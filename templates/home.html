@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psilocon Valley</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+        h1 { color: #1a1a2e; }
+        p { color: #444; }
+        .highlight { color: #e94560; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to <span class="highlight">Psilocon Valley</span></h1>
+    <p>{{.Message}}</p>
+    <p>Server is running on Go version {{.GoVersion}}</p>
+</body>
+</html>
