@@ -1,0 +1,97 @@
+{{define "home.tmpl"}}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Psiloconvalley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            background: #020617;
+            color: #e5e7eb;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.6;
+        }
+        header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(148,163,184,0.2);
+            background: rgba(15,23,42,0.9);
+        }
+        h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(2rem, 4vw, 3rem);
+        }
+        .tagline {
+            color: #9ca3af;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        nav a {
+            margin: 0 0.75rem;
+            color: #cbd5f5;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        nav a:hover {
+            color: #f9fafb;
+        }
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 3rem;
+        }
+        .card {
+            background: rgba(15,23,42,0.9);
+            border: 1px solid rgba(148,163,184,0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.7rem 1.6rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #f9fafb;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .btn:hover {
+            filter: brightness(1.05);
+        }
+        .muted {
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Psiloconvalley</h1>
+    <p class="tagline">Small tools to help you protect your focus and build things that matter.</p>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/trigger-log">Trigger Log</a>
+        <a href="/store">Store</a>
+    </nav>
+</header>
+<main>
+    <div class="card">
+        <h2>Trigger Log — Free Focus Timer</h2>
+        <p>Choose 25, 50, or 90 minutes. Set your intention. Enter a distraction‑free session.</p>
+        <a class="btn" href="/trigger-log">Enter Flow</a>
+        <p class="muted" style="margin-top:1rem;">Built with Go. Deployed on Railway.</p>
+    </div>
+
+    <div class="card">
+        <h2>Store</h2>
+        <p>Psiloconvalley merch. Simple apparel and stickers for people who build.</p>
+        <a class="btn" href="/store">View Store</a>
+    </div>
+</main>
+</body>
+</html>
+{{end}}

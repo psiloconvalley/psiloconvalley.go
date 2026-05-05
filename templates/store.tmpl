@@ -1,0 +1,123 @@
+{{define "store.tmpl"}}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Store | Psiloconvalley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            background: #020617;
+            color: #e5e7eb;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.6;
+        }
+        nav {
+            padding: 1rem 2rem;
+            background: rgba(15,23,42,0.9);
+            border-bottom: 1px solid rgba(148,163,184,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #93c5fd;
+        }
+        .nav-links a {
+            margin-left: 1.25rem;
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .nav-links a:hover { color: #93c5fd; }
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 3rem;
+        }
+        h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 0.5rem;
+        }
+        .store-subtitle {
+            color: #9ca3af;
+            margin-bottom: 2rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: rgba(15,23,42,0.95);
+            border: 1px solid rgba(148,163,184,0.3);
+            border-radius: 12px;
+            overflow:hidden;
+        }
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .card-body {
+            padding: 1rem 1.1rem 1.3rem;
+        }
+        .card-body h3 {
+            margin: 0 0 0.3rem;
+        }
+        .muted {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin: 0 0 0.7rem;
+        }
+        .price {
+            font-weight:700;
+            margin-bottom: 0.7rem;
+        }
+        .btn {
+            display:inline-block;
+            padding:0.6rem 1.4rem;
+            border-radius:999px;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            color:#f9fafb;
+            font-size:0.85rem;
+            text-decoration:none;
+            border:none;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="nav-logo">Psiloconvalley</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/trigger-log">Trigger Log</a>
+        <a href="/store">Store</a>
+    </div>
+</nav>
+<main>
+    <h1>Store</h1>
+    <p class="store-subtitle">Psiloconvalley merch. Built for people who build.</p>
+    <div class="grid">
+    {{range .Products}}
+        <div class="card">
+            <img src="{{.ImageURL}}" alt="{{.Name}}">
+            <div class="card-body">
+                <h3>{{.Name}}</h3>
+                <p class="muted">{{.Description}}</p>
+                <div class="price">${{printf "%.2f" (mulcents .Price)}}</div>
+                <button class="btn">Add to Cart</button>
+            </div>
+        </div>
+    {{end}}
+    </div>
+</main>
+</body>
+</html>
+{{end}}
