@@ -1,0 +1,64 @@
+{{define "nav"}}
+<nav class="site-nav">
+    <div class="nav-inner">
+        <a href="/" class="nav-brand">PsiloConValley</a>
+        <div class="nav-links">
+            <a href="/invoices">Dashboard</a>
+            <a href="/invoices/new">Generate</a>
+            <a href="/healthz">System</a>
+        </div>
+    </div>
+</nav>
+{{end}}
+
+{{define "nav-styles"}}
+<style>
+    .site-nav {
+        background: #0a0a0a;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0 20px;
+    }
+
+    .nav-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 56px;
+    }
+
+    .nav-brand {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .nav-brand:hover {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-links a {
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-left: 28px;
+        transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+        color: #fff;
+    }
+
+    @media print {
+        .site-nav {
+            display: none;
+        }
+    }
+</style>
+{{end}}

@@ -42,34 +42,6 @@
             min-height: 100vh;
         }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 40px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .brand-logo {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        nav a {
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-left: 30px;
-            transition: color 0.2s ease;
-        }
-
-        nav a:hover {
-            color: #ffffff;
-        }
 
         /* Main Hero Presentation */
         main {
@@ -189,19 +161,15 @@
 </head>
 <body>
 
+	
+	{{template "nav-styles" .}}
+    	{{template "nav" .}}
+
     <canvas id="mycelium-canvas"></canvas>
 
     <div class="app-interface">
-        <header>
-            <div class="brand-logo">PsiloConValley</div>
-            <nav>
-                <a href="/invoices">Dashboard</a>
-                <a href="/invoices/new">Generate</a>
-                <a href="/healthz">System</a>
-            </nav>
-        </header>
-
-        <main>
+        
+	<main>
             <div class="meta-tag">Core Infrastructure Group</div>
             <h1>Sovereign<br>Business Tools.</h1>
             <p class="tagline">

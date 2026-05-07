@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Create Invoice | PsiloConValley</title>
+    <title>
+        {{if eq .Mode "edit"}}Edit Invoice
+        {{else if eq .Mode "duplicate"}}Duplicate Invoice
+        {{else}}Create Invoice{{end}}
+    </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <style>
         * {
             box-sizing: border-box;
@@ -11,183 +14,202 @@
 
         body {
             margin: 0;
-            background: #f7f4ee;
+            background: #f5f5f5;
             color: #111;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        header {
-            background: #0a0a0a;
-            color: white;
-            padding: 24px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-weight: 900;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 24px;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-family: Arial, sans-serif;
         }
 
         .page {
-            max-width: 1180px;
-            margin: 56px auto;
-            padding: 0 20px;
+            max-width: 1400px;
+            margin: auto;
+            padding: 40px 20px;
         }
 
-        h1 {
-            font-size: 58px;
-            margin: 0 0 10px;
-            letter-spacing: -3px;
+        /* ── CHANGE 1: Back link ── */
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
         }
 
-        .subtitle {
-            margin: 0 0 40px;
-            color: #555;
-            font-size: 18px;
+        .back-link:hover {
+            color: #111;
         }
 
-        .section {
-            background: white;
-            border: 2px solid #111;
+        /* System banners */
+        .system-banner {
+            background: #111;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 10px;
             margin-bottom: 30px;
-            padding: 34px;
-        }
-
-        .section-top {
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 18px;
-            margin-bottom: 28px;
         }
 
-        .section-top h2 {
-            margin: 0;
-            font-size: 28px;
-            letter-spacing: -1px;
+        .system-banner strong {
+            color: #ff4a4a;
         }
 
-        .step-indicator {
+        /* ── CHANGE 2: Edit banner has distinct color from duplicate ── */
+
+	.system-banner.edit-mode {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+	.system-banner.edit-mode strong {
+    color: #fff;
+}
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 40px;
+        }
+
+        .main {
+            background: white;
+            padding: 40px;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 40px;
+            background: #111;
+            color: white;
+            padding: 30px;
+            border-radius: 14px;
+            height: fit-content;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 42px;
+            letter-spacing: -2px;
+        }
+
+        .section {
+            margin-top: 60px;
+        }
+
+        .section:first-child {
+            margin-top: 0;
+        }
+
+        .step-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            white-space: nowrap;
-        }
-
-        .step-text {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #666;
-            font-weight: bold;
+            margin-bottom: 20px;
         }
 
         .dots {
             display: flex;
-            gap: 6px;
+            margin-right: 14px;
         }
 
         .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: 1px solid #111;
-            background: white;
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: #d1d5db;
+            margin-right: 8px;
         }
 
         .dot.active {
             background: #111;
         }
 
+        .step-label {
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
         label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 14px;
             font-weight: bold;
+            margin-bottom: 8px;
         }
 
         input,
         textarea,
         select {
             width: 100%;
-            padding: 13px 14px;
-            border: 1px solid #999;
-            background: white;
-            color: #111;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             font-size: 15px;
+            background: #fff;
+            color: #111;
         }
 
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #111;
-            box-shadow: 0 0 0 2px #111;
+        /* ── CHANGE 3: Readonly fields look distinct ── */
+        input[readonly] {
+            background: #f5f5f5;
+            color: #888;
+            cursor: not-allowed;
+            border-color: #e0e0e0;
         }
 
         textarea {
-            min-height: 130px;
+            min-height: 120px;
             resize: vertical;
         }
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 22px;
-            margin-bottom: 22px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 22px;
-            margin-bottom: 22px;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 22px;
-            margin-bottom: 22px;
-        }
-
-        .field-full {
-            margin-bottom: 22px;
+        .sidebar input,
+        .sidebar textarea {
+            background: #222;
+            border: 1px solid #333;
+            color: #fff;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
 
         th {
+            background: #111;
+            color: white;
             text-align: left;
-            padding: 12px 8px;
-            border-bottom: 2px solid #111;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding: 14px;
         }
 
         td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #ddd;
+            padding: 14px;
+            border-bottom: 1px solid #eee;
             vertical-align: top;
         }
 
@@ -195,396 +217,606 @@
             text-align: right;
         }
 
-        .amount {
-            padding-top: 25px;
-            font-weight: bold;
-            white-space: nowrap;
+        .add-btn {
+            margin-top: 20px;
         }
 
-        .remove-btn {
-            margin-top: 8px;
-            background: white;
-            border: 1px solid #111;
-            color: #111;
-            padding: 8px 10px;
+        button {
+            background: #111;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 15px;
             font-weight: bold;
+        }
+
+        button:hover {
+            background: #222;
+        }
+
+        /* ── CHANGE 4: Remove row button ── */
+        .remove-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
         }
 
         .remove-btn:hover {
-            background: #111;
+            background: #dc2626;
             color: white;
         }
 
-        .btn {
-            background: #111;
-            color: white;
-            border: 2px solid #111;
-            padding: 14px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn:hover {
-            background: white;
+        .save-btn {
+            width: 100%;
+            margin-top: 40px;
+            padding: 18px;
+            font-size: 16px;
+            background: #fff;
             color: #111;
+            transition: background 0.2s;
         }
 
-        .btn-secondary {
-            background: white;
-            color: #111;
+        .save-btn:hover {
+            background: #eee;
         }
 
-        .btn-secondary:hover {
-            background: #111;
-            color: white;
+        /* ── CHANGE 5: Edit mode save button distinct color ── */
+	.save-btn.edit-mode {
+    background: #fff;
+    color: #111;
+    border: 1px solid #111;
+}
+
+.save-btn.edit-mode:hover {
+    background: #111;
+    color: #fff;
+}
+	
+        .summary-title {
+            font-size: 22px;
+            margin-top: 0;
+            margin-bottom: 30px;
         }
 
-        .line-actions {
-            margin-top: 22px;
-        }
-
-        .memo-total-layout {
-            display: grid;
-            grid-template-columns: 1fr 360px;
-            gap: 30px;
-            align-items: start;
-            margin-top: 34px;
-        }
-
-        .totals-card {
-            border: 2px solid #111;
-            background: #fafafa;
-            padding: 24px;
-        }
-
-        .totals-row {
+        .summary-line {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #ddd;
-            font-size: 16px;
+            margin-bottom: 16px;
         }
 
-        .grand-total {
-            margin-top: 12px;
-            padding-top: 18px;
-            border-top: 2px solid #111;
+        .summary-total {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 20px;
+            margin-top: 20px;
             font-size: 28px;
-            font-weight: 900;
+            font-weight: bold;
         }
 
-        .submit-row {
-            display: flex;
-            justify-content: flex-end;
+        .summary-note {
             margin-top: 30px;
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+            font-size: 14px;
         }
 
-        @media (max-width: 900px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
+        /* ── CHANGE 6: Item name + detail layout inside td ── */
+        .item-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-            nav a {
-                margin-left: 0;
-                margin-right: 18px;
-            }
+        .item-name {
+            font-weight: bold;
+        }
 
-            h1 {
-                font-size: 42px;
-            }
+        .item-detail {
+            font-size: 13px;
+            color: #666;
+            border-color: #eee;
+        }
 
-            .grid-2,
-            .grid-3,
-            .grid-4,
-            .memo-total-layout {
+        @media (max-width: 1000px) {
+            .layout {
                 grid-template-columns: 1fr;
             }
-
-            .section-top {
-                flex-direction: column;
-                align-items: flex-start;
+            .sidebar {
+                position: static;
             }
-
-            table {
-                font-size: 14px;
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
-
 <body>
 
-<header>
-    <div class="logo">PsiloConValley</div>
-
-    <nav>
-        <a href="/">Home</a>
-        <a href="/invoices">Invoices</a>
-        <a href="/invoices/new">Create</a>
-    </nav>
-</header>
+{{template "nav-styles" .}}
+{{template "nav" .}}
 
 <div class="page">
 
-    <h1>Invoice Generator</h1>
-    <p class="subtitle">
-        Create a clean professional invoice in one simple page.
-    </p>
+    <!-- Duplicate banner -->
+    {{if eq .Mode "duplicate"}}
+    <div class="system-banner">
+        <span>Initializing duplicate transaction framework</span>
+        <span>Source ID: <strong>{{.SourceInvoiceNumber}}</strong></span>
+    </div>
+    {{end}}
 
+    <!-- ── CHANGE 8: Edit banner ── -->
+    {{if eq .Mode "edit"}}
+    <div class="system-banner edit-mode">
+        <span>Edit mode — modifying existing record</span>
+        <span>Invoice: <strong>{{.Invoice.InvoiceNumber}}</strong></span>
+    </div>
+    {{end}}
+
+    <!--
+        ── CHANGE 9: Dynamic form action ──
+        create/duplicate → POST /invoices/create   (new row)
+        edit             → POST /invoices/{id}/edit (update row)
+    -->
+    {{if eq .Mode "edit"}}
+    <form id="invoice-form" method="POST" action="/invoices/{{.Invoice.ID}}/edit">
+    {{else}}
     <form id="invoice-form" method="POST" action="/invoices/create">
+    {{end}}
 
-        <!-- STEP 1 -->
-        <section class="section">
-            <div class="section-top">
-                <h2>Enter your company information</h2>
+        <div class="layout">
+            <div class="main">
 
-                <div class="step-indicator">
-                    <span class="step-text">Step 1 of 3</span>
-                    <div class="dots">
-                        <span class="dot active"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
+                <!-- ── CHANGE 10: Dynamic heading ── -->
+                <h1>
+                    {{if eq .Mode "edit"}}Edit Invoice
+                    {{else if eq .Mode "duplicate"}}Duplicate Invoice
+                    {{else}}Create Invoice{{end}}
+                </h1>
+
+                <!-- STEP 1: Company Info -->
+                <section class="section">
+                    <div class="step-row">
+                        <div class="dots">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div class="step-label">Step 1 of 3</div>
                     </div>
-                </div>
-            </div>
+                    <h2>Your company information</h2>
 
-            <div class="grid-2">
-                <div>
-                    <label>Your company name</label>
-                    <input type="text" name="company_name" placeholder="Your business name">
-                </div>
-
-                <div>
-                    <label>Your email address</label>
-                    <input type="email" name="company_email" placeholder="you@example.com">
-                </div>
-            </div>
-
-            <div class="field-full">
-                <label>Your address</label>
-                <input type="text" name="company_address" placeholder="Street address">
-            </div>
-
-            <div class="grid-4">
-                <div>
-                    <label>City</label>
-                    <input type="text" name="company_city">
-                </div>
-
-                <div>
-                    <label>Zip / Postal code</label>
-                    <input type="text" name="company_zip">
-                </div>
-
-                <div>
-                    <label>Country</label>
-                    <select name="company_country" id="company_country"></select>
-                </div>
-
-                <div>
-                    <label>State / Province</label>
-                    <select name="company_state" id="company_state"></select>
-                </div>
-            </div>
-        </section>
-
-        <!-- STEP 2 -->
-        <section class="section">
-            <div class="section-top">
-                <h2>Enter customer and invoice information</h2>
-
-                <div class="step-indicator">
-                    <span class="step-text">Step 2 of 3</span>
-                    <div class="dots">
-                        <span class="dot active"></span>
-                        <span class="dot active"></span>
-                        <span class="dot"></span>
+                    <div class="grid-2">
+                        <div>
+                            <label>Company Name</label>
+                            <!--
+                                ── CHANGE 11: Fixed bug ──
+                                Was: .Invoice.ClientName (wrong field)
+                                Now: .Invoice.CompanyName (correct)
+                            -->
+                            <input type="text" name="company_name"
+                                value="{{if .Invoice}}{{field .Invoice.CompanyName}}{{end}}">
+                        </div>
+                        <div>
+                            <label>Email Address</label>
+                            <input type="email" name="company_email"
+                                value="{{if .Invoice}}{{field .Invoice.CompanyEmail}}{{end}}">
+                        </div>
                     </div>
-                </div>
+
+                    <div class="grid-3" style="margin-top:20px;">
+                        <div>
+                            <label>Address</label>
+                            <input type="text" name="company_address"
+                                value="{{if .Invoice}}{{field .Invoice.CompanyAddress}}{{end}}">
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="company_city"
+                                value="{{if .Invoice}}{{field .Invoice.CompanyCity}}{{end}}">
+                        </div>
+                        <div>
+                            <label>Zip Code</label>
+                            <input type="text" name="company_zip"
+                                value="{{if .Invoice}}{{field .Invoice.CompanyZip}}{{end}}">
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top:20px;">
+                        <div>
+                            <label>Country</label>
+                            <!--
+                                ── CHANGE 12: Added id= attributes ──
+                                JS uses getElementById() to populate
+                                these dropdowns dynamically.
+                                Without id= the JS finds nothing and
+                                the dropdowns stay empty.
+                            -->
+                            <select name="company_country" id="company_country"
+                                data-selected="{{if .Invoice}}{{field .Invoice.CompanyCountry}}{{end}}">
+                            </select>
+                        </div>
+                        <div>
+                            <label>State / Region</label>
+                            <select name="company_state" id="company_state"
+                                data-selected="{{if .Invoice}}{{field .Invoice.CompanyState}}{{end}}">
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 2: Customer & Invoice Info -->
+                <section class="section">
+                    <div class="step-row">
+                        <div class="dots">
+                            <div class="dot active"></div>
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div class="step-label">Step 2 of 3</div>
+                    </div>
+                    <h2>Customer and invoice information</h2>
+
+                    <div class="grid-3">
+                        <div>
+                            <label>Customer Name</label>
+                            <input type="text" name="client_name"
+                                value="{{if .Invoice}}{{field .Invoice.ClientName}}{{end}}">
+                        </div>
+                        <div>
+                            <label>Customer Email</label>
+                            <!--
+                                ── CHANGE 13: Fixed field name ──
+                                Was: name="customer_email" (never read by handler)
+                                Now: name="client_email"   (matches handler + struct)
+                            -->
+                            <input type="email" name="client_email"
+                                value="{{if .Invoice}}{{field .Invoice.ClientEmail}}{{end}}">
+                        </div>
+                        <div>
+                            <label>Invoice Number</label>
+                            <!--
+                                ── CHANGE 14: Readonly lock on edit ──
+                                Invoice number is identity. Changing it
+                                on an existing invoice breaks audit trail.
+                                On edit: locked. On create/duplicate: free.
+                            -->
+                            {{if eq .Mode "edit"}}
+                            <input type="text" name="invoice_number"
+                                value="{{.Invoice.InvoiceNumber}}"
+                                readonly>
+                            {{else}}
+                            <input type="text" name="invoice_number"
+                                value="{{if .Invoice}}{{field .Invoice.InvoiceNumber}}{{end}}"
+                                placeholder="Leave blank to auto-generate">
+                            {{end}}
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top:20px;">
+                        <div>
+                            <label>Invoice Date</label>
+                            <input type="date" name="issue_date"
+                                value="{{if .Invoice}}{{field .Invoice.IssueDate}}{{end}}">
+                        </div>
+                        <div>
+                            <label>Due Date</label>
+                            <input type="date" name="due_date"
+                                value="{{if .Invoice}}{{field .Invoice.DueDate}}{{end}}">
+                        </div>
+                    </div>
+
+                    <div class="grid-3" style="margin-top:20px;">
+                        <div>
+                            <label>Customer Address</label>
+                            <!--
+                                ── CHANGE 15: Fixed all client field names ──
+                                Were: customer_address, customer_city etc
+                                Now:  client_address, client_city etc
+                                Handler reads client_* not customer_*
+                            -->
+                            <input type="text" name="client_address"
+                                value="{{if .Invoice}}{{field .Invoice.ClientAddress}}{{end}}">
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="client_city"
+                                value="{{if .Invoice}}{{field .Invoice.ClientCity}}{{end}}">
+                        </div>
+                        <div>
+                            <label>Zip Code</label>
+                            <input type="text" name="client_zip"
+                                value="{{if .Invoice}}{{field .Invoice.ClientZip}}{{end}}">
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top:20px;">
+                        <div>
+                            <label>Country</label>
+                            <select name="client_country" id="client_country"
+                                data-selected="{{if .Invoice}}{{field .Invoice.ClientCountry}}{{end}}">
+                            </select>
+                        </div>
+                        <div>
+                            <label>State / Region</label>
+                            <select name="client_state" id="client_state"
+                                data-selected="{{if .Invoice}}{{field .Invoice.ClientState}}{{end}}">
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 3: Line Items -->
+                <section class="section">
+                    <div class="step-row">
+                        <div class="dots">
+                            <div class="dot active"></div>
+                            <div class="dot active"></div>
+                            <div class="dot active"></div>
+                        </div>
+                        <div class="step-label">Step 3 of 3</div>
+                    </div>
+                    <h2>Items to bill</h2>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th width="110">Qty</th>
+                                <th width="150">Price</th>
+                                <th width="150">Amount</th>
+                                <th width="50"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="items_body">
+                        <!--
+                            ── CHANGE 16: Line item rows match JS expectations ──
+
+                            JS (invoice.js) expects:
+                              class="item-name"    → visible item name input
+                              class="item-detail"  → visible detail input
+                              class="desc-hidden"  → hidden combined description
+                              class="qty"          → quantity input
+                              class="price"        → unit price input
+                              class="row-amount"   → amount display cell
+                              class="remove-btn"   → remove button
+
+                            JS combines item-name + item-detail into
+                            desc-hidden on form submit, which is what
+                            the server reads as "description".
+
+                            For existing items loaded from DB, the
+                            description is pre-filled into item-name.
+                            item-detail stays blank unless user adds it.
+                        -->
+                        {{if .Items}}
+                            {{range .Items}}
+                            <tr>
+                                <td>
+                                    <div class="item-inputs">
+                                        <input type="text"
+                                            class="item-name"
+                                            placeholder="Item name"
+                                            value="{{.Description}}">
+                                        <input type="text"
+                                            class="item-detail"
+                                            placeholder="Detail (optional)">
+                                        <input type="hidden"
+                                            name="description"
+                                            class="desc-hidden"
+                                            value="{{.Description}}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01"
+                                        name="quantity"
+                                        class="qty"
+                                        value="{{.Quantity}}">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01"
+                                        name="unit_price"
+                                        class="price"
+                                        value="{{.UnitPrice}}">
+                                </td>
+                                <td class="right row-amount">$0.00</td>
+                                <td>
+                                    <button type="button"
+                                        class="remove-btn"
+                                        onclick="removeRow(this)">×</button>
+                                </td>
+                            </tr>
+                            {{end}}
+                        {{else}}
+                            <tr>
+                                <td>
+                                    <div class="item-inputs">
+                                        <input type="text"
+                                            class="item-name"
+                                            placeholder="Item name">
+                                        <input type="text"
+                                            class="item-detail"
+                                            placeholder="Detail (optional)">
+                                        <input type="hidden"
+                                            name="description"
+                                            class="desc-hidden">
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01"
+                                        name="quantity"
+                                        class="qty"
+                                        value="1">
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01"
+                                        name="unit_price"
+                                        class="price"
+                                        value="0">
+                                </td>
+                                <td class="right row-amount">$0.00</td>
+                                <td>
+                                    <button type="button"
+                                        class="remove-btn"
+                                        onclick="removeRow(this)">×</button>
+                                </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+
+                    <!--
+                        ── CHANGE 17: Fixed function name ──
+                        Was: onclick="addInvoiceRow()" (does not exist in JS)
+                        Now: onclick="addRow()"        (exported by invoice.js)
+                    -->
+                    <button type="button" class="add-btn" onclick="addRow()">
+                        + Add Line Item
+                    </button>
+
+                    <div style="margin-top:40px;">
+                        <label>Notes / Memo</label>
+                        <textarea name="notes">{{if .Invoice}}{{.Invoice.Notes}}{{end}}</textarea>
+                    </div>
+                </section>
+
             </div>
 
-            <div class="grid-3">
-                <div>
-                    <label>Customer name</label>
-                    <input type="text" name="client_name" required>
+            <!-- SIDEBAR -->
+            <aside class="sidebar">
+                <h3 class="summary-title">Invoice Summary</h3>
+
+                <div class="summary-line">
+                    <span>Subtotal</span>
+                    <span id="subtotal">$0.00</span>
                 </div>
 
-                <div>
-                    <label>Customer email</label>
-                    <input type="email" name="client_email">
+                <div class="summary-line">
+                    <span>Tax</span>
+                    <span id="tax_amount">$0.00</span>
                 </div>
 
-                <div>
-                    <label>Invoice number</label>
-                    <input type="text" name="invoice_number" placeholder="Leave blank to auto-generate">
-                </div>
-            </div>
-
-            <div class="field-full">
-                <label>Customer address</label>
-                <input type="text" name="client_address" placeholder="Street address">
-            </div>
-
-            <div class="grid-4">
-                <div>
-                    <label>Customer city</label>
-                    <input type="text" name="client_city">
+                <div class="summary-line summary-total">
+                    <span>Total</span>
+                    <span id="total">$0.00</span>
                 </div>
 
-                <div>
-                    <label>State / Province</label>
-                    <select name="client_state" id="client_state"></select>
+                <div style="margin-top:30px;">
+                    <label>Tax Rate (%)</label>
+                    <input type="number" step="0.01"
+                        name="tax_rate"
+                        id="tax_rate"
+                        value="{{if .Invoice}}{{field .Invoice.TaxRate}}{{else}}0{{end}}">
                 </div>
 
-                <div>
-                    <label>Country</label>
-                    <select name="client_country" id="client_country"></select>
-                </div>
-
-                <div>
-                    <label>Invoice date</label>
-                    <input type="date" name="issue_date">
-                </div>
-            </div>
-
-            <div class="grid-3">
-                <div>
-                    <label>Due date</label>
-                    <input type="date" name="due_date">
-                </div>
-
-                <div>
+                <div style="margin-top:20px;">
                     <label>Currency</label>
                     <select name="currency" id="currency">
-                        <option value="USD" data-symbol="$">USD — $</option>
-                        <option value="EUR" data-symbol="€">EUR — €</option>
-                        <option value="GBP" data-symbol="£">GBP — £</option>
-                        <option value="CAD" data-symbol="$">CAD — $</option>
-                        <option value="AUD" data-symbol="$">AUD — $</option>
-                        <option value="JPY" data-symbol="¥">JPY — ¥</option>
+                        <option value="USD"
+                            data-symbol="$"
+                            {{if .Invoice}}{{if eq .Invoice.Currency "USD"}}selected{{end}}{{else}}selected{{end}}>
+                            USD — US Dollar
+                        </option>
+                        <option value="CAD"
+                            data-symbol="CA$"
+                            {{if .Invoice}}{{if eq .Invoice.Currency "CAD"}}selected{{end}}{{end}}>
+                            CAD — Canadian Dollar
+                        </option>
+                        <option value="GBP"
+                            data-symbol="£"
+                            {{if .Invoice}}{{if eq .Invoice.Currency "GBP"}}selected{{end}}{{end}}>
+                            GBP — British Pound
+                        </option>
+                        <option value="EUR"
+                            data-symbol="€"
+                            {{if .Invoice}}{{if eq .Invoice.Currency "EUR"}}selected{{end}}{{end}}>
+                            EUR — Euro
+                        </option>
                     </select>
                 </div>
 
-                <div>
-                    <label>Tax rate (%)</label>
-                    <input type="number" step="0.01" name="tax_rate" id="tax_rate" value="0">
-                </div>
-            </div>
-        </section>
-
-        <!-- STEP 3 -->
-        <section class="section">
-            <div class="section-top">
-                <h2>Enter items you wish to bill</h2>
-
-                <div class="step-indicator">
-                    <span class="step-text">Step 3 of 3</span>
-                    <div class="dots">
-                        <span class="dot active"></span>
-                        <span class="dot active"></span>
-                        <span class="dot active"></span>
-                    </div>
-                </div>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Description</th>
-                        <th width="110">Quantity</th>
-                        <th width="140">Price</th>
-                        <th width="140" class="right">Amount</th>
-                        <th width="70"></th>
-                    </tr>
-                </thead>
-
-                <tbody id="items_body">
-                    <tr>
-                        <td>
-                            <input type="text" class="item-name" placeholder="Website Design" required>
-                        </td>
-
-                        <td>
-                            <input type="text" class="item-detail" placeholder="Landing page build">
-                            <input type="hidden" name="description" class="desc-hidden">
-                        </td>
-
-                        <td>
-                            <input type="number" step="0.01" name="quantity" value="1" class="qty">
-                        </td>
-
-                        <td>
-                            <input type="number" step="0.01" name="unit_price" value="0" class="price">
-                        </td>
-
-                        <td class="right amount row-amount">
-                            $0.00
-                        </td>
-
-                        <td>
-                            <button type="button" class="remove-btn" onclick="removeRow(this)">×</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="line-actions">
-                <button type="button" class="btn btn-secondary" onclick="addRow()">
-                    + Add a line item
-                </button>
-            </div>
-
-            <div class="memo-total-layout">
-                <div>
-                    <label>Notes / Memo</label>
-                    <textarea name="notes" placeholder="Thank you for your business."></textarea>
-
-                    <div style="height: 22px;"></div>
-
+                <div style="margin-top:20px;">
                     <label>Payment Details</label>
-                    <textarea name="payment_details" placeholder="Payment link, PayPal, Cash App, bank transfer, etc."></textarea>
+                    <textarea name="payment_details">{{if .Invoice}}{{.Invoice.PaymentDetails}}{{end}}</textarea>
                 </div>
 
-                <div class="totals-card">
-                    <div class="totals-row">
-                        <span>Subtotal</span>
-                        <span id="subtotal">$0.00</span>
-                    </div>
-
-                    <div class="totals-row">
-                        <span>Tax</span>
-                        <span id="tax_amount">$0.00</span>
-                    </div>
-
-                    <div class="totals-row grand-total">
-                        <span>Total</span>
-                        <span id="total">$0.00</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="submit-row">
-                <button type="submit" class="btn">
-                    Save Invoice
+                <!--
+                    ── CHANGE 18: Dynamic submit button ──
+                    Label and color change based on mode.
+                    Edit gets a distinct cyan color so user
+                    knows they are updating not creating.
+                -->
+                <button type="submit"
+                    class="save-btn{{if eq .Mode "edit"}} edit-mode{{end}}">
+                    {{if eq .Mode "edit"}}Update Invoice
+                    {{else if eq .Mode "duplicate"}}Save as New Invoice
+                    {{else}}Save Invoice{{end}}
                 </button>
-            </div>
-        </section>
 
+                <div class="summary-note">
+                    Sovereign Business Utilities.<br>
+                    Fast. Independent. Free.
+                </div>
+            </aside>
+        </div>
     </form>
-
 </div>
 
 <script src="/static/js/invoice.js"></script>
 
-<script src="/static/js/invoice.js?v=1"></script>
+<!--
+    ── CHANGE 19: Pre-select saved country/state on load ──
 
+    The JS populates country dropdowns dynamically from JSON.
+    By the time JS runs, the server-rendered selected attribute
+    is gone because JS rebuilds the options from scratch.
 
+    This small script reads the data-selected attribute we
+    stored on each select and re-applies it AFTER the JS
+    has finished populating the dropdowns.
+
+    It fires after invoice.js DOMContentLoaded completes
+    using a small delay to ensure population is done.
+-->
+<script>
+    function restoreSelections() {
+        const selects = [
+            "company_country",
+            "company_state",
+            "client_country",
+            "client_state"
+        ];
+
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            const saved = el.dataset.selected;
+            if (!saved) return;
+
+            // Find the matching option and select it
+            for (const opt of el.options) {
+                if (opt.value === saved || opt.textContent.trim() === saved) {
+                    el.value = opt.value;
+                    break;
+                }
+            }
+        });
+    }
+
+    // Wait for invoice.js DOMContentLoaded + country population
+    window.addEventListener("load", () => {
+        setTimeout(restoreSelections, 100);
+    });
+</script>
 
 </body>
 </html>

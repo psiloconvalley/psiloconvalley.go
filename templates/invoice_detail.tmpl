@@ -7,7 +7,7 @@
         body {
             font-family: Arial, sans-serif;
             background: #f4f4f4;
-            padding: 40px;
+            padding: 0;
             color: #111;
         }
 
@@ -33,6 +33,63 @@
         .meta {
             color: #666;
             line-height: 1.7;
+        }
+
+        .parties {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            gap: 40px;
+        }
+
+        .party {
+            flex: 1;
+        }
+
+        .party-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #999;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .party-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .party-detail {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-sent {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
         }
 
         table {
@@ -80,19 +137,77 @@
             margin-top: 50px;
         }
 
+        .payment-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .payment-info h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+        }
+
         .actions {
             max-width: 900px;
             margin: 20px auto;
-            text-align: right;
+            padding: 0 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
         }
 
-        button {
+        .action-btn {
+            display: inline-block;
             background: #111;
             color: white;
-            border: none;
-            padding: 14px 20px;
+            border: 1px solid #111;
+            padding: 12px 18px;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: white;
+            color: #111;
+        }
+
+        .action-btn.edit {
+            background: #1a1a1a;
+            border-color: #333;
+            color: #fff;
+        }
+
+        .action-btn.edit:hover {
+            background: #fff;
+            color: #111;
+            border-color: #111;
+        }
+
+        .action-btn.outline {
+            background: white;
+            color: #111;
+        }
+
+        .action-btn.outline:hover {
+            background: #111;
+            color: white;
+        }
+
+        /* Content area below nav */
+        .page-content {
+            padding: 20px 20px 40px;
         }
 
         @media print {
@@ -101,6 +216,7 @@
                 padding: 0;
             }
 
+            .site-nav,
             .actions {
                 display: none;
             }
@@ -115,89 +231,136 @@
 
 <body>
 
-<div class="actions">
-    <button onclick="window.print()">
-        Print / Save PDF
-    </button>
-</div>
+<!-- Shared nav -->
+{{template "nav-styles" .}}
+{{template "nav" .}}
 
-<div class="invoice">
+<div class="page-content">
 
-    <div class="top">
+    <div class="actions">
+        {{if eq .Invoice.Status "draft"}}
+        <a class="action-btn edit" href="/invoices/{{.Invoice.ID}}/edit">
+            Edit
+        </a>
+        {{end}}
 
-        <div>
-            <h1>INVOICE</h1>
+        <a class="action-btn outline" href="/invoices/{{.Invoice.ID}}/duplicate">
+            Duplicate
+        </a>
 
-            <div class="meta">
-                Invoice #: {{.Invoice.InvoiceNumber}}<br>
-                Client: {{.Invoice.ClientName}}<br>
-                Status: {{.Invoice.Status}}
+        <button class="action-btn" onclick="window.print()">
+            Print / PDF
+        </button>
+    </div>
+
+    <div class="invoice">
+
+        <div class="top">
+            <div>
+                <h1>INVOICE</h1>
+                <div class="meta">
+                    Invoice #: {{.Invoice.InvoiceNumber}}<br>
+                    Status:
+                    <span class="status-badge status-{{.Invoice.Status}}">
+                        {{.Invoice.Status}}
+                    </span>
+                </div>
+            </div>
+
+            <div class="meta" style="text-align:right;">
+                Issue Date:<br>
+                {{.Invoice.IssueDate.Format "Jan 02, 2006"}}
+                {{if .Invoice.DueDate}}<br><br>
+                Due Date:<br>
+                {{.Invoice.DueDate.Format "Jan 02, 2006"}}
+                {{end}}
             </div>
         </div>
 
-        <div class="meta">
-            Issue Date:<br>
-            {{.Invoice.IssueDate.Format "Jan 02, 2006"}}
+        <div class="parties">
+            <div class="party">
+                <div class="party-label">From</div>
+                {{if .Invoice.CompanyName}}
+                    <div class="party-name">{{.Invoice.CompanyName}}</div>
+                {{end}}
+                <div class="party-detail">
+                    {{if .Invoice.CompanyEmail}}{{.Invoice.CompanyEmail}}<br>{{end}}
+                    {{if .Invoice.CompanyAddress}}{{.Invoice.CompanyAddress}}<br>{{end}}
+                    {{if .Invoice.CompanyCity}}{{.Invoice.CompanyCity}}{{end}}
+                    {{if .Invoice.CompanyState}}, {{.Invoice.CompanyState}}{{end}}
+                    {{if .Invoice.CompanyZip}} {{.Invoice.CompanyZip}}{{end}}
+                    {{if .Invoice.CompanyCountry}}<br>{{.Invoice.CompanyCountry}}{{end}}
+                </div>
+            </div>
+
+            <div class="party">
+                <div class="party-label">Bill To</div>
+                {{if .Invoice.ClientName}}
+                    <div class="party-name">{{.Invoice.ClientName}}</div>
+                {{end}}
+                <div class="party-detail">
+                    {{if .Invoice.ClientEmail}}{{.Invoice.ClientEmail}}<br>{{end}}
+                    {{if .Invoice.ClientAddress}}{{.Invoice.ClientAddress}}<br>{{end}}
+                    {{if .Invoice.ClientCity}}{{.Invoice.ClientCity}}{{end}}
+                    {{if .Invoice.ClientState}}, {{.Invoice.ClientState}}{{end}}
+                    {{if .Invoice.ClientZip}} {{.Invoice.ClientZip}}{{end}}
+                    {{if .Invoice.ClientCountry}}<br>{{.Invoice.ClientCountry}}{{end}}
+                </div>
+            </div>
         </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th width="120">Qty</th>
+                    <th width="160">Unit Price</th>
+                    <th width="160">Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{range .Items}}
+                <tr>
+                    <td>{{.Description}}</td>
+                    <td>{{.Quantity}}</td>
+                    <td class="right">{{money .UnitPrice}}</td>
+                    <td class="right">{{money .LineTotal}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <div>
+                <span>Subtotal</span>
+                <span>{{money .Invoice.Subtotal}}</span>
+            </div>
+            <div>
+                <span>Tax ({{.Invoice.TaxRate}}%)</span>
+                <span>{{money .Invoice.TaxAmount}}</span>
+            </div>
+            <div class="grand-total">
+                <span>Total</span>
+                <span>{{money .Invoice.Total}}</span>
+            </div>
+        </div>
+
+        {{if .Invoice.Notes}}
+        <div class="notes">
+            <h3>Notes</h3>
+            <p>{{.Invoice.Notes}}</p>
+        </div>
+        {{end}}
+
+        {{if .Invoice.PaymentDetails}}
+        <div class="payment-info">
+            <h3>Payment Information</h3>
+            <p>{{.Invoice.PaymentDetails}}</p>
+        </div>
+        {{end}}
 
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th width="120">Qty</th>
-                <th width="160">Unit Price</th>
-                <th width="160">Amount</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            {{range .Items}}
-            <tr>
-                <td>{{.Description}}</td>
-
-                <td>{{.Quantity}}</td>
-
-                <td class="right">
-                    {{money .UnitPrice}}
-                </td>
-
-                <td class="right">
-                    {{money .LineTotal}}
-                </td>
-            </tr>
-            {{end}}
-
-        </tbody>
-    </table>
-
-    <div class="totals">
-
-        <div>
-            <span>Subtotal</span>
-            <span>{{money .Invoice.Subtotal}}</span>
-        </div>
-
-        <div>
-            <span>Tax</span>
-            <span>{{money .Invoice.TaxAmount}}</span>
-        </div>
-
-        <div class="grand-total">
-            <span>Total</span>
-            <span>{{money .Invoice.Total}}</span>
-        </div>
-
-    </div>
-
-    {{if .Invoice.Notes}}
-    <div class="notes">
-        <h3>Notes</h3>
-        <p>{{.Invoice.Notes}}</p>
-    </div>
-    {{end}}
 
 </div>
 

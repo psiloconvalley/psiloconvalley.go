@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Invoices</title>
+    <title>Invoices | PsiloConValley</title>
 
     <style>
         body {
@@ -12,7 +12,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: auto;
         }
 
@@ -33,6 +33,13 @@
             padding: 12px 18px;
             text-decoration: none;
             border-radius: 6px;
+            font-weight: bold;
+            border: 1px solid #111;
+        }
+
+        .btn:hover {
+            background: white;
+            color: #111;
         }
 
         table {
@@ -41,6 +48,7 @@
             background: white;
             border-radius: 10px;
             overflow: hidden;
+            border: 1px solid #ddd;
         }
 
         th {
@@ -48,25 +56,101 @@
             color: white;
             text-align: left;
             padding: 14px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         td {
             padding: 14px;
             border-bottom: 1px solid #ddd;
+            vertical-align: middle;
         }
 
         tr:last-child td {
             border-bottom: none;
         }
 
-        a {
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .invoice-link {
             color: inherit;
             text-decoration: none;
             font-weight: bold;
         }
 
-        a:hover {
+        .invoice-link:hover {
             text-decoration: underline;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .small-btn {
+            background: white;
+            color: #111;
+            border: 1px solid #111;
+            padding: 8px 10px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .small-btn:hover {
+            background: #111;
+            color: white;
+            text-decoration: none;
+        }
+
+        /* ── CHANGE 1: Edit button distinct color ── */
+
+	.small-btn.edit {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #333;
+}
+
+.small-btn.edit:hover {
+    background: #fff;
+    color: #111;
+    border-color: #111;
+}
+        /* ── CHANGE 2: Status badge on list view ── */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-sent {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
         }
 
         .empty {
@@ -75,6 +159,7 @@
             border-radius: 10px;
             text-align: center;
             color: #666;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
@@ -85,7 +170,6 @@
 
     <div class="top">
         <h1>Invoices</h1>
-
         <a class="btn" href="/invoices/new">
             Create Invoice
         </a>
@@ -94,38 +178,59 @@
     {{if .Invoices}}
 
     <table>
-
         <thead>
             <tr>
                 <th>Invoice #</th>
                 <th>Client</th>
                 <th>Status</th>
-                <th>Total</th>
+                <th class="right">Total</th>
+                <th class="right">Actions</th>
             </tr>
         </thead>
 
         <tbody>
-
             {{range .Invoices}}
             <tr>
-
                 <td>
-                    <a href="/invoices/{{.ID}}">
+                    <a class="invoice-link" href="/invoices/{{.ID}}">
                         {{.InvoiceNumber}}
                     </a>
                 </td>
 
                 <td>{{.ClientName}}</td>
 
-                <td>{{.Status}}</td>
+                <!-- ── CHANGE 3: Status badge instead of plain text ── -->
+                <td>
+                    <span class="status-badge status-{{.Status}}">
+                        {{.Status}}
+                    </span>
+                </td>
 
-                <td>{{money .Total}}</td>
+                <td class="right">
+                    {{money .Total}}
+                </td>
 
+                <td class="right">
+                    <div class="actions-cell">
+                        <a class="small-btn" href="/invoices/{{.ID}}">
+                            View
+                        </a>
+
+                        <!-- ── CHANGE 4: Edit button, draft only ── -->
+                        {{if eq .Status "draft"}}
+                        <a class="small-btn edit" href="/invoices/{{.ID}}/edit">
+                            Edit
+                        </a>
+                        {{end}}
+
+                        <a class="small-btn" href="/invoices/{{.ID}}/duplicate">
+                            Duplicate
+                        </a>
+                    </div>
+                </td>
             </tr>
             {{end}}
-
         </tbody>
-
     </table>
 
     {{else}}
