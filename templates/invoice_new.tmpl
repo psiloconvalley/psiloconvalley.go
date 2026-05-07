@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Invoice | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f7f4ee;
+            color: #111;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        header {
+            background: #0a0a0a;
+            color: white;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 56px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 58px;
+            margin: 0 0 10px;
+            letter-spacing: -3px;
+        }
+
+        .subtitle {
+            margin: 0 0 40px;
+            color: #555;
+            font-size: 18px;
+        }
+
+        .section {
+            background: white;
+            border: 2px solid #111;
+            margin-bottom: 30px;
+            padding: 34px;
+        }
+
+        .section-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+        }
+
+        .section-top h2 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: -1px;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .step-text {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid #111;
+            background: white;
+        }
+
+        .dot.active {
+            background: #111;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #999;
+            background: white;
+            color: #111;
+            font-size: 15px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #111;
+            box-shadow: 0 0 0 2px #111;
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .field-full {
+            margin-bottom: 22px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 2px solid #111;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .amount {
+            padding-top: 25px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .remove-btn {
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #111;
+            color: #111;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .remove-btn:hover {
+            background: #111;
+            color: white;
+        }
+
+        .btn {
+            background: #111;
+            color: white;
+            border: 2px solid #111;
+            padding: 14px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: white;
+            color: #111;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #111;
+        }
+
+        .btn-secondary:hover {
+            background: #111;
+            color: white;
+        }
+
+        .line-actions {
+            margin-top: 22px;
+        }
+
+        .memo-total-layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 30px;
+            align-items: start;
+            margin-top: 34px;
+        }
+
+        .totals-card {
+            border: 2px solid #111;
+            background: #fafafa;
+            padding: 24px;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .grand-total {
+            margin-top: 12px;
+            padding-top: 18px;
+            border-top: 2px solid #111;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .submit-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 900px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            nav a {
+                margin-left: 0;
+                margin-right: 18px;
+            }
+
+            h1 {
+                font-size: 42px;
+            }
+
+            .grid-2,
+            .grid-3,
+            .grid-4,
+            .memo-total-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .section-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">PsiloConValley</div>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/invoices">Invoices</a>
+        <a href="/invoices/new">Create</a>
+    </nav>
+</header>
+
+<div class="page">
+
+    <h1>Invoice Generator</h1>
+    <p class="subtitle">
+        Create a clean professional invoice in one simple page.
+    </p>
+
+    <form id="invoice-form" method="POST" action="/invoices/create">
+
+        <!-- STEP 1 -->
+        <section class="section">
+            <div class="section-top">
+                <h2>Enter your company information</h2>
+
+                <div class="step-indicator">
+                    <span class="step-text">Step 1 of 3</span>
+                    <div class="dots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <label>Your company name</label>
+                    <input type="text" name="company_name" placeholder="Your business name">
+                </div>
+
+                <div>
+                    <label>Your email address</label>
+                    <input type="email" name="company_email" placeholder="you@example.com">
+                </div>
+            </div>
+
+            <div class="field-full">
+                <label>Your address</label>
+                <input type="text" name="company_address" placeholder="Street address">
+            </div>
+
+            <div class="grid-4">
+                <div>
+                    <label>City</label>
+                    <input type="text" name="company_city">
+                </div>
+
+                <div>
+                    <label>Zip / Postal code</label>
+                    <input type="text" name="company_zip">
+                </div>
+
+                <div>
+                    <label>Country</label>
+                    <select name="company_country" id="company_country"></select>
+                </div>
+
+                <div>
+                    <label>State / Province</label>
+                    <select name="company_state" id="company_state"></select>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="section">
+            <div class="section-top">
+                <h2>Enter customer and invoice information</h2>
+
+                <div class="step-indicator">
+                    <span class="step-text">Step 2 of 3</span>
+                    <div class="dots">
+                        <span class="dot active"></span>
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div>
+                    <label>Customer name</label>
+                    <input type="text" name="client_name" required>
+                </div>
+
+                <div>
+                    <label>Customer email</label>
+                    <input type="email" name="client_email">
+                </div>
+
+                <div>
+                    <label>Invoice number</label>
+                    <input type="text" name="invoice_number" placeholder="Leave blank to auto-generate">
+                </div>
+            </div>
+
+            <div class="field-full">
+                <label>Customer address</label>
+                <input type="text" name="client_address" placeholder="Street address">
+            </div>
+
+            <div class="grid-4">
+                <div>
+                    <label>Customer city</label>
+                    <input type="text" name="client_city">
+                </div>
+
+                <div>
+                    <label>State / Province</label>
+                    <select name="client_state" id="client_state"></select>
+                </div>
+
+                <div>
+                    <label>Country</label>
+                    <select name="client_country" id="client_country"></select>
+                </div>
+
+                <div>
+                    <label>Invoice date</label>
+                    <input type="date" name="issue_date">
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div>
+                    <label>Due date</label>
+                    <input type="date" name="due_date">
+                </div>
+
+                <div>
+                    <label>Currency</label>
+                    <select name="currency" id="currency">
+                        <option value="USD" data-symbol="$">USD — $</option>
+                        <option value="EUR" data-symbol="€">EUR — €</option>
+                        <option value="GBP" data-symbol="£">GBP — £</option>
+                        <option value="CAD" data-symbol="$">CAD — $</option>
+                        <option value="AUD" data-symbol="$">AUD — $</option>
+                        <option value="JPY" data-symbol="¥">JPY — ¥</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Tax rate (%)</label>
+                    <input type="number" step="0.01" name="tax_rate" id="tax_rate" value="0">
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="section">
+            <div class="section-top">
+                <h2>Enter items you wish to bill</h2>
+
+                <div class="step-indicator">
+                    <span class="step-text">Step 3 of 3</span>
+                    <div class="dots">
+                        <span class="dot active"></span>
+                        <span class="dot active"></span>
+                        <span class="dot active"></span>
+                    </div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th width="110">Quantity</th>
+                        <th width="140">Price</th>
+                        <th width="140" class="right">Amount</th>
+                        <th width="70"></th>
+                    </tr>
+                </thead>
+
+                <tbody id="items_body">
+                    <tr>
+                        <td>
+                            <input type="text" class="item-name" placeholder="Website Design" required>
+                        </td>
+
+                        <td>
+                            <input type="text" class="item-detail" placeholder="Landing page build">
+                            <input type="hidden" name="description" class="desc-hidden">
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.01" name="quantity" value="1" class="qty">
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.01" name="unit_price" value="0" class="price">
+                        </td>
+
+                        <td class="right amount row-amount">
+                            $0.00
+                        </td>
+
+                        <td>
+                            <button type="button" class="remove-btn" onclick="removeRow(this)">×</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="line-actions">
+                <button type="button" class="btn btn-secondary" onclick="addRow()">
+                    + Add a line item
+                </button>
+            </div>
+
+            <div class="memo-total-layout">
+                <div>
+                    <label>Notes / Memo</label>
+                    <textarea name="notes" placeholder="Thank you for your business."></textarea>
+
+                    <div style="height: 22px;"></div>
+
+                    <label>Payment Details</label>
+                    <textarea name="payment_details" placeholder="Payment link, PayPal, Cash App, bank transfer, etc."></textarea>
+                </div>
+
+                <div class="totals-card">
+                    <div class="totals-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+
+                    <div class="totals-row">
+                        <span>Tax</span>
+                        <span id="tax_amount">$0.00</span>
+                    </div>
+
+                    <div class="totals-row grand-total">
+                        <span>Total</span>
+                        <span id="total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-row">
+                <button type="submit" class="btn">
+                    Save Invoice
+                </button>
+            </div>
+        </section>
+
+    </form>
+
+</div>
+
+<script src="/static/js/invoice.js"></script>
+
+<script src="/static/js/invoice.js?v=1"></script>
+
+
+
+</body>
+</html>

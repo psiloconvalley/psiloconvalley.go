@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
@@ -10,9 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 
-	// Adjust this import path to match your module name in go.mod
 	"psiloconvalley/internal/repo"
 )
 
@@ -23,20 +21,26 @@ var (
 	bizRepo    *repo.BusinessRepo
 )
 
-// Template helper: if you decide to keep amounts in cents, this is handy
+func money(v float64) string {
+	return fmt.Sprintf("$%.2f", v)
+}
+
 func mulcents(cents int64) float64 {
 	return float64(cents) / 100.0
 }
 
 func initTemplates() {
 	funcs := template.FuncMap{
+		"money":    money,
 		"mulcents": mulcents,
-		// add more helpers as needed (formatDate, money, etc.)
 	}
 
 	var err error
-	// Templates live in ./templates/*.tmpl (adjust pattern if yours differ)
-	templates, err = template.New("").Funcs(funcs).ParseGlob("templates/*.tmpl")
+
+	templates, err = template.New("").
+		Funcs(funcs).
+		ParseGlob("templates/*.tmpl")
+
 	if err != nil {
 		log.Fatal("error parsing templates:", err)
 	}
@@ -48,86 +52,123 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "db unavailable")
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintln(w, "ok")
 }
 
-// Home / landing page
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
-	if err := templates.ExecuteTemplate(w, "home.tmpl", nil); err != nil {
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := templates.ExecuteTemplate(w, "home.tmpl", nil)
+	if err != nil {
 		log.Println("home template error:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 	}
 }
 
-// GET /invoices/new -> show form
 func invoiceNewHandler(w http.ResponseWriter, r *http.Request) {
-	// In a real app, load clients/business profile(s) to populate selects
-	data := map[string]any{
-		// "Clients": clientRepo.List(...),
-		// "Business": bizRepo.GetDefault(...),
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
-	if err := templates.ExecuteTemplate(w, "invoice_new.tmpl", data); err != nil {
+
+	err := templates.ExecuteTemplate(w, "invoice_new.tmpl", nil)
+	if err != nil {
 		log.Println("invoice_new template error:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 	}
 }
 
-// POST /invoices -> create invoice
 func invoiceCreateHandler(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/invoices/new", http.StatusSeeOther)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
 		http.Error(w, "bad form", http.StatusBadRequest)
 		return
 	}
 
-	// Minimal extraction (expand with validation as needed)
-	bizID, _ := strconv.ParseInt(r.FormValue("business_profile_id"), 10, 64)
-	var clientIDPtr *int64
-	if cid := r.FormValue("client_id"); cid != "" {
-		if v, err := strconv.ParseInt(cid, 10, 64); err == nil {
-			clientIDPtr = &v
+	var businessProfileID *int64
+
+	if bid := r.FormValue("business_profile_id"); bid != "" {
+		if v, err := strconv.ParseInt(bid, 10, 64); err == nil {
+			businessProfileID = &v
 		}
 	}
 
-	issueDate, _ := time.Parse("2006-01-02", r.FormValue("issue_date"))
-	var dueDatePtr *time.Time
-	if dd := r.FormValue("due_date"); dd != "" {
-		if t, err := time.Parse("2006-01-02", dd); err == nil {
-			dueDatePtr = &t
+	var clientID *int64
+
+	if cid := r.FormValue("client_id"); cid != "" {
+		if v, err := strconv.ParseInt(cid, 10, 64); err == nil {
+			clientID = &v
+		}
+	}
+
+	issueDate := time.Now()
+
+	if val := r.FormValue("issue_date"); val != "" {
+		if t, err := time.Parse("2006-01-02", val); err == nil {
+			issueDate = t
+		}
+	}
+
+	var dueDate *time.Time
+
+	if val := r.FormValue("due_date"); val != "" {
+		if t, err := time.Parse("2006-01-02", val); err == nil {
+			dueDate = &t
 		}
 	}
 
 	taxRate, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
-	discount, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
 
 	inv := &repo.Invoice{
-		BusinessProfileID: bizID,
-		ClientID:          clientIDPtr,
+		BusinessProfileID: businessProfileID,
+		ClientID:          clientID,
+		ClientName:        r.FormValue("client_name"),
 		InvoiceNumber:     r.FormValue("invoice_number"),
 		IssueDate:         issueDate,
-		DueDate:           dueDatePtr,
-		Status:            "draft",
+		DueDate:           dueDate,
 		TaxRate:           taxRate,
-		DiscountAmount:    discount,
 		Notes:             r.FormValue("notes"),
 		PaymentDetails:    r.FormValue("payment_details"),
+		Status:            "draft",
 	}
 
-	// Collect line items (simple approach; improve with JS add/remove later)
-	items := []repo.InvoiceItem{}
+	var items []repo.InvoiceItem
+
 	descs := r.Form["description"]
 	qtys := r.Form["quantity"]
 	prices := r.Form["unit_price"]
+
 	for i := range descs {
 		if descs[i] == "" {
 			continue
 		}
-		qty, _ := strconv.ParseFloat(qtys[i], 64)
-		price, _ := strconv.ParseFloat(prices[i], 64)
+
+		qty := 1.0
+		price := 0.0
+
+		if i < len(qtys) {
+			qty, _ = strconv.ParseFloat(qtys[i], 64)
+		}
+
+		if i < len(prices) {
+			price, _ = strconv.ParseFloat(prices[i], 64)
+		}
+
 		items = append(items, repo.InvoiceItem{
 			Description: descs[i],
 			Quantity:    qty,
@@ -142,91 +183,154 @@ func invoiceCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Redirect to invoice detail
 	http.Redirect(w, r, fmt.Sprintf("/invoices/%d", id), http.StatusSeeOther)
 }
 
-// GET /invoices/{id} -> show invoice
 func invoiceDetailHandler(w http.ResponseWriter, r *http.Request) {
-	// naive path param parsing (use gorilla/mux chi later for nicer routing)
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	idStr := r.URL.Path[len("/invoices/"):]
+
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
+
 	inv, items, err := invRepo.GetInvoiceWithItems(id)
 	if err != nil {
 		log.Println("get invoice error:", err)
 		http.NotFound(w, r)
 		return
 	}
+
 	data := map[string]any{
 		"Invoice": inv,
 		"Items":   items,
-		// compute totals in template helper or here
 	}
-	if err := templates.ExecuteTemplate(w, "invoice_detail.tmpl", data); err != nil {
+
+	err = templates.ExecuteTemplate(w, "invoice_detail.tmpl", data)
+	if err != nil {
 		log.Println("invoice_detail template error:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 	}
 }
 
-// GET /invoices -> list invoices
 func invoicesListHandler(w http.ResponseWriter, r *http.Request) {
-	list, err := invRepo.ListInvoices(50, 0) // simple pagination
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	list, err := invRepo.ListInvoices(50, 0)
 	if err != nil {
 		log.Println("list invoices error:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}
-	if err := templates.ExecuteTemplate(w, "invoices_list.tmpl", map[string]any{"Invoices": list}); err != nil {
+
+	data := map[string]any{
+		"Invoices": list,
+	}
+
+	err = templates.ExecuteTemplate(w, "invoices_list.tmpl", data)
+	if err != nil {
 		log.Println("invoices_list template error:", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 	}
 }
+func invoiceDuplicateHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/invoices", http.StatusSeeOther)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "bad form", http.StatusBadRequest)
+		return
+	}
+
+	idStr := r.FormValue("id")
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	oldInvoice, oldItems, err := invRepo.GetInvoiceWithItems(id)
+	if err != nil {
+		log.Println("duplicate invoice get error:", err)
+		http.Error(w, "could not duplicate invoice", http.StatusInternalServerError)
+		return
+	}
+
+	newInvoice := *oldInvoice
+
+	newInvoice.ID = 0
+	newInvoice.InvoiceNumber = ""
+	newInvoice.Status = "draft"
+	newInvoice.IssueDate = time.Now()
+	newInvoice.DueDate = nil
+	newInvoice.CreatedAt = time.Time{}
+
+	newItems := make([]repo.InvoiceItem, 0, len(oldItems))
+
+	for _, item := range oldItems {
+		newItems = append(newItems, repo.InvoiceItem{
+			Description: item.Description,
+			Quantity:    item.Quantity,
+			UnitPrice:   item.UnitPrice,
+		})
+	}
+
+	newID, err := invRepo.CreateInvoice(&newInvoice, newItems)
+	if err != nil {
+		log.Println("duplicate invoice create error:", err)
+		http.Error(w, "could not duplicate invoice", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/invoices/%d", newID), http.StatusSeeOther)
+}
+
+
 
 func main() {
-	// DB connection (Railway provides DATABASE_URL)
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		log.Fatal("DATABASE_URL is not set")
-	}
+	_ = godotenv.Load()
 
-	var err error
-	db, err = sql.Open("pgx", dbURL)
-	if err != nil {
-		log.Fatal("failed to open db:", err)
-	}
+	initDB()
 	defer db.Close()
 
-	if err := db.Ping(); err != nil {
-		log.Fatal("failed to ping db:", err)
-	}
+	initTemplates()
 
-	// Initialize repos
 	invRepo = repo.NewInvoiceRepo(db)
 	clientRepo = repo.NewClientRepo(db)
 	bizRepo = repo.NewBusinessRepo(db)
 
-	// Templates
-	initTemplates()
-
-	// Router
 	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", healthHandler)
+	
+	mux.Handle("/static/", http.StripPrefix("/static/", 
+	http.FileServer(http.Dir("static"))))
+	
 	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/invoices", invoicesListHandler)         // GET list
-	mux.HandleFunc("/invoices/new", invoiceNewHandler)       // GET form
-	mux.HandleFunc("/invoices/", invoiceDetailHandler)       // GET detail (simple path)
-	mux.HandleFunc("/invoices/create", invoiceCreateHandler) // POST
+	mux.HandleFunc("/healthz", healthHandler)
 
-	// Port
+	mux.HandleFunc("/invoices", invoicesListHandler)
+	mux.HandleFunc("/invoices/new", invoiceNewHandler)
+	mux.HandleFunc("/invoices/create", invoiceCreateHandler)
+	mux.HandleFunc("/invoices/duplicate", invoiceDuplicateHandler)
+	mux.HandleFunc("/invoices/", invoiceDetailHandler)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	log.Printf("Server starting on :%s", port)
+
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }

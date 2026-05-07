@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice {{.Invoice.InvoiceNumber}}</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 40px;
+            color: #111;
+        }
+
+        .invoice {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 50px;
+            border-radius: 12px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 42px;
+        }
+
+        .meta {
+            color: #666;
+            line-height: 1.7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+
+        th {
+            background: #111;
+            color: white;
+            text-align: left;
+            padding: 14px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .totals {
+            width: 320px;
+            margin-left: auto;
+            margin-top: 40px;
+        }
+
+        .totals div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .grand-total {
+            font-size: 26px;
+            font-weight: bold;
+            border-top: 2px solid #111;
+            padding-top: 12px;
+        }
+
+        .notes {
+            margin-top: 50px;
+        }
+
+        .actions {
+            max-width: 900px;
+            margin: 20px auto;
+            text-align: right;
+        }
+
+        button {
+            background: #111;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .actions {
+                display: none;
+            }
+
+            .invoice {
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="actions">
+    <button onclick="window.print()">
+        Print / Save PDF
+    </button>
+</div>
+
+<div class="invoice">
+
+    <div class="top">
+
+        <div>
+            <h1>INVOICE</h1>
+
+            <div class="meta">
+                Invoice #: {{.Invoice.InvoiceNumber}}<br>
+                Client: {{.Invoice.ClientName}}<br>
+                Status: {{.Invoice.Status}}
+            </div>
+        </div>
+
+        <div class="meta">
+            Issue Date:<br>
+            {{.Invoice.IssueDate.Format "Jan 02, 2006"}}
+        </div>
+
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th width="120">Qty</th>
+                <th width="160">Unit Price</th>
+                <th width="160">Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {{range .Items}}
+            <tr>
+                <td>{{.Description}}</td>
+
+                <td>{{.Quantity}}</td>
+
+                <td class="right">
+                    {{money .UnitPrice}}
+                </td>
+
+                <td class="right">
+                    {{money .LineTotal}}
+                </td>
+            </tr>
+            {{end}}
+
+        </tbody>
+    </table>
+
+    <div class="totals">
+
+        <div>
+            <span>Subtotal</span>
+            <span>{{money .Invoice.Subtotal}}</span>
+        </div>
+
+        <div>
+            <span>Tax</span>
+            <span>{{money .Invoice.TaxAmount}}</span>
+        </div>
+
+        <div class="grand-total">
+            <span>Total</span>
+            <span>{{money .Invoice.Total}}</span>
+        </div>
+
+    </div>
+
+    {{if .Invoice.Notes}}
+    <div class="notes">
+        <h3>Notes</h3>
+        <p>{{.Invoice.Notes}}</p>
+    </div>
+    {{end}}
+
+</div>
+
+</body>
+</html>
