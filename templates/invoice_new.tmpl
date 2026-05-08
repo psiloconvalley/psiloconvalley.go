@@ -7,9 +7,20 @@
         {{else}}Create Invoice{{end}}
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; background: #f5f5f5; color: #111; font-family: Arial, sans-serif; }
+        body { 
+            margin: 0; 
+            background: #f5f5f5; 
+            color: #111; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+        }
         .page { max-width: 1400px; margin: auto; padding: 40px 20px; }
         .layout { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
         .main { background: white; padding: 40px; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -48,11 +59,18 @@
         .summary-total { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; margin-top: 20px; font-size: 28px; font-weight: bold; }
         .summary-note { margin-top: 30px; color: rgba(255,255,255,0.4); line-height: 1.6; font-size: 14px; }
         .item-inputs { display: flex; flex-direction: column; gap: 6px; }
-        @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; } .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+        .item-name { font-weight: bold; }
+        .item-detail { font-size: 13px; color: #666; border-color: #eee; }
+        @media (max-width: 1000px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
+{{template "nav-styles" .}}
 {{template "nav" .}}
 
 <div class="page">
@@ -63,15 +81,24 @@
     </div>
     {{end}}
 
-	{{if eq .Mode "edit"}}
-<form id="invoice-form" method="POST" action="/invoices/{{.Invoice.ID}}/edit">
-    {{.csrfField}}
-{{else}}
-<form id="invoice-form" method="POST" action="/invoices/create">
-    {{.csrfField}}
-{{end}}
+    {{if eq .Mode "duplicate"}}
+    <div class="system-banner">
+        <span>Initializing duplicate transaction framework</span>
+        <span>Source ID: <strong>{{.Invoice.InvoiceNumber}}</strong></span>
+    </div>
+    {{end}}
+
+    {{if eq .Mode "edit"}}
+    <form id="invoice-form" method="POST" action="/invoices/{{.Invoice.ID}}/edit">
+        {{.csrfField}}
+    {{else}}
+    <form id="invoice-form" method="POST" action="/invoices/create">
+        {{.csrfField}}
+    {{end}}
+
         <div class="layout">
             <div class="main">
+
                 <h1>
                     {{if eq .Mode "edit"}}Edit Invoice
                     {{else if eq .Mode "duplicate"}}Duplicate Invoice
@@ -81,62 +108,167 @@
                 <!-- STEP 1: Company Info -->
                 <section class="section">
                     <div class="step-row">
-                        <div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+                        <div class="dots">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
                         <div class="step-label">Step 1 of 3</div>
                     </div>
                     <h2>Your company information</h2>
+
                     <div class="grid-2">
-                        <div><label>Company Name</label><input type="text" name="company_name" value="{{if .Invoice}}{{.Invoice.CompanyName}}{{end}}"></div>
-                        <div><label>Email Address</label><input type="email" name="company_email" value="{{if .Invoice}}{{.Invoice.CompanyEmail}}{{end}}"></div>
+                        <div>
+                            <label>Company Name</label>
+                            <input type="text" name="company_name"
+                                value="{{field .Invoice.CompanyName}}">
+                        </div>
+                        <div>
+                            <label>Email Address</label>
+                            <input type="email" name="company_email"
+                                value="{{field .Invoice.CompanyEmail}}">
+                        </div>
                     </div>
+
                     <div class="grid-3" style="margin-top:20px;">
-                        <div><label>Address</label><input type="text" name="company_address" value="{{if .Invoice}}{{.Invoice.CompanyAddress}}{{end}}"></div>
-                        <div><label>City</label><input type="text" name="company_city" value="{{if .Invoice}}{{.Invoice.CompanyCity}}{{end}}"></div>
-                        <div><label>Zip Code</label><input type="text" name="company_zip" value="{{if .Invoice}}{{.Invoice.CompanyZip}}{{end}}"></div>
+                        <div>
+                            <label>Address</label>
+                            <input type="text" name="company_address"
+                                value="{{field .Invoice.CompanyAddress}}">
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="company_city"
+                                value="{{field .Invoice.CompanyCity}}">
+                        </div>
+                        <div>
+                            <label>Zip Code</label>
+                            <input type="text" name="company_zip"
+                                value="{{field .Invoice.CompanyZip}}">
+                        </div>
                     </div>
+
                     <div class="grid-2" style="margin-top:20px;">
-                        <div><label>Country</label><select name="company_country" id="company_country" data-selected="{{if .Invoice}}{{.Invoice.CompanyCountry}}{{end}}"></select></div>
-                        <div><label>State / Region</label><select name="company_state" id="company_state" data-selected="{{if .Invoice}}{{.Invoice.CompanyState}}{{end}}"></select></div>
+                        <div>
+                            <label>Country</label>
+                            <select name="company_country" id="company_country"
+                                data-selected="{{field .Invoice.CompanyCountry}}">
+                            </select>
+                        </div>
+                        <div>
+                            <label>State / Region</label>
+                            <select name="company_state" id="company_state"
+                                data-selected="{{field .Invoice.CompanyState}}">
+                            </select>
+                        </div>
                     </div>
                 </section>
 
-                <!-- STEP 2: Customer Info -->
+                <!-- STEP 2: Customer & Invoice Info -->
                 <section class="section">
                     <div class="step-row">
-                        <div class="dots"><div class="dot active"></div><div class="dot active"></div><div class="dot"></div></div>
+                        <div class="dots">
+                            <div class="dot active"></div>
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                        </div>
                         <div class="step-label">Step 2 of 3</div>
                     </div>
                     <h2>Customer and invoice information</h2>
+
                     <div class="grid-3">
-                        <div><label>Customer Name</label><input type="text" name="client_name" value="{{if .Invoice}}{{.Invoice.ClientName}}{{end}}"></div>
-                        <div><label>Customer Email</label><input type="email" name="client_email" value="{{if .Invoice}}{{.Invoice.ClientEmail}}{{end}}"></div>
-                        <div><label>Invoice Number</label>{{if eq .Mode "edit"}}<input type="text" name="invoice_number" value="{{.Invoice.InvoiceNumber}}" readonly>{{else}}<input type="text" name="invoice_number" value="{{if .Invoice}}{{.Invoice.InvoiceNumber}}{{end}}" placeholder="Leave blank to auto-generate">{{end}}</div>
+                        <div>
+                            <label>Customer Name</label>
+                            <input type="text" name="client_name"
+                                value="{{field .Invoice.ClientName}}">
+                        </div>
+                        <div>
+                            <label>Customer Email</label>
+                            <input type="email" name="client_email"
+                                value="{{field .Invoice.ClientEmail}}">
+                        </div>
+                        <div>
+                            <label>Invoice Number</label>
+                            {{if eq .Mode "edit"}}
+                            <input type="text" name="invoice_number"
+                                value="{{.Invoice.InvoiceNumber}}"
+                                readonly>
+                            {{else}}
+                            <input type="text" name="invoice_number"
+                                value="{{field .Invoice.InvoiceNumber}}"
+                                placeholder="Leave blank to auto-generate">
+                            {{end}}
+                        </div>
                     </div>
+
                     <div class="grid-2" style="margin-top:20px;">
-                        <div><label>Invoice Date</label><input type="date" name="issue_date" value="{{if .Invoice}}{{.Invoice.IssueDate}}{{end}}"></div>
-                        <div><label>Due Date</label><input type="date" name="due_date" value="{{if .Invoice}}{{.Invoice.DueDate}}{{end}}"></div>
+                        <div>
+                            <label>Invoice Date</label>
+                            <input type="date" name="issue_date"
+                                value="{{field .Invoice.IssueDate}}">
+                        </div>
+                        <div>
+                            <label>Due Date</label>
+                            <input type="date" name="due_date"
+                                value="{{field .Invoice.DueDate}}">
+                        </div>
                     </div>
+
                     <div class="grid-3" style="margin-top:20px;">
-                        <div><label>Customer Address</label><input type="text" name="client_address" value="{{if .Invoice}}{{.Invoice.ClientAddress}}{{end}}"></div>
-                        <div><label>City</label><input type="text" name="client_city" value="{{if .Invoice}}{{.Invoice.ClientCity}}{{end}}"></div>
-                        <div><label>Zip Code</label><input type="text" name="client_zip" value="{{if .Invoice}}{{.Invoice.ClientZip}}{{end}}"></div>
+                        <div>
+                            <label>Customer Address</label>
+                            <input type="text" name="client_address"
+                                value="{{field .Invoice.ClientAddress}}">
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="client_city"
+                                value="{{field .Invoice.ClientCity}}">
+                        </div>
+                        <div>
+                            <label>Zip Code</label>
+                            <input type="text" name="client_zip"
+                                value="{{field .Invoice.ClientZip}}">
+                        </div>
                     </div>
+
                     <div class="grid-2" style="margin-top:20px;">
-                        <div><label>Country</label><select name="client_country" id="client_country" data-selected="{{if .Invoice}}{{.Invoice.ClientCountry}}{{end}}"></select></div>
-                        <div><label>State / Region</label><select name="client_state" id="client_state" data-selected="{{if .Invoice}}{{.Invoice.ClientState}}{{end}}"></select></div>
+                        <div>
+                            <label>Country</label>
+                            <select name="client_country" id="client_country"
+                                data-selected="{{field .Invoice.ClientCountry}}">
+                            </select>
+                        </div>
+                        <div>
+                            <label>State / Region</label>
+                            <select name="client_state" id="client_state"
+                                data-selected="{{field .Invoice.ClientState}}">
+                            </select>
+                        </div>
                     </div>
                 </section>
 
                 <!-- STEP 3: Line Items -->
                 <section class="section">
                     <div class="step-row">
-                        <div class="dots"><div class="dot active"></div><div class="dot active"></div><div class="dot active"></div></div>
+                        <div class="dots">
+                            <div class="dot active"></div>
+                            <div class="dot active"></div>
+                            <div class="dot active"></div>
+                        </div>
                         <div class="step-label">Step 3 of 3</div>
                     </div>
                     <h2>Items to bill</h2>
+
                     <table>
                         <thead>
-                            <tr><th>Item</th><th width="110">Qty</th><th width="150">Price</th><th width="150">Amount</th><th width="50"></th></tr>
+                            <tr>
+                                <th>Item</th>
+                                <th width="110">Qty</th>
+                                <th width="150">Price</th>
+                                <th width="150">Amount</th>
+                                <th width="50"></th>
+                            </tr>
                         </thead>
                         <tbody id="items_body">
                         {{if .Invoice.Items}}
@@ -149,7 +281,7 @@
                                         <input type="hidden" name="description" class="desc-hidden" value="{{.Description}}">
                                     </div>
                                 </td>
-                                <td><input type="number" step="0.01" name="quantity" class="qty" value="{{.Quantity}}"></td>
+                                <td><input type="number" step="0.01" name="quantity" class="qty" value="{{.QuantityRaw}}"></td>
                                 <td><input type="number" step="0.01" name="unit_price" class="price" value="{{formatCents .UnitPriceCents}}"></td>
                                 <td class="right row-amount">$0.00</td>
                                 <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
@@ -172,54 +304,92 @@
                         {{end}}
                         </tbody>
                     </table>
+
                     <button type="button" class="add-btn" onclick="addRow()">+ Add Line Item</button>
+
                     <div style="margin-top:40px;">
                         <label>Notes / Memo</label>
-                        <textarea name="notes">{{if .Invoice}}{{.Invoice.Notes}}{{end}}</textarea>
+                        <textarea name="notes">{{.Invoice.Notes}}</textarea>
                     </div>
                 </section>
+
             </div>
 
             <!-- SIDEBAR -->
             <aside class="sidebar">
                 <h3 class="summary-title">Invoice Summary</h3>
-                <div class="summary-line"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
-                <div class="summary-line"><span>Tax</span><span id="tax_amount">$0.00</span></div>
-                <div class="summary-line summary-total"><span>Total</span><span id="total">$0.00</span></div>
-                <div style="margin-top:30px;"><label>Tax Rate (%)</label><input type="number" step="0.01" name="tax_rate" id="tax_rate" value="{{if .Invoice}}{{.Invoice.TaxRate}}{{else}}0{{end}}"></div>
-                <div style="margin-top:20px;"><label>Currency</label>
+
+                <div class="summary-line">
+                    <span>Subtotal</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+
+                <div class="summary-line">
+                    <span>Tax</span>
+                    <span id="tax_amount">$0.00</span>
+                </div>
+
+                <div class="summary-line summary-total">
+                    <span>Total</span>
+                    <span id="total">$0.00</span>
+                </div>
+
+                <div style="margin-top:30px;">
+                    <label>Tax Rate (%)</label>
+                    <input type="number" step="0.01" name="tax_rate" id="tax_rate"
+                        value="{{if .Invoice}}{{.Invoice.TaxRate}}{{else}}0{{end}}">
+                </div>
+
+                <div style="margin-top:20px;">
+                    <label>Currency</label>
                     <select name="currency" id="currency">
-                        <option value="USD" data-symbol="$" {{if .Invoice}}{{if eq .Invoice.Currency "USD"}}selected{{end}}{{else}}selected{{end}}>USD — US Dollar</option>
-                        <option value="CAD" data-symbol="CA$" {{if .Invoice}}{{if eq .Invoice.Currency "CAD"}}selected{{end}}{{end}}>CAD — Canadian Dollar</option>
-                        <option value="GBP" data-symbol="£" {{if .Invoice}}{{if eq .Invoice.Currency "GBP"}}selected{{end}}{{end}}>GBP — British Pound</option>
-                        <option value="EUR" data-symbol="€" {{if .Invoice}}{{if eq .Invoice.Currency "EUR"}}selected{{end}}{{end}}>EUR — Euro</option>
+                        <option value="USD" data-symbol="$" {{if eq .Invoice.Currency "USD"}}selected{{end}}>USD — US Dollar</option>
+                        <option value="CAD" data-symbol="CA$" {{if eq .Invoice.Currency "CAD"}}selected{{end}}>CAD — Canadian Dollar</option>
+                        <option value="GBP" data-symbol="£" {{if eq .Invoice.Currency "GBP"}}selected{{end}}>GBP — British Pound</option>
+                        <option value="EUR" data-symbol="€" {{if eq .Invoice.Currency "EUR"}}selected{{end}}>EUR — Euro</option>
                     </select>
                 </div>
-                <div style="margin-top:20px;"><label>Payment Details</label><textarea name="payment_details">{{if .Invoice}}{{.Invoice.PaymentDetails}}{{end}}</textarea></div>
+
+                <div style="margin-top:20px;">
+                    <label>Payment Details</label>
+                    <textarea name="payment_details">{{.Invoice.PaymentDetails}}</textarea>
+                </div>
+
                 <button type="submit" class="save-btn{{if eq .Mode "edit"}} edit-mode{{end}}">
-                    {{if eq .Mode "edit"}}Update Invoice{{else if eq .Mode "duplicate"}}Save as New Invoice{{else}}Save Invoice{{end}}
+                    {{if eq .Mode "edit"}}Update Invoice
+                    {{else if eq .Mode "duplicate"}}Save as New Invoice
+                    {{else}}Save Invoice{{end}}
                 </button>
-                <div class="summary-note">Sovereign Business Utilities.<br>Fast. Independent. Free.</div>
+
+                <div class="summary-note">
+                    Sovereign Business Utilities.<br>
+                    Fast. Independent. Free.
+                </div>
             </aside>
         </div>
     </form>
 </div>
 
 <script src="/static/js/invoice.js"></script>
+
 <script>
     function restoreSelections() {
-        const selects = ["company_country","company_state","client_country","client_state"];
+        const selects = ["company_country", "company_state", "client_country", "client_state"];
         selects.forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
             const saved = el.dataset.selected;
             if (!saved) return;
             for (const opt of el.options) {
-                if (opt.value === saved || opt.textContent.trim() === saved) { el.value = opt.value; break; }
+                if (opt.value === saved || opt.textContent.trim() === saved) {
+                    el.value = opt.value;
+                    break;
+                }
             }
         });
     }
     window.addEventListener("load", () => { setTimeout(restoreSelections, 100); });
 </script>
+
 </body>
 </html>

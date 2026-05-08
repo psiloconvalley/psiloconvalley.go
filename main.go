@@ -21,9 +21,14 @@ import (
 
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
+	"psiloconvalley/internal/pdf"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/views"
 )
+
+// =====================================================================
+// Application Container
+// =====================================================================
 
 type app struct {
 	templates  *template.Template
@@ -185,7 +190,7 @@ func securityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		w.Header().Set(
 			"Content-Security-Policy",
-			"default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;",
+			"default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;",
 		)
 		next.ServeHTTP(w, r)
 	})
@@ -219,6 +224,10 @@ func (a *app) feedbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/tools?transmitted=true", http.StatusSeeOther)
 }
 
+func (a *app) invoicePortalHandler(w http.ResponseWriter, r *http.Request) {
+	a.render(w, r, "home.tmpl", nil)
+}
+
 // =====================================================================
 // Handlers: Auth
 // =====================================================================
@@ -230,6 +239,8 @@ func (a *app) registerGetHandler(w http.ResponseWriter, r *http.Request) {
 func (a *app) registerPostHandler(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(strings.ToLower(r.FormValue("email")))
 	pass := r.FormValue("password")
+
+	log.Printf("REGISTER ATTEMPT: %s from %s", email, r.RemoteAddr)
 
 	if email == "" || len(pass) < 8 {
 		a.render(w, r, "register.tmpl", map[string]any{"Error": "Invalid credentials (min 8 chars)"})
@@ -250,11 +261,12 @@ func (a *app) loginGetHandler(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "login.tmpl", nil)
 }
 
-	func (a *app) loginPostHandler(w http.ResponseWriter, r *http.Request) {
+func (a *app) loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(strings.ToLower(r.FormValue("email")))
 	pass := r.FormValue("password")
 
 	log.Printf("LOGIN ATTEMPT: %s from %s", email, r.RemoteAddr)
+
 	user, err := a.userRepo.GetByEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -283,10 +295,6 @@ func (a *app) logoutHandler(w http.ResponseWriter, r *http.Request) {
 // =====================================================================
 // Handlers: Invoices
 // =====================================================================
-
-func (a *app) invoicePortalHandler(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, "home.tmpl", nil)
-}
 
 func (a *app) invoicesListHandler(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
@@ -494,6 +502,49 @@ func (a *app) invoiceDuplicateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // =====================================================================
+// Handler: PDF Generation
+// =====================================================================
+
+func (a *app) invoicePDFHandler(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+
+	inv, items, err := a.invRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || !canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	var buf bytes.Buffer
+	data := map[string]any{
+		"Invoice":   invoiceView,
+		"User":      auth.GetUser(r),
+		"csrfField": template.HTML(""),
+	}
+
+	if err := a.templates.ExecuteTemplate(&buf, "invoice_detail.tmpl", data); err != nil {
+		log.Printf("pdf template error: %v", err)
+		http.Error(w, "Could not render invoice", http.StatusInternalServerError)
+		return
+	}
+
+	pdfBytes, err := pdf.Generate(r.Context(), buf.String())
+	if err != nil {
+		log.Printf("pdf generation error: %v", err)
+		http.Error(w, "Could not generate PDF", http.StatusInternalServerError)
+		return
+	}
+
+	filename := fmt.Sprintf("invoice-%s.pdf", inv.InvoiceNumber)
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(pdfBytes)))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(pdfBytes)
+}
+
+// =====================================================================
 // Form Parsing
 // =====================================================================
 
@@ -628,6 +679,7 @@ func main() {
 		r.Get("/{id}/edit", a.invoiceEditHandler)
 		r.Post("/{id}/edit", a.invoiceUpdateHandler)
 		r.Get("/{id}/duplicate", a.invoiceDuplicateHandler)
+		r.Get("/{id}/pdf", a.invoicePDFHandler)
 	})
 
 	port := os.Getenv("PORT")
@@ -652,7 +704,7 @@ func main() {
 		Addr:         ":" + port,
 		Handler:      csrfHandler,
 		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
 
