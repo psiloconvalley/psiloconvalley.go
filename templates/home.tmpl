@@ -4,12 +4,7 @@
     <title>PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background: #0a0a0a;
             color: #ffffff;
@@ -17,8 +12,6 @@
             overflow-x: hidden;
             min-height: 100vh;
         }
-
-        /* Canvas Background Setup */
         #mycelium-canvas {
             position: fixed;
             top: 0;
@@ -29,8 +22,6 @@
             pointer-events: none;
             opacity: 0.6;
         }
-
-        /* Layout Structure */
         .app-interface {
             position: relative;
             z-index: 2;
@@ -41,9 +32,19 @@
             flex-direction: column;
             min-height: 100vh;
         }
-
-
-        /* Main Hero Presentation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .brand-logo {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
         main {
             flex-grow: 1;
             display: flex;
@@ -51,7 +52,6 @@
             justify-content: center;
             margin: 80px 0;
         }
-
         .meta-tag {
             font-size: 12px;
             text-transform: uppercase;
@@ -59,7 +59,6 @@
             color: rgba(255, 255, 255, 0.4);
             margin-bottom: 24px;
         }
-
         h1 {
             font-size: clamp(48px, 8vw, 84px);
             font-weight: 800;
@@ -69,7 +68,6 @@
             margin-bottom: 40px;
             text-transform: uppercase;
         }
-
         .tagline {
             font-size: clamp(18px, 2.5vw, 24px);
             line-height: 1.5;
@@ -78,15 +76,12 @@
             margin-bottom: 60px;
             font-weight: 300;
         }
-
-        /* Minimal Technical Directory Structure */
         .tools-directory {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             margin-bottom: 80px;
         }
-
         .tool-node {
             background: rgba(15, 15, 15, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -100,234 +95,122 @@
             backdrop-filter: blur(8px);
             transition: border-color 0.3s ease, background 0.3s ease;
         }
-
         .tool-node:hover {
             border-color: rgba(255, 255, 255, 0.6);
             background: rgba(20, 20, 20, 0.9);
         }
-
-        .node-index {
-            font-size: 11px;
-            font-family: monospace;
-            color: rgba(255, 255, 255, 0.3);
-            margin-bottom: 20px;
-        }
-
-        .node-title {
-            font-size: 24px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-            margin-bottom: 12px;
-        }
-
-        .node-description {
-            font-size: 14px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .node-action {
-            margin-top: 30px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-
-        .node-action::after {
-            content: " →";
-            transition: transform 0.2s ease;
-        }
-
-        .tool-node:hover .node-action::after {
-            transform: translateX(6px);
-        }
-
+        .node-index { font-size: 11px; font-family: monospace; color: rgba(255, 255, 255, 0.3); margin-bottom: 20px; }
+        .node-title { font-size: 24px; font-weight: 600; text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 12px; }
+        .node-description { font-size: 14px; line-height: 1.6; color: rgba(255, 255, 255, 0.5); }
+        .node-action { margin-top: 30px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; display: flex; align-items: center; }
+        .node-action::after { content: " →"; transition: transform 0.2s ease; }
+        .tool-node:hover .node-action::after { transform: translateX(6px); }
         footer {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 40px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            justify-content: space-between; align-items: center; font-size: 12px;
+            color: rgba(255, 255, 255, 0.3); border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 40px; text-transform: uppercase; letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
-
-	
-	{{template "nav-styles" .}}
-    	{{template "nav" .}}
-
     <canvas id="mycelium-canvas"></canvas>
-
     <div class="app-interface">
-        
-	<main>
+        <header>
+            <div class="brand-logo">PsiloConValley</div>
+        </header>
+        <main>
             <div class="meta-tag">Core Infrastructure Group</div>
             <h1>Sovereign<br>Business Tools.</h1>
             <p class="tagline">
-                Fast, zero-compromise system utility built to handle core operations independently. No tracking layers. No friction profiles. Raw functional software.
+                Fast, zero-compromise system utility built to handle core operations independently. No tracking layers. Raw functional software.
             </p>
-
             <div class="tools-directory">
                 <a href="/invoices/new" class="tool-node">
                     <div>
                         <div class="node-index">[ Node // 01 ]</div>
-                        <div class="node-title">Invoice Generator</div>
+                        <div class="node-title">Free Business Tools</div>
                         <div class="node-description">
                             Render crisp, high-fidelity technical line invoices instantly. Dynamic transaction addition, calculated internal parameters, zero session persistence required.
                         </div>
                     </div>
-                    <div class="node-action">Initialize utility</div>
+                    <div class="node-action">Launch Tools</div>
                 </a>
-                
-                <!-- Room for Node // 02, Node // 03 later -->
             </div>
         </main>
-
         <footer>
             <div>Engine Status: Active</div>
             <div>Built independently // Go + Postgres + Railway</div>
         </footer>
     </div>
-
-    <!-- Mycelium Simulation System Script -->
     <script>
         const canvas = document.getElementById("mycelium-canvas");
         const ctx = canvas.getContext("2d");
-
         let width = (canvas.width = window.innerWidth);
         let height = (canvas.height = window.innerHeight);
-
         window.addEventListener("resize", () => {
             width = (canvas.width = window.innerWidth);
             height = (canvas.height = window.innerHeight);
         });
-
         const mouse = { x: null, y: null, radius: 180 };
-        window.addEventListener("mousemove", (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-        window.addEventListener("mouseleave", () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
-
+        window.addEventListener("mousemove", (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
         class Hypha {
             constructor(x, y, angle, depth) {
-                this.x = x;
-                this.y = y;
-                this.px = x;
-                this.py = y;
-                this.angle = angle;
-                this.speed = Math.random() * 1.5 + 0.5;
-                this.depth = depth;
-                this.age = 0;
+                this.x = x; this.y = y; this.px = x; this.py = y;
+                this.angle = angle; this.speed = Math.random() * 1.5 + 0.5;
+                this.depth = depth; this.age = 0;
                 this.maxAge = Math.random() * 100 + 50 / (depth + 1);
                 this.dead = false;
             }
-
             update() {
                 if (this.dead) return;
-
-                this.px = this.x;
-                this.py = this.y;
-
-                // Organic noise random walk variation
+                this.px = this.x; this.py = this.y;
                 this.angle += (Math.random() - 0.5) * 0.4;
-
-                // Nutrient attraction vector to mouse position
                 if (mouse.x !== null && mouse.y !== null) {
-                    const dx = mouse.x - this.x;
-                    const dy = mouse.y - this.y;
+                    const dx = mouse.x - this.x; const dy = mouse.y - this.y;
                     const dist = Math.hypot(dx, dy);
                     if (dist < mouse.radius) {
                         const targetAngle = Math.atan2(dy, dx);
                         this.angle += (targetAngle - this.angle) * 0.08;
                     }
                 }
-
                 this.x += Math.cos(this.angle) * this.speed;
                 this.y += Math.sin(this.angle) * this.speed;
-
                 this.age++;
-
-                // Enforce spatial boundary checks
-                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.age >= this.maxAge) {
-                    this.dead = true;
-                }
+                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.age >= this.maxAge) { this.dead = true; }
             }
-
             draw() {
-                ctx.beginPath();
-                ctx.moveTo(this.px, this.py);
-                ctx.lineTo(this.x, this.y);
+                ctx.beginPath(); ctx.moveTo(this.px, this.py); ctx.lineTo(this.x, this.y);
                 ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 / (this.depth + 1)})`;
                 ctx.lineWidth = Math.max(0.5, 2 / (this.depth + 1));
                 ctx.stroke();
             }
         }
-
         let hyphae = [];
-
         function seedNetwork(x, y) {
             const numBranches = Math.floor(Math.random() * 4) + 3;
-            for (let i = 0; i < numBranches; i++) {
-                hyphae.push(new Hypha(x, y, (Math.PI * 2 * i) / numBranches, 0));
-            }
+            for (let i = 0; i < numBranches; i++) { hyphae.push(new Hypha(x, y, (Math.PI * 2 * i) / numBranches, 0)); }
         }
-
-        // Initialize core nodes across the viewing portal frame
-        for (let i = 0; i < 6; i++) {
-            seedNetwork(Math.random() * width, Math.random() * height);
-        }
-
-        // Click to dynamically inject new structural nodes
-        window.addEventListener("click", (e) => {
-            seedNetwork(e.clientX, e.clientY);
-        });
-
-        // Main Animation Execution Loop
+        for (let i = 0; i < 6; i++) { seedNetwork(Math.random() * width, Math.random() * height); }
+        window.addEventListener("click", (e) => { seedNetwork(e.clientX, e.clientY); });
         function animate() {
-            // Soft clear canvas to leave micro trail paths
             ctx.fillStyle = "rgba(10, 10, 10, 0.04)";
             ctx.fillRect(0, 0, width, height);
-
             let newHyphae = [];
-
             hyphae.forEach((h) => {
-                h.update();
-                h.draw();
-
+                h.update(); h.draw();
                 if (!h.dead) {
                     newHyphae.push(h);
-
-                    // Branching probability metric evaluation
                     if (Math.random() < 0.02 && h.depth < 4 && h.age > 15) {
                         const branchAngle = h.angle + (Math.random() - 0.5) * 1.2;
                         newHyphae.push(new Hypha(h.x, h.y, branchAngle, h.depth + 1));
                     }
                 }
             });
-
             hyphae = newHyphae;
-
-            // Maintain basic ambient network density levels
-            if (hyphae.length < 15 && Math.random() < 0.05) {
-                seedNetwork(Math.random() * width, Math.random() * height);
-            }
-
+            if (hyphae.length < 15 && Math.random() < 0.05) { seedNetwork(Math.random() * width, Math.random() * height); }
             requestAnimationFrame(animate);
         }
-
         animate();
     </script>
 </body>

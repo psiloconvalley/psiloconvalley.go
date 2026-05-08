@@ -3,9 +3,18 @@
     <div class="nav-inner">
         <a href="/" class="nav-brand">PsiloConValley</a>
         <div class="nav-links">
-            <a href="/invoices">Dashboard</a>
-            <a href="/invoices/new">Generate</a>
-            <a href="/healthz">System</a>
+            <a href="/invoices/new">New Invoice</a>
+            {{if .User}}
+                <a href="/invoices">My Tools</a>
+                <span class="nav-user">{{.User.Email}}</span>
+                <form method="POST" action="/logout" style="display:inline;">
+                    {{.csrfField}} <!-- CSRF PROTECTION INJECTED -->
+                    <button type="submit" class="nav-logout">Logout</button>
+                </form>
+            {{else}}
+                <a href="/login">Login</a>
+                <a href="/register" class="nav-cta">Sign Up</a>
+            {{end}}
         </div>
     </div>
 </nav>
@@ -13,52 +22,19 @@
 
 {{define "nav-styles"}}
 <style>
-    .site-nav {
-        background: #0a0a0a;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0 20px;
-    }
-
-    .nav-inner {
-        max-width: 1400px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height: 56px;
-    }
-
-    .nav-brand {
-        font-size: 14px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #fff;
-        text-decoration: none;
-    }
-
-    .nav-brand:hover {
-        color: rgba(255, 255, 255, 0.8);
-    }
-
-    .nav-links a {
-        color: rgba(255, 255, 255, 0.6);
-        text-decoration: none;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-left: 28px;
-        transition: color 0.2s ease;
-    }
-
-    .nav-links a:hover {
-        color: #fff;
-    }
-
-    @media print {
-        .site-nav {
-            display: none;
-        }
-    }
+    .site-nav { background: #0a0a0a; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 20px; }
+    .nav-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 64px; }
+    .nav-brand { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; text-decoration: none; }
+    .nav-brand:hover { color: rgba(255, 255, 255, 0.8); }
+    .nav-links { display: flex; align-items: center; }
+    .nav-links a { color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-left: 28px; transition: color 0.2s ease; }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { background: #fff !important; color: #0a0a0a !important; padding: 8px 16px; border-radius: 6px; font-weight: 700; }
+    .nav-cta:hover { background: #e5e5e5 !important; }
+    .nav-user { color: rgba(255, 255, 255, 0.4); font-size: 13px; margin-left: 28px; font-family: monospace; }
+    .nav-logout { background: none; border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); padding: 5px 14px; border-radius: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-left: 16px; }
+    .nav-logout:hover { border-color: rgba(255, 255, 255, 0.6); color: #fff; }
+    @media print { .site-nav { display: none; } }
+    @media (max-width: 600px) { .nav-user { display: none; } .nav-links a { margin-left: 16px; font-size: 11px; } }
 </style>
 {{end}}

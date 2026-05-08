@@ -1,244 +1,255 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Invoices | PsiloConValley</title>
-
+    <title>My Tools | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 40px;
-            color: #111;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
         }
 
         .container {
             max-width: 1100px;
-            margin: auto;
+            margin: 0 auto;
+            padding: 60px 20px;
         }
 
+        /* ── Header / Tool Title ── */
         .top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
         }
 
-        h1 {
-            margin: 0;
+        .top h1 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
         }
 
         .btn {
-            background: #111;
-            color: white;
-            padding: 12px 18px;
+            background: #fff;
+            color: #0a0a0a;
+            padding: 12px 24px;
             text-decoration: none;
             border-radius: 6px;
-            font-weight: bold;
-            border: 1px solid #111;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s ease;
         }
 
         .btn:hover {
-            background: white;
-            color: #111;
+            background: #e5e5e5;
+            transform: translateY(-2px);
+        }
+
+        /* ── Data Table ── */
+        .table-wrapper {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #ddd;
         }
 
         th {
-            background: #111;
-            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
             text-align: left;
-            padding: 14px;
-            font-size: 12px;
+            padding: 16px 20px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-family: monospace;
         }
 
         td {
-            padding: 14px;
-            border-bottom: 1px solid #ddd;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             vertical-align: middle;
+            font-size: 15px;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover {
-            background: #fafafa;
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .invoice-link {
-            color: inherit;
+            color: #fff;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            font-family: monospace;
         }
 
         .invoice-link:hover {
             text-decoration: underline;
         }
 
-        .right {
-            text-align: right;
-        }
+        .right { text-align: right; }
 
+        /* ── Action Buttons ── */
         .actions-cell {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             justify-content: flex-end;
-            flex-wrap: wrap;
         }
 
         .small-btn {
-            background: white;
-            color: #111;
-            border: 1px solid #111;
-            padding: 8px 10px;
+            background: none;
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 14px;
             text-decoration: none;
             font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
+            font-weight: 600;
             border-radius: 4px;
+            transition: all 0.2s;
         }
 
         .small-btn:hover {
-            background: #111;
-            color: white;
-            text-decoration: none;
+            border-color: #fff;
+            color: #fff;
         }
 
-        /* ── CHANGE 1: Edit button distinct color ── */
+        .small-btn.edit {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
 
-	.small-btn.edit {
-    background: #1a1a1a;
-    color: #fff;
-    border-color: #333;
-}
-
-.small-btn.edit:hover {
-    background: #fff;
-    color: #111;
-    border-color: #111;
-}
-        /* ── CHANGE 2: Status badge on list view ── */
+        /* ── Status Badges ── */
         .status-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            font-family: monospace;
         }
 
-        .status-draft {
-            background: #fef3c7;
-            color: #92400e;
-        }
+        .status-draft { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .status-sent  { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .status-paid  { background: rgba(16, 185, 129, 0.1); color: #10b881; border: 1px solid rgba(16, 185, 129, 0.2); }
 
-        .status-sent {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-paid {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .empty {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
+        /* ── Empty / Ready State ── */
+        .system-ready-state {
             text-align: center;
-            color: #666;
-            border: 1px solid #ddd;
+            padding: 120px 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 16px;
+        }
+        .ready-icon { font-size: 32px; margin-bottom: 24px; opacity: 0.2; }
+        .system-ready-state h2 { 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            font-size: 16px; 
+            margin-bottom: 12px; 
+            font-family: monospace;
+            color: #444;
+        }
+        .system-ready-state p { 
+            color: rgba(255,255,255,0.4); 
+            margin-bottom: 32px; 
+            font-size: 14px; 
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
         }
     </style>
 </head>
 
 <body>
 
+{{template "nav-styles" .}}
+{{template "nav" .}}
+
 <div class="container">
 
     <div class="top">
-        <h1>Invoices</h1>
+        <h1>My Tools // Invoices</h1>
         <a class="btn" href="/invoices/new">
-            Create Invoice
+            + New Invoice
         </a>
     </div>
 
     {{if .Invoices}}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Record ID</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th class="right">Value</th>
+                    <th class="right">Operations</th>
+                </tr>
+            </thead>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Invoice #</th>
-                <th>Client</th>
-                <th>Status</th>
-                <th class="right">Total</th>
-                <th class="right">Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {{range .Invoices}}
-            <tr>
-                <td>
-                    <a class="invoice-link" href="/invoices/{{.ID}}">
-                        {{.InvoiceNumber}}
-                    </a>
-                </td>
-
-                <td>{{.ClientName}}</td>
-
-                <!-- ── CHANGE 3: Status badge instead of plain text ── -->
-                <td>
-                    <span class="status-badge status-{{.Status}}">
-                        {{.Status}}
-                    </span>
-                </td>
-
-                <td class="right">
-                    {{money .Total}}
-                </td>
-
-                <td class="right">
-                    <div class="actions-cell">
-                        <a class="small-btn" href="/invoices/{{.ID}}">
-                            View
+            <tbody>
+                {{range .Invoices}}
+                <tr>
+                    <td>
+                        <a class="invoice-link" href="/invoices/{{.ID}}">
+                            {{.InvoiceNumber}}
                         </a>
+                    </td>
 
-                        <!-- ── CHANGE 4: Edit button, draft only ── -->
-                        {{if eq .Status "draft"}}
-                        <a class="small-btn edit" href="/invoices/{{.ID}}/edit">
-                            Edit
-                        </a>
-                        {{end}}
+                    <td>{{.ClientName}}</td>
 
-                        <a class="small-btn" href="/invoices/{{.ID}}/duplicate">
-                            Duplicate
-                        </a>
-                    </div>
-                </td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+                    <td>
+                        <span class="status-badge status-{{.Status}}">
+                            {{.Status}}
+                        </span>
+                    </td>
 
-    {{else}}
+                    <td class="right" style="font-family: monospace; font-weight: 600;">
+                        {{money .Total}}
+                    </td>
 
-    <div class="empty">
-        No invoices yet.
+                    <td class="right">
+                        <div class="actions-cell">
+                            <a class="small-btn" href="/invoices/{{.ID}}">
+                                View
+                            </a>
+
+                            {{if eq .Status "draft"}}
+                            <a class="small-btn edit" href="/invoices/{{.ID}}/edit">
+                                Edit
+                            </a>
+                            {{end}}
+
+                            <a class="small-btn" href="/invoices/{{.ID}}/duplicate">
+                                Duplicate
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
     </div>
-
+    {{else}}
+    <div class="system-ready-state">
+        <div class="ready-icon">⚡</div>
+        <h2>Node Active // No Records Found</h2>
+        <p>Your business tools are initialized. Generate your first high-fidelity invoice to begin tracking operations.</p>
+        <a href="/invoices/new" class="btn">Initialize Module 01</a>
+    </div>
     {{end}}
 
 </div>

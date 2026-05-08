@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Business Tools | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        .hub-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        /* ── Operational Header ── */
+        .hub-header { 
+            margin-bottom: 80px; 
+            border-left: 2px solid #fff; 
+            padding-left: 30px; 
+        }
+        .hub-header h1 { 
+            font-size: 42px; 
+            letter-spacing: -2px; 
+            text-transform: uppercase; 
+        }
+        .hub-header p { 
+            color: rgba(255,255,255,0.4); 
+            font-size: 16px; 
+            margin-top: 10px; 
+            font-family: monospace;
+        }
+        
+        /* ── Inventory Grid ── */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        .tool-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px;
+            text-decoration: none;
+            color: inherit;
+            border-radius: 4px; /* Sharper corners for industrial feel */
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 300px;
+        }
+        .tool-card:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .tool-tag { 
+            font-family: monospace; 
+            font-size: 11px; 
+            color: rgba(255,255,255,0.3); 
+            margin-bottom: 25px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+        .tool-name { font-size: 22px; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; }
+        .tool-desc { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+        
+        .tool-status { 
+            margin-top: 40px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            display: flex; 
+            align-items: center;
+            font-family: monospace;
+        }
+        .tool-status::before { content: "[ "; color: rgba(255,255,255,0.2); }
+        .tool-status::after { content: " ]"; color: rgba(255,255,255,0.2); }
+        
+        /* ── Feedback Terminal ── */
+        .feedback-terminal { 
+            margin-top: 120px; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            padding-top: 60px; 
+            max-width: 600px; 
+        }
+        .terminal-header { 
+            font-family: monospace; 
+            font-size: 11px; 
+            color: #444; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            margin-bottom: 20px; 
+        }
+        #anomaly-form textarea {
+            width: 100%; background: #050505; border: 1px solid #111; border-radius: 4px;
+            padding: 20px; color: #00ff41; font-family: monospace; font-size: 13px;
+            min-height: 100px; resize: none; outline: none; transition: border-color 0.2s;
+        }
+        #anomaly-form textarea:focus { border-color: #333; }
+        #anomaly-form button {
+            background: none; border: 1px solid #222; color: #444; padding: 10px 25px;
+            font-family: monospace; font-size: 11px; text-transform: uppercase;
+            margin-top: 15px; cursor: pointer; transition: all 0.2s;
+            letter-spacing: 2px;
+        }
+        #anomaly-form button:hover { border-color: #fff; color: #fff; }
+
+        .success-msg { color: #00ff41; font-family: monospace; font-size: 12px; margin-top: 15px; }
+
+        @media (max-width: 600px) {
+            .hub-header h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav-styles" .}}
+{{template "nav" .}}
+
+<div class="hub-container">
+    <div class="hub-header">
+        <h1>Business Tools</h1>
+        <p>Operational Module Inventory // System v1.0.4</p>
+    </div>
+
+    <div class="tool-grid">
+        <!-- Module 01: Generator -->
+        <a href="/invoices/new" class="tool-card">
+            <div>
+                <div class="tool-tag">Module // 01</div>
+                <div class="tool-name">Invoice Engine</div>
+                <div class="tool-desc">Generate high-fidelity technical invoices with calculated parameters. Supports global currencies and independent record keeping.</div>
+            </div>
+            <div class="tool-status">Initialize</div>
+        </a>
+
+        <!-- Module 02: Records -->
+        <a href="/invoices" class="tool-card">
+            <div>
+                <div class="tool-tag">Module // 02</div>
+                <div class="tool-name">Access Records</div>
+                <div class="tool-desc">Enter the private transaction vault. View historical data, track payment statuses, and manage your financial directory.</div>
+            </div>
+            <div class="tool-status">Enter Vault</div>
+        </a>
+
+        <!-- Module 03: Future -->
+        <div class="tool-card" style="opacity: 0.2; cursor: default;">
+            <div>
+                <div class="tool-tag">Module // 03</div>
+                <div class="tool-name">Strategy Engine</div>
+                <div class="tool-desc">Predictive cash-flow modeling and independent business intelligence. Currently undergoing systems integration.</div>
+            </div>
+            <div class="tool-status">Offline</div>
+        </div>
+    </div>
+
+    <!-- The Anomaly Terminal -->
+    <section class="feedback-terminal">
+        <div class="terminal-header">Transmission // Anomaly Report</div>
+        <form id="anomaly-form" action="/feedback" method="POST">
+            {{.csrfField}} <!-- CSRF PROTECTION INJECTED -->
+            <textarea name="report" placeholder="Identify system anomaly or suggest optimization..." required></textarea>
+            <button type="submit">Transmit</button>
+        </form>
+        <div id="status-display"></div>
+    </section>
+</div>
+
+<script>
+    // Simple UI feedback for the transmission
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('transmitted')) {
+        document.getElementById('status-display').innerHTML = '<div class="success-msg">Report received. Connection closed.</div>';
+    }
+</script>
+
+</body>
+</html>

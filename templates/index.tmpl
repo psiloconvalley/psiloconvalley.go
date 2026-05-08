@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PsiloConValley | Independent Systems</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background: #000; 
+            color: #fff; 
+            font-family: "JetBrains Mono", monospace, "Courier New", Courier; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+
+        .directory { 
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            text-align: left; 
+        }
+
+        .brand-header { 
+            font-size: 11px; 
+            letter-spacing: 5px; 
+            text-transform: uppercase; 
+            color: #444; 
+            margin-bottom: 80px; 
+            border-bottom: 1px solid #222;
+            padding-bottom: 10px;
+        }
+
+        .nodes { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+        }
+
+        .node-link { 
+            display: block;
+            color: #fff; 
+            text-decoration: none; 
+            font-size: 20px; 
+            padding: 15px; 
+            border: 1px solid transparent; 
+            transition: all 0.2s ease;
+        }
+
+        .node-link:hover { 
+            border: 1px solid #333; 
+            background: #0a0a0a; 
+            padding-left: 25px;
+        }
+
+        .node-link span { 
+            color: #444; 
+            margin-right: 20px; 
+            font-size: 14px;
+        }
+
+        .node-link .status {
+            float: right;
+            font-size: 10px;
+            color: #00ff41; /* Classic Terminal Green */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+
+        .node-link.offline {
+            opacity: 0.2;
+            cursor: default;
+        }
+
+        .node-link.offline:hover {
+            border-color: transparent;
+            background: none;
+            padding-left: 15px;
+        }
+
+        .node-link.offline .status {
+            color: #ff4a4a;
+        }
+
+        footer { 
+            position: absolute; 
+            bottom: 40px; 
+            font-size: 9px; 
+            color: #333; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+        }
+
+        /* Subtle scanline effect for that DARPA terminal feel */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="directory">
+        <div class="brand-header">PsiloConValley // Global Index</div>
+        
+        <div class="nodes">
+            <!-- NODE 01: THE CORE TOOLS -->
+            <a href="/tools" class="node-link">
+                <span>[ 01 ]</span> Business Tools
+                <div class="status">Online</div>
+            </a>
+
+            <!-- NODE 02: INTELLIGENCE / SUPPORT -->
+            <a href="mailto:ops@psiloconvalley.com" class="node-link">
+                <span>[ 02 ]</span> Intelligence / Feedback
+                <div class="status">Secure</div>
+            </a>
+
+            <!-- NODE 03: UPCOMING -->
+            <div class="node-link offline">
+                <span>[ 03 ]</span> Strategy Engine
+                <div class="status">Offline</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>System v1.0.4 // Encrypted Connection established</footer>
+</body>
+</html>
