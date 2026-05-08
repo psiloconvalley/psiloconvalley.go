@@ -2,9 +2,6 @@
     "use strict";
 
     const COUNTRY_DATA_URL = "/static/data/country-region-data.json";
-    const DEFAULT_COUNTRY_CODE = "US";
-    const DEFAULT_REGION_NAME = "California";
-
     let countryRegionData = [];
 
     const fallbackCountryRegionData = [
@@ -35,6 +32,14 @@
             ].map(name => ({ name }))
         },
         {
+            countryName: "Mexico",
+            countryShortCode: "MX",
+            regions: [
+                "Jalisco", "Nuevo León", "CDMX", "Yucatán", "Baja California",
+                "Chihuahua", "Guanajuato", "Puebla", "Veracruz", "Oaxaca"
+            ].map(name => ({ name }))
+        },
+        {
             countryName: "United Kingdom",
             countryShortCode: "GB",
             regions: [
@@ -61,18 +66,12 @@
     function parseNumber(value, fallback = 0) {
         const cleaned = String(value ?? "").replace(/,/g, "");
         const number = Number.parseFloat(cleaned);
-
-        if (!Number.isFinite(number)) {
-            return fallback;
-        }
-
+        if (!Number.isFinite(number)) return fallback;
         return number;
     }
 
     function normalizeCountryRegionData(data) {
-        if (!Array.isArray(data)) {
-            return fallbackCountryRegionData;
-        }
+        if (!Array.isArray(data)) return fallbackCountryRegionData;
 
         return data
             .filter(country => country.countryName && country.countryShortCode)
@@ -91,14 +90,8 @@
 
     async function loadCountryRegionData() {
         try {
-            const response = await fetch(COUNTRY_DATA_URL, {
-                cache: "force-cache"
-            });
-
-            if (!response.ok) {
-                throw new Error("Could not load country/region JSON");
-            }
-
+            const response = await fetch(COUNTRY_DATA_URL, { cache: "force-cache" });
+            if (!response.ok) throw new Error("Could not load country/region JSON");
             const data = await response.json();
             countryRegionData = normalizeCountryRegionData(data);
         } catch (error) {
@@ -107,23 +100,31 @@
         }
     }
 
-    function populateCountrySelect(selectID, defaultCountryCode = DEFAULT_COUNTRY_CODE) {
+    // =========================================================
+    // SERVER-DRIVEN UI: COUNTRY & REGION HYDRATION
+    // The Backend is the Single Source of Truth.
+    // We read the `data-selected` attributes injected by Go.
+    // =========================================================
+
+    function populateCountrySelect(selectID) {
         const select = document.getElementById(selectID);
+        if (!select) return;
 
-        if (!select) {
-            return;
-        }
-
+        // 1. Read the server's truth. Fallback to "US" only if server sends nothing.
+        const serverSelected = select.dataset.selected || "US"; 
+        
         select.innerHTML = "";
 
         countryRegionData.forEach(country => {
             const option = document.createElement("option");
-
-            option.value = country.countryName;
+            
+            // 2. CRITICAL FIX: Use ISO Short Code as the value to match Go backend
+            option.value = country.countryShortCode; 
             option.textContent = country.countryName;
             option.dataset.code = country.countryShortCode;
 
-            if (country.countryShortCode === defaultCountryCode) {
+            // 3. Hydrate from server state
+            if (country.countryShortCode === serverSelected) {
                 option.selected = true;
             }
 
@@ -131,25 +132,22 @@
         });
     }
 
-    function populateRegionSelect(countrySelectID, regionSelectID, defaultRegionName = "") {
+    function populateRegionSelect(countrySelectID, regionSelectID) {
         const countrySelect = document.getElementById(countrySelectID);
         const regionSelect = document.getElementById(regionSelectID);
 
-        if (!countrySelect || !regionSelect) {
-            return;
-        }
+        if (!countrySelect || !regionSelect) return;
 
-        const selectedCountryName = countrySelect.value;
+        // 1. Read the server's truth for the region
+        const serverSelectedRegion = regionSelect.dataset.selected || "";
+        const selectedCountryCode = countrySelect.value;
 
-        const country = countryRegionData.find(item => {
-            return item.countryName === selectedCountryName;
-        });
-
+        const country = countryRegionData.find(item => item.countryShortCode === selectedCountryCode);
         regionSelect.innerHTML = "";
 
         if (!country || !country.regions || country.regions.length === 0) {
             const option = document.createElement("option");
-            option.value = "Not applicable";
+            option.value = "";
             option.textContent = "Not applicable";
             regionSelect.appendChild(option);
             return;
@@ -159,14 +157,11 @@
 
         country.regions.forEach(region => {
             const option = document.createElement("option");
-
             option.value = region.name;
             option.textContent = region.name;
 
-            if (
-                defaultRegionName &&
-                region.name.toLowerCase() === defaultRegionName.toLowerCase()
-            ) {
+            // 2. Hydrate from server state (case-insensitive match)
+            if (serverSelectedRegion && region.name.toLowerCase() === serverSelectedRegion.toLowerCase()) {
                 option.selected = true;
                 selectedWasSet = true;
             }
@@ -181,51 +176,38 @@
 
     function setupCountryRegionPair(countrySelectID, regionSelectID) {
         const countrySelect = document.getElementById(countrySelectID);
+        const regionSelect = document.getElementById(regionSelectID);
 
-        if (!countrySelect) {
-            return;
-        }
+        if (!countrySelect || !regionSelect) return;
 
-        const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-        const selectedCode = selectedOption ? selectedOption.dataset.code : "";
+        // Initial hydration based on server-rendered DOM
+        populateRegionSelect(countrySelectID, regionSelectID);
 
-        const initialRegion =
-            selectedCode === DEFAULT_COUNTRY_CODE ? DEFAULT_REGION_NAME : "";
-
-        populateRegionSelect(countrySelectID, regionSelectID, initialRegion);
-
+        // User interaction: When country changes, clear the server-selected 
+        // region so it doesn't force "California" when switching to "Canada"
         countrySelect.addEventListener("change", () => {
-            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
-            const selectedCode = selectedOption ? selectedOption.dataset.code : "";
-
-            const defaultRegion =
-                selectedCode === DEFAULT_COUNTRY_CODE ? DEFAULT_REGION_NAME : "";
-
-            populateRegionSelect(countrySelectID, regionSelectID, defaultRegion);
+            regionSelect.dataset.selected = ""; 
+            populateRegionSelect(countrySelectID, regionSelectID);
         });
     }
 
     function setupCountryDropdowns() {
-        populateCountrySelect("company_country", DEFAULT_COUNTRY_CODE);
-        populateCountrySelect("client_country", DEFAULT_COUNTRY_CODE);
+        populateCountrySelect("company_country");
+        populateCountrySelect("client_country");
 
         setupCountryRegionPair("company_country", "company_state");
         setupCountryRegionPair("client_country", "client_state");
     }
 
+    // =========================================================
+    // CURRENCY & MATH UI
+    // =========================================================
+
     function currentSymbol() {
         const select = document.getElementById("currency");
-
-        if (!select) {
-            return "$";
-        }
-
+        if (!select) return "$";
         const selected = select.options[select.selectedIndex];
-
-        if (!selected) {
-            return "$";
-        }
-
+        if (!selected) return "$";
         return selected.dataset.symbol || "$";
     }
 
@@ -235,15 +217,12 @@
 
     function updateHiddenDescriptions() {
         const rows = qsa("#items_body tr");
-
         rows.forEach(row => {
             const itemNameInput = qs(".item-name", row);
             const itemDetailInput = qs(".item-detail", row);
             const hiddenDescriptionInput = qs(".desc-hidden", row);
 
-            if (!itemNameInput || !itemDetailInput || !hiddenDescriptionInput) {
-                return;
-            }
+            if (!itemNameInput || !itemDetailInput || !hiddenDescriptionInput) return;
 
             const itemName = itemNameInput.value.trim();
             const itemDetail = itemDetailInput.value.trim();
@@ -260,7 +239,6 @@
 
     function calculateTotals() {
         let subtotal = 0;
-
         const rows = qsa("#items_body tr");
 
         rows.forEach(row => {
@@ -268,9 +246,7 @@
             const priceInput = qs(".price", row);
             const amountCell = qs(".row-amount", row);
 
-            if (!qtyInput || !priceInput || !amountCell) {
-                return;
-            }
+            if (!qtyInput || !priceInput || !amountCell) return;
 
             const qty = parseNumber(qtyInput.value, 0);
             const price = parseNumber(priceInput.value, 0);
@@ -290,83 +266,44 @@
         const taxAmountEl = document.getElementById("tax_amount");
         const totalEl = document.getElementById("total");
 
-        if (subtotalEl) {
-            subtotalEl.innerText = money(subtotal);
-        }
-
-        if (taxAmountEl) {
-            taxAmountEl.innerText = money(taxAmount);
-        }
-
-        if (totalEl) {
-            totalEl.innerText = money(total);
-        }
+        if (subtotalEl) subtotalEl.innerText = money(subtotal);
+        if (taxAmountEl) taxAmountEl.innerText = money(taxAmount);
+        if (totalEl) totalEl.innerText = money(total);
 
         updateHiddenDescriptions();
     }
 
     function addRow() {
         const tbody = document.getElementById("items_body");
-
-        if (!tbody) {
-            return;
-        }
+        if (!tbody) return;
 
         const row = document.createElement("tr");
-
         row.innerHTML = `
-            <td>
-                <input type="text" class="item-name" placeholder="Service or product" required>
-            </td>
-
+            <td><input type="text" class="item-name" placeholder="Service or product" required></td>
             <td>
                 <input type="text" class="item-detail" placeholder="Short description">
                 <input type="hidden" name="description" class="desc-hidden">
             </td>
-
-            <td>
-                <input type="number" step="0.01" name="quantity" value="1" class="qty">
-            </td>
-
-            <td>
-                <input type="number" step="0.01" name="unit_price" value="0" class="price">
-            </td>
-
-            <td class="right amount row-amount">
-                ${money(0)}
-            </td>
-
-            <td>
-                <button type="button" class="remove-btn" onclick="removeRow(this)">×</button>
-            </td>
+            <td><input type="number" step="0.01" name="quantity" value="1" class="qty"></td>
+            <td><input type="number" step="0.01" name="unit_price" value="0" class="price"></td>
+            <td class="right amount row-amount">${money(0)}</td>
+            <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
         `;
-
         tbody.appendChild(row);
         calculateTotals();
     }
 
     function removeRow(button) {
         const rows = qsa("#items_body tr");
-
-        if (rows.length === 1) {
-            return;
-        }
-
+        if (rows.length <= 1) return;
         const row = button.closest("tr");
-
-        if (row) {
-            row.remove();
-        }
-
+        if (row) row.remove();
         calculateTotals();
     }
 
     function bindFormEvents() {
         const form = document.getElementById("invoice-form");
-
-        if (!form) {
-            return;
-        }
+        if (!form) return;
 
         form.addEventListener("input", event => {
             if (
@@ -393,7 +330,6 @@
 
     async function initInvoiceForm() {
         await loadCountryRegionData();
-
         setupCountryDropdowns();
         bindFormEvents();
         calculateTotals();

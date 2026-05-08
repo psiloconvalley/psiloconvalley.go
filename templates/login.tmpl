@@ -204,6 +204,7 @@
         {{end}}
 
         <form method="POST" action="/login">
+            {{.csrfField}}
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" name="email"
