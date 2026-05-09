@@ -38,6 +38,12 @@ type Client struct {
 	Name              string
 	Email             string
 	Address           string
+	City              string
+	State             string
+	Zip               string
+	Country           string
+	Phone             string
+	Notes             string
 	DefaultTaxRateBps int64
 	PaymentTerms      string
 	CreatedAt         time.Time
@@ -46,19 +52,19 @@ type Client struct {
 type User struct {
 	ID           int64
 	Email        string
-	PasswordHash string  // empty for Google-only users
-	Plan         string  // "free" | "pro"
-	Provider     string  // "email" | "google"
-	GoogleID     string  // empty for email users
-	Name         string  // from Google profile or empty
-	AvatarURL    string  // from Google profile or empty
+	PasswordHash string
+	Plan         string
+	Provider     string
+	GoogleID     string
+	Name         string
+	AvatarURL    string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
 
 func (u *User) CheckPassword(plain string) bool {
 	if u.PasswordHash == "" {
-		return false // Google user — no password
+		return false
 	}
 	return bcrypt.CompareHashAndPassword(
 		[]byte(u.PasswordHash),
@@ -159,7 +165,9 @@ func (r *UserRepo) Create(email, plainPassword string) (int64, error) {
 	}
 	var id int64
 	err = r.db.QueryRow(
-		`INSERT INTO users (email, password_hash, provider) VALUES ($1, $2, 'email') RETURNING id`,
+		`INSERT INTO users (email, password_hash, provider, plan)
+		 VALUES ($1, $2, 'email', 'free')
+		 RETURNING id`,
 		email, string(hash),
 	).Scan(&id)
 	return id, err
@@ -181,14 +189,12 @@ func (r *UserRepo) GetByEmail(email string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
 	if provider.Valid     { u.Provider     = provider.String }
 	if googleID.Valid     { u.GoogleID     = googleID.String }
 	if name.Valid         { u.Name         = name.String }
 	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
 	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
-
 	return &u, nil
 }
 
@@ -208,14 +214,12 @@ func (r *UserRepo) GetByID(id int64) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
 	if provider.Valid     { u.Provider     = provider.String }
 	if googleID.Valid     { u.GoogleID     = googleID.String }
 	if name.Valid         { u.Name         = name.String }
 	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
 	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
-
 	return &u, nil
 }
 
@@ -235,14 +239,12 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if passwordHash.Valid  { u.PasswordHash = passwordHash.String }
 	if provider.Valid      { u.Provider     = provider.String }
 	if googleIDVal.Valid   { u.GoogleID     = googleIDVal.String }
 	if name.Valid          { u.Name         = name.String }
 	if avatarURL.Valid     { u.AvatarURL    = avatarURL.String }
 	if updatedAt.Valid     { u.UpdatedAt    = updatedAt.Time }
-
 	return &u, nil
 }
 
@@ -264,26 +266,16 @@ func (r *UserRepo) GetMonthlyInvoiceCount(ctx context.Context, userID int64) (in
 	return count, err
 }
 
-func (r *UserRepo) IncrementInvoiceCount(userID int64) error {
-	return nil
-}
-
-// CreateGoogleUser creates a brand new user from Google OAuth
-func (r *UserRepo) CreateGoogleUser(
-	email, googleID, name, avatarURL string,
-) (int64, error) {
+func (r *UserRepo) CreateGoogleUser(email, googleID, name, avatarURL string) (int64, error) {
 	var id int64
 	err := r.db.QueryRow(`
-		INSERT INTO users 
-			(email, google_id, provider, name, avatar_url, plan)
-		VALUES 
-			($1, $2, 'google', $3, $4, 'free')
+		INSERT INTO users (email, google_id, provider, name, avatar_url, plan)
+		VALUES ($1, $2, 'google', $3, $4, 'free')
 		RETURNING id
 	`, email, googleID, name, avatarURL).Scan(&id)
 	return id, err
 }
 
-// LinkGoogleToExisting links a Google account to an existing email/password user
 func (r *UserRepo) LinkGoogleToExisting(userID int64, googleID string) error {
 	_, err := r.db.Exec(`
 		UPDATE users
@@ -291,22 +283,17 @@ func (r *UserRepo) LinkGoogleToExisting(userID int64, googleID string) error {
 		    provider   = 'google',
 		    updated_at = NOW()
 		WHERE id = $2
+		AND (google_id IS NULL OR google_id = $1)
 	`, googleID, userID)
 	return err
 }
 
-// FindOrCreateGoogleUser is the main OAuth flow entry point.
-// Returns: user, isNewUser, error
-func (r *UserRepo) FindOrCreateGoogleUser(
-	email, googleID, name, avatarURL string,
-) (*User, bool, error) {
-
+func (r *UserRepo) FindOrCreateGoogleUser(email, googleID, name, avatarURL string) (*User, bool, error) {
 	// Case 1: Already linked Google account
 	user, err := r.GetByGoogleID(googleID)
 	if err == nil {
-		// Update name/avatar in case they changed on Google
 		_, _ = r.db.Exec(`
-			UPDATE users 
+			UPDATE users
 			SET name = $1, avatar_url = $2, updated_at = NOW()
 			WHERE id = $3
 		`, name, avatarURL, user.ID)
@@ -324,15 +311,15 @@ func (r *UserRepo) FindOrCreateGoogleUser(
 		if linkErr := r.LinkGoogleToExisting(user.ID, googleID); linkErr != nil {
 			return nil, false, fmt.Errorf("link google: %w", linkErr)
 		}
-		// Also update name/avatar
 		_, _ = r.db.Exec(`
-			UPDATE users 
+			UPDATE users
 			SET name = $1, avatar_url = $2, updated_at = NOW()
 			WHERE id = $3
 		`, name, avatarURL, user.ID)
 		user.GoogleID  = googleID
 		user.Name      = name
 		user.AvatarURL = avatarURL
+		user.Provider  = "google"
 		return user, false, nil
 	}
 	if err != sql.ErrNoRows {
@@ -344,13 +331,210 @@ func (r *UserRepo) FindOrCreateGoogleUser(
 	if err != nil {
 		return nil, false, fmt.Errorf("create google user: %w", err)
 	}
-
 	user, err = r.GetByID(id)
 	if err != nil {
 		return nil, false, fmt.Errorf("fetch new user: %w", err)
 	}
-
 	return user, true, nil
+}
+
+// =====================================================================
+// ClientRepo Methods
+// =====================================================================
+
+func (r *ClientRepo) ListByUserID(ctx context.Context, userID int64) ([]Client, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT
+			c.id, c.business_profile_id, c.name, c.email,
+			c.address, c.city, c.state, c.zip, c.country,
+			c.phone, c.notes, c.payment_terms, c.created_at
+		FROM clients c
+		INNER JOIN business_profiles bp ON bp.id = c.business_profile_id
+		WHERE bp.user_id = $1
+		ORDER BY c.name ASC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var clients []Client
+	for rows.Next() {
+		var c Client
+		var email, address, city, state, zip, country, phone, notes, paymentTerms sql.NullString
+		if err := rows.Scan(
+			&c.ID, &c.BusinessProfileID, &c.Name, &email,
+			&address, &city, &state, &zip, &country,
+			&phone, &notes, &paymentTerms, &c.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		if email.Valid        { c.Email        = email.String }
+		if address.Valid      { c.Address      = address.String }
+		if city.Valid         { c.City         = city.String }
+		if state.Valid        { c.State        = state.String }
+		if zip.Valid          { c.Zip          = zip.String }
+		if country.Valid      { c.Country      = country.String }
+		if phone.Valid        { c.Phone        = phone.String }
+		if notes.Valid        { c.Notes        = notes.String }
+		if paymentTerms.Valid { c.PaymentTerms = paymentTerms.String }
+		clients = append(clients, c)
+	}
+	return clients, rows.Err()
+}
+
+func (r *ClientRepo) GetByID(ctx context.Context, id int64, userID int64) (*Client, error) {
+	var c Client
+	var email, address, city, state, zip, country, phone, notes, paymentTerms sql.NullString
+
+	err := r.db.QueryRowContext(ctx, `
+		SELECT
+			c.id, c.business_profile_id, c.name, c.email,
+			c.address, c.city, c.state, c.zip, c.country,
+			c.phone, c.notes, c.payment_terms, c.created_at
+		FROM clients c
+		INNER JOIN business_profiles bp ON bp.id = c.business_profile_id
+		WHERE c.id = $1 AND bp.user_id = $2
+	`, id, userID).Scan(
+		&c.ID, &c.BusinessProfileID, &c.Name, &email,
+		&address, &city, &state, &zip, &country,
+		&phone, &notes, &paymentTerms, &c.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if email.Valid        { c.Email        = email.String }
+	if address.Valid      { c.Address      = address.String }
+	if city.Valid         { c.City         = city.String }
+	if state.Valid        { c.State        = state.String }
+	if zip.Valid          { c.Zip          = zip.String }
+	if country.Valid      { c.Country      = country.String }
+	if phone.Valid        { c.Phone        = phone.String }
+	if notes.Valid        { c.Notes        = notes.String }
+	if paymentTerms.Valid { c.PaymentTerms = paymentTerms.String }
+	return &c, nil
+}
+
+func (r *ClientRepo) Create(ctx context.Context, c *Client) (int64, error) {
+	var id int64
+	err := r.db.QueryRowContext(ctx, `
+		INSERT INTO clients
+			(business_profile_id, name, email, address, city, state, zip, country, phone, notes, payment_terms)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		RETURNING id
+	`,
+		c.BusinessProfileID, c.Name, c.Email, c.Address,
+		c.City, c.State, c.Zip, c.Country,
+		c.Phone, c.Notes, c.PaymentTerms,
+	).Scan(&id)
+	return id, err
+}
+
+func (r *ClientRepo) Update(ctx context.Context, c *Client, userID int64) error {
+	res, err := r.db.ExecContext(ctx, `
+		UPDATE clients SET
+			name          = $1,
+			email         = $2,
+			address       = $3,
+			city          = $4,
+			state         = $5,
+			zip           = $6,
+			country       = $7,
+			phone         = $8,
+			notes         = $9,
+			payment_terms = $10
+		WHERE id = $11
+		AND business_profile_id IN (
+			SELECT id FROM business_profiles WHERE user_id = $12
+		)
+	`,
+		c.Name, c.Email, c.Address,
+		c.City, c.State, c.Zip, c.Country,
+		c.Phone, c.Notes, c.PaymentTerms,
+		c.ID, userID,
+	)
+	if err != nil {
+		return err
+	}
+	aff, _ := res.RowsAffected()
+	if aff == 0 {
+		return fmt.Errorf("client %d not found or access denied", c.ID)
+	}
+	return nil
+}
+
+func (r *ClientRepo) Delete(ctx context.Context, id int64, userID int64) error {
+	res, err := r.db.ExecContext(ctx, `
+		DELETE FROM clients
+		WHERE id = $1
+		AND business_profile_id IN (
+			SELECT id FROM business_profiles WHERE user_id = $2
+		)
+	`, id, userID)
+	if err != nil {
+		return err
+	}
+	aff, _ := res.RowsAffected()
+	if aff == 0 {
+		return fmt.Errorf("client %d not found or access denied", id)
+	}
+	return nil
+}
+
+func (r *ClientRepo) CountByUserID(ctx context.Context, userID int64) (int, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM clients c
+		INNER JOIN business_profiles bp ON bp.id = c.business_profile_id
+		WHERE bp.user_id = $1
+	`, userID).Scan(&count)
+	return count, err
+}
+
+// FindOrCreate finds an existing client by name or creates a new one.
+// This is the auto-save magic — called on every invoice save.
+func (r *ClientRepo) FindOrCreate(ctx context.Context, bizProfileID int64, name, email, address, city, state, zip, country string) (int64, error) {
+	// Try to find existing client by name
+	var id int64
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id FROM clients
+		WHERE business_profile_id = $1
+		AND LOWER(TRIM(name)) = LOWER(TRIM($2))
+		LIMIT 1
+	`, bizProfileID, name).Scan(&id)
+
+	if err == nil {
+		// Found — silently update their info if we have better data
+		_, _ = r.db.ExecContext(ctx, `
+			UPDATE clients SET
+				email   = COALESCE(NULLIF($1, ''), email),
+				address = COALESCE(NULLIF($2, ''), address),
+				city    = COALESCE(NULLIF($3, ''), city),
+				state   = COALESCE(NULLIF($4, ''), state),
+				zip     = COALESCE(NULLIF($5, ''), zip),
+				country = COALESCE(NULLIF($6, ''), country)
+			WHERE id = $7
+		`, email, address, city, state, zip, country, id)
+		return id, nil
+	}
+	if err != sql.ErrNoRows {
+		return 0, fmt.Errorf("client lookup: %w", err)
+	}
+
+	// Not found — create new client
+	err = r.db.QueryRowContext(ctx, `
+		INSERT INTO clients
+			(business_profile_id, name, email, address, city, state, zip, country)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id
+	`, bizProfileID, name, email, address, city, state, zip, country).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("client create: %w", err)
+	}
+	return id, nil
 }
 
 // =====================================================================
@@ -375,32 +559,14 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 	if err != nil {
 		return nil, err
 	}
-
-	if email.Valid {
-		p.Email = email.String
-	}
-	if city.Valid {
-		p.City = city.String
-	}
-	if state.Valid {
-		p.State = state.String
-	}
-	if zip.Valid {
-		p.Zip = zip.String
-	}
-	if country.Valid {
-		p.Country = country.String
-	}
-	if taxID.Valid {
-		p.TaxID = taxID.String
-	}
-	if currency.Valid {
-		p.Currency = currency.String
-	}
-	if logoURL.Valid {
-		p.LogoURL = logoURL.String
-	}
-
+	if email.Valid   { p.Email   = email.String }
+	if city.Valid    { p.City    = city.String }
+	if state.Valid   { p.State   = state.String }
+	if zip.Valid     { p.Zip     = zip.String }
+	if country.Valid { p.Country = country.String }
+	if taxID.Valid   { p.TaxID   = taxID.String }
+	if currency.Valid { p.Currency = currency.String }
+	if logoURL.Valid  { p.LogoURL  = logoURL.String }
 	return &p, nil
 }
 
@@ -448,9 +614,9 @@ func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 	if totalCents < 0 {
 		totalCents = 0
 	}
-	inv.SubtotalCents = subtotalCents
+	inv.SubtotalCents  = subtotalCents
 	inv.TaxAmountCents = taxCents
-	inv.TotalCents = totalCents
+	inv.TotalCents     = totalCents
 	return items
 }
 
@@ -511,7 +677,7 @@ func (r *InvoiceRepo) CreateInvoice(ctx context.Context, inv *Invoice, items []I
 		return 0, fmt.Errorf("insert invoice: %w", err)
 	}
 
-	inv.ID = newID
+	inv.ID        = newID
 	inv.CreatedAt = createdAt
 
 	const insertItem = `
@@ -564,63 +730,25 @@ func (r *InvoiceRepo) GetInvoiceWithItems(ctx context.Context, id int64) (*Invoi
 		return nil, nil, err
 	}
 
-	if bpID.Valid {
-		inv.BusinessProfileID = &bpID.Int64
-	}
-	if cID.Valid {
-		inv.ClientID = &cID.Int64
-	}
-	if uID.Valid {
-		inv.UserID = &uID.Int64
-	}
-	if dueDate.Valid {
-		inv.DueDate = &dueDate.Time
-	}
-	if updatedAt.Valid {
-		inv.UpdatedAt = updatedAt.Time
-	}
-	if cEmail.Valid {
-		inv.ClientEmail = cEmail.String
-	}
-	if cAddr.Valid {
-		inv.ClientAddress = cAddr.String
-	}
-	if cCity.Valid {
-		inv.ClientCity = cCity.String
-	}
-	if cZip.Valid {
-		inv.ClientZip = cZip.String
-	}
-	if cState.Valid {
-		inv.ClientState = cState.String
-	}
-	if cCountry.Valid {
-		inv.ClientCountry = cCountry.String
-	}
-	if compName.Valid {
-		inv.CompanyName = compName.String
-	}
-	if compEmail.Valid {
-		inv.CompanyEmail = compEmail.String
-	}
-	if compAddr.Valid {
-		inv.CompanyAddress = compAddr.String
-	}
-	if compCity.Valid {
-		inv.CompanyCity = compCity.String
-	}
-	if compZip.Valid {
-		inv.CompanyZip = compZip.String
-	}
-	if compState.Valid {
-		inv.CompanyState = compState.String
-	}
-	if compCountry.Valid {
-		inv.CompanyCountry = compCountry.String
-	}
-	if currency.Valid {
-		inv.Currency = currency.String
-	}
+	if bpID.Valid    { inv.BusinessProfileID = &bpID.Int64 }
+	if cID.Valid     { inv.ClientID          = &cID.Int64 }
+	if uID.Valid     { inv.UserID            = &uID.Int64 }
+	if dueDate.Valid { inv.DueDate           = &dueDate.Time }
+	if updatedAt.Valid { inv.UpdatedAt       = updatedAt.Time }
+	if cEmail.Valid  { inv.ClientEmail       = cEmail.String }
+	if cAddr.Valid   { inv.ClientAddress     = cAddr.String }
+	if cCity.Valid   { inv.ClientCity        = cCity.String }
+	if cZip.Valid    { inv.ClientZip         = cZip.String }
+	if cState.Valid  { inv.ClientState       = cState.String }
+	if cCountry.Valid { inv.ClientCountry    = cCountry.String }
+	if compName.Valid  { inv.CompanyName     = compName.String }
+	if compEmail.Valid { inv.CompanyEmail    = compEmail.String }
+	if compAddr.Valid  { inv.CompanyAddress  = compAddr.String }
+	if compCity.Valid  { inv.CompanyCity     = compCity.String }
+	if compZip.Valid   { inv.CompanyZip      = compZip.String }
+	if compState.Valid { inv.CompanyState    = compState.String }
+	if compCountry.Valid { inv.CompanyCountry = compCountry.String }
+	if currency.Valid  { inv.Currency        = currency.String }
 
 	rows, err := r.db.QueryContext(ctx,
 		`SELECT id, invoice_id, description, quantity, unit_price_cents, line_total_cents
@@ -681,12 +809,8 @@ func (r *InvoiceRepo) ListInvoices(ctx context.Context, limit int, offset int, u
 		); err != nil {
 			return nil, err
 		}
-		if uID.Valid {
-			inv.UserID = &uID.Int64
-		}
-		if dueDate.Valid {
-			inv.DueDate = &dueDate.Time
-		}
+		if uID.Valid    { inv.UserID  = &uID.Int64 }
+		if dueDate.Valid { inv.DueDate = &dueDate.Time }
 		invoices = append(invoices, inv)
 	}
 	return invoices, rows.Err()
@@ -759,14 +883,9 @@ func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []I
 	return tx.Commit()
 }
 
-// UpdateInvoiceStatus transitions an invoice to a new status.
 func (r *InvoiceRepo) UpdateInvoiceStatus(ctx context.Context, id int64, newStatus string, userID int64) error {
 	validStatuses := map[string]bool{
-		"draft":   true,
-		"sent":    true,
-		"paid":    true,
-		"void":    true,
-		"overdue": true,
+		"draft": true, "sent": true, "paid": true, "void": true, "overdue": true,
 	}
 	if !validStatuses[newStatus] {
 		return fmt.Errorf("invalid status: %s", newStatus)
@@ -801,8 +920,6 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(ctx context.Context, id int64, newStat
 	return err
 }
 
-// DeleteDraftInvoice permanently removes a draft invoice.
-// Only drafts can be deleted. All other statuses must be voided.
 func (r *InvoiceRepo) DeleteDraftInvoice(ctx context.Context, id int64, userID int64) error {
 	var status string
 	err := r.db.QueryRowContext(ctx,
@@ -812,7 +929,6 @@ func (r *InvoiceRepo) DeleteDraftInvoice(ctx context.Context, id int64, userID i
 	if err != nil {
 		return fmt.Errorf("invoice not found: %w", err)
 	}
-
 	if status != "draft" {
 		return fmt.Errorf("only draft invoices can be deleted — use void for %s invoices", status)
 	}
@@ -837,12 +953,4 @@ func (r *InvoiceRepo) DeleteDraftInvoice(ctx context.Context, id int64, userID i
 	}
 
 	return tx.Commit()
-}
-
-// =====================================================================
-// Stubs
-// =====================================================================
-
-func (r *ClientRepo) ListByBusiness(bizID int64) ([]Client, error) {
-	return nil, errors.New("not implemented")
 }

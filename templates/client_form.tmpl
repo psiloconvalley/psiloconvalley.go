@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        {{if eq .Mode "edit"}}Edit Client{{else}}New Client{{end}} | PsiloConValley
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 720px;
+            margin: 48px auto;
+            padding: 0 24px;
+        }
+
+        .card {
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 48px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .error-banner {
+            background: rgba(220, 38, 38, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #0a0a0a;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #e5e5e5;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(255,255,255,0.4);
+            color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .card { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav-styles" .}}
+{{template "nav" .}}
+
+<div class="page">
+    <div class="card">
+        <h1 class="page-title">
+            {{if eq .Mode "edit"}}Edit Client{{else}}New Client{{end}}
+        </h1>
+        <p class="page-subtitle">
+            {{if eq .Mode "edit"}}
+                Update client information. Changes apply to future invoices.
+            {{else}}
+                Saved clients auto-fill on every new invoice.
+            {{end}}
+        </p>
+
+        {{if .Error}}
+        <div class="error-banner">{{.Error}}</div>
+        {{end}}
+
+        <form method="POST"
+              action="{{if eq .Mode "edit"}}/clients/{{.Client.ID}}/edit{{else}}/clients/new{{end}}">
+            {{.csrfField}}
+
+            <div class="section">
+                <div class="section-title">Contact Information</div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Client Name *</label>
+                        <input type="text" name="name"
+                               value="{{if .Client}}{{.Client.Name}}{{end}}"
+                               placeholder="Acme Corp"
+                               required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email"
+                               value="{{if .Client}}{{.Client.Email}}{{end}}"
+                               placeholder="billing@acme.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone"
+                           value="{{if .Client}}{{.Client.Phone}}{{end}}"
+                           placeholder="+1 (555) 000-0000">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Address</div>
+                <div class="form-group">
+                    <label>Street Address</label>
+                    <input type="text" name="address"
+                           value="{{if .Client}}{{.Client.Address}}{{end}}"
+                           placeholder="123 Main St">
+                </div>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" name="city"
+                               value="{{if .Client}}{{.Client.City}}{{end}}"
+                               placeholder="San Francisco">
+                    </div>
+                    <div class="form-group">
+                        <label>State / Region</label>
+                        <input type="text" name="state"
+                               value="{{if .Client}}{{.Client.State}}{{end}}"
+                               placeholder="CA">
+                    </div>
+                    <div class="form-group">
+                        <label>Zip / Postal</label>
+                        <input type="text" name="zip"
+                               value="{{if .Client}}{{.Client.Zip}}{{end}}"
+                               placeholder="94102">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" name="country"
+                           value="{{if .Client}}{{.Client.Country}}{{end}}"
+                           placeholder="US">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Notes</div>
+                <div class="form-group">
+                    <label>Internal Notes</label>
+                    <textarea name="notes"
+                              placeholder="Payment terms, preferences, contact details...">{{if .Client}}{{.Client.Notes}}{{end}}</textarea>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <a href="/clients" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn-primary">
+                    {{if eq .Mode "edit"}}Save Changes{{else}}Save Client{{end}}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

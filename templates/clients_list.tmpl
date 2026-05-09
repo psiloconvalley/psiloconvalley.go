@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clients | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
+        }
+
+        .top h1 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            background: #fff;
+            color: #0a0a0a;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #e5e5e5;
+            transform: translateY(-2px);
+        }
+
+        .btn-disabled {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: not-allowed;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .success-banner {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 32px;
+            font-family: monospace;
+        }
+
+        .limit-banner {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            color: #fde68a;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .limit-banner strong {
+            color: #fbbf24;
+        }
+
+        .table-wrapper {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            text-align: left;
+            padding: 16px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+            font-size: 15px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .client-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .client-email {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .small-btn {
+            background: none;
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 14px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .small-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .small-btn.danger:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 120px 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 16px;
+        }
+
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 24px;
+            opacity: 0.2;
+        }
+
+        .empty-state h2 {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-family: monospace;
+            color: #444;
+        }
+
+        .empty-state p {
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 32px;
+            font-size: 14px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .plan-badge {
+            font-size: 10px;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .plan-badge.pro {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav-styles" .}}
+{{template "nav" .}}
+
+<div class="container">
+
+    <div class="top">
+        <div>
+            <h1>Clients</h1>
+            <div style="color:rgba(255,255,255,0.4); font-size:13px; margin-top:6px; font-family:monospace;">
+                {{.ClientCount}} saved
+                {{if .User}}
+                    {{if eq .User.Plan "pro"}}
+                    · <span class="plan-badge pro">Pro — Unlimited</span>
+                    {{else}}
+                    · {{.ClientCount}}/3 free slots used
+                    {{end}}
+                {{end}}
+            </div>
+        </div>
+        <div class="top-right">
+            {{if .CanAddClient}}
+            <a class="btn" href="/clients/new">+ New Client</a>
+            {{else}}
+            <span class="btn-disabled">+ New Client</span>
+            {{end}}
+        </div>
+    </div>
+
+    {{if .AtLimit}}
+    <div class="limit-banner">
+        ⚡ You've used all <strong>3 free client slots</strong>.
+        Upgrade to <strong>Pro</strong> for unlimited clients, invoice history per client, and revenue analytics.
+        <br><br>
+        <a href="/upgrade" style="color:#fbbf24; font-weight:700;">Upgrade to Pro →</a>
+    </div>
+    {{end}}
+
+    {{if eq (index . "saved") true}}
+    <div class="success-banner">✓ Client saved successfully</div>
+    {{end}}
+
+    {{if .Clients}}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Location</th>
+                    <th>Phone</th>
+                    <th class="right" style="text-align:right;">Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Clients}}
+                <tr>
+                    <td>
+                        <div class="client-name">{{.Name}}</div>
+                        {{if .Email}}
+                        <div class="client-email">{{.Email}}</div>
+                        {{end}}
+                    </td>
+                    <td style="color:rgba(255,255,255,0.6); font-size:14px;">
+                        {{if .City}}{{.City}}{{end}}
+                        {{if and .City .State}}, {{end}}
+                        {{if .State}}{{.State}}{{end}}
+                        {{if .Country}}<br><span style="color:rgba(255,255,255,0.3); font-size:12px;">{{.Country}}</span>{{end}}
+                    </td>
+                    <td style="color:rgba(255,255,255,0.5); font-size:14px; font-family:monospace;">
+                        {{if .Phone}}{{.Phone}}{{else}}—{{end}}
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <a class="small-btn" href="/clients/{{.ID}}/edit">Edit</a>
+                            <a class="small-btn" href="/invoices/new?client_id={{.ID}}">Invoice</a>
+                            <form method="POST" action="/clients/{{.ID}}/delete"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Delete {{.Name}}? This cannot be undone.');">
+                                {{$.csrfField}}
+                                <button type="submit" class="small-btn danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    {{else}}
+    <div class="empty-state">
+        <div class="empty-icon">👤</div>
+        <h2>No Clients Saved</h2>
+        <p>
+            Save your first client and their info will auto-fill every future invoice.
+            No more retyping addresses.
+        </p>
+        {{if .CanAddClient}}
+        <a href="/clients/new" class="btn">Add First Client</a>
+        {{end}}
+    </div>
+    {{end}}
+
+</div>
+
+</body>
+</html>

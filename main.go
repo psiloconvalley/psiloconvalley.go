@@ -26,10 +26,6 @@ import (
 	"psiloconvalley/internal/views"
 )
 
-// =====================================================================
-// Application Container
-// =====================================================================
-
 type app struct {
 	templates  *template.Template
 	invRepo    *repo.InvoiceRepo
@@ -37,10 +33,6 @@ type app struct {
 	bizRepo    *repo.BusinessRepo
 	userRepo   *repo.UserRepo
 }
-
-// =====================================================================
-// Helpers
-// =====================================================================
 
 func money(cents int64) string {
 	return fmt.Sprintf("$%.2f", float64(cents)/100.0)
@@ -116,10 +108,6 @@ func field(v any) string {
 	}
 }
 
-// =====================================================================
-// Usage Limits
-// =====================================================================
-
 const freePlanMonthlyLimit = 100
 
 func (a *app) hasReachedLimit(r *http.Request) bool {
@@ -138,9 +126,20 @@ func (a *app) hasReachedLimit(r *http.Request) bool {
 	return count >= freePlanMonthlyLimit
 }
 
-// =====================================================================
-// App Constructor
-// =====================================================================
+func (a *app) canAddClient(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return false
+	}
+	if user.Plan == "pro" {
+		return true
+	}
+	count, err := a.clientRepo.CountByUserID(r.Context(), user.ID)
+	if err != nil {
+		return true
+	}
+	return count < 3
+}
 
 func newApp() *app {
 	funcs := template.FuncMap{
@@ -164,10 +163,6 @@ func newApp() *app {
 	}
 }
 
-// =====================================================================
-// Rendering
-// =====================================================================
-
 func (a *app) render(w http.ResponseWriter, r *http.Request, name string, data map[string]any) {
 	if data == nil {
 		data = map[string]any{}
@@ -189,10 +184,6 @@ func (a *app) render(w http.ResponseWriter, r *http.Request, name string, data m
 	_, _ = buf.WriteTo(w)
 }
 
-// =====================================================================
-// Security
-// =====================================================================
-
 func canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
 	if inv.UserID == nil {
 		return true
@@ -210,17 +201,11 @@ func securityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
-		w.Header().Set(
-			"Content-Security-Policy",
-			"default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;",
-		)
+		w.Header().Set("Content-Security-Policy",
+			"default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;")
 		next.ServeHTTP(w, r)
 	})
 }
-
-// =====================================================================
-// Handlers: Platform
-// =====================================================================
 
 func (a *app) indexHandler(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "index.tmpl", nil)
@@ -250,10 +235,6 @@ func (a *app) invoicePortalHandler(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "home.tmpl", nil)
 }
 
-// =====================================================================
-// Handlers: Auth
-// =====================================================================
-
 func (a *app) registerGetHandler(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "register.tmpl", nil)
 }
@@ -266,35 +247,21 @@ func (a *app) registerPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("REGISTER ATTEMPT: %s from %s", email, r.RemoteAddr)
 
 	if email == "" || !strings.Contains(email, "@") {
-		a.render(w, r, "register.tmpl", map[string]any{
-			"Error": "Please enter a valid email address",
-			"Email": email,
-		})
+		a.render(w, r, "register.tmpl", map[string]any{"Error": "Please enter a valid email address", "Email": email})
 		return
 	}
-
 	if len(pass) < 8 {
-		a.render(w, r, "register.tmpl", map[string]any{
-			"Error": "Password must be at least 8 characters",
-			"Email": email,
-		})
+		a.render(w, r, "register.tmpl", map[string]any{"Error": "Password must be at least 8 characters", "Email": email})
 		return
 	}
-
 	if pass != confirm {
-		a.render(w, r, "register.tmpl", map[string]any{
-			"Error": "Passwords do not match",
-			"Email": email,
-		})
+		a.render(w, r, "register.tmpl", map[string]any{"Error": "Passwords do not match", "Email": email})
 		return
 	}
 
 	id, err := a.userRepo.Create(email, pass)
 	if err != nil {
-		a.render(w, r, "register.tmpl", map[string]any{
-			"Error": "An account with this email already exists",
-			"Email": email,
-		})
+		a.render(w, r, "register.tmpl", map[string]any{"Error": "An account with this email already exists", "Email": email})
 		return
 	}
 	auth.SetSessionCookie(w, id)
@@ -303,18 +270,15 @@ func (a *app) registerPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func (a *app) loginGetHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{}
-
 	switch r.URL.Query().Get("error") {
 	case "oauth_failed":
 		data["Error"] = "Google sign-in failed. Please try again or use email."
 	case "oauth_denied":
 		data["Error"] = "Google sign-in was cancelled."
 	}
-
 	if r.URL.Query().Get("reason") == "limit" {
 		data["LimitBanner"] = true
 	}
-
 	a.render(w, r, "login.tmpl", data)
 }
 
@@ -347,22 +311,15 @@ func (a *app) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// =====================================================================
-// Handlers: Google OAuth
-// =====================================================================
-
 func (a *app) googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	googleUser, err := auth.ProcessGoogleCallback(w, r)
 	if err != nil {
 		log.Printf("google oauth callback error: %v", err)
-
-		// State mismatch — retry instead of showing error
 		if strings.Contains(err.Error(), "invalid oauth state") {
 			log.Printf("OAuth state mismatch — redirecting to retry")
 			http.Redirect(w, r, "/auth/google", http.StatusTemporaryRedirect)
 			return
 		}
-
 		errMsg := "oauth_failed"
 		if strings.Contains(err.Error(), "denied") {
 			errMsg = "oauth_denied"
@@ -372,10 +329,7 @@ func (a *app) googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, isNew, err := a.userRepo.FindOrCreateGoogleUser(
-		googleUser.Email,
-		googleUser.ID,
-		googleUser.Name,
-		googleUser.Picture,
+		googleUser.Email, googleUser.ID, googleUser.Name, googleUser.Picture,
 	)
 	if err != nil {
 		log.Printf("google user upsert error: %v", err)
@@ -390,13 +344,8 @@ func (a *app) googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/profile?welcome=true", http.StatusSeeOther)
 		return
 	}
-
 	http.Redirect(w, r, "/invoices", http.StatusSeeOther)
 }
-
-// =====================================================================
-// Handlers: Business Profile
-// =====================================================================
 
 func (a *app) profileGetHandler(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
@@ -448,9 +397,7 @@ func (a *app) profilePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	if p.Name == "" {
 		a.render(w, r, "profile.tmpl", map[string]any{
-			"Profile":    p,
-			"Error":      "Company name is required",
-			"Currencies": catalog.SupportedCurrencies,
+			"Profile": p, "Error": "Company name is required", "Currencies": catalog.SupportedCurrencies,
 		})
 		return
 	}
@@ -458,9 +405,7 @@ func (a *app) profilePostHandler(w http.ResponseWriter, r *http.Request) {
 	if err := a.bizRepo.Upsert(r.Context(), p); err != nil {
 		log.Printf("profile upsert error: %v", err)
 		a.render(w, r, "profile.tmpl", map[string]any{
-			"Profile":    p,
-			"Error":      "Could not save profile",
-			"Currencies": catalog.SupportedCurrencies,
+			"Profile": p, "Error": "Could not save profile", "Currencies": catalog.SupportedCurrencies,
 		})
 		return
 	}
@@ -468,9 +413,168 @@ func (a *app) profilePostHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/profile?saved=true", http.StatusSeeOther)
 }
 
-// =====================================================================
-// Handlers: Invoices
-// =====================================================================
+func (a *app) clientsListHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	clients, err := a.clientRepo.ListByUserID(r.Context(), user.ID)
+	if err != nil {
+		log.Printf("list clients error: %v", err)
+	}
+
+	count, _ := a.clientRepo.CountByUserID(r.Context(), user.ID)
+
+	a.render(w, r, "clients_list.tmpl", map[string]any{
+		"Clients":      clients,
+		"ClientCount":  count,
+		"AtLimit":      user.Plan != "pro" && count >= 3,
+		"CanAddClient": a.canAddClient(r),
+		"saved":        r.URL.Query().Get("saved") == "true",
+	})
+}
+
+func (a *app) clientNewGetHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if !a.canAddClient(r) {
+		http.Redirect(w, r, "/clients?limit=true", http.StatusSeeOther)
+		return
+	}
+	a.render(w, r, "client_form.tmpl", map[string]any{"Mode": "create"})
+}
+
+func (a *app) clientNewPostHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if !a.canAddClient(r) {
+		http.Redirect(w, r, "/clients?limit=true", http.StatusSeeOther)
+		return
+	}
+
+	profile, err := a.bizRepo.GetByUserID(r.Context(), user.ID)
+	if err != nil {
+		a.render(w, r, "client_form.tmpl", map[string]any{
+			"Mode": "create", "Error": "Please set up your business profile first.",
+		})
+		return
+	}
+
+	c := &repo.Client{
+		BusinessProfileID: profile.ID,
+		Name:              strings.TrimSpace(r.FormValue("name")),
+		Email:             strings.TrimSpace(r.FormValue("email")),
+		Address:           strings.TrimSpace(r.FormValue("address")),
+		City:              strings.TrimSpace(r.FormValue("city")),
+		State:             strings.TrimSpace(r.FormValue("state")),
+		Zip:               strings.TrimSpace(r.FormValue("zip")),
+		Country:           strings.TrimSpace(r.FormValue("country")),
+		Phone:             strings.TrimSpace(r.FormValue("phone")),
+		Notes:             strings.TrimSpace(r.FormValue("notes")),
+	}
+
+	if c.Name == "" {
+		a.render(w, r, "client_form.tmpl", map[string]any{
+			"Mode": "create", "Error": "Client name is required", "Client": c,
+		})
+		return
+	}
+
+	newID, err := a.clientRepo.Create(r.Context(), c)
+	if err != nil {
+		log.Printf("create client error: %v", err)
+		a.render(w, r, "client_form.tmpl", map[string]any{
+			"Mode": "create", "Error": "Could not save client", "Client": c,
+		})
+		return
+	}
+
+	log.Printf("CLIENT CREATED: id=%d name=%s biz_profile=%d", newID, c.Name, c.BusinessProfileID)
+	http.Redirect(w, r, "/clients?saved=true", http.StatusSeeOther)
+}
+
+func (a *app) clientEditGetHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	client, err := a.clientRepo.GetByID(r.Context(), id, user.ID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	a.render(w, r, "client_form.tmpl", map[string]any{"Mode": "edit", "Client": client})
+}
+
+func (a *app) clientEditPostHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+
+	c := &repo.Client{
+		ID:      id,
+		Name:    strings.TrimSpace(r.FormValue("name")),
+		Email:   strings.TrimSpace(r.FormValue("email")),
+		Address: strings.TrimSpace(r.FormValue("address")),
+		City:    strings.TrimSpace(r.FormValue("city")),
+		State:   strings.TrimSpace(r.FormValue("state")),
+		Zip:     strings.TrimSpace(r.FormValue("zip")),
+		Country: strings.TrimSpace(r.FormValue("country")),
+		Phone:   strings.TrimSpace(r.FormValue("phone")),
+		Notes:   strings.TrimSpace(r.FormValue("notes")),
+	}
+
+	if c.Name == "" {
+		a.render(w, r, "client_form.tmpl", map[string]any{
+			"Mode": "edit", "Error": "Client name is required", "Client": c,
+		})
+		return
+	}
+
+	if err := a.clientRepo.Update(r.Context(), c, user.ID); err != nil {
+		log.Printf("update client error: %v", err)
+		a.render(w, r, "client_form.tmpl", map[string]any{
+			"Mode": "edit", "Error": "Could not update client", "Client": c,
+		})
+		return
+	}
+
+	http.Redirect(w, r, "/clients?saved=true", http.StatusSeeOther)
+}
+
+func (a *app) clientDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err := a.clientRepo.Delete(r.Context(), id, user.ID); err != nil {
+		log.Printf("delete client error: %v", err)
+		http.Error(w, "Could not delete client", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/clients", http.StatusSeeOther)
+}
 
 func (a *app) invoicesListHandler(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
@@ -520,6 +624,8 @@ func (a *app) invoiceNewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := auth.GetUser(r)
+	var clients []repo.Client
+
 	if user != nil {
 		profile, err := a.bizRepo.GetByUserID(r.Context(), user.ID)
 		if err == nil && profile != nil {
@@ -534,6 +640,13 @@ func (a *app) invoiceNewHandler(w http.ResponseWriter, r *http.Request) {
 				inv.Currency = profile.Currency
 			}
 		}
+
+		clients, err = a.clientRepo.ListByUserID(r.Context(), user.ID)
+		if err != nil {
+			log.Printf("CLIENT LOAD ERROR for user %d: %v", user.ID, err)
+		} else {
+			log.Printf("CLIENTS LOADED: %d clients for user %d", len(clients), user.ID)
+		}
 	}
 
 	invoiceView := views.MapInvoicePage(inv, nil, "create")
@@ -541,6 +654,7 @@ func (a *app) invoiceNewHandler(w http.ResponseWriter, r *http.Request) {
 		"Invoice":    invoiceView,
 		"Mode":       "create",
 		"Currencies": catalog.SupportedCurrencies,
+		"Clients":    clients,
 	})
 }
 
@@ -564,6 +678,21 @@ func (a *app) invoiceCreateHandler(w http.ResponseWriter, r *http.Request) {
 	var uid *int64
 	if user != nil {
 		uid = &user.ID
+	}
+
+	if user != nil && f.ClientName != "" && f.ClientID == nil {
+		profile, err := a.bizRepo.GetByUserID(r.Context(), user.ID)
+		if err == nil && profile != nil && a.canAddClient(r) {
+			clientID, err := a.clientRepo.FindOrCreate(
+				r.Context(), profile.ID,
+				f.ClientName, f.ClientEmail, f.ClientAddress,
+				f.ClientCity, f.ClientState, f.ClientZip, f.ClientCountry,
+			)
+			if err == nil {
+				f.ClientID = &clientID
+				log.Printf("AUTO-SAVED CLIENT: %s (id=%d)", f.ClientName, clientID)
+			}
+		}
 	}
 
 	inv := &repo.Invoice{
@@ -616,11 +745,18 @@ func (a *app) invoiceEditHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user := auth.GetUser(r)
+	var clients []repo.Client
+	if user != nil {
+		clients, _ = a.clientRepo.ListByUserID(r.Context(), user.ID)
+	}
+
 	invoiceView := views.MapInvoicePage(inv, items, "edit")
 	a.render(w, r, "invoice_new.tmpl", map[string]any{
 		"Invoice":    invoiceView,
 		"Mode":       "edit",
 		"Currencies": catalog.SupportedCurrencies,
+		"Clients":    clients,
 	})
 }
 
@@ -639,9 +775,25 @@ func (a *app) invoiceUpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user := auth.GetUser(r)
+	if user != nil && f.ClientName != "" && f.ClientID == nil {
+		profile, err := a.bizRepo.GetByUserID(r.Context(), user.ID)
+		if err == nil && profile != nil && a.canAddClient(r) {
+			clientID, err := a.clientRepo.FindOrCreate(
+				r.Context(), profile.ID,
+				f.ClientName, f.ClientEmail, f.ClientAddress,
+				f.ClientCity, f.ClientState, f.ClientZip, f.ClientCountry,
+			)
+			if err == nil {
+				f.ClientID = &clientID
+			}
+		}
+	}
+
 	inv := &repo.Invoice{
 		ID:             id,
 		UserID:         ex.UserID,
+		ClientID:       f.ClientID,
 		CompanyName:    f.CompanyName,
 		CompanyEmail:   f.CompanyEmail,
 		CompanyAddress: f.CompanyAddress,
@@ -689,11 +841,18 @@ func (a *app) invoiceDuplicateHandler(w http.ResponseWriter, r *http.Request) {
 	inv.IssueDate = time.Now()
 	inv.Status = "draft"
 
+	user := auth.GetUser(r)
+	var clients []repo.Client
+	if user != nil {
+		clients, _ = a.clientRepo.ListByUserID(r.Context(), user.ID)
+	}
+
 	invoiceView := views.MapInvoicePage(inv, items, "duplicate")
 	a.render(w, r, "invoice_new.tmpl", map[string]any{
 		"Invoice":    invoiceView,
 		"Mode":       "duplicate",
 		"Currencies": catalog.SupportedCurrencies,
+		"Clients":    clients,
 	})
 }
 
@@ -715,10 +874,6 @@ func (a *app) invoiceStatusHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, fmt.Sprintf("/invoices/%d", id), http.StatusSeeOther)
 }
-
-// =====================================================================
-// Handler: PDF Generation
-// =====================================================================
 
 func (a *app) invoicePDFHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
@@ -759,20 +914,16 @@ func (a *app) invoicePDFHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(pdfBytes)
 }
 
-// =====================================================================
-// Form Parsing
-// =====================================================================
-
 type invoiceFormData struct {
-	ClientID                                                                                        *int64
+	ClientID                                                                                         *int64
 	CompanyName, CompanyEmail, CompanyAddress, CompanyCity, CompanyZip, CompanyState, CompanyCountry string
-	ClientName, ClientEmail, ClientAddress, ClientCity, ClientZip, ClientState, ClientCountry       string
-	InvoiceNumber                                                                                   string
-	IssueDate                                                                                       time.Time
-	DueDate                                                                                         *time.Time
-	TaxRateBps                                                                                      int64
-	Notes, PaymentDetails, Currency                                                                 string
-	Items                                                                                           []repo.InvoiceItem
+	ClientName, ClientEmail, ClientAddress, ClientCity, ClientZip, ClientState, ClientCountry        string
+	InvoiceNumber                                                                                    string
+	IssueDate                                                                                        time.Time
+	DueDate                                                                                          *time.Time
+	TaxRateBps                                                                                       int64
+	Notes, PaymentDetails, Currency                                                                  string
+	Items                                                                                            []repo.InvoiceItem
 }
 
 func parseInvoiceForm(w http.ResponseWriter, r *http.Request) (*invoiceFormData, error) {
@@ -847,16 +998,11 @@ func parseInvoiceForm(w http.ResponseWriter, r *http.Request) (*invoiceFormData,
 	return f, nil
 }
 
-// =====================================================================
-// Main
-// =====================================================================
-
 func main() {
 	_ = godotenv.Load()
 	initDB()
 	defer db.Close()
 
-	// Initialize PDF and Google OAuth
 	pdf.Init()
 	defer pdf.Shutdown()
 	auth.InitGoogleOAuth()
@@ -884,13 +1030,18 @@ func main() {
 	r.Post("/login", a.loginPostHandler)
 	r.Post("/logout", a.logoutHandler)
 
-	// Google OAuth routes
 	r.Get("/auth/google", auth.GoogleLoginHandler)
 	r.Get("/auth/google/callback", a.googleCallbackHandler)
 
-	// Business profile
 	r.Get("/profile", a.profileGetHandler)
 	r.Post("/profile", a.profilePostHandler)
+
+	r.Get("/clients", a.clientsListHandler)
+	r.Get("/clients/new", a.clientNewGetHandler)
+	r.Post("/clients/new", a.clientNewPostHandler)
+	r.Get("/clients/{id}/edit", a.clientEditGetHandler)
+	r.Post("/clients/{id}/edit", a.clientEditPostHandler)
+	r.Post("/clients/{id}/delete", a.clientDeleteHandler)
 
 	r.Route("/invoices", func(r chi.Router) {
 		r.Get("/welcome", a.invoicePortalHandler)

@@ -25,6 +25,7 @@ import (
 
 type InvoicePage struct {
 	ID             int64
+	ClientID	int64
 	InvoiceNumber  string
 	Status         string
 	IssueDate      string
@@ -153,6 +154,12 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 
 	page := InvoicePage{
 		ID:             inv.ID,
+		ClientID:	func() int64 {
+			if inv.ClientID != nil {
+				return *inv.ClientID
+			}
+			return 0
+		}(),
 		InvoiceNumber:  inv.InvoiceNumber,
 		Status:         inv.Status,
 		IssueDate:      formatDate(inv.IssueDate),
