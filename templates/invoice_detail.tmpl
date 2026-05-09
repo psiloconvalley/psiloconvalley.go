@@ -335,6 +335,35 @@
             border-color: #bbb;
         }
 
+        /* ── Status Workflow Buttons ── */
+        .status-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+        }
+
+        .status-btn-sent    { background: #dbeafe; color: #1d4ed8; }
+        .status-btn-paid    { background: #dcfce7; color: #15803d; }
+        .status-btn-overdue { background: #fef9c3; color: #854d0e; }
+        .status-btn-void    { background: #fee2e2; color: #dc2626; }
+
+        .status-btn-sent:hover    { background: #1d4ed8; color: white; }
+        .status-btn-paid:hover    { background: #15803d; color: white; }
+        .status-btn-overdue:hover { background: #854d0e; color: white; }
+        .status-btn-void:hover    { background: #dc2626; color: white; }
+
         /* ── Responsive ── */
         @media (max-width: 700px) {
             .header {
@@ -423,6 +452,10 @@
                 display: none !important;
             }
 
+            .status-actions {
+                display: none !important;
+            }
+
             .site-nav {
                 display: none !important;
             }
@@ -434,10 +467,15 @@
         }
     </style>
 </head>
-<body>
+    <body>
+
+{{template "nav-styles" .}}
+{{template "nav" .}}
 
 <div class="page">
+
     <div class="invoice-card">
+
 
         <!-- Header -->
         <div class="header">
@@ -568,14 +606,64 @@
             {{end}}
 
             <!-- Actions -->
-		<div class="actions">
-    			{{if eq .Invoice.Status "draft"}}
-    			<a href="/invoices/{{.Invoice.ID}}/edit" class="btn btn-secondary">Edit Invoice</a>
-    {{end}}
-   			 <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn btn-secondary">Duplicate</a>
-    			<a href="/invoices/{{.Invoice.ID}}/pdf" class="btn btn-primary">Download PDF</a>
-    			<button class="btn btn-secondary" onclick="window.print()">Print</button>
-</div>	
+            <div class="actions">
+                {{if eq .Invoice.Status "draft"}}
+                <a href="/invoices/{{.Invoice.ID}}/edit" class="btn btn-secondary">Edit Invoice</a>
+                {{end}}
+                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn btn-secondary">Duplicate</a>
+                <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn btn-primary">Download PDF</a>
+                <button class="btn btn-secondary" onclick="window.print()">Print</button>
+            </div>
+
+            <!-- Status Workflow -->
+            {{if .User}}
+            <div class="status-actions">
+                {{if eq .Invoice.Status "draft"}}
+                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
+                    {{.csrfField}}
+                    <input type="hidden" name="status" value="sent">
+                    <button type="submit" class="status-btn status-btn-sent">Mark as Sent</button>
+                </form>
+                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
+                    {{.csrfField}}
+                    <input type="hidden" name="status" value="void">
+                    <button type="submit" class="status-btn status-btn-void">Void Invoice</button>
+                </form>
+                {{end}}
+
+                {{if eq .Invoice.Status "sent"}}
+                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
+                    {{.csrfField}}
+                    <input type="hidden" name="status" value="paid">
+                    <button type="submit" class="status-btn status-btn-paid">Mark as Paid</button>
+                </form>
+                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
+                    {{.csrfField}}
+                    <input type="hidden" name="status" value="overdue">
+                    <button type="submit" class="status-btn status-btn-overdue">Mark as Overdue</button>
+                </form>
+                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
+                    {{.csrfField}}
+                    <input type="hidden" name="status" value="void">
+                    <button type="submit" class="status-btn status-btn-void">Void Invoice</button>
+                </form>
+                {{end}}
+
+                {{if eq .Invoice.Status "overdue"}}
+                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
+                    {{.csrfField}}
+                    <input type="hidden" name="status" value="paid">
+                    <button type="submit" class="status-btn status-btn-paid">Mark as Paid</button>
+                </form>
+                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
+                    {{.csrfField}}
+                    <input type="hidden" name="status" value="void">
+                    <button type="submit" class="status-btn status-btn-void">Void Invoice</button>
+                </form>
+                {{end}}
+            </div>
+            {{end}}
+
         </div>
     </div>
 </div>

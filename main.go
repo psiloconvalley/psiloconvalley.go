@@ -117,6 +117,28 @@ func field(v any) string {
 }
 
 // =====================================================================
+// Usage Limits
+// =====================================================================
+
+const freePlanMonthlyLimit = 100
+
+func (a *app) hasReachedLimit(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return auth.AnonLimitReached(r)
+	}
+	if user.Plan == "pro" {
+		return false
+	}
+	count, err := a.userRepo.GetMonthlyInvoiceCount(r.Context(), user.ID)
+	if err != nil {
+		log.Printf("usage limit check error: %v", err)
+		return false
+	}
+	return count >= freePlanMonthlyLimit
+}
+
+// =====================================================================
 // App Constructor
 // =====================================================================
 
@@ -150,8 +172,8 @@ func (a *app) render(w http.ResponseWriter, r *http.Request, name string, data m
 	if data == nil {
 		data = map[string]any{}
 	}
-
 	data["User"] = auth.GetUser(r)
+	data["GoogleEnabled"] = auth.GoogleOAuthEnabled()
 	data["csrfField"] = template.HTML(
 		fmt.Sprintf(`<input type="hidden" name="csrf_token" value="%s">`, nosurf.Token(r)),
 	)
@@ -239,26 +261,61 @@ func (a *app) registerGetHandler(w http.ResponseWriter, r *http.Request) {
 func (a *app) registerPostHandler(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(strings.ToLower(r.FormValue("email")))
 	pass := r.FormValue("password")
+	confirm := r.FormValue("confirm_password")
 
 	log.Printf("REGISTER ATTEMPT: %s from %s", email, r.RemoteAddr)
 
-	if email == "" || len(pass) < 8 {
-		a.render(w, r, "register.tmpl", map[string]any{"Error": "Invalid credentials (min 8 chars)"})
+	if email == "" || !strings.Contains(email, "@") {
+		a.render(w, r, "register.tmpl", map[string]any{
+			"Error": "Please enter a valid email address",
+			"Email": email,
+		})
+		return
+	}
+
+	if len(pass) < 8 {
+		a.render(w, r, "register.tmpl", map[string]any{
+			"Error": "Password must be at least 8 characters",
+			"Email": email,
+		})
+		return
+	}
+
+	if pass != confirm {
+		a.render(w, r, "register.tmpl", map[string]any{
+			"Error": "Passwords do not match",
+			"Email": email,
+		})
 		return
 	}
 
 	id, err := a.userRepo.Create(email, pass)
 	if err != nil {
-		a.render(w, r, "register.tmpl", map[string]any{"Error": "Account already exists"})
+		a.render(w, r, "register.tmpl", map[string]any{
+			"Error": "An account with this email already exists",
+			"Email": email,
+		})
 		return
 	}
-
 	auth.SetSessionCookie(w, id)
-	http.Redirect(w, r, "/tools", http.StatusSeeOther)
+	http.Redirect(w, r, "/profile?welcome=true", http.StatusSeeOther)
 }
 
 func (a *app) loginGetHandler(w http.ResponseWriter, r *http.Request) {
-	a.render(w, r, "login.tmpl", nil)
+	data := map[string]any{}
+
+	switch r.URL.Query().Get("error") {
+	case "oauth_failed":
+		data["Error"] = "Google sign-in failed. Please try again or use email."
+	case "oauth_denied":
+		data["Error"] = "Google sign-in was cancelled."
+	}
+
+	if r.URL.Query().Get("reason") == "limit" {
+		data["LimitBanner"] = true
+	}
+
+	a.render(w, r, "login.tmpl", data)
 }
 
 func (a *app) loginPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -277,12 +334,10 @@ func (a *app) loginPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Auth service unavailable", http.StatusInternalServerError)
 		return
 	}
-
 	if !user.CheckPassword(pass) {
 		a.render(w, r, "login.tmpl", map[string]any{"Error": "Invalid credentials", "Email": email})
 		return
 	}
-
 	auth.SetSessionCookie(w, user.ID)
 	http.Redirect(w, r, "/tools", http.StatusSeeOther)
 }
@@ -290,6 +345,127 @@ func (a *app) loginPostHandler(w http.ResponseWriter, r *http.Request) {
 func (a *app) logoutHandler(w http.ResponseWriter, r *http.Request) {
 	auth.ClearSessionCookie(w)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// =====================================================================
+// Handlers: Google OAuth
+// =====================================================================
+
+func (a *app) googleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	googleUser, err := auth.ProcessGoogleCallback(w, r)
+	if err != nil {
+		log.Printf("google oauth callback error: %v", err)
+
+		// State mismatch — retry instead of showing error
+		if strings.Contains(err.Error(), "invalid oauth state") {
+			log.Printf("OAuth state mismatch — redirecting to retry")
+			http.Redirect(w, r, "/auth/google", http.StatusTemporaryRedirect)
+			return
+		}
+
+		errMsg := "oauth_failed"
+		if strings.Contains(err.Error(), "denied") {
+			errMsg = "oauth_denied"
+		}
+		http.Redirect(w, r, "/login?error="+errMsg, http.StatusSeeOther)
+		return
+	}
+
+	user, isNew, err := a.userRepo.FindOrCreateGoogleUser(
+		googleUser.Email,
+		googleUser.ID,
+		googleUser.Name,
+		googleUser.Picture,
+	)
+	if err != nil {
+		log.Printf("google user upsert error: %v", err)
+		http.Error(w, "Could not create or find account", http.StatusInternalServerError)
+		return
+	}
+
+	auth.SetSessionCookie(w, user.ID)
+	log.Printf("GOOGLE AUTH: %s (id=%d, new=%v)", user.Email, user.ID, isNew)
+
+	if isNew {
+		http.Redirect(w, r, "/profile?welcome=true", http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, "/invoices", http.StatusSeeOther)
+}
+
+// =====================================================================
+// Handlers: Business Profile
+// =====================================================================
+
+func (a *app) profileGetHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	profile, err := a.bizRepo.GetByUserID(r.Context(), user.ID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Printf("profile fetch error: %v", err)
+		http.Error(w, "Could not load profile", http.StatusInternalServerError)
+		return
+	}
+
+	a.render(w, r, "profile.tmpl", map[string]any{
+		"Profile":    profile,
+		"Saved":      r.URL.Query().Get("saved") == "true",
+		"Welcome":    r.URL.Query().Get("welcome") == "true",
+		"Currencies": catalog.SupportedCurrencies,
+	})
+}
+
+func (a *app) profilePostHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	p := &repo.BusinessProfile{
+		UserID:  user.ID,
+		Name:    strings.TrimSpace(r.FormValue("name")),
+		Email:   strings.TrimSpace(r.FormValue("email")),
+		Address: strings.TrimSpace(r.FormValue("address")),
+		City:    strings.TrimSpace(r.FormValue("city")),
+		State:   strings.TrimSpace(r.FormValue("state")),
+		Zip:     strings.TrimSpace(r.FormValue("zip")),
+		Country: strings.TrimSpace(r.FormValue("country")),
+		TaxID:   strings.TrimSpace(r.FormValue("tax_id")),
+		Currency: func() string {
+			c := r.FormValue("currency")
+			if c == "" {
+				return "USD"
+			}
+			return c
+		}(),
+	}
+
+	if p.Name == "" {
+		a.render(w, r, "profile.tmpl", map[string]any{
+			"Profile":    p,
+			"Error":      "Company name is required",
+			"Currencies": catalog.SupportedCurrencies,
+		})
+		return
+	}
+
+	if err := a.bizRepo.Upsert(r.Context(), p); err != nil {
+		log.Printf("profile upsert error: %v", err)
+		a.render(w, r, "profile.tmpl", map[string]any{
+			"Profile":    p,
+			"Error":      "Could not save profile",
+			"Currencies": catalog.SupportedCurrencies,
+		})
+		return
+	}
+
+	http.Redirect(w, r, "/profile?saved=true", http.StatusSeeOther)
 }
 
 // =====================================================================
@@ -310,7 +486,8 @@ func (a *app) invoicesListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.render(w, r, "invoices_list.tmpl", map[string]any{"Invoices": list})
+	rows := views.MapInvoiceList(list)
+	a.render(w, r, "invoices_list.tmpl", map[string]any{"Invoices": rows})
 }
 
 func (a *app) invoiceDetailHandler(w http.ResponseWriter, r *http.Request) {
@@ -327,7 +504,7 @@ func (a *app) invoiceDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) invoiceNewHandler(w http.ResponseWriter, r *http.Request) {
-	if auth.GetUser(r) == nil && auth.AnonLimitReached(r) {
+	if a.hasReachedLimit(r) {
 		http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
 		return
 	}
@@ -342,6 +519,23 @@ func (a *app) invoiceNewHandler(w http.ResponseWriter, r *http.Request) {
 		IssueDate:      time.Now(),
 	}
 
+	user := auth.GetUser(r)
+	if user != nil {
+		profile, err := a.bizRepo.GetByUserID(r.Context(), user.ID)
+		if err == nil && profile != nil {
+			inv.CompanyName = profile.Name
+			inv.CompanyEmail = profile.Email
+			inv.CompanyAddress = profile.Address
+			inv.CompanyCity = profile.City
+			inv.CompanyState = profile.State
+			inv.CompanyZip = profile.Zip
+			inv.CompanyCountry = profile.Country
+			if profile.Currency != "" {
+				inv.Currency = profile.Currency
+			}
+		}
+	}
+
 	invoiceView := views.MapInvoicePage(inv, nil, "create")
 	a.render(w, r, "invoice_new.tmpl", map[string]any{
 		"Invoice":    invoiceView,
@@ -351,8 +545,7 @@ func (a *app) invoiceNewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) invoiceCreateHandler(w http.ResponseWriter, r *http.Request) {
-	user := auth.GetUser(r)
-	if user == nil && auth.AnonLimitReached(r) {
+	if a.hasReachedLimit(r) {
 		http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
 		return
 	}
@@ -367,6 +560,7 @@ func (a *app) invoiceCreateHandler(w http.ResponseWriter, r *http.Request) {
 		f.InvoiceNumber = fmt.Sprintf("INV-%d", time.Now().UnixNano()/1_000_000)
 	}
 
+	user := auth.GetUser(r)
 	var uid *int64
 	if user != nil {
 		uid = &user.ID
@@ -424,8 +618,9 @@ func (a *app) invoiceEditHandler(w http.ResponseWriter, r *http.Request) {
 
 	invoiceView := views.MapInvoicePage(inv, items, "edit")
 	a.render(w, r, "invoice_new.tmpl", map[string]any{
-		"Invoice": invoiceView,
-		"Mode":    "edit",
+		"Invoice":    invoiceView,
+		"Mode":       "edit",
+		"Currencies": catalog.SupportedCurrencies,
 	})
 }
 
@@ -496,9 +691,29 @@ func (a *app) invoiceDuplicateHandler(w http.ResponseWriter, r *http.Request) {
 
 	invoiceView := views.MapInvoicePage(inv, items, "duplicate")
 	a.render(w, r, "invoice_new.tmpl", map[string]any{
-		"Invoice": invoiceView,
-		"Mode":    "duplicate",
+		"Invoice":    invoiceView,
+		"Mode":       "duplicate",
+		"Currencies": catalog.SupportedCurrencies,
 	})
+}
+
+func (a *app) invoiceStatusHandler(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	newStatus := r.FormValue("status")
+
+	if err := a.invRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, user.ID); err != nil {
+		log.Printf("status update error: %v", err)
+		http.Error(w, "Could not update status", http.StatusBadRequest)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/invoices/%d", id), http.StatusSeeOther)
 }
 
 // =====================================================================
@@ -549,15 +764,15 @@ func (a *app) invoicePDFHandler(w http.ResponseWriter, r *http.Request) {
 // =====================================================================
 
 type invoiceFormData struct {
-	ClientID                                                                                          *int64
+	ClientID                                                                                        *int64
 	CompanyName, CompanyEmail, CompanyAddress, CompanyCity, CompanyZip, CompanyState, CompanyCountry string
-	ClientName, ClientEmail, ClientAddress, ClientCity, ClientZip, ClientState, ClientCountry        string
-	InvoiceNumber                                                                                     string
-	IssueDate                                                                                         time.Time
-	DueDate                                                                                           *time.Time
-	TaxRateBps                                                                                        int64
-	Notes, PaymentDetails, Currency                                                                   string
-	Items                                                                                             []repo.InvoiceItem
+	ClientName, ClientEmail, ClientAddress, ClientCity, ClientZip, ClientState, ClientCountry       string
+	InvoiceNumber                                                                                   string
+	IssueDate                                                                                       time.Time
+	DueDate                                                                                         *time.Time
+	TaxRateBps                                                                                      int64
+	Notes, PaymentDetails, Currency                                                                 string
+	Items                                                                                           []repo.InvoiceItem
 }
 
 func parseInvoiceForm(w http.ResponseWriter, r *http.Request) (*invoiceFormData, error) {
@@ -641,6 +856,11 @@ func main() {
 	initDB()
 	defer db.Close()
 
+	// Initialize PDF and Google OAuth
+	pdf.Init()
+	defer pdf.Shutdown()
+	auth.InitGoogleOAuth()
+
 	a := newApp()
 	r := chi.NewRouter()
 
@@ -664,6 +884,14 @@ func main() {
 	r.Post("/login", a.loginPostHandler)
 	r.Post("/logout", a.logoutHandler)
 
+	// Google OAuth routes
+	r.Get("/auth/google", auth.GoogleLoginHandler)
+	r.Get("/auth/google/callback", a.googleCallbackHandler)
+
+	// Business profile
+	r.Get("/profile", a.profileGetHandler)
+	r.Post("/profile", a.profilePostHandler)
+
 	r.Route("/invoices", func(r chi.Router) {
 		r.Get("/welcome", a.invoicePortalHandler)
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -679,6 +907,7 @@ func main() {
 		r.Get("/{id}/edit", a.invoiceEditHandler)
 		r.Post("/{id}/edit", a.invoiceUpdateHandler)
 		r.Get("/{id}/duplicate", a.invoiceDuplicateHandler)
+		r.Post("/{id}/status", a.invoiceStatusHandler)
 		r.Get("/{id}/pdf", a.invoicePDFHandler)
 	})
 
@@ -694,7 +923,6 @@ func main() {
 		Secure:   os.Getenv("RAILWAY_ENVIRONMENT") != "",
 		SameSite: http.SameSiteLaxMode,
 	})
-
 	csrfHandler.SetFailureHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("CSRF rejection: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
 		http.Error(w, "Forbidden — invalid or missing CSRF token", http.StatusForbidden)

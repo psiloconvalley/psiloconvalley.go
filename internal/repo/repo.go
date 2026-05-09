@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -16,15 +17,19 @@ import (
 // =====================================================================
 
 type BusinessProfile struct {
-	ID                int64
-	Name              string
-	Email             string
-	Address           string
-	TaxID             string
-	DefaultTaxRateBps int64
-	Currency          string
-	LogoURL           string
-	CreatedAt         time.Time
+	ID        int64
+	UserID    int64
+	Name      string
+	Email     string
+	Address   string
+	City      string
+	State     string
+	Zip       string
+	Country   string
+	TaxID     string
+	Currency  string
+	LogoURL   string
+	CreatedAt time.Time
 }
 
 type Client struct {
@@ -41,15 +46,36 @@ type Client struct {
 type User struct {
 	ID           int64
 	Email        string
-	PasswordHash string
-	Plan         string
+	PasswordHash string  // empty for Google-only users
+	Plan         string  // "free" | "pro"
+	Provider     string  // "email" | "google"
+	GoogleID     string  // empty for email users
+	Name         string  // from Google profile or empty
+	AvatarURL    string  // from Google profile or empty
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
 
 func (u *User) CheckPassword(plain string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(plain))
-	return err == nil
+	if u.PasswordHash == "" {
+		return false // Google user — no password
+	}
+	return bcrypt.CompareHashAndPassword(
+		[]byte(u.PasswordHash),
+		[]byte(plain),
+	) == nil
+}
+
+func (u *User) IsGoogleUser() bool {
+	return u.Provider == "google" || u.GoogleID != ""
+}
+
+func (u *User) DisplayName() string {
+	if u.Name != "" {
+		return u.Name
+	}
+	parts := strings.SplitN(u.Email, "@", 2)
+	return parts[0]
 }
 
 type Invoice struct {
@@ -133,7 +159,7 @@ func (r *UserRepo) Create(email, plainPassword string) (int64, error) {
 	}
 	var id int64
 	err = r.db.QueryRow(
-		`INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id`,
+		`INSERT INTO users (email, password_hash, provider) VALUES ($1, $2, 'email') RETURNING id`,
 		email, string(hash),
 	).Scan(&id)
 	return id, err
@@ -141,35 +167,82 @@ func (r *UserRepo) Create(email, plainPassword string) (int64, error) {
 
 func (r *UserRepo) GetByEmail(email string) (*User, error) {
 	var u User
+	var passwordHash, provider, googleID, name, avatarURL sql.NullString
 	var updatedAt sql.NullTime
+
 	err := r.db.QueryRow(`
-		SELECT id, email, password_hash, plan, created_at, updated_at
-		FROM users WHERE email = $1`, email).Scan(
-		&u.ID, &u.Email, &u.PasswordHash, &u.Plan, &u.CreatedAt, &updatedAt,
+		SELECT id, email, password_hash, provider, google_id,
+		       name, avatar_url, plan, created_at, updated_at
+		FROM users WHERE email = $1
+	`, email).Scan(
+		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
+		&name, &avatarURL, &u.Plan, &u.CreatedAt, &updatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
-	if updatedAt.Valid {
-		u.UpdatedAt = updatedAt.Time
-	}
+
+	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
+	if provider.Valid     { u.Provider     = provider.String }
+	if googleID.Valid     { u.GoogleID     = googleID.String }
+	if name.Valid         { u.Name         = name.String }
+	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
+	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
+
 	return &u, nil
 }
 
 func (r *UserRepo) GetByID(id int64) (*User, error) {
 	var u User
+	var passwordHash, provider, googleID, name, avatarURL sql.NullString
 	var updatedAt sql.NullTime
+
 	err := r.db.QueryRow(`
-		SELECT id, email, password_hash, plan, created_at, updated_at
-		FROM users WHERE id = $1`, id).Scan(
-		&u.ID, &u.Email, &u.PasswordHash, &u.Plan, &u.CreatedAt, &updatedAt,
+		SELECT id, email, password_hash, provider, google_id,
+		       name, avatar_url, plan, created_at, updated_at
+		FROM users WHERE id = $1
+	`, id).Scan(
+		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
+		&name, &avatarURL, &u.Plan, &u.CreatedAt, &updatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
-	if updatedAt.Valid {
-		u.UpdatedAt = updatedAt.Time
+
+	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
+	if provider.Valid     { u.Provider     = provider.String }
+	if googleID.Valid     { u.GoogleID     = googleID.String }
+	if name.Valid         { u.Name         = name.String }
+	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
+	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
+
+	return &u, nil
+}
+
+func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
+	var u User
+	var passwordHash, provider, googleIDVal, name, avatarURL sql.NullString
+	var updatedAt sql.NullTime
+
+	err := r.db.QueryRow(`
+		SELECT id, email, password_hash, provider, google_id,
+		       name, avatar_url, plan, created_at, updated_at
+		FROM users WHERE google_id = $1
+	`, googleID).Scan(
+		&u.ID, &u.Email, &passwordHash, &provider, &googleIDVal,
+		&name, &avatarURL, &u.Plan, &u.CreatedAt, &updatedAt,
+	)
+	if err != nil {
+		return nil, err
 	}
+
+	if passwordHash.Valid  { u.PasswordHash = passwordHash.String }
+	if provider.Valid      { u.Provider     = provider.String }
+	if googleIDVal.Valid   { u.GoogleID     = googleIDVal.String }
+	if name.Valid          { u.Name         = name.String }
+	if avatarURL.Valid     { u.AvatarURL    = avatarURL.String }
+	if updatedAt.Valid     { u.UpdatedAt    = updatedAt.Time }
+
 	return &u, nil
 }
 
@@ -181,9 +254,182 @@ func (r *UserRepo) GetInvoiceCount(ctx context.Context, userID int64) (int, erro
 	return count, err
 }
 
+func (r *UserRepo) GetMonthlyInvoiceCount(ctx context.Context, userID int64) (int, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM invoices
+		WHERE user_id = $1
+		AND created_at >= date_trunc('month', now())
+	`, userID).Scan(&count)
+	return count, err
+}
+
 func (r *UserRepo) IncrementInvoiceCount(userID int64) error {
-	// No-op: count is now derived from invoices table via GetInvoiceCount
 	return nil
+}
+
+// CreateGoogleUser creates a brand new user from Google OAuth
+func (r *UserRepo) CreateGoogleUser(
+	email, googleID, name, avatarURL string,
+) (int64, error) {
+	var id int64
+	err := r.db.QueryRow(`
+		INSERT INTO users 
+			(email, google_id, provider, name, avatar_url, plan)
+		VALUES 
+			($1, $2, 'google', $3, $4, 'free')
+		RETURNING id
+	`, email, googleID, name, avatarURL).Scan(&id)
+	return id, err
+}
+
+// LinkGoogleToExisting links a Google account to an existing email/password user
+func (r *UserRepo) LinkGoogleToExisting(userID int64, googleID string) error {
+	_, err := r.db.Exec(`
+		UPDATE users
+		SET google_id  = $1,
+		    provider   = 'google',
+		    updated_at = NOW()
+		WHERE id = $2
+	`, googleID, userID)
+	return err
+}
+
+// FindOrCreateGoogleUser is the main OAuth flow entry point.
+// Returns: user, isNewUser, error
+func (r *UserRepo) FindOrCreateGoogleUser(
+	email, googleID, name, avatarURL string,
+) (*User, bool, error) {
+
+	// Case 1: Already linked Google account
+	user, err := r.GetByGoogleID(googleID)
+	if err == nil {
+		// Update name/avatar in case they changed on Google
+		_, _ = r.db.Exec(`
+			UPDATE users 
+			SET name = $1, avatar_url = $2, updated_at = NOW()
+			WHERE id = $3
+		`, name, avatarURL, user.ID)
+		user.Name      = name
+		user.AvatarURL = avatarURL
+		return user, false, nil
+	}
+	if err != sql.ErrNoRows {
+		return nil, false, fmt.Errorf("lookup by google id: %w", err)
+	}
+
+	// Case 2: Email exists — link Google to existing account
+	user, err = r.GetByEmail(email)
+	if err == nil {
+		if linkErr := r.LinkGoogleToExisting(user.ID, googleID); linkErr != nil {
+			return nil, false, fmt.Errorf("link google: %w", linkErr)
+		}
+		// Also update name/avatar
+		_, _ = r.db.Exec(`
+			UPDATE users 
+			SET name = $1, avatar_url = $2, updated_at = NOW()
+			WHERE id = $3
+		`, name, avatarURL, user.ID)
+		user.GoogleID  = googleID
+		user.Name      = name
+		user.AvatarURL = avatarURL
+		return user, false, nil
+	}
+	if err != sql.ErrNoRows {
+		return nil, false, fmt.Errorf("lookup by email: %w", err)
+	}
+
+	// Case 3: Brand new user
+	id, err := r.CreateGoogleUser(email, googleID, name, avatarURL)
+	if err != nil {
+		return nil, false, fmt.Errorf("create google user: %w", err)
+	}
+
+	user, err = r.GetByID(id)
+	if err != nil {
+		return nil, false, fmt.Errorf("fetch new user: %w", err)
+	}
+
+	return user, true, nil
+}
+
+// =====================================================================
+// BusinessRepo Methods
+// =====================================================================
+
+func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*BusinessProfile, error) {
+	var p BusinessProfile
+	var city, state, zip, country, email, taxID, currency, logoURL sql.NullString
+
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id, user_id, name, email, address, city, state, zip, country,
+		       tax_id, currency, logo_url, created_at
+		FROM business_profiles
+		WHERE user_id = $1
+		LIMIT 1
+	`, userID).Scan(
+		&p.ID, &p.UserID, &p.Name, &email, &p.Address,
+		&city, &state, &zip, &country,
+		&taxID, &currency, &logoURL, &p.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if email.Valid {
+		p.Email = email.String
+	}
+	if city.Valid {
+		p.City = city.String
+	}
+	if state.Valid {
+		p.State = state.String
+	}
+	if zip.Valid {
+		p.Zip = zip.String
+	}
+	if country.Valid {
+		p.Country = country.String
+	}
+	if taxID.Valid {
+		p.TaxID = taxID.String
+	}
+	if currency.Valid {
+		p.Currency = currency.String
+	}
+	if logoURL.Valid {
+		p.LogoURL = logoURL.String
+	}
+
+	return &p, nil
+}
+
+func (r *BusinessRepo) Upsert(ctx context.Context, p *BusinessProfile) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO business_profiles
+			(user_id, name, email, address, city, state, zip, country, tax_id, currency)
+		VALUES
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		ON CONFLICT (user_id) DO UPDATE SET
+			name     = EXCLUDED.name,
+			email    = EXCLUDED.email,
+			address  = EXCLUDED.address,
+			city     = EXCLUDED.city,
+			state    = EXCLUDED.state,
+			zip      = EXCLUDED.zip,
+			country  = EXCLUDED.country,
+			tax_id   = EXCLUDED.tax_id,
+			currency = EXCLUDED.currency
+	`,
+		p.UserID, p.Name, p.Email, p.Address,
+		p.City, p.State, p.Zip, p.Country,
+		p.TaxID, p.Currency,
+	)
+	return err
+}
+
+func (r *BusinessRepo) GetDefault() (*BusinessProfile, error) {
+	return nil, errors.New("not implemented")
 }
 
 // =====================================================================
@@ -288,7 +534,7 @@ func (r *InvoiceRepo) CreateInvoice(ctx context.Context, inv *Invoice, items []I
 
 func (r *InvoiceRepo) GetInvoiceWithItems(ctx context.Context, id int64) (*Invoice, []InvoiceItem, error) {
 	const q = `
-		SELECT 
+		SELECT
 			id, business_profile_id, client_id, user_id,
 			client_name, client_email, client_address, client_city, client_zip, client_state, client_country,
 			company_name, company_email, company_address, company_city, company_zip, company_state, company_country,
@@ -513,14 +759,90 @@ func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []I
 	return tx.Commit()
 }
 
+// UpdateInvoiceStatus transitions an invoice to a new status.
+func (r *InvoiceRepo) UpdateInvoiceStatus(ctx context.Context, id int64, newStatus string, userID int64) error {
+	validStatuses := map[string]bool{
+		"draft":   true,
+		"sent":    true,
+		"paid":    true,
+		"void":    true,
+		"overdue": true,
+	}
+	if !validStatuses[newStatus] {
+		return fmt.Errorf("invalid status: %s", newStatus)
+	}
+
+	var currentStatus string
+	err := r.db.QueryRowContext(ctx,
+		`SELECT status FROM invoices WHERE id = $1 AND user_id = $2`,
+		id, userID,
+	).Scan(&currentStatus)
+	if err != nil {
+		return fmt.Errorf("invoice not found: %w", err)
+	}
+
+	validTransitions := map[string]map[string]bool{
+		"draft":   {"sent": true, "void": true},
+		"sent":    {"paid": true, "overdue": true, "void": true},
+		"overdue": {"paid": true, "void": true},
+		"paid":    {},
+		"void":    {},
+	}
+
+	allowed, ok := validTransitions[currentStatus]
+	if !ok || !allowed[newStatus] {
+		return fmt.Errorf("cannot transition from %s to %s", currentStatus, newStatus)
+	}
+
+	_, err = r.db.ExecContext(ctx,
+		`UPDATE invoices SET status = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3`,
+		newStatus, id, userID,
+	)
+	return err
+}
+
+// DeleteDraftInvoice permanently removes a draft invoice.
+// Only drafts can be deleted. All other statuses must be voided.
+func (r *InvoiceRepo) DeleteDraftInvoice(ctx context.Context, id int64, userID int64) error {
+	var status string
+	err := r.db.QueryRowContext(ctx,
+		`SELECT status FROM invoices WHERE id = $1 AND user_id = $2`,
+		id, userID,
+	).Scan(&status)
+	if err != nil {
+		return fmt.Errorf("invoice not found: %w", err)
+	}
+
+	if status != "draft" {
+		return fmt.Errorf("only draft invoices can be deleted — use void for %s invoices", status)
+	}
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	if _, err := tx.ExecContext(ctx,
+		`DELETE FROM invoice_items WHERE invoice_id = $1`, id,
+	); err != nil {
+		return fmt.Errorf("delete items: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx,
+		`DELETE FROM invoices WHERE id = $1 AND user_id = $2 AND status = 'draft'`,
+		id, userID,
+	); err != nil {
+		return fmt.Errorf("delete invoice: %w", err)
+	}
+
+	return tx.Commit()
+}
+
 // =====================================================================
 // Stubs
 // =====================================================================
 
 func (r *ClientRepo) ListByBusiness(bizID int64) ([]Client, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (r *BusinessRepo) GetDefault() (*BusinessProfile, error) {
 	return nil, errors.New("not implemented")
 }

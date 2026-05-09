@@ -3,28 +3,75 @@ package pdf
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"sync"
 	"time"
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
 
+// =====================================================================
+// Persistent Chrome Allocator
+//
+// One Chrome process shared across all PDF requests.
+// Each Generate() call opens a new tab, not a new browser.
+// =====================================================================
+
+var (
+	allocCtx    context.Context
+	allocCancel context.CancelFunc
+	initOnce    sync.Once
+)
+
+// Init starts the persistent Chrome allocator.
+// Call once from main() during startup.
+func Init() {
+	initOnce.Do(func() {
+		opts := append(chromedp.DefaultExecAllocatorOptions[:],
+			chromedp.Flag("headless", true),
+			chromedp.Flag("disable-gpu", true),
+			chromedp.Flag("no-sandbox", true),
+			chromedp.Flag("disable-dev-shm-usage", true),
+			chromedp.Flag("disable-setuid-sandbox", true),
+			chromedp.Flag("no-first-run", true),
+			chromedp.Flag("no-zygote", true),
+			chromedp.Flag("single-process", true),
+			chromedp.Flag("disable-extensions", true),
+			chromedp.Flag("disable-background-networking", true),
+			chromedp.Flag("disable-default-apps", true),
+			chromedp.Flag("disable-sync", true),
+			chromedp.Flag("metrics-recording-only", true),
+			chromedp.Flag("mute-audio", true),
+			chromedp.Flag("safebrowsing-disable-auto-update", true),
+		)
+
+		if chromeBin := os.Getenv("CHROME_BIN"); chromeBin != "" {
+			opts = append(opts, chromedp.ExecPath(chromeBin))
+		}
+
+		allocCtx, allocCancel = chromedp.NewExecAllocator(
+			context.Background(),
+			opts...,
+		)
+		log.Println("[pdf] Chrome allocator initialized")
+	})
+}
+
+// Shutdown gracefully closes the Chrome allocator.
+// Call from main() with defer.
+func Shutdown() {
+	if allocCancel != nil {
+		allocCancel()
+		log.Println("[pdf] Chrome allocator shut down")
+	}
+}
+
 // Generate takes a fully rendered HTML string and returns PDF bytes.
 func Generate(ctx context.Context, html string) ([]byte, error) {
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),
-		chromedp.Flag("disable-gpu", true),
-		chromedp.Flag("no-sandbox", true),
-		chromedp.Flag("disable-dev-shm-usage", true),
-		chromedp.Flag("disable-setuid-sandbox", true),
-		chromedp.Flag("no-first-run", true),
-		chromedp.Flag("no-zygote", true),
-		chromedp.Flag("single-process", true),
-		chromedp.Flag("disable-extensions", true),
-	)
-
-	allocCtx, cancelAlloc := chromedp.NewExecAllocator(ctx, opts...)
-	defer cancelAlloc()
+	// Lazy init if Init() wasn't called
+	Init()
 
 	taskCtx, cancelTask := chromedp.NewContext(allocCtx)
 	defer cancelTask()
