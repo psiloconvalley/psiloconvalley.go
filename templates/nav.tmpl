@@ -6,7 +6,7 @@
             <a href="/invoices/new">New Invoice</a>
             {{if .User}}
                 <a href="/invoices">My Invoices</a>
-		<a href="clients">Clients</a>
+		<a href="/clients">Clients</a>
 		<a href="/profile">Profile</a>
                 <span class="nav-user">{{.User.Email}}</span>
                 <form method="POST" action="/logout" style="display:inline;">

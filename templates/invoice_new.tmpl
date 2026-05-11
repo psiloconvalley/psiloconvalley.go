@@ -1,441 +1,559 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>
         {{if eq .Mode "edit"}}Edit Invoice
         {{else if eq .Mode "duplicate"}}Duplicate Invoice
-        {{else}}Create Invoice{{end}}
+        {{else}}Create Invoice{{end}} — PsiloConValley
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <meta name="description" content="Create professional invoices in seconds. Free forever.">
+
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            margin: 0; 
-            background: #f5f5f5; 
-            color: #111; 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --ink-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #0f172a;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --sidebar: #0f172a;
+            --radius: 14px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         }
-        .page { max-width: 1400px; margin: auto; padding: 40px 20px; }
-        .layout { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
-        .main { background: white; padding: 40px; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .sidebar { position: sticky; top: 40px; background: #111; color: white; padding: 30px; border-radius: 14px; height: fit-content; }
-        h1 { margin-top: 0; font-size: 42px; letter-spacing: -2px; }
-        .section { margin-top: 60px; }
-        .section:first-child { margin-top: 0; }
-        .step-row { display: flex; align-items: center; margin-bottom: 20px; }
-        .dots { display: flex; margin-right: 14px; }
-        .dot { width: 12px; height: 12px; border-radius: 999px; background: #d1d5db; margin-right: 8px; }
-        .dot.active { background: #111; }
-        .step-label { font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #666; }
-        h2 { margin-top: 0; margin-bottom: 30px; font-size: 28px; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            max-width: 1400px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 40px;
+        }
+
+        .main {
+            background: var(--card);
+            padding: 48px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 40px;
+            background: var(--sidebar);
+            color: white;
+            padding: 36px;
+            border-radius: var(--radius);
+            height: fit-content;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { font-size: 36px; font-weight: 700; letter-spacing: -1.5px; margin-bottom: 8px; }
+        h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px; color: var(--ink); }
+
+        .section { margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--border); }
+        .section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            margin-bottom: 12px;
+        }
+
+        .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; }
+        .step-dot.active { background: var(--accent); }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-        label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 8px; }
-        input, textarea, select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; background: #fff; color: #111; }
-        input[readonly] { background: #f5f5f5; color: #888; cursor: not-allowed; border-color: #e0e0e0; }
-        textarea { min-height: 120px; resize: vertical; }
-        .sidebar input, .sidebar textarea { background: #222; border: 1px solid #333; color: #fff; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #111; color: white; text-align: left; padding: 14px; }
-        td { padding: 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ink-muted);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--card);
+            color: var(--ink);
+            transition: all 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05);
+        }
+
+        input[readonly] { background: #f1f5f9; color: var(--ink-muted); cursor: not-allowed; }
+        textarea { min-height: 100px; resize: vertical; }
+
+        /* Sidebar input overrides */
+        .sidebar input, .sidebar textarea, .sidebar select {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        .sidebar input:focus, .sidebar textarea:focus, .sidebar select:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+        .sidebar label { color: rgba(255, 255, 255, 0.7); }
+
+        /* --- Table Styling --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+
+        th {
+            background: #f1f5f9;
+            color: var(--ink-muted);
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        th:first-child { border-radius: 8px 0 0 8px; }
+        th:last-child { border-radius: 0 8px 8px 0; }
+
+        td { padding: 12px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        td input { padding: 10px 12px; font-size: 13px; }
+
         .right { text-align: right; }
-        .add-btn { margin-top: 20px; }
-        button { background: #111; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; }
-        button:hover { background: #222; }
-        .remove-btn { background: #fee2e2; color: #dc2626; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; }
-        .remove-btn:hover { background: #dc2626; color: white; }
-        .save-btn { width: 100%; margin-top: 40px; padding: 18px; font-size: 16px; background: #fff; color: #111; transition: background 0.2s; }
-        .save-btn:hover { background: #eee; }
-        .save-btn.edit-mode { background: #fff; color: #111; border: 1px solid #111; }
-        .save-btn.edit-mode:hover { background: #111; color: #fff; }
-        .summary-title { font-size: 22px; margin-top: 0; margin-bottom: 30px; }
-        .summary-line { display: flex; justify-content: space-between; margin-bottom: 16px; }
-        .summary-total { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; margin-top: 20px; font-size: 28px; font-weight: bold; }
-        .summary-note { margin-top: 30px; color: rgba(255,255,255,0.4); line-height: 1.6; font-size: 14px; }
-        .item-inputs { display: flex; flex-direction: column; gap: 6px; }
-        .item-name { font-weight: bold; }
-        .item-detail { font-size: 13px; color: #666; border-color: #eee; }
+        .row-amount { font-weight: 600; vertical-align: middle; padding-top: 22px; font-variant-numeric: tabular-nums; }
+
+        /* --- Premium Buttons --- */
+        .add-btn {
+            margin-top: 16px;
+            background: transparent;
+            color: var(--accent);
+            border: 2px dashed var(--border);
+            padding: 14px;
+            width: 100%;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .add-btn:hover { border-color: var(--accent); background: #f8fafc; }
+
+        .remove-btn {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1;
+            margin-top: 6px;
+            transition: all 0.15s;
+        }
+        .remove-btn:hover { background: var(--danger); color: white; transform: scale(1.05); }
+
+        /* Guaranteed highly visible submit button */
+        .save-btn {
+            width: 100%;
+            margin-top: 36px;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .save-btn:hover { background: #f1f5f9 !important; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); }
+        .save-btn:active { transform: translateY(0); }
+
+        /* --- Sidebar Summary --- */
+        .summary-title { font-size: 20px; color: white; margin-bottom: 24px; }
+        .summary-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 14px; color: rgba(255,255,255,0.8); }
+        .summary-total {
+            border-top: 1px solid rgba(255,255,255,0.15);
+            padding-top: 20px;
+            margin-top: 16px;
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .banner {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #fef3c7; color: #854d0e; padding: 16px 24px;
+            border-radius: 12px; margin-bottom: 24px; font-size: 14px; font-weight: 600;
+            border: 1px solid #fde68a;
+        }
+
         @media (max-width: 1000px) {
             .layout { grid-template-columns: 1fr; }
-            .sidebar { position: static; }
+            .sidebar { position: static; box-shadow: none; }
             .grid-2, .grid-3 { grid-template-columns: 1fr; }
         }
     </style>
+
+    {{template "nav-styles" .}}
 </head>
 <body>
 
-{{template "nav-styles" .}}
 {{template "nav" .}}
 
 <div class="page">
+
     {{if eq .Mode "edit"}}
-    <div class="system-banner edit-mode">
-        <span>Edit mode — modifying existing record</span>
-        <span>Invoice: <strong>{{.Invoice.InvoiceNumber}}</strong></span>
+    <div class="banner">
+        <span>✏️ Editing Invoice</span>
+        <span><strong>#{{.Invoice.InvoiceNumber}}</strong></span>
     </div>
     {{end}}
 
     {{if eq .Mode "duplicate"}}
-    <div class="system-banner">
-        <span>Initializing duplicate transaction framework</span>
-        <span>Source ID: <strong>{{.Invoice.InvoiceNumber}}</strong></span>
+    <div class="banner" style="background:#e0e7ff; color:#1e40af; border-color:#bfdbfe;">
+        <span>📋 Creating duplicate copy of invoice</span>
+        <span><strong>#{{.Invoice.InvoiceNumber}}</strong></span>
     </div>
     {{end}}
 
-    {{if eq .Mode "edit"}}
-    <form id="invoice-form" method="POST" action="/invoices/{{.Invoice.ID}}/edit">
+    <form id="invoice-form" method="POST" action="{{if eq .Mode "edit"}}/invoices/{{.Invoice.ID}}/edit{{else}}/invoices/create{{end}}">
         {{.csrfField}}
-    {{else}}
-    <form id="invoice-form" method="POST" action="/invoices/create">
-        {{.csrfField}}
-    {{end}}
 
         <div class="layout">
             <div class="main">
 
                 <h1>
                     {{if eq .Mode "edit"}}Edit Invoice
-                    {{else if eq .Mode "duplicate"}}Duplicate Invoice
+                    {{else if eq .Mode "duplicate"}}New Invoice Copy
                     {{else}}Create Invoice{{end}}
                 </h1>
 
-                <!-- STEP 1: Company Info -->
+                <!-- ==================== SECTION 1: COMPANY ==================== -->
                 <section class="section">
-                    <div class="step-row">
-                        <div class="dots">
-                            <div class="dot active"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                        </div>
-                        <div class="step-label">Step 1 of 3</div>
+                    <div class="step-badge">
+                        <span class="step-dot active"></span>
+                        <span class="step-dot"></span>
+                        <span class="step-dot"></span>
+                        Step 1 of 3
                     </div>
-                    <h2>Your company information</h2>
+                    <h2>Your Business Details</h2>
 
                     <div class="grid-2">
                         <div>
-                            <label>Company Name</label>
-                            <input type="text" name="company_name"
-                                value="{{field .Invoice.CompanyName}}">
+                            <label>Company Name <span style="color:var(--danger)">*</span></label>
+                            <input type="text" name="company_name" required value="{{field .Invoice.CompanyName}}" placeholder="Acme Agency LLC">
                         </div>
                         <div>
-                            <label>Email Address</label>
-                            <input type="email" name="company_email"
-                                value="{{field .Invoice.CompanyEmail}}">
+                            <label>Email</label>
+                            <input type="email" name="company_email" value="{{field .Invoice.CompanyEmail}}" placeholder="billing@acme.com">
                         </div>
                     </div>
 
-                    <div class="grid-3" style="margin-top:20px;">
+                    <div class="grid-3" style="margin-top:16px;">
                         <div>
                             <label>Address</label>
-                            <input type="text" name="company_address"
-                                value="{{field .Invoice.CompanyAddress}}">
+                            <input type="text" name="company_address" value="{{field .Invoice.CompanyAddress}}" placeholder="123 Innovation Way">
                         </div>
                         <div>
                             <label>City</label>
-                            <input type="text" name="company_city"
-                                value="{{field .Invoice.CompanyCity}}">
+                            <input type="text" name="company_city" value="{{field .Invoice.CompanyCity}}" placeholder="San Francisco">
                         </div>
                         <div>
-                            <label>Zip Code</label>
-                            <input type="text" name="company_zip"
-                                value="{{field .Invoice.CompanyZip}}">
+                            <label>ZIP / Postal</label>
+                            <input type="text" name="company_zip" value="{{field .Invoice.CompanyZip}}" placeholder="94103">
                         </div>
                     </div>
 
-                    <div class="grid-2" style="margin-top:20px;">
+                    <div class="grid-2" style="margin-top:16px;">
                         <div>
                             <label>Country</label>
-                            <select name="company_country" id="company_country"
-                                data-selected="{{field .Invoice.CompanyCountry}}">
-                            </select>
+                            <input type="text" name="company_country" value="{{field .Invoice.CompanyCountry}}" placeholder="United States">
                         </div>
                         <div>
                             <label>State / Region</label>
-                            <select name="company_state" id="company_state"
-                                data-selected="{{field .Invoice.CompanyState}}">
-                            </select>
+                            <input type="text" name="company_state" value="{{field .Invoice.CompanyState}}" placeholder="CA">
                         </div>
                     </div>
-<!-- STEP 2: Customer & Invoice Info -->
-<section class="section">
-    <div class="step-row">
-        <div class="dots">
-            <div class="dot active"></div>
-            <div class="dot active"></div>
-            <div class="dot"></div>
-        </div>
-        <div class="step-label">Step 2 of 3</div>
-    </div>
-    <h2>Customer and invoice information</h2>
+                </section>
 
-    {{if .Clients}}
-    <!-- Saved client selector -->
-    <div style="margin-bottom:24px;">
-        <label>Select Saved Client</label>
-        <select id="client_selector" onchange="fillClient(this)"
-                style="width:100%; padding:14px; border:1px solid #ddd; border-radius:8px; font-size:15px; background:#fff; color:#111;">
-            <option value="">— Type new client below or select saved —</option>
-            {{range .Clients}}
-            <option value="{{.ID}}"
-                    data-name="{{.Name}}"
-                    data-email="{{.Email}}"
-                    data-address="{{.Address}}"
-                    data-city="{{.City}}"
-                    data-state="{{.State}}"
-                    data-zip="{{.Zip}}"
-                    data-country="{{.Country}}"
-                    {{if $.Invoice.ClientID}}
-                        {{if eq $.Invoice.ClientID .ID}}selected{{end}}
-                    {{end}}>
-                {{.Name}}{{if .Email}} — {{.Email}}{{end}}
-            </option>
-            {{end}}
-        </select>
-    </div>
-    {{end}}
-
-    <!-- Hidden client_id field -->
-    <input type="hidden" name="client_id" id="client_id"
-           value="{{if .Invoice.ClientID}}{{.Invoice.ClientID}}{{end}}">
-
-    <div class="grid-3">
-        <div>
-            <label>Customer Name</label>
-            <input type="text" name="client_name" id="client_name"
-                value="{{field .Invoice.ClientName}}">
-        </div>
-        <div>
-            <label>Customer Email</label>
-            <input type="email" name="client_email" id="client_email"
-                value="{{field .Invoice.ClientEmail}}">
-        </div>
-        <div>
-            <label>Invoice Number</label>
-            {{if eq .Mode "edit"}}
-            <input type="text" name="invoice_number"
-                value="{{.Invoice.InvoiceNumber}}"
-                readonly>
-            {{else}}
-            <input type="text" name="invoice_number"
-                value="{{field .Invoice.InvoiceNumber}}"
-                placeholder="Leave blank to auto-generate">
-            {{end}}
-        </div>
-    </div>
-
-    <div class="grid-2" style="margin-top:20px;">
-        <div>
-            <label>Invoice Date</label>
-            <input type="date" name="issue_date"
-                value="{{field .Invoice.IssueDate}}">
-        </div>
-        <div>
-            <label>Due Date</label>
-            <input type="date" name="due_date"
-                value="{{field .Invoice.DueDate}}">
-        </div>
-    </div>
-
-    <div class="grid-3" style="margin-top:20px;">
-        <div>
-            <label>Customer Address</label>
-            <input type="text" name="client_address" id="client_address"
-                value="{{field .Invoice.ClientAddress}}">
-        </div>
-        <div>
-            <label>City</label>
-            <input type="text" name="client_city" id="client_city"
-                value="{{field .Invoice.ClientCity}}">
-        </div>
-        <div>
-            <label>Zip Code</label>
-            <input type="text" name="client_zip" id="client_zip"
-                value="{{field .Invoice.ClientZip}}">
-        </div>
-    </div>
-
-    <div class="grid-2" style="margin-top:20px;">
-        <div>
-            <label>Country</label>
-            <input type="text" name="client_country" id="client_country"
-                value="{{field .Invoice.ClientCountry}}">
-        </div>
-        <div>
-            <label>State / Region</label>
-            <input type="text" name="client_state" id="client_state"
-                value="{{field .Invoice.ClientState}}">
-        </div>
-    </div>
-</section>
-
-
-
-                <!-- STEP 3: Line Items -->
+                <!-- ==================== SECTION 2: CUSTOMER ==================== -->
                 <section class="section">
-                    <div class="step-row">
-                        <div class="dots">
-                            <div class="dot active"></div>
-                            <div class="dot active"></div>
-                            <div class="dot active"></div>
-                        </div>
-                        <div class="step-label">Step 3 of 3</div>
+                    <div class="step-badge">
+                        <span class="step-dot active"></span>
+                        <span class="step-dot active"></span>
+                        <span class="step-dot"></span>
+                        Step 2 of 3
                     </div>
-                    <h2>Items to bill</h2>
+                    <h2>Customer Details</h2>
+
+                    {{if .Clients}}
+                    <div style="margin-bottom:20px;">
+                        <label>Auto-Fill Saved Customer</label>
+                        <select id="client_selector" onchange="fillClient(this)">
+                            <option value="">— Type custom below or choose saved —</option>
+                            {{range .Clients}}
+                            <option value="{{.ID}}"
+                                data-name="{{.Name}}"
+                                data-email="{{.Email}}"
+                                data-address="{{.Address}}"
+                                data-city="{{.City}}"
+                                data-state="{{.State}}"
+                                data-zip="{{.Zip}}"
+                                data-country="{{.Country}}"
+                                {{if $.Invoice.ClientID}}{{if eq $.Invoice.ClientID .ID}}selected{{end}}{{end}}>
+                                {{.Name}} {{if .Email}}({{.Email}}){{end}}
+                            </option>
+                            {{end}}
+                        </select>
+                    </div>
+                    {{end}}
+
+                    <input type="hidden" name="client_id" id="client_id" value="{{if .Invoice.ClientID}}{{.Invoice.ClientID}}{{end}}">
+
+                    <div class="grid-3">
+                        <div>
+                            <label>Customer Name <span style="color:var(--danger)">*</span></label>
+                            <input type="text" name="client_name" id="client_name" required value="{{field .Invoice.ClientName}}" placeholder="Globex Corp">
+                        </div>
+                        <div>
+                            <label>Email</label>
+                            <input type="email" name="client_email" id="client_email" value="{{field .Invoice.ClientEmail}}" placeholder="ap@globex.com">
+                        </div>
+                        <div>
+                            <label>Invoice Number</label>
+                            {{if eq .Mode "edit"}}
+                            <input type="text" name="invoice_number" readonly value="{{.Invoice.InvoiceNumber}}">
+                            {{else}}
+                            <input type="text" name="invoice_number" value="{{field .Invoice.InvoiceNumber}}" placeholder="INV-2026-001">
+                            {{end}}
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top:16px;">
+                        <div>
+                            <label>Issue Date</label>
+                            <input type="date" name="issue_date" value="{{field .Invoice.IssueDate}}">
+                        </div>
+                        <div>
+                            <label>Due Date</label>
+                            <input type="date" name="due_date" value="{{field .Invoice.DueDate}}">
+                        </div>
+                    </div>
+
+                    <div class="grid-3" style="margin-top:16px;">
+                        <div>
+                            <label>Address</label>
+                            <input type="text" name="client_address" id="client_address" value="{{field .Invoice.ClientAddress}}" placeholder="456 Enterprise Dr">
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="client_city" id="client_city" value="{{field .Invoice.ClientCity}}" placeholder="Austin">
+                        </div>
+                        <div>
+                            <label>ZIP / Postal</label>
+                            <input type="text" name="client_zip" id="client_zip" value="{{field .Invoice.ClientZip}}" placeholder="73301">
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top:16px;">
+                        <div>
+                            <label>Country</label>
+                            <input type="text" name="client_country" id="client_country" value="{{field .Invoice.ClientCountry}}" placeholder="United States">
+                        </div>
+                        <div>
+                            <label>State / Region</label>
+                            <input type="text" name="client_state" id="client_state" value="{{field .Invoice.ClientState}}" placeholder="TX">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== SECTION 3: LINE ITEMS ==================== -->
+                <section class="section">
+                    <div class="step-badge">
+                        <span class="step-dot active"></span>
+                        <span class="step-dot active"></span>
+                        <span class="step-dot active"></span>
+                        Step 3 of 3
+                    </div>
+                    <h2>Items to Bill</h2>
 
                     <table>
                         <thead>
                             <tr>
-                                <th>Item</th>
-                                <th width="110">Qty</th>
-                                <th width="150">Price</th>
-                                <th width="150">Amount</th>
-                                <th width="50"></th>
+                                <th style="width:35%;">Description</th>
+                                <th style="width:30%;">Details / Notes</th>
+                                <th style="width:10%;">Qty</th>
+                                <th style="width:15%;">Unit Price</th>
+                                <th style="width:10%; text-align:right;">Amount</th>
+                                <th style="width:5%;"></th>
                             </tr>
                         </thead>
                         <tbody id="items_body">
-                        {{if .Invoice.Items}}
-                            {{range .Invoice.Items}}
-                            <tr>
-                                <td>
-                                    <div class="item-inputs">
-                                        <input type="text" class="item-name" placeholder="Item name" value="{{.Description}}">
-                                        <input type="text" class="item-detail" placeholder="Detail (optional)">
-                                        <input type="hidden" name="description" class="desc-hidden" value="{{.Description}}">
-                                    </div>
-                                </td>
-                                <td><input type="number" step="0.01" name="quantity" class="qty" value="{{.QuantityRaw}}"></td>
-                                <td><input type="number" step="0.01" name="unit_price" class="price" value="{{formatCents .UnitPriceCents}}"></td>
-                                <td class="right row-amount">$0.00</td>
-                                <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
-                            </tr>
+                            {{if .Invoice.Items}}
+                                {{range .Invoice.Items}}
+                                <tr>
+                                    <td>
+                                        <input type="text" name="description[]" class="item-desc" value="{{.Description}}" placeholder="E.g., Web Development" required>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="details[]" class="item-details" value="{{.Details}}" placeholder="E.g., 40 hours setup">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0.01" name="quantity[]" class="qty" value="{{.Quantity}}" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="unit_price[]" class="price" value="{{if .UnitPriceCents}}{{formatCents .UnitPriceCents}}{{else}}0.00{{end}}" required>
+                                    </td>
+                                    <td class="right row-amount">{{if .LineTotal}}{{.LineTotal}}{{else}}$0.00{{end}}</td>
+                                    <td style="text-align:center;">
+                                        <button type="button" class="remove-btn" onclick="removeRow(this)">×</button>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            {{else}}
+                                <tr>
+                                    <td>
+                                        <input type="text" name="description[]" class="item-desc" placeholder="E.g., Web Development" required>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="details[]" class="item-details" placeholder="E.g., 40 hours setup">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0.01" name="quantity[]" class="qty" value="1" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="unit_price[]" class="price" value="0.00" required>
+                                    </td>
+                                    <td class="right row-amount">$0.00</td>
+                                    <td style="text-align:center;">
+                                        <button type="button" class="remove-btn" onclick="removeRow(this)">×</button>
+                                    </td>
+                                </tr>
                             {{end}}
-                        {{else}}
-                            <tr>
-                                <td>
-                                    <div class="item-inputs">
-                                        <input type="text" class="item-name" placeholder="Item name">
-                                        <input type="text" class="item-detail" placeholder="Detail (optional)">
-                                        <input type="hidden" name="description" class="desc-hidden">
-                                    </div>
-                                </td>
-                                <td><input type="number" step="0.01" name="quantity" class="qty" value="1"></td>
-                                <td><input type="number" step="0.01" name="unit_price" class="price" value="0"></td>
-                                <td class="right row-amount">$0.00</td>
-                                <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
-                            </tr>
-                        {{end}}
                         </tbody>
                     </table>
 
                     <button type="button" class="add-btn" onclick="addRow()">+ Add Line Item</button>
 
-                    <div style="margin-top:40px;">
-                        <label>Notes / Memo</label>
-                        <textarea name="notes">{{.Invoice.Notes}}</textarea>
+                    <div style="margin-top:32px;">
+                        <label>Invoice Memo / Footer Notes</label>
+                        <textarea name="notes" placeholder="Thank you for your business! Payment is due within 30 days.">{{.Invoice.Notes}}</textarea>
                     </div>
                 </section>
 
             </div>
 
-            <!-- SIDEBAR -->
+            <!-- ==================== SIDEBAR ==================== -->
             <aside class="sidebar">
-                <h3 class="summary-title">Invoice Summary</h3>
+                <h2 class="summary-title">Financial Summary</h2>
 
                 <div class="summary-line">
                     <span>Subtotal</span>
-                    <span id="subtotal">$0.00</span>
+                    <span id="subtotal_display">{{if .Invoice.Subtotal}}{{.Invoice.Subtotal}}{{else}}$0.00{{end}}</span>
                 </div>
 
                 <div class="summary-line">
                     <span>Tax</span>
-                    <span id="tax_amount">$0.00</span>
+                    <span id="tax_display">{{if .Invoice.TaxAmount}}{{.Invoice.TaxAmount}}{{else}}$0.00{{end}}</span>
                 </div>
 
                 <div class="summary-line summary-total">
                     <span>Total</span>
-                    <span id="total">$0.00</span>
+                    <span id="total_display">{{if .Invoice.Total}}{{.Invoice.Total}}{{else}}$0.00{{end}}</span>
                 </div>
 
-                <div style="margin-top:30px;">
+                <div style="margin-top:28px;">
                     <label>Tax Rate (%)</label>
-                    <input type="number" step="0.01" name="tax_rate" id="tax_rate"
-                        value="{{if .Invoice}}{{.Invoice.TaxRate}}{{else}}0{{end}}">
+                    <input type="number" step="0.01" min="0" name="tax_rate" id="tax_rate"
+                           value="{{if .Invoice.TaxRateBps}}{{bpsToPercent .Invoice.TaxRateBps}}{{else}}0{{end}}" placeholder="0.00">
                 </div>
 
-                <div style="margin-top:20px;">
+                <div style="margin-top:16px;">
                     <label>Currency</label>
                     <select name="currency" id="currency">
-                        <option value="USD" data-symbol="$" {{if eq .Invoice.Currency "USD"}}selected{{end}}>USD — US Dollar</option>
-                        <option value="CAD" data-symbol="CA$" {{if eq .Invoice.Currency "CAD"}}selected{{end}}>CAD — Canadian Dollar</option>
-                        <option value="GBP" data-symbol="£" {{if eq .Invoice.Currency "GBP"}}selected{{end}}>GBP — British Pound</option>
-                        <option value="EUR" data-symbol="€" {{if eq .Invoice.Currency "EUR"}}selected{{end}}>EUR — Euro</option>
+                        {{range .Currencies}}
+                        <option value="{{.Code}}" data-symbol="{{.Symbol}}" {{if eq $.Invoice.Currency .Code}}selected{{end}}>
+                            {{.Code}} — {{.Name}}
+                        </option>
+                        {{end}}
                     </select>
                 </div>
 
-                <div style="margin-top:20px;">
-                    <label>Payment Details</label>
-                    <textarea name="payment_details">{{.Invoice.PaymentDetails}}</textarea>
+                <div style="margin-top:16px;">
+                    <label>Payment Instructions</label>
+                    <textarea name="payment_details" rows="3" placeholder="Bank: Chase · Routing: xxx · Account: xxxx">{{.Invoice.PaymentDetails}}</textarea>
                 </div>
 
-                <button type="submit" class="save-btn{{if eq .Mode "edit"}} edit-mode{{end}}">
-                    {{if eq .Mode "edit"}}Update Invoice
-                    {{else if eq .Mode "duplicate"}}Save as New Invoice
-                    {{else}}Save Invoice{{end}}
+                <!-- Explicitly styled to be highly bold and visible -->
+                <button type="submit" class="save-btn">
+                    {{if eq .Mode "edit"}}💾 Update Invoice
+                    {{else if eq .Mode "duplicate"}}📋 Save Duplicate Copy
+                    {{else}}✅ Save Invoice{{end}}
                 </button>
-
-                <div class="summary-note">
-                    Sovereign Business Utilities.<br>
-                    Fast. Independent. Free.
-                </div>
             </aside>
         </div>
     </form>
 </div>
 
-<script src="/static/js/invoice.js"></script>
-
-<script>
-    function restoreSelections() {
-        const selects = ["company_country", "company_state", "client_country", "client_state"];
-        selects.forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            const saved = el.dataset.selected;
-            if (!saved) return;
-            for (const opt of el.options) {
-                if (opt.value === saved || opt.textContent.trim() === saved) {
-                    el.value = opt.value;
-                    break;
-                }
-            }
-        });
-    }
-    window.addEventListener("load", () => { setTimeout(restoreSelections, 100); });
-</script>
+<!-- Built-in interactive calculator and tools -->
 <script>
 function fillClient(select) {
     const opt = select.options[select.selectedIndex];
+    const clientID = document.getElementById('client_id');
     if (!opt || !opt.value) {
-        document.getElementById('client_id').value = '';
+        if (clientID) clientID.value = '';
         return;
     }
-
-    document.getElementById('client_id').value = opt.value;
+    if (clientID) clientID.value = opt.value;
 
     const fields = {
-        'client_name':    opt.dataset.name,
-        'client_email':   opt.dataset.email,
-        'client_address': opt.dataset.address,
-        'client_city':    opt.dataset.city,
-        'client_state':   opt.dataset.state,
-        'client_zip':     opt.dataset.zip,
-        'client_country': opt.dataset.country,
+        client_name: opt.dataset.name,
+        client_email: opt.dataset.email,
+        client_address: opt.dataset.address,
+        client_city: opt.dataset.city,
+        client_state: opt.dataset.state,
+        client_zip: opt.dataset.zip,
+        client_country: opt.dataset.country,
     };
 
     for (const [id, val] of Object.entries(fields)) {
@@ -443,6 +561,84 @@ function fillClient(select) {
         if (el) el.value = val || '';
     }
 }
+
+function addRow() {
+    const tbody = document.getElementById('items_body');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td><input type="text" name="description[]" class="item-desc" placeholder="E.g., Web Development" required></td>
+        <td><input type="text" name="details[]" class="item-details" placeholder="E.g., 40 hours setup"></td>
+        <td><input type="number" step="0.01" min="0.01" name="quantity[]" class="qty" value="1" required></td>
+        <td><input type="number" step="0.01" min="0" name="unit_price[]" class="price" value="0.00" required></td>
+        <td class="right row-amount">$0.00</td>
+        <td style="text-align:center;"><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
+    `;
+    tbody.appendChild(row);
+    attachListeners();
+    calculateLiveTotals();
+}
+
+function removeRow(btn) {
+    const tbody = document.getElementById('items_body');
+    if (tbody.querySelectorAll('tr').length > 1) {
+        btn.closest('tr').remove();
+        calculateLiveTotals();
+    } else {
+        alert("An invoice requires at least one item row.");
+    }
+}
+
+function getCurrencySymbol() {
+    const sel = document.getElementById('currency');
+    if (!sel || sel.selectedIndex === -1) return '$';
+    return sel.options[select.selectedIndex]?.dataset?.symbol || '$';
+}
+
+function calculateLiveTotals() {
+    const rows = document.querySelectorAll('#items_body tr');
+    let subtotal = 0;
+    const sym = getCurrencySymbol();
+
+    rows.forEach(row => {
+        const qEl = row.querySelector('.qty');
+        const pEl = row.querySelector('.price');
+        const amtEl = row.querySelector('.row-amount');
+        
+        if (qEl && pEl && amtEl) {
+            const qty = parseFloat(qEl.value) || 0;
+            const price = parseFloat(pEl.value) || 0;
+            const rowAmt = qty * price;
+            subtotal += rowAmt;
+            amtEl.textContent = sym + rowAmt.toFixed(2);
+        }
+    });
+
+    const taxInput = document.getElementById('tax_rate');
+    const taxRate = taxInput ? (parseFloat(taxInput.value) || 0) : 0;
+    const taxAmt = subtotal * (taxRate / 100);
+    const total = subtotal + taxAmt;
+
+    const subDisplay = document.getElementById('subtotal_display');
+    const taxDisplay = document.getElementById('tax_display');
+    const totDisplay = document.getElementById('total_display');
+
+    if (subDisplay) subDisplay.textContent = sym + subtotal.toFixed(2);
+    if (taxDisplay) taxDisplay.textContent = sym + taxAmt.toFixed(2);
+    if (totDisplay) totDisplay.textContent = sym + total.toFixed(2);
+}
+
+function attachListeners() {
+    document.querySelectorAll('.qty, .price, #tax_rate, #currency').forEach(el => {
+        el.removeEventListener('input', calculateLiveTotals);
+        el.addEventListener('input', calculateLiveTotals);
+        el.addEventListener('change', calculateLiveTotals);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    attachListeners();
+    calculateLiveTotals();
+});
 </script>
 
 </body>

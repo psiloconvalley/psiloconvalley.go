@@ -1,3 +1,4 @@
+// internal/views/invoice.go
 package views
 
 import (
@@ -9,23 +10,12 @@ import (
 )
 
 // =====================================================================
-// ViewModel Structs
+// View Models
 // =====================================================================
-//
-// These are the ONLY structs your HTML templates will ever see.
-// They contain pre-formatted strings. No int64. No float64.
-// No math in templates. No panics. No ambiguity.
-//
-// The Go compiler enforces this boundary at build time.
-// If a field is missing, the code won't compile.
-// If a field is wrong, the mapper function catches it.
-//
-// This is the permanent architectural firewall between
-// your database layer and your presentation layer.
 
 type InvoicePage struct {
 	ID             int64
-	ClientID	int64
+	ClientID       int64
 	InvoiceNumber  string
 	Status         string
 	IssueDate      string
@@ -36,7 +26,7 @@ type InvoicePage struct {
 	PaymentDetails string
 	Mode           string
 
-	// Company (Sender)
+	// Company
 	CompanyName    string
 	CompanyEmail   string
 	CompanyAddress string
@@ -45,7 +35,7 @@ type InvoicePage struct {
 	CompanyState   string
 	CompanyCountry string
 
-	// Client (Receiver)
+	// Client
 	ClientName    string
 	ClientEmail   string
 	ClientAddress string
@@ -54,29 +44,26 @@ type InvoicePage struct {
 	ClientState   string
 	ClientCountry string
 
-	// Financials (Pre-formatted for display)
+	// Financials (formatted)
 	Subtotal  string
 	TaxRate   string
 	TaxAmount string
 	Discount  string
 	Total     string
 
-	// Financials (Raw cents for form inputs)
-	TaxRateBpsRaw          int64
+	TaxRateBps          int64
 	DiscountAmountCentsRaw int64
 
-	// Line Items
 	Items []InvoiceItemView
 }
 
 type InvoiceItemView struct {
-	ID          int64
 	Description string
+	Details     string   // ← NEW: Additional details per line item
 	Quantity    string
-	UnitPrice   string // Display: "$150.50"
-	LineTotal   string // Display: "$301.00"
+	UnitPrice   string
+	LineTotal   string
 
-	// Raw values for form inputs
 	QuantityRaw    float64
 	UnitPriceCents int64
 }
@@ -92,7 +79,7 @@ type InvoiceListRow struct {
 }
 
 // =====================================================================
-// Formatting Helpers (Private to this package)
+// Formatting Helpers
 // =====================================================================
 
 func formatMoney(cents int64, symbol string) string {
@@ -130,36 +117,27 @@ func formatQuantity(q float64) string {
 	return fmt.Sprintf("%.2f", q)
 }
 
-func formatCentsForInput(cents int64) string {
-	if cents == 0 {
-		return ""
-	}
-	return fmt.Sprintf("%.2f", float64(cents)/100.0)
-}
-
 func currencySymbol(code string) string {
 	return catalog.CurrencySymbol(code)
 }
 
+func ptrToInt64(p *int64) int64 {
+	if p == nil {
+		return 0
+	}
+	return *p
+}
+
 // =====================================================================
-// Mappers: repo -> view
+// Mappers
 // =====================================================================
-//
-// These are the ONE place where database structs become view structs.
-// All formatting decisions live here. Not in templates. Not in handlers.
-// Here. One place. One truth. Forever.
 
 func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) InvoicePage {
 	sym := currencySymbol(inv.Currency)
 
 	page := InvoicePage{
 		ID:             inv.ID,
-		ClientID:	func() int64 {
-			if inv.ClientID != nil {
-				return *inv.ClientID
-			}
-			return 0
-		}(),
+		ClientID:       ptrToInt64(inv.ClientID),
 		InvoiceNumber:  inv.InvoiceNumber,
 		Status:         inv.Status,
 		IssueDate:      formatDate(inv.IssueDate),
@@ -192,14 +170,14 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		Discount:  formatMoney(inv.DiscountAmountCents, sym),
 		Total:     formatMoney(inv.TotalCents, sym),
 
-		TaxRateBpsRaw:          inv.TaxRateBps,
+		TaxRateBps:             inv.TaxRateBps,
 		DiscountAmountCentsRaw: inv.DiscountAmountCents,
 	}
 
 	for _, item := range items {
 		page.Items = append(page.Items, InvoiceItemView{
-			ID:             item.ID,
 			Description:    item.Description,
+			Details:        "", // Will be populated when we add a Details column to the DB
 			Quantity:       formatQuantity(item.Quantity),
 			UnitPrice:      formatMoney(item.UnitPriceCents, sym),
 			LineTotal:      formatMoney(item.LineTotalCents, sym),

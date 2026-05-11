@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -12,10 +12,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var db *sql.DB
+var DB *sql.DB
 
-func initDB() {
-	// Load .env file for local development
+func InitDB() {
 	_ = godotenv.Load()
 
 	dsn := os.Getenv("DATABASE_URL")
@@ -39,5 +38,12 @@ func initDB() {
 		log.Fatal(fmt.Errorf("database ping failed: %w", err))
 	}
 
-	db = conn
+	DB = conn
+	log.Println("✅ Database connected")
+}
+
+func CloseDB() {
+	if DB != nil {
+		DB.Close()
+	}
 }

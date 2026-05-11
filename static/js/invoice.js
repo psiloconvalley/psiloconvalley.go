@@ -1,342 +1,204 @@
-(() => {
-    "use strict";
+/**
+ * PsiloconValley Invoice UI Controller
+ * Architecture: Event Delegation, Integer Math (Cents), Zero-Trust Client State
+ */
+(function () {
+    'use strict';
 
-    const COUNTRY_DATA_URL = "/static/data/country-region-data.json";
-    let countryRegionData = [];
+    // =========================================================================
+    // 1. CONFIGURATION & STATE
+    // =========================================================================
+    const CURRENCY_SYMBOLS = {
+        USD: '$', CAD: 'CA$', GBP: '£', EUR: '€'
+    };
 
-    const fallbackCountryRegionData = [
-        {
-            countryName: "United States",
-            countryShortCode: "US",
-            regions: [
-                "Alabama", "Alaska", "Arizona", "Arkansas", "California",
-                "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
-                "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
-                "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-                "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
-                "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-                "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
-                "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
-                "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
-                "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
-            ].map(name => ({ name }))
-        },
-        {
-            countryName: "Canada",
-            countryShortCode: "CA",
-            regions: [
-                "Alberta", "British Columbia", "Manitoba", "New Brunswick",
-                "Newfoundland and Labrador", "Nova Scotia", "Ontario",
-                "Prince Edward Island", "Quebec", "Saskatchewan",
-                "Northwest Territories", "Nunavut", "Yukon"
-            ].map(name => ({ name }))
-        },
-        {
-            countryName: "Mexico",
-            countryShortCode: "MX",
-            regions: [
-                "Jalisco", "Nuevo León", "CDMX", "Yucatán", "Baja California",
-                "Chihuahua", "Guanajuato", "Puebla", "Veracruz", "Oaxaca"
-            ].map(name => ({ name }))
-        },
-        {
-            countryName: "United Kingdom",
-            countryShortCode: "GB",
-            regions: [
-                "England", "Scotland", "Wales", "Northern Ireland"
-            ].map(name => ({ name }))
-        },
-        {
-            countryName: "Other",
-            countryShortCode: "OTHER",
-            regions: [
-                { name: "Other / Not listed" }
-            ]
-        }
-    ];
+    // =========================================================================
+    // 2. UTILITY FUNCTIONS (MATH & FORMATTING)
+    // =========================================================================
 
-    function qs(selector, root = document) {
-        return root.querySelector(selector);
+    /**
+     * Safely parses a string input into integer CENTS to avoid IEEE 754 float errors.
+     * e.g., "10.50" -> 1050, "10" -> 1000, "" -> 0
+     */
+    function parseToCents(val) {
+        if (!val) return 0;
+        // Strip everything except numbers, dots, and minus signs
+        const cleaned = String(val).replace(/[^0-9.\-]/g, '');
+        const floatVal = parseFloat(cleaned);
+        if (isNaN(floatVal)) return 0;
+        return Math.round(floatVal * 100);
     }
 
-    function qsa(selector, root = document) {
-        return Array.from(root.querySelectorAll(selector));
+    /**
+     * Formats integer cents back to a localized currency string.
+     */
+    function formatCents(cents) {
+        const symbol = getCurrencySymbol();
+        // Handle negative cents just in case, though UI should prevent it
+        const isNegative = cents < 0;
+        const absCents = Math.abs(cents);
+        const dollars = (absCents / 100).toFixed(2);
+        return `${isNegative ? '-' : ''}${symbol}${dollars}`;
     }
 
-    function parseNumber(value, fallback = 0) {
-        const cleaned = String(value ?? "").replace(/,/g, "");
-        const number = Number.parseFloat(cleaned);
-        if (!Number.isFinite(number)) return fallback;
-        return number;
+    function getCurrencySymbol() {
+        const sel = document.getElementById('currency');
+        const code = sel ? sel.value : 'USD';
+        return CURRENCY_SYMBOLS[code] || '$';
     }
 
-    function normalizeCountryRegionData(data) {
-        if (!Array.isArray(data)) return fallbackCountryRegionData;
+    // =========================================================================
+    // 3. CORE CALCULATION ENGINE
+    // =========================================================================
 
-        return data
-            .filter(country => country.countryName && country.countryShortCode)
-            .map(country => ({
-                countryName: country.countryName,
-                countryShortCode: country.countryShortCode,
-                regions: Array.isArray(country.regions)
-                    ? country.regions.map(region => ({
-                        name: region.name,
-                        shortCode: region.shortCode || ""
-                    }))
-                    : []
-            }))
-            .sort((a, b) => a.countryName.localeCompare(b.countryName));
-    }
+    /**
+     * Recalculates a single row and returns its total in cents.
+     */
+    function calculateRow(tr) {
+        const qtyInput = tr.querySelector('.qty');
+        const priceInput = tr.querySelector('.price');
+        const amountCell = tr.querySelector('.row-amount');
 
-    async function loadCountryRegionData() {
-        try {
-            const response = await fetch(COUNTRY_DATA_URL, { cache: "force-cache" });
-            if (!response.ok) throw new Error("Could not load country/region JSON");
-            const data = await response.json();
-            countryRegionData = normalizeCountryRegionData(data);
-        } catch (error) {
-            console.warn("Using fallback country data:", error);
-            countryRegionData = fallbackCountryRegionData;
-        }
-    }
-
-    // =========================================================
-    // SERVER-DRIVEN UI: COUNTRY & REGION HYDRATION
-    // The Backend is the Single Source of Truth.
-    // We read the `data-selected` attributes injected by Go.
-    // =========================================================
-
-    function populateCountrySelect(selectID) {
-        const select = document.getElementById(selectID);
-        if (!select) return;
-
-        // 1. Read the server's truth. Fallback to "US" only if server sends nothing.
-        const serverSelected = select.dataset.selected || "US"; 
+        const qty = parseFloat(qtyInput?.value || 0) || 0;
+        const priceCents = parseToCents(priceInput?.value);
         
-        select.innerHTML = "";
+        // Math in integers!
+        const lineCents = Math.round(qty * priceCents);
 
-        countryRegionData.forEach(country => {
-            const option = document.createElement("option");
-            
-            // 2. CRITICAL FIX: Use ISO Short Code as the value to match Go backend
-            option.value = country.countryShortCode; 
-            option.textContent = country.countryName;
-            option.dataset.code = country.countryShortCode;
-
-            // 3. Hydrate from server state
-            if (country.countryShortCode === serverSelected) {
-                option.selected = true;
-            }
-
-            select.appendChild(option);
-        });
-    }
-
-    function populateRegionSelect(countrySelectID, regionSelectID) {
-        const countrySelect = document.getElementById(countrySelectID);
-        const regionSelect = document.getElementById(regionSelectID);
-
-        if (!countrySelect || !regionSelect) return;
-
-        // 1. Read the server's truth for the region
-        const serverSelectedRegion = regionSelect.dataset.selected || "";
-        const selectedCountryCode = countrySelect.value;
-
-        const country = countryRegionData.find(item => item.countryShortCode === selectedCountryCode);
-        regionSelect.innerHTML = "";
-
-        if (!country || !country.regions || country.regions.length === 0) {
-            const option = document.createElement("option");
-            option.value = "";
-            option.textContent = "Not applicable";
-            regionSelect.appendChild(option);
-            return;
+        if (amountCell) {
+            amountCell.textContent = formatCents(lineCents);
         }
 
-        let selectedWasSet = false;
-
-        country.regions.forEach(region => {
-            const option = document.createElement("option");
-            option.value = region.name;
-            option.textContent = region.name;
-
-            // 2. Hydrate from server state (case-insensitive match)
-            if (serverSelectedRegion && region.name.toLowerCase() === serverSelectedRegion.toLowerCase()) {
-                option.selected = true;
-                selectedWasSet = true;
-            }
-
-            regionSelect.appendChild(option);
-        });
-
-        if (!selectedWasSet && regionSelect.options.length > 0) {
-            regionSelect.selectedIndex = 0;
-        }
+        return lineCents;
     }
 
-    function setupCountryRegionPair(countrySelectID, regionSelectID) {
-        const countrySelect = document.getElementById(countrySelectID);
-        const regionSelect = document.getElementById(regionSelectID);
-
-        if (!countrySelect || !regionSelect) return;
-
-        // Initial hydration based on server-rendered DOM
-        populateRegionSelect(countrySelectID, regionSelectID);
-
-        // User interaction: When country changes, clear the server-selected 
-        // region so it doesn't force "California" when switching to "Canada"
-        countrySelect.addEventListener("change", () => {
-            regionSelect.dataset.selected = ""; 
-            populateRegionSelect(countrySelectID, regionSelectID);
-        });
-    }
-
-    function setupCountryDropdowns() {
-        populateCountrySelect("company_country");
-        populateCountrySelect("client_country");
-
-        setupCountryRegionPair("company_country", "company_state");
-        setupCountryRegionPair("client_country", "client_state");
-    }
-
-    // =========================================================
-    // CURRENCY & MATH UI
-    // =========================================================
-
-    function currentSymbol() {
-        const select = document.getElementById("currency");
-        if (!select) return "$";
-        const selected = select.options[select.selectedIndex];
-        if (!selected) return "$";
-        return selected.dataset.symbol || "$";
-    }
-
-    function money(value) {
-        return currentSymbol() + value.toFixed(2);
-    }
-
-    function updateHiddenDescriptions() {
-        const rows = qsa("#items_body tr");
-        rows.forEach(row => {
-            const itemNameInput = qs(".item-name", row);
-            const itemDetailInput = qs(".item-detail", row);
-            const hiddenDescriptionInput = qs(".desc-hidden", row);
-
-            if (!itemNameInput || !itemDetailInput || !hiddenDescriptionInput) return;
-
-            const itemName = itemNameInput.value.trim();
-            const itemDetail = itemDetailInput.value.trim();
-
-            if (itemName && itemDetail) {
-                hiddenDescriptionInput.value = itemName + " — " + itemDetail;
-            } else if (itemName) {
-                hiddenDescriptionInput.value = itemName;
-            } else {
-                hiddenDescriptionInput.value = itemDetail;
-            }
-        });
-    }
-
-    function calculateTotals() {
-        let subtotal = 0;
-        const rows = qsa("#items_body tr");
-
-        rows.forEach(row => {
-            const qtyInput = qs(".qty", row);
-            const priceInput = qs(".price", row);
-            const amountCell = qs(".row-amount", row);
-
-            if (!qtyInput || !priceInput || !amountCell) return;
-
-            const qty = parseNumber(qtyInput.value, 0);
-            const price = parseNumber(priceInput.value, 0);
-            const amount = qty * price;
-
-            amountCell.innerText = money(amount);
-            subtotal += amount;
-        });
-
-        const taxRateInput = document.getElementById("tax_rate");
-        const taxRate = taxRateInput ? parseNumber(taxRateInput.value, 0) : 0;
-
-        const taxAmount = subtotal * (taxRate / 100);
-        const total = subtotal + taxAmount;
-
-        const subtotalEl = document.getElementById("subtotal");
-        const taxAmountEl = document.getElementById("tax_amount");
-        const totalEl = document.getElementById("total");
-
-        if (subtotalEl) subtotalEl.innerText = money(subtotal);
-        if (taxAmountEl) taxAmountEl.innerText = money(taxAmount);
-        if (totalEl) totalEl.innerText = money(total);
-
-        updateHiddenDescriptions();
-    }
-
-    function addRow() {
-        const tbody = document.getElementById("items_body");
+    /**
+     * Recalculates the entire invoice (Subtotal, Tax, Total).
+     */
+    function recalculateInvoice() {
+        const tbody = document.getElementById('items_body');
         if (!tbody) return;
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td><input type="text" class="item-name" placeholder="Service or product" required></td>
-            <td>
-                <input type="text" class="item-detail" placeholder="Short description">
-                <input type="hidden" name="description" class="desc-hidden">
-            </td>
-            <td><input type="number" step="0.01" name="quantity" value="1" class="qty"></td>
-            <td><input type="number" step="0.01" name="unit_price" value="0" class="price"></td>
-            <td class="right amount row-amount">${money(0)}</td>
-            <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
-        `;
-        tbody.appendChild(row);
-        calculateTotals();
-    }
+        const rows = tbody.querySelectorAll('tr');
+        let subtotalCents = 0;
 
-    function removeRow(button) {
-        const rows = qsa("#items_body tr");
-        if (rows.length <= 1) return;
-        const row = button.closest("tr");
-        if (row) row.remove();
-        calculateTotals();
-    }
-
-    function bindFormEvents() {
-        const form = document.getElementById("invoice-form");
-        if (!form) return;
-
-        form.addEventListener("input", event => {
-            if (
-                event.target.matches(".qty") ||
-                event.target.matches(".price") ||
-                event.target.matches(".item-name") ||
-                event.target.matches(".item-detail") ||
-                event.target.matches("#tax_rate")
-            ) {
-                calculateTotals();
-            }
+        rows.forEach(tr => {
+            subtotalCents += calculateRow(tr);
         });
 
-        form.addEventListener("change", event => {
-            if (event.target.matches("#currency")) {
-                calculateTotals();
-            }
-        });
+        // Tax Calculation (Matching Go backend logic: bps / 10000)
+        const taxRateInput = document.getElementById('tax_rate');
+        const taxRatePercent = parseFloat(taxRateInput?.value || 0) || 0;
+        const taxCents = Math.round((subtotalCents * taxRatePercent) / 100);
 
-        form.addEventListener("submit", () => {
-            updateHiddenDescriptions();
-        });
+        const totalCents = subtotalCents + taxCents;
+
+        // Update DOM
+        const elSubtotal = document.getElementById('subtotal');
+        const elTax = document.getElementById('tax_amount');
+        const elTotal = document.getElementById('total');
+
+        if (elSubtotal) elSubtotal.textContent = formatCents(subtotalCents);
+        if (elTax) elTax.textContent = formatCents(taxCents);
+        if (elTotal) elTotal.textContent = formatCents(totalCents);
     }
 
-    async function initInvoiceForm() {
-        await loadCountryRegionData();
-        setupCountryDropdowns();
-        bindFormEvents();
-        calculateTotals();
+    // =========================================================================
+    // 4. DOM MANIPULATION (ADD / REMOVE)
+    // =========================================================================
+
+    function addRow() {
+        const tbody = document.getElementById('items_body');
+        if (!tbody) return;
+
+        const rows = tbody.querySelectorAll('tr');
+        if (rows.length === 0) return; // Safety check
+
+        // Clone the last row
+        const lastRow = rows[rows.length - 1];
+        const newRow = lastRow.cloneNode(true);
+
+        // Reset values for the new row
+        const desc = newRow.querySelector('.item-name');
+        if (desc) desc.value = '';
+
+        const qty = newRow.querySelector('.qty');
+        if (qty) qty.value = '1';
+
+        const price = newRow.querySelector('.price');
+        if (price) price.value = '0.00';
+
+        const amount = newRow.querySelector('.row-amount');
+        if (amount) amount.textContent = formatCents(0);
+
+        tbody.appendChild(newRow);
+        
+        // Focus the new description input for fast typing
+        if (desc) desc.focus();
+        
+        recalculateInvoice();
     }
 
-    window.addRow = addRow;
-    window.removeRow = removeRow;
+    function removeRow(btn) {
+        const tbody = document.getElementById('items_body');
+        if (!tbody) return;
 
-    window.addEventListener("DOMContentLoaded", initInvoiceForm);
+        const rows = tbody.querySelectorAll('tr');
+        const tr = btn.closest('tr');
+
+        if (rows.length <= 1) {
+            // Don't delete the last row, just clear it
+            const desc = tr.querySelector('.item-name');
+            if (desc) desc.value = '';
+            const qty = tr.querySelector('.qty');
+            if (qty) qty.value = '1';
+            const price = tr.querySelector('.price');
+            if (price) price.value = '0.00';
+        } else {
+            tr.remove();
+        }
+
+        recalculateInvoice();
+    }
+
+    // =========================================================================
+    // 5. EVENT DELEGATION & INITIALIZATION
+    // =========================================================================
+
+    function init() {
+        const tbody = document.getElementById('items_body');
+        
+        // EVENT DELEGATION: One listener to rule them all.
+        // This catches events on dynamically added rows automatically.
+        if (tbody) {
+            tbody.addEventListener('input', function (e) {
+                const target = e.target;
+                if (target.classList.contains('qty') || target.classList.contains('price')) {
+                    recalculateInvoice();
+                }
+            });
+        }
+
+        // Sidebar listeners
+        const taxRate = document.getElementById('tax_rate');
+        if (taxRate) taxRate.addEventListener('input', recalculateInvoice);
+
+        const currency = document.getElementById('currency');
+        if (currency) currency.addEventListener('change', recalculateInvoice);
+
+        // Expose ONLY what the HTML template inline handlers require
+        window.addRow = addRow;
+        window.removeRow = removeRow;
+
+        // Initial calculation on page load
+        recalculateInvoice();
+    }
+
+    // Boot up when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
 })();

@@ -1,181 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{{.Invoice.InvoiceNumber}} — {{.Invoice.ClientName}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{template "nav-styles" .}}
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-            background: #f5f5f5;
-            color: #1a1a1a;
+            background: #f3f4f6;
+            color: #111827;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 13px;
+            line-height: 1.45;
             -webkit-font-smoothing: antialiased;
         }
 
         .page {
-            max-width: 880px;
-            margin: 48px auto;
-            padding: 0 24px;
+            max-width: 860px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
         .invoice-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
             overflow: hidden;
+            border: 1px solid #e5e7eb;
         }
 
-        /* ── Header ── */
-        .header {
-            background: #0a0a0a;
-            color: white;
-            padding: 48px 56px;
+        .top-accent {
+            height: 6px;
+            background: #0f172a;
+        }
+
+        /* ============================================================
+           COMPACT HEADER (Identity & Meta)
+           ============================================================ */
+
+        .header-top {
+            padding: 28px 36px 16px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
 
-        .header-left {
+        .header-title-block {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: baseline;
+            gap: 12px;
         }
 
-        .title {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.4);
-            margin: 0;
-        }
-
-        .invoice-number-display {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin: 0;
-        }
-
-        .header-right {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-
-        .company-name-header {
-            font-size: 20px;
-            font-weight: 700;
+        .doc-title {
+            font-size: 24px;
+            font-weight: 800;
             letter-spacing: -0.5px;
+            color: #0f172a;
         }
 
-        .logo-placeholder {
-            width: 120px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            overflow: hidden;
-        }
-
-        .logo-placeholder img {
-            max-width: 120px;
-            max-height: 48px;
-            object-fit: contain;
-        }
-
-        .currency-badge {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
-            background: rgba(255,255,255,0.08);
-            padding: 4px 12px;
-            border-radius: 4px;
-        }
-
-        /* ── Body ── */
-        .body {
-            padding: 56px;
-        }
-
-        /* ── Addresses ── */
-        .addresses {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 56px;
-            margin-bottom: 48px;
-        }
-
-        .address-label {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #999;
-            margin-bottom: 12px;
-        }
-
-        .address-name {
-            font-size: 16px;
+        .doc-number {
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 6px;
-            color: #111;
+            color: #64748b;
         }
 
-        .address-line {
-            font-size: 14px;
-            color: #555;
-            line-height: 1.7;
-        }
-
-        /* ── Invoice Meta ── */
-        .invoice-meta {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            margin-bottom: 48px;
-            padding: 28px 32px;
-            background: #fafafa;
-            border-radius: 10px;
-            border: 1px solid #f0f0f0;
+        .meta-grid {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #475569;
         }
 
         .meta-item {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            align-items: flex-end;
         }
 
         .meta-label {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
+            font-size: 9px;
+            font-weight: 700;
             text-transform: uppercase;
-            color: #999;
+            color: #94a3b8;
+            letter-spacing: 0.8px;
         }
 
         .meta-value {
-            font-size: 15px;
             font-weight: 600;
-            color: #111;
+            color: #0f172a;
+            margin-top: 2px;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -186,397 +119,357 @@
         .status-void     { background: #fee2e2; color: #dc2626; }
         .status-overdue  { background: #fef9c3; color: #854d0e; }
 
-        /* ── Line Items Table ── */
-        table {
+        /* ============================================================
+           SIDE-BY-SIDE ADDRESSES
+           ============================================================ */
+
+        .addresses-band {
+            padding: 0 36px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .address-col {
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .address-label {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+
+        .address-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .address-line {
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* ============================================================
+           TIGHT LINE ITEMS TABLE
+           ============================================================ */
+
+        .table-wrapper {
+            padding: 0 36px;
+        }
+
+        .items-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        thead th {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
+        .items-table thead th {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            color: #999;
-            padding: 14px 16px;
-            border-bottom: 2px solid #111;
+            color: #64748b;
+            padding: 8px 10px;
+            border-bottom: 2px solid #cbd5e1;
             text-align: left;
         }
 
-        thead th.right {
-            text-align: right;
+        .items-table th.right,
+        .items-table td.right { text-align: right; }
+
+        .items-table tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: top;
+            font-size: 12px;
         }
 
-        tbody td {
-            padding: 18px 16px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-            color: #333;
+        .item-description { font-weight: 700; color: #0f172a; white-space: pre-line; }
+        .item-details { margin-top: 2px; color: #64748b; font-size: 11px; line-height: 1.4; white-space: pre-line; }
+        .money, .numeric { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+        /* ============================================================
+           BOTTOM SPLIT (Notes Left / Totals Right)
+           ============================================================ */
+
+        .invoice-footer-split {
+            padding: 20px 36px 36px;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 40px;
+            align-items: flex-start;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
-        tbody td.right {
-            text-align: right;
-            font-variant-numeric: tabular-nums;
+        .notes-block {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        tbody tr:last-child td {
-            border-bottom: none;
+        .info-group {
+            background: #ffffff;
         }
 
-        /* ── Totals ── */
-        .totals-section {
-            margin-top: 8px;
-            border-top: 2px solid #111;
+        .info-label {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .info-content {
+            font-size: 11.5px;
+            color: #475569;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        /* Slim, tight totals box */
+        .totals-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
         }
 
         .totals-row {
             display: flex;
-            justify-content: flex-end;
-            padding: 12px 16px;
-            font-size: 14px;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 12px;
         }
 
-        .totals-row .totals-label {
-            width: 200px;
-            text-align: right;
-            padding-right: 32px;
-            color: #666;
+        .totals-label { color: #64748b; font-weight: 600; }
+        .totals-value { color: #0f172a; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+        .grand-total {
+            border-top: 1px solid #cbd5e1;
+            margin-top: 6px;
+            padding-top: 10px;
+            padding-bottom: 2px;
+        }
+        .grand-total .totals-label { color: #0f172a; font-size: 14px; font-weight: 800; }
+        .grand-total .totals-value { color: #0f172a; font-size: 15px; font-weight: 800; }
+
+        /* ============================================================
+           ACTIONS BLOCK
+           ============================================================ */
+
+        .invoice-actions-wrapper { margin-top: 20px; padding: 26px 36px; border-top: 1px solid #e5e7eb; background: #fafafa; }
+        .primary-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+
+        .btn-primary, .btn-secondary {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 10px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 700;
+            text-decoration: none; cursor: pointer; border: none; font-family: inherit;
         }
 
-        .totals-row .totals-value {
-            width: 150px;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-            color: #111;
-        }
+        .btn-primary { background: #0f172a; color: #ffffff; }
+        .btn-secondary { background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; }
 
-        .totals-row.grand-total {
-            padding: 20px 16px;
-            margin-top: 4px;
-            border-top: 1px solid #eee;
-        }
+        .status-panel { background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid #e5e7eb; }
+        .status-panel-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+        .status-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .status-btn { padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; border: none; cursor: pointer; font-family: inherit; }
 
-        .totals-row.grand-total .totals-label {
-            font-size: 18px;
-            font-weight: 700;
-            color: #111;
-        }
-
-        .totals-row.grand-total .totals-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #111;
-        }
-
-        /* ── Footer Sections ── */
-        .info-section {
-            margin-top: 48px;
-            padding-top: 32px;
-            border-top: 1px solid #f0f0f0;
-        }
-
-        .info-section-label {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #999;
-            margin-bottom: 10px;
-        }
-
-        .info-section-content {
-            font-size: 14px;
-            color: #555;
-            line-height: 1.7;
-        }
-
-        /* ── Actions ── */
-        .actions {
-            margin-top: 40px;
-            padding-top: 32px;
-            border-top: 1px solid #f0f0f0;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            border: none;
-            text-decoration: none;
-            transition: all 0.15s ease;
-        }
-
-        .btn-primary {
-            background: #111;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #333;
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #111;
-            border: 1px solid #ddd;
-        }
-
-        .btn-secondary:hover {
-            background: #f5f5f5;
-            border-color: #bbb;
-        }
-
-        /* ── Status Workflow Buttons ── */
-        .status-actions {
-            margin-top: 16px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .status-btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            border: none;
-            transition: all 0.15s ease;
-        }
-
-        .status-btn-sent    { background: #dbeafe; color: #1d4ed8; }
-        .status-btn-paid    { background: #dcfce7; color: #15803d; }
-        .status-btn-overdue { background: #fef9c3; color: #854d0e; }
-        .status-btn-void    { background: #fee2e2; color: #dc2626; }
-
-        .status-btn-sent:hover    { background: #1d4ed8; color: white; }
-        .status-btn-paid:hover    { background: #15803d; color: white; }
-        .status-btn-overdue:hover { background: #854d0e; color: white; }
-        .status-btn-void:hover    { background: #dc2626; color: white; }
-
-        /* ── Responsive ── */
         @media (max-width: 700px) {
-            .header {
-                flex-direction: column;
-                gap: 24px;
-                padding: 32px 28px;
-            }
-
-            .header-right {
-                text-align: left;
-                align-items: flex-start;
-            }
-
-            .body {
-                padding: 32px 28px;
-            }
-
-            .addresses {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-
-            .invoice-meta {
-                grid-template-columns: 1fr 1fr;
-            }
+            .header-top { flex-direction: column; gap: 16px; padding: 20px; }
+            .meta-grid { flex-wrap: wrap; gap: 12px; justify-content: flex-start; }
+            .meta-item { align-items: flex-start; }
+            .addresses-band { grid-template-columns: 1fr; gap: 16px; padding: 0 20px 20px; }
+            .table-wrapper { padding: 0 20px; }
+            .invoice-footer-split { grid-template-columns: 1fr; gap: 24px; padding: 20px; }
+            .invoice-actions-wrapper { padding: 20px; }
         }
 
-        /* ── Print Styles ── */
+        /* ============================================================
+           HYPER-OPTIMIZED PRINT RULES (Guarantees Single Page Fit)
+           ============================================================ */
+
         @media print {
             @page {
-                margin: 0.5in;
                 size: letter;
+                margin: 0.3in !important; /* Maximizes physical printable area */
             }
 
             html, body {
-                background: white !important;
+                background: #ffffff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                color-adjust: exact !important;
+                color: #000000 !important;
             }
 
-            body {
-                font-size: 12px;
-            }
+            body { font-size: 11px !important; line-height: 1.35 !important; }
 
-            .page {
-                margin: 0;
-                padding: 0;
-                max-width: 100%;
-            }
+            .site-nav, .invoice-actions-wrapper { display: none !important; }
+            .page { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .invoice-card { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+            .top-accent { height: 4px !important; }
 
-            .invoice-card {
-                box-shadow: none;
-                border-radius: 0;
-                border: none;
-            }
+            /* Minimize structural padding entirely */
+            .header-top { padding: 16px 0 12px !important; }
+            .addresses-band { padding: 0 0 16px !important; gap: 16px !important; }
+            .address-col { padding: 10px 12px !important; border-color: #e2e8f0 !important; background: #ffffff !important; }
+            
+            .table-wrapper { padding: 0 !important; }
+            .items-table thead th { padding: 6px 8px !important; font-size: 9px !important; }
+            .items-table tbody td { padding: 8px !important; font-size: 11px !important; }
 
-            .header {
-                background: #0a0a0a !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                padding: 32px 40px;
-            }
+            .invoice-footer-split { padding: 16px 0 0 !important; gap: 20px !important; }
+            .totals-box { padding: 8px 12px !important; background: #ffffff !important; border-color: #cbd5e1 !important; }
+            .totals-row { padding: 4px 0 !important; font-size: 11px !important; }
+            .grand-total { margin-top: 4px !important; padding-top: 6px !important; }
+            .grand-total .totals-label, .grand-total .totals-value { font-size: 13px !important; }
 
-            .body {
-                padding: 32px 40px;
-            }
+            .info-label { margin-bottom: 2px !important; }
+            .info-content { font-size: 10.5px !important; }
 
-            .invoice-meta {
-                background: #fafafa !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .status-badge {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            thead th {
-                border-bottom: 2px solid #111 !important;
-            }
-
-            .actions {
-                display: none !important;
-            }
-
-            .status-actions {
-                display: none !important;
-            }
-
-            .site-nav {
-                display: none !important;
-            }
-
-            a {
-                text-decoration: none !important;
-                color: inherit !important;
-            }
+            thead { display: table-header-group !important; }
+            tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            .invoice-footer-split { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
     </style>
 </head>
-    <body>
 
-{{template "nav-styles" .}}
+<body>
+
 {{template "nav" .}}
 
 <div class="page">
-
     <div class="invoice-card">
 
+        <div class="top-accent"></div>
 
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1 class="title">Invoice</h1>
-                <p class="invoice-number-display">{{.Invoice.InvoiceNumber}}</p>
-            </div>
-            <div class="header-right">
-                <div class="logo-placeholder">
-                    <!-- Logo will go here for paid users -->
-                </div>
-                <span class="company-name-header">{{.Invoice.CompanyName}}</span>
-                <span class="currency-badge">{{.Invoice.Currency}}</span>
-            </div>
-        </div>
-
-        <div class="body">
-
-            <!-- Addresses -->
-            <div class="addresses">
-                <div class="address">
-                    <div class="address-label">From</div>
-                    <div class="address-name">{{.Invoice.CompanyName}}</div>
-                    <div class="address-line">
-                        {{if .Invoice.CompanyAddress}}{{.Invoice.CompanyAddress}}<br>{{end}}
-                        {{if .Invoice.CompanyCity}}{{.Invoice.CompanyCity}}{{if .Invoice.CompanyState}}, {{.Invoice.CompanyState}}{{end}} {{.Invoice.CompanyZip}}<br>{{end}}
-                        {{if .Invoice.CompanyCountry}}{{.Invoice.CompanyCountry}}<br>{{end}}
-                        {{if .Invoice.CompanyEmail}}{{.Invoice.CompanyEmail}}{{end}}
-                    </div>
-                </div>
-                <div class="address">
-                    <div class="address-label">Bill To</div>
-                    <div class="address-name">{{.Invoice.ClientName}}</div>
-                    <div class="address-line">
-                        {{if .Invoice.ClientAddress}}{{.Invoice.ClientAddress}}<br>{{end}}
-                        {{if .Invoice.ClientCity}}{{.Invoice.ClientCity}}{{if .Invoice.ClientState}}, {{.Invoice.ClientState}}{{end}} {{.Invoice.ClientZip}}<br>{{end}}
-                        {{if .Invoice.ClientCountry}}{{.Invoice.ClientCountry}}<br>{{end}}
-                        {{if .Invoice.ClientEmail}}{{.Invoice.ClientEmail}}{{end}}
-                    </div>
-                </div>
+        <!-- Identity & Metadata Band -->
+        <header class="header-top">
+            <div class="header-title-block">
+                <span class="doc-title">INVOICE</span>
+                <span class="doc-number">#{{.Invoice.InvoiceNumber}}</span>
             </div>
 
-            <!-- Invoice Meta -->
-            <div class="invoice-meta">
-                <div class="meta-item">
-                    <span class="meta-label">Invoice Number</span>
-                    <span class="meta-value">{{.Invoice.InvoiceNumber}}</span>
-                </div>
+            <div class="meta-grid">
                 <div class="meta-item">
                     <span class="meta-label">Status</span>
-                    <span class="meta-value">
-                        <span class="status-badge status-{{.Invoice.Status}}">{{.Invoice.Status}}</span>
-                    </span>
+                    <span class="meta-value"><span class="status-badge status-{{.Invoice.Status}}">{{.Invoice.Status}}</span></span>
                 </div>
                 <div class="meta-item">
-                    <span class="meta-label">Issue Date</span>
+                    <span class="meta-label">Issued</span>
                     <span class="meta-value">{{.Invoice.IssueDate}}</span>
                 </div>
+                {{if .Invoice.DueDate}}
                 <div class="meta-item">
-                    <span class="meta-label">Due Date</span>
-                    <span class="meta-value">{{if .Invoice.DueDate}}{{.Invoice.DueDate}}{{else}}—{{end}}</span>
+                    <span class="meta-label">Due</span>
+                    <span class="meta-value">{{.Invoice.DueDate}}</span>
+                </div>
+                {{end}}
+                <div class="meta-item">
+                    <span class="meta-label">Currency</span>
+                    <span class="meta-value">{{.Invoice.Currency}}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Side-by-Side From & Bill To Addresses -->
+        <section class="addresses-band">
+            <div class="address-col">
+                <div class="address-label">From</div>
+                <div class="address-name">{{.Invoice.CompanyName}}</div>
+                <div class="address-line">
+                    {{if .Invoice.CompanyAddress}}{{.Invoice.CompanyAddress}}<br>{{end}}
+                    {{if .Invoice.CompanyCity}}{{.Invoice.CompanyCity}}{{if .Invoice.CompanyState}}, {{.Invoice.CompanyState}}{{end}} {{.Invoice.CompanyZip}}<br>{{end}}
+                    {{if .Invoice.CompanyCountry}}{{.Invoice.CompanyCountry}}<br>{{end}}
+                    {{if .Invoice.CompanyEmail}}{{.Invoice.CompanyEmail}}{{end}}
                 </div>
             </div>
 
-            <!-- Line Items -->
-            <table>
+            <div class="address-col">
+                <div class="address-label">Bill To</div>
+                <div class="address-name">{{.Invoice.ClientName}}</div>
+                <div class="address-line">
+                    {{if .Invoice.ClientAddress}}{{.Invoice.ClientAddress}}<br>{{end}}
+                    {{if .Invoice.ClientCity}}{{.Invoice.ClientCity}}{{if .Invoice.ClientState}}, {{.Invoice.ClientState}}{{end}} {{.Invoice.ClientZip}}<br>{{end}}
+                    {{if .Invoice.ClientCountry}}{{.Invoice.ClientCountry}}<br>{{end}}
+                    {{if .Invoice.ClientEmail}}{{.Invoice.ClientEmail}}{{end}}
+                </div>
+            </div>
+        </section>
+
+        <!-- Tight Line Items Table -->
+        <div class="table-wrapper">
+            <table class="items-table">
                 <thead>
                     <tr>
                         <th>Description</th>
                         <th class="right">Qty</th>
-                        <th class="right">Price</th>
+                        <th class="right">Unit Price</th>
                         <th class="right">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{range .Invoice.Items}}
                     <tr>
-                        <td>{{.Description}}</td>
-                        <td class="right">{{.Quantity}}</td>
-                        <td class="right">{{.UnitPrice}}</td>
-                        <td class="right">{{.LineTotal}}</td>
+                        <td>
+                            <div class="item-description">{{.Description}}</div>
+                            {{if .Details}}
+                            <div class="item-details">{{.Details}}</div>
+                            {{end}}
+                        </td>
+                        <td class="right numeric">{{.Quantity}}</td>
+                        <td class="right money">{{.UnitPrice}}</td>
+                        <td class="right money">{{.LineTotal}}</td>
                     </tr>
                     {{end}}
                 </tbody>
             </table>
+        </div>
 
-            <!-- Totals -->
-            <div class="totals-section">
+        <!-- Side-by-Side Shared Bottom Split (Notes Left / Totals Right) -->
+        <footer class="invoice-footer-split">
+            
+            <div class="notes-block">
+                {{if .Invoice.PaymentDetails}}
+                <div class="info-group">
+                    <div class="info-label">Payment Instructions</div>
+                    <div class="info-content">{{.Invoice.PaymentDetails}}</div>
+                </div>
+                {{end}}
+
+                {{if .Invoice.Notes}}
+                <div class="info-group">
+                    <div class="info-label">Notes & Memo</div>
+                    <div class="info-content">{{.Invoice.Notes}}</div>
+                </div>
+                {{end}}
+            </div>
+
+            <div class="totals-box">
                 <div class="totals-row">
                     <span class="totals-label">Subtotal</span>
                     <span class="totals-value">{{.Invoice.Subtotal}}</span>
                 </div>
 
-                {{if .Invoice.TaxRate}}
+                {{if ne .Invoice.TaxRate "0"}}
                 <div class="totals-row">
                     <span class="totals-label">Tax ({{.Invoice.TaxRate}}%)</span>
                     <span class="totals-value">{{.Invoice.TaxAmount}}</span>
                 </div>
                 {{end}}
 
-                {{if .Invoice.Discount}}
+                {{if ne .Invoice.Discount "$0.00"}}
                 <div class="totals-row">
                     <span class="totals-label">Discount</span>
                     <span class="totals-value">-{{.Invoice.Discount}}</span>
@@ -584,87 +477,74 @@
                 {{end}}
 
                 <div class="totals-row grand-total">
-                    <span class="totals-label">Total</span>
+                    <span class="totals-label">Total Due</span>
                     <span class="totals-value">{{.Invoice.Total}}</span>
                 </div>
             </div>
 
-            <!-- Payment Details -->
-            {{if .Invoice.PaymentDetails}}
-            <div class="info-section">
-                <div class="info-section-label">Payment Details</div>
-                <div class="info-section-content">{{.Invoice.PaymentDetails}}</div>
-            </div>
-            {{end}}
+        </footer>
 
-            <!-- Notes -->
-            {{if .Invoice.Notes}}
-            <div class="info-section">
-                <div class="info-section-label">Notes</div>
-                <div class="info-section-content">{{.Invoice.Notes}}</div>
-            </div>
-            {{end}}
-
-            <!-- Actions -->
-            <div class="actions">
+        <!-- Action / Workflow Controls -->
+        <section class="invoice-actions-wrapper">
+            <div class="primary-actions">
                 {{if eq .Invoice.Status "draft"}}
-                <a href="/invoices/{{.Invoice.ID}}/edit" class="btn btn-secondary">Edit Invoice</a>
+                <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
                 {{end}}
-                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn btn-secondary">Duplicate</a>
-                <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn btn-primary">Download PDF</a>
-                <button class="btn btn-secondary" onclick="window.print()">Print</button>
+
+                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn-secondary">📋 Duplicate</a>
+                <button type="button" onclick="window.print()" class="btn-secondary">🖨️ Print</button>
+                <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-primary">📥 Download PDF</a>
             </div>
 
-            <!-- Status Workflow -->
             {{if .User}}
-            <div class="status-actions">
-                {{if eq .Invoice.Status "draft"}}
-                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
-                    {{.csrfField}}
-                    <input type="hidden" name="status" value="sent">
-                    <button type="submit" class="status-btn status-btn-sent">Mark as Sent</button>
-                </form>
-                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
-                    {{.csrfField}}
-                    <input type="hidden" name="status" value="void">
-                    <button type="submit" class="status-btn status-btn-void">Void Invoice</button>
-                </form>
-                {{end}}
+            <div class="status-panel">
+                <div class="status-panel-title">Change Invoice Status</div>
 
-                {{if eq .Invoice.Status "sent"}}
-                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
-                    {{.csrfField}}
-                    <input type="hidden" name="status" value="paid">
-                    <button type="submit" class="status-btn status-btn-paid">Mark as Paid</button>
-                </form>
-                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
-                    {{.csrfField}}
-                    <input type="hidden" name="status" value="overdue">
-                    <button type="submit" class="status-btn status-btn-overdue">Mark as Overdue</button>
-                </form>
-                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
-                    {{.csrfField}}
-                    <input type="hidden" name="status" value="void">
-                    <button type="submit" class="status-btn status-btn-void">Void Invoice</button>
-                </form>
-                {{end}}
+                <div class="status-actions">
+                    {{if eq .Invoice.Status "draft"}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="sent">
+                        <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">Mark as Sent</button>
+                    </form>
+                    {{end}}
 
-                {{if eq .Invoice.Status "overdue"}}
-                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
-                    {{.csrfField}}
-                    <input type="hidden" name="status" value="paid">
-                    <button type="submit" class="status-btn status-btn-paid">Mark as Paid</button>
-                </form>
-                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:inline;">
-                    {{.csrfField}}
-                    <input type="hidden" name="status" value="void">
-                    <button type="submit" class="status-btn status-btn-void">Void Invoice</button>
-                </form>
-                {{end}}
+                    {{if eq .Invoice.Status "sent"}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="paid">
+                        <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
+                    </form>
+
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="overdue">
+                        <button type="submit" class="status-btn" style="background:#fef9c3; color:#854d0e;">Mark Overdue</button>
+                    </form>
+                    {{end}}
+
+                    {{if eq .Invoice.Status "overdue"}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="paid">
+                        <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
+                    </form>
+                    {{end}}
+
+                    {{if ne .Invoice.Status "void"}}
+                    {{if ne .Invoice.Status "paid"}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="void">
+                        <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">Void</button>
+                    </form>
+                    {{end}}
+                    {{end}}
+                </div>
             </div>
             {{end}}
+        </section>
 
-        </div>
     </div>
 </div>
 

@@ -666,9 +666,13 @@ func (a *app) invoiceCreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	f, err := parseInvoiceForm(w, r)
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		log.Printf("parseInvoiceForm error: %v", err)
+		http.Error(w, "Bad request: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	// 🚨 INJECTED LOG DIAGNOSTIC - PROVES DATA PASSAGE 🚨
+	log.Printf("parsed invoice form: items=%d %+v", len(f.Items), f.Items)
 
 	if f.InvoiceNumber == "" {
 		f.InvoiceNumber = fmt.Sprintf("INV-%d", time.Now().UnixNano()/1_000_000)
@@ -771,9 +775,13 @@ func (a *app) invoiceUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 	f, err := parseInvoiceForm(w, r)
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		log.Printf("parseInvoiceForm error: %v", err)
+		http.Error(w, "Bad request: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	// 🚨 INJECTED LOG DIAGNOSTIC - PROVES DATA PASSAGE 🚨
+	log.Printf("parsed invoice form: items=%d %+v", len(f.Items), f.Items)
 
 	user := auth.GetUser(r)
 	if user != nil && f.ClientName != "" && f.ClientID == nil {
@@ -926,6 +934,9 @@ type invoiceFormData struct {
 	Items                                                                                            []repo.InvoiceItem
 }
 
+// =====================================================================
+// HARDENED FORM PARSER (PRODUCTION-GRADE)
+// =====================================================================
 func parseInvoiceForm(w http.ResponseWriter, r *http.Request) (*invoiceFormData, error) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 
@@ -934,62 +945,119 @@ func parseInvoiceForm(w http.ResponseWriter, r *http.Request) (*invoiceFormData,
 	}
 
 	f := &invoiceFormData{
-		CompanyName:    r.FormValue("company_name"),
-		CompanyEmail:   r.FormValue("company_email"),
-		CompanyAddress: r.FormValue("company_address"),
-		CompanyCity:    r.FormValue("company_city"),
-		CompanyZip:     r.FormValue("company_zip"),
-		CompanyState:   r.FormValue("company_state"),
-		CompanyCountry: r.FormValue("company_country"),
-		ClientName:     r.FormValue("client_name"),
-		ClientEmail:    r.FormValue("client_email"),
-		ClientAddress:  r.FormValue("client_address"),
-		ClientCity:     r.FormValue("client_city"),
-		ClientZip:      r.FormValue("client_zip"),
-		ClientState:    r.FormValue("client_state"),
-		ClientCountry:  r.FormValue("client_country"),
-		InvoiceNumber:  r.FormValue("invoice_number"),
-		Notes:          r.FormValue("notes"),
-		PaymentDetails: r.FormValue("payment_details"),
+		CompanyName:    strings.TrimSpace(r.FormValue("company_name")),
+		CompanyEmail:   strings.TrimSpace(r.FormValue("company_email")),
+		CompanyAddress: strings.TrimSpace(r.FormValue("company_address")),
+		CompanyCity:    strings.TrimSpace(r.FormValue("company_city")),
+		CompanyZip:     strings.TrimSpace(r.FormValue("company_zip")),
+		CompanyState:   strings.TrimSpace(r.FormValue("company_state")),
+		CompanyCountry: strings.TrimSpace(r.FormValue("company_country")),
+		ClientName:     strings.TrimSpace(r.FormValue("client_name")),
+		ClientEmail:    strings.TrimSpace(r.FormValue("client_email")),
+		ClientAddress:  strings.TrimSpace(r.FormValue("client_address")),
+		ClientCity:     strings.TrimSpace(r.FormValue("client_city")),
+		ClientZip:      strings.TrimSpace(r.FormValue("client_zip")),
+		ClientState:    strings.TrimSpace(r.FormValue("client_state")),
+		ClientCountry:  strings.TrimSpace(r.FormValue("client_country")),
+		InvoiceNumber:  strings.TrimSpace(r.FormValue("invoice_number")),
+		Notes:          strings.TrimSpace(r.FormValue("notes")),
+		PaymentDetails: strings.TrimSpace(r.FormValue("payment_details")),
 	}
 
-	if cid := r.FormValue("client_id"); cid != "" {
-		if v, err := strconv.ParseInt(cid, 10, 64); err == nil {
+	// Client ID
+	if cid := strings.TrimSpace(r.FormValue("client_id")); cid != "" {
+		if v, err := strconv.ParseInt(cid, 10, 64); err == nil && v > 0 {
 			f.ClientID = &v
 		}
 	}
 
+	// Dates
 	f.IssueDate = time.Now()
-	if val := r.FormValue("issue_date"); val != "" {
+	if val := strings.TrimSpace(r.FormValue("issue_date")); val != "" {
 		if t, err := time.Parse("2006-01-02", val); err == nil {
 			f.IssueDate = t
 		}
 	}
-
-	if val := r.FormValue("due_date"); val != "" {
+	if val := strings.TrimSpace(r.FormValue("due_date")); val != "" {
 		if t, err := time.Parse("2006-01-02", val); err == nil {
 			f.DueDate = &t
 		}
 	}
 
+	// Tax + currency
 	f.TaxRateBps = parseBps(r.FormValue("tax_rate"))
-	f.Currency = r.FormValue("currency")
+	f.Currency = strings.TrimSpace(r.FormValue("currency"))
 	if f.Currency == "" {
 		f.Currency = "USD"
 	}
 
-	descs := r.Form["description"]
-	qtys := r.Form["quantity"]
-	prices := r.Form["unit_price"]
+	// Items (safe parsing across potentially sparse/uneven arrays)
+	descs := r.Form["description[]"]
+	if len(descs) == 0 {
+		// Fallback just in case template submits without [] bracket
+		descs = r.Form["description"]
+	}
+	qtys := r.Form["quantity[]"]
+	if len(qtys) == 0 {
+		qtys = r.Form["quantity"]
+	}
+	prices := r.Form["unit_price[]"]
+	if len(prices) == 0 {
+		prices = r.Form["unit_price"]
+	}
 
-	for i := range descs {
-		if descs[i] == "" {
-			continue
+	// find max length to avoid out-of-range panic
+	n := len(descs)
+	if len(qtys) > n {
+		n = len(qtys)
+	}
+	if len(prices) > n {
+		n = len(prices)
+	}
+
+	for i := 0; i < n; i++ {
+		var desc string
+		if i < len(descs) {
+			desc = strings.TrimSpace(descs[i])
 		}
-		qty, _ := strconv.ParseFloat(qtys[i], 64)
-		priceCents := parseCents(prices[i])
+		if desc == "" {
+			continue // skip completely blank lines
+		}
+
+		// quantity
+		var qty float64
+		if i < len(qtys) {
+			qstr := strings.TrimSpace(qtys[i])
+			if qstr == "" {
+				return nil, fmt.Errorf("quantity required for item #%d (%s)", i+1, desc)
+			}
+			qv, err := strconv.ParseFloat(qstr, 64)
+			if err != nil || qv <= 0 {
+				return nil, fmt.Errorf("invalid quantity for item #%d (%s)", i+1, desc)
+			}
+			qty = qv
+		} else {
+			return nil, fmt.Errorf("missing quantity for item #%d (%s)", i+1, desc)
+		}
+
+		// unit price (cents)
+		var priceCents int64
+		if i < len(prices) {
+			pstr := strings.TrimSpace(prices[i])
+			if pstr == "" {
+				return nil, fmt.Errorf("unit price required for item #%d (%s)", i+1, desc)
+			}
+			pc := parseCents(pstr)
+			if pc < 0 {
+				return nil, fmt.Errorf("invalid unit price for item #%d (%s)", i+1, desc)
+			}
+			priceCents = pc
+		} else {
+			return nil, fmt.Errorf("missing unit price for item #%d (%s)", i+1, desc)
+		}
+
 		f.Items = append(f.Items, repo.InvoiceItem{
-			Description:    descs[i],
+			Description:    desc,
 			Quantity:       qty,
 			UnitPriceCents: priceCents,
 		})
@@ -998,6 +1066,9 @@ func parseInvoiceForm(w http.ResponseWriter, r *http.Request) (*invoiceFormData,
 	return f, nil
 }
 
+// =====================================================================
+// APPLICATION ENTRY POINT
+// =====================================================================
 func main() {
 	_ = godotenv.Load()
 	initDB()
