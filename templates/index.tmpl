@@ -1,139 +1,236 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>PsiloConValley | Independent Systems</title>
+    <title>PsiloConValley — Independent Systems for Borderless Operators</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            background: #000; 
-            color: #fff; 
-            font-family: "JetBrains Mono", monospace, "Courier New", Courier; 
-            display: flex; 
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
             flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            overflow: hidden; 
         }
 
-        .directory { 
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            text-align: left; 
+        /* ── Nav (simplified for landing) ── */
+        .landing-nav {
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-
-        .brand-header { 
-            font-size: 11px; 
-            letter-spacing: 5px; 
-            text-transform: uppercase; 
-            color: #444; 
-            margin-bottom: 80px; 
-            border-bottom: 1px solid #222;
-            padding-bottom: 10px;
+        .landing-nav .brand {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #fff;
+            text-decoration: none;
         }
-
-        .nodes { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
+        .landing-nav .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
         }
-
-        .node-link { 
-            display: block;
-            color: #fff; 
-            text-decoration: none; 
-            font-size: 20px; 
-            padding: 15px; 
-            border: 1px solid transparent; 
-            transition: all 0.2s ease;
-        }
-
-        .node-link:hover { 
-            border: 1px solid #333; 
-            background: #0a0a0a; 
-            padding-left: 25px;
-        }
-
-        .node-link span { 
-            color: #444; 
-            margin-right: 20px; 
-            font-size: 14px;
-        }
-
-        .node-link .status {
-            float: right;
-            font-size: 10px;
-            color: #00ff41; /* Classic Terminal Green */
+        .landing-nav .nav-links a {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-top: 8px;
+            transition: color 0.2s;
+        }
+        .landing-nav .nav-links a:hover { color: #fff; }
+        .nav-cta-btn {
+            background: #fff !important;
+            color: #000 !important;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        .nav-cta-btn:hover { background: #e0e0e0 !important; }
+
+        /* ── Hero ── */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 32px 60px;
+        }
+        .hero-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: clamp(36px, 6vw, 56px);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: 17px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.55);
+            font-weight: 300;
+            max-width: 580px;
+            margin-bottom: 48px;
         }
 
-        .node-link.offline {
-            opacity: 0.2;
-            cursor: default;
+        /* ── Two cards ── */
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 32px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 200px;
+        }
+        .card:hover {
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-2px);
+        }
+        .card-tag {
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 16px;
+        }
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .card-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .card-status {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+        .status-live { color: #00ff41; }
+        .status-lab { color: #f59e0b; }
+
+        /* ── Trust line ── */
+        .trust {
+            font-size: 12px;
+            color: rgba(255,255,255,0.25);
+            text-align: center;
+            letter-spacing: 1px;
         }
 
-        .node-link.offline:hover {
-            border-color: transparent;
-            background: none;
-            padding-left: 15px;
+        /* ── Footer ── */
+        .landing-footer {
+            padding: 32px;
+            text-align: center;
+            font-size: 10px;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        .node-link.offline .status {
-            color: #ff4a4a;
-        }
-
-        footer { 
-            position: absolute; 
-            bottom: 40px; 
-            font-size: 9px; 
-            color: #333; 
-            text-transform: uppercase; 
-            letter-spacing: 3px; 
-        }
-
-        /* Subtle scanline effect for that DARPA terminal feel */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+        @media (max-width: 600px) {
+            .cards { grid-template-columns: 1fr; }
+            .hero { padding: 60px 20px 40px; }
+            .landing-nav { padding: 16px 20px; }
+            .landing-nav .nav-links { gap: 16px; }
         }
     </style>
 </head>
 <body>
-    <div class="directory">
-        <div class="brand-header">PsiloConValley // Global Index</div>
-        
-        <div class="nodes">
-            <!-- NODE 01: THE CORE TOOLS -->
-            <a href="/tools" class="node-link">
-                <span>[ 01 ]</span> Business Tools
-                <div class="status">Online</div>
-            </a>
 
-            <!-- NODE 02: INTELLIGENCE / SUPPORT -->
-            <a href="mailto:ops@psiloconvalley.com" class="node-link">
-                <span>[ 02 ]</span> Intelligence / Feedback
-                <div class="status">Secure</div>
-            </a>
+<nav class="landing-nav">
+    <a href="/" class="brand">PsiloConValley</a>
+    <div class="nav-links">
+        <a href="/tools">Tools</a>
+        <a href="/research">Research</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="nav-cta-btn">Sign Up</a>
+    </div>
+</nav>
 
-            <!-- NODE 03: UPCOMING -->
-            <div class="node-link offline">
-                <span>[ 03 ]</span> Strategy Engine
-                <div class="status">Offline</div>
+<div class="hero">
+    <div class="hero-label">Independent Systems</div>
+
+    <h1>Practical tools for<br>borderless operators.</h1>
+
+    <p>
+        Create and send professional invoices in 60 seconds.
+        Polished PDF. Shareable hosted link. Email delivery.
+        Built for freelancers, agencies, and independent teams
+        billing clients across countries.
+    </p>
+
+    <div class="cards">
+        <a href="/tools" class="card">
+            <div>
+                <div class="card-tag">Production</div>
+                <div class="card-title">Business Tools</div>
+                <div class="card-desc">
+                    Invoice engine, client management,
+                    PDF generation, email delivery.
+                    Create, send, and track invoices today.
+                </div>
             </div>
-        </div>
+            <div class="card-status status-live">● Live</div>
+        </a>
+
+        <a href="/research" class="card">
+            <div>
+                <div class="card-tag">Lab</div>
+                <div class="card-title">Research & Experiments</div>
+                <div class="card-desc">
+                    Early-stage concepts and prototypes.
+                    Ideas we are exploring. Nothing here
+                    is a shipped feature or a promise.
+                </div>
+            </div>
+            <div class="card-status status-lab">● Exploring</div>
+        </a>
     </div>
 
-    <footer>System v1.0.4 // Encrypted Connection established</footer>
+    <div class="trust">
+        Free to start. No credit card required. Built independently.
+    </div>
+</div>
+
+<footer class="landing-footer">
+    PsiloConValley — Independent systems for borderless operators
+</footer>
+
 </body>
 </html>

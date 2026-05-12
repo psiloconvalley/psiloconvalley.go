@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Research & Experiments | PsiloConValley</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {{template "nav-styles" .}}
+  <style>
+    body { background:#000; color:#fff; font-family: "JetBrains Mono", "Courier New", monospace; }
+    .wrap { max-width:800px; margin:0 auto; padding:80px 20px; }
+    .label { font-size:10px; letter-spacing:4px; text-transform:uppercase; color:#444; margin-bottom:12px; }
+    h1 { font-size:36px; letter-spacing:-1px; margin-bottom:12px; }
+    .sub { font-size:14px; color:#888; margin-bottom:48px; line-height:1.6; }
+    .card { border:1px solid #1a1a1a; padding:28px; border-radius:4px; margin-bottom:24px; background:#0a0a0a; }
+    .card .tag { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:#444; margin-bottom:8px; }
+    .card h2 { font-size:18px; margin-bottom:8px; }
+    .card p { font-size:13px; color:#888; line-height:1.6; margin-bottom:12px; }
+    .card .meta { font-size:10px; color:#555; }
+    .disclaimer { margin-top:40px; padding:16px; border:1px dashed #222; color:#666; font-size:11px; line-height:1.6; }
+  </style>
+</head>
+<body>
+{{template "nav" .}}
+<div class="wrap">
+  <div class="label">PsiloConValley Lab</div>
+  <h1>Research & Experiments</h1>
+  <div class="sub">
+    This is a living notebook of ideas, prototypes, and hypotheses we’re exploring.  
+    <strong>Nothing here is a shipped feature, a promise, or an endorsement of any asset/network.</strong>
+  </div>
+
+  <div class="card">
+    <div class="tag">Hypothesis // 001</div>
+    <h2>Borderless invoicing payment instructions (bank-first)</h2>
+    <p>Many independent operators invoice internationally and rely on Wise/ACH/SWIFT. We’re exploring better defaults for payment instructions, multi-currency presentation, and clearer “due date + late policy” language on the PDF/hosted page.</p>
+    <div class="meta">Status: Discovery • Next: 10 customer interviews</div>
+  </div>
+
+  <div class="card">
+    <div class="tag">Hypothesis // 002</div>
+    <h2>Stablecoin payment references (research only)</h2>
+    <p>We’re researching how service providers request payment in stablecoins (e.g., USDC) without turning PsiloConValley into a custody/wallet/payment processor. Current approach: <em>manual payment instructions + reference/memo + optional tx hash confirmation by the invoice owner</em>. No automated on-chain settlement, no wallet integrations planned yet.</p>
+    <div class="meta">Status: Research • Networks under consideration: Polygon, Solana (for low-fee stablecoin transfers) • Not implemented</div>
+  </div>
+
+  <div class="card">
+    <div class="tag">Origin // Note</div>
+    <h2>Where the name comes from</h2>
+    <p>PsiloConValley is a name inspired by the intersection of nature, consciousness, and technology. The growing global conversation around psilocybin research — from Johns Hopkins to Imperial College London — sparked a curiosity about how organic systems (mycelial networks, decentralized growth patterns, adaptive intelligence) might inform how we build software and think about independent infrastructure. The name stuck. Today it is simply the umbrella for building practical, borderless tools.</p>
+
+    <div class="meta">Context only • No product tie-in</div>
+    </div>
+
+  <div class="disclaimer">
+    Research & Experiments is for learning and ideation. It does not constitute financial, legal, tax, or investment advice. Any references to blockchains/tokens are strictly educational hypotheses and are not live features, integrations, or endorsements.
+  </div>
+</div>
+</body>
+</html>

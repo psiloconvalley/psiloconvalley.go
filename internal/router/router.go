@@ -40,6 +40,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/clients", h.ClientsList)
 	r.Get("/clients/new", h.ClientNewGet)
 	r.Post("/clients/new", h.ClientNewPost)
+	r.Get("/research", h.Research)
+
 
 	r.Route("/invoices", func(r chi.Router) {
 		r.Get("/", h.InvoicesList)
@@ -55,4 +57,5 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	})
 
 	return r
+
 }

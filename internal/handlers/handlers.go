@@ -21,7 +21,10 @@ func NewHandlers(a *app.App) *Handlers {
 // ---------- Basic pages ----------
 
 func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
-	h.App.Render(w, r, "home.tmpl", nil)
+	h.App.Render(w, r, "index.tmpl", nil)
+}
+func (h *Handlers) Research(w http.ResponseWriter, r *http.Request) {
+	h.App.Render(w, r, "research.tmpl", nil)
 }
 
 func (h *Handlers) ToolsHub(w http.ResponseWriter, r *http.Request) {

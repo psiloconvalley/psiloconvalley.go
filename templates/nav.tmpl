@@ -3,14 +3,16 @@
     <div class="nav-inner">
         <a href="/" class="nav-brand">PsiloConValley</a>
         <div class="nav-links">
+            <a href="/tools">Tools</a>
+            <a href="/research">Research</a>
             <a href="/invoices/new">New Invoice</a>
             {{if .User}}
                 <a href="/invoices">My Invoices</a>
-		<a href="/clients">Clients</a>
-		<a href="/profile">Profile</a>
+                <a href="/clients">Clients</a>
+                <a href="/profile">Profile</a>
                 <span class="nav-user">{{.User.Email}}</span>
                 <form method="POST" action="/logout" style="display:inline;">
-                    {{.csrfField}} <!-- CSRF PROTECTION INJECTED -->
+                    {{.csrfField}}
                     <button type="submit" class="nav-logout">Logout</button>
                 </form>
             {{else}}
