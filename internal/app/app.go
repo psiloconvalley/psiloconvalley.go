@@ -1,6 +1,7 @@
 package app
 
 import (
+	"os"
 	"bytes"
 	"database/sql"
 	"fmt"
@@ -10,7 +11,7 @@ import (
 	"time"
 
 	"github.com/justinas/nosurf"
-
+	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/util"
@@ -22,6 +23,8 @@ type App struct {
 	ClientRepo *repo.ClientRepo
 	BizRepo    *repo.BusinessRepo
 	UserRepo   *repo.UserRepo
+	Mailer     *mailer.Mailer
+	BaseURL    string
 }
 
 func NewApp(db *sql.DB) *App {
@@ -38,12 +41,19 @@ func NewApp(db *sql.DB) *App {
 		log.Fatal("template parse error:", err)
 	}
 
+	baseURL := os.Getenv("APP_BASE_URL")
+	if baseURL == "" {
+		baseURL = "https://psiloconvalley.com"
+	}
+
 	return &App{
 		Templates:  t,
 		InvRepo:    repo.NewInvoiceRepo(db),
 		ClientRepo: repo.NewClientRepo(db),
 		BizRepo:    repo.NewBusinessRepo(db),
 		UserRepo:   repo.NewUserRepo(db),
+		Mailer:     mailer.New(),
+		BaseURL:    baseURL,
 	}
 }
 

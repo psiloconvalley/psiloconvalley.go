@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Send Invoice {{.Invoice.InvoiceNumber}} | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "nav-styles" .}}
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: "JetBrains Mono", "Courier New", monospace;
+            min-height: 100vh;
+        }
+
+        .page {
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .page-label {
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #444;
+            margin-bottom: 12px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 60px;
+        }
+
+        /* Invoice summary card */
+        .invoice-summary {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 4px;
+            padding: 24px 28px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .summary-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .summary-total {
+            text-align: right;
+        }
+
+        .summary-amount {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Form */
+        .send-form {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #555;
+        }
+
+        input[type="email"],
+        textarea {
+            background: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 4px;
+            padding: 14px 16px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+
+        input[type="email"]:focus,
+        textarea:focus {
+            border-color: #444;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            color: #00ff41;
+        }
+
+        .field-hint {
+            font-size: 11px;
+            color: #333;
+        }
+
+        /* Preview box */
+        .email-preview {
+            background: #050505;
+            border: 1px solid #111;
+            border-radius: 4px;
+            padding: 20px;
+        }
+
+        .preview-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .preview-line {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .preview-line span {
+            color: #888;
+        }
+
+        /* Actions */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding-top: 12px;
+        }
+
+        .btn-send {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 14px 32px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-send:hover { opacity: 0.85; }
+
+        .btn-cancel {
+            color: #444;
+            text-decoration: none;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        .btn-cancel:hover { color: #fff; }
+
+        .send-note {
+            font-size: 11px;
+            color: #333;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="page">
+
+    <p class="page-label">Invoice Transmission</p>
+    <h1 class="page-title">Send Invoice</h1>
+    <p class="page-sub">
+        A PDF will be generated and delivered to your client via email.
+    </p>
+
+    <!-- Invoice Summary -->
+    <div class="invoice-summary">
+        <div>
+            <div class="summary-label">Invoice</div>
+            <div class="summary-number">{{.Invoice.InvoiceNumber}}</div>
+            <div style="font-size:12px;color:#555;margin-top:4px;">
+                {{.Invoice.ClientName}}
+            </div>
+        </div>
+        <div class="summary-total">
+            <div class="summary-label">Amount Due</div>
+            <div class="summary-amount">
+                {{.Invoice.Currency}} {{.Invoice.Total}}
+            </div>
+            {{if .Invoice.DueDate}}
+            <div style="font-size:11px;color:#555;margin-top:4px;">
+                Due {{.Invoice.DueDate}}
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Send Form -->
+    <form class="send-form" method="POST"
+          action="/invoices/{{.InvoiceID}}/send">
+        {{.csrfField}}
+
+        <!-- Recipient -->
+        <div class="field-group">
+            <label for="to_email">Send To</label>
+            <input
+                type="email"
+                id="to_email"
+                name="to_email"
+                value="{{.ClientEmail}}"
+                placeholder="client@company.com"
+                required
+                autocomplete="email"
+            >
+            <span class="field-hint">
+                Client will receive the invoice PDF as an attachment
+            </span>
+        </div>
+
+        <!-- Personal Note -->
+        <div class="field-group">
+            <label for="personal_note">Personal Note (optional)</label>
+            <textarea
+                id="personal_note"
+                name="personal_note"
+                placeholder="Add a message to your client..."
+            ></textarea>
+            <span class="field-hint">
+                Appears in the email body above the invoice details
+            </span>
+        </div>
+
+        <!-- Email Preview -->
+        <div class="email-preview">
+            <div class="preview-label">Email Preview</div>
+            <div class="preview-line">
+                From: <span>noreply@psiloconvalley.com</span>
+            </div>
+            <div class="preview-line">
+                Subject: <span>
+                    Invoice {{.Invoice.InvoiceNumber}} from
+                    {{.Invoice.CompanyName}} —
+                    {{.Invoice.Currency}} {{.Invoice.Total}}
+                </span>
+            </div>
+            <div class="preview-line">
+                Attachment: <span>invoice-{{.Invoice.InvoiceNumber}}.pdf</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn-send">
+                Transmit Invoice →
+            </button>
+            <a href="/invoices/{{.InvoiceID}}" class="btn-cancel">
+                Cancel
+            </a>
+        </div>
+
+        <p class="send-note">
+            Sending will attach a PDF copy of this invoice to the email.
+            {{if eq .Invoice.Status "draft"}}
+            Invoice status will automatically update from
+            <strong style="color:#fff;">Draft</strong> to
+            <strong style="color:#1d4ed8;">Sent</strong>.
+            {{end}}
+        </p>
+
+    </form>
+</div>
+
+</body>
+</html>

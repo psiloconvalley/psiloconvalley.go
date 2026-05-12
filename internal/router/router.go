@@ -15,7 +15,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Use(handlers.SecurityHeaders)
 	r.Use(auth.LoadUser(h.App.UserRepo))
 
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.Handle("/static/*", http.StripPrefix("/static/",
+		http.FileServer(http.Dir("static"))))
 
 	r.Get("/", h.Index)
 	r.Get("/tools", h.ToolsHub)
@@ -49,6 +50,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Post("/{id}/edit", h.InvoiceUpdatePost)
 		r.Post("/{id}/status", h.InvoiceStatusPost)
 		r.Get("/{id}/pdf", h.InvoicePDFGet)
+		r.Get("/{id}/send", h.InvoiceSendGet)    // ← NEW
+		r.Post("/{id}/send", h.InvoiceSendPost)  // ← NEW
 	})
 
 	return r

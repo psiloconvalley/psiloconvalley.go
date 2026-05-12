@@ -486,16 +486,19 @@
 
         <!-- Action / Workflow Controls -->
         <section class="invoice-actions-wrapper">
-            <div class="primary-actions">
-                {{if eq .Invoice.Status "draft"}}
-                <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
-                {{end}}
+	<div class="primary-actions">
+    {{if eq .Invoice.Status "draft"}}
+    <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
+    {{end}}
 
-                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn-secondary">📋 Duplicate</a>
-                <button type="button" onclick="window.print()" class="btn-secondary">🖨️ Print</button>
-                <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-primary">📥 Download PDF</a>
-            </div>
+    {{if .User}}
+    <a href="/invoices/{{.Invoice.ID}}/send" class="btn-primary">📨 Send Invoice</a>
+    {{end}}
 
+    <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn-secondary">📋 Duplicate</a>
+    <button type="button" onclick="window.print()" class="btn-secondary">🖨️ Print</button>
+    <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-secondary">📥 Download PDF</a>
+</div>
             {{if .User}}
             <div class="status-panel">
                 <div class="status-panel-title">Change Invoice Status</div>

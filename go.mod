@@ -9,6 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/joho/godotenv v1.5.1
 	github.com/justinas/nosurf v1.2.0
+	github.com/resend/resend-go/v2 v2.28.0
 	golang.org/x/crypto v0.50.0
 	golang.org/x/oauth2 v0.36.0
 )
