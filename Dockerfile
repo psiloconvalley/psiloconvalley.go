@@ -1,35 +1,26 @@
 # ============================================================================
-# PsiloConValley — Railway / Production Dockerfile (BuildKit–free)
+# PsiloConValley — Railway Production Dockerfile
 # ============================================================================
 
-# ---------- Stage 1: Dependency Cache (no --mount) ----------
-FROM golang:1.23-bookworm AS deps
+# ---------- Build Stage ----------
+FROM golang:1.26-bookworm AS builder
 
 WORKDIR /src
 
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-# ---------- Stage 2: Build (no --mount) ----------
-FROM golang:1.23-bookworm AS builder
-
-WORKDIR /src
-
-# Pull cached modules from deps stage
-COPY --from=deps /go/pkg/mod /go/pkg/mod
 COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build \
       -trimpath \
       -buildvcs=false \
-      -ldflags="-w -s -extldflags '-static'" \
+      -ldflags="-w -s" \
       -o /out/psiloconvalley \
       ./cmd/psiloconvalley
 
-RUN test -x /out/psiloconvalley && echo "✅ Binary OK"
-
-# ---------- Stage 3: Runtime ----------
+# ---------- Runtime Stage ----------
 FROM debian:bookworm-slim AS runtime
 
 LABEL org.opencontainers.image.title="PsiloConValley" \
@@ -42,6 +33,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       ca-certificates \
+      curl \
       tzdata \
       chromium \
       chromium-sandbox \
@@ -63,24 +55,23 @@ RUN set -eux; \
       libxshmfence1 \
       libx11-xcb1 \
     ; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
-    chromium --version
+    rm -rf /var/lib/apt/lists/*
 
-RUN groupadd --gid 1001 appgroup && \
+RUN groupadd --system --gid 1001 appgroup && \
     useradd \
+      --system \
       --uid 1001 \
       --gid appgroup \
-      --shell /usr/sbin/nologin \
       --create-home \
+      --home-dir /home/appuser \
+      --shell /usr/sbin/nologin \
       appuser && \
     mkdir -p \
+      /app \
+      /tmp/chromedp \
       /home/appuser/.cache/chromium \
-      /home/appuser/.config/chromium \
-      /tmp/chromedp && \
-    chown -R appuser:appgroup \
-      /home/appuser \
-      /tmp/chromedp
+      /home/appuser/.config/chromium && \
+    chown -R appuser:appgroup /app /tmp/chromedp /home/appuser
 
 WORKDIR /app
 
@@ -94,17 +85,17 @@ ENV HOME=/home/appuser \
     GOGC=100 \
     GOMEMLIMIT=512MiB
 
-COPY --from=builder --chown=appuser:appuser /out/psiloconvalley /app/psiloconvalley
-COPY --chown=appuser:appuser templates/ /app/templates/
-COPY --chown=appuser:appuser static/    /app/static/
+COPY --from=builder --chown=appuser:appgroup /out/psiloconvalley /app/psiloconvalley
+COPY --chown=appuser:appgroup templates/ /app/templates/
+COPY --chown=appuser:appgroup static/ /app/static/
 
 RUN chmod 555 /app/psiloconvalley
-
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -fsS http://localhost:${PORT}/healthz || exit 1
 
 USER appuser
 
 EXPOSE 8080
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=45s --retries=5 \
+    CMD curl -fsS http://127.0.0.1:${PORT}/healthz || exit 1
 
 CMD ["/app/psiloconvalley"]
