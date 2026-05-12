@@ -7,7 +7,7 @@
 
 .DS_Store
 
-psiloconvalley
+/psiloconvalley
 *.log
 *.out
 *.test
