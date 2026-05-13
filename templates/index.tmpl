@@ -18,14 +18,20 @@
             flex-direction: column;
         }
 
-        /* ── Nav (simplified for landing) ── */
+        /* ── Landing Nav ── */
         .landing-nav {
-            padding: 20px 32px;
+            padding: 0 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.06);
+            height: 56px;
+            position: sticky;
+            top: 0;
+            background: #000;
+            z-index: 1000;
         }
+
         .landing-nav .brand {
             font-size: 13px;
             font-weight: 700;
@@ -34,12 +40,14 @@
             color: #fff;
             text-decoration: none;
         }
-        .landing-nav .nav-links {
+        .landing-nav .brand:hover { color: rgba(255,255,255,0.8); }
+
+        .nav-links {
             display: flex;
             gap: 24px;
             align-items: center;
         }
-        .landing-nav .nav-links a {
+        .nav-links a {
             font-size: 12px;
             color: rgba(255,255,255,0.5);
             text-decoration: none;
@@ -47,15 +55,42 @@
             letter-spacing: 1px;
             transition: color 0.2s;
         }
-        .landing-nav .nav-links a:hover { color: #fff; }
+        .nav-links a:hover { color: #fff; }
+
         .nav-cta-btn {
             background: #fff !important;
             color: #000 !important;
             padding: 8px 18px;
             border-radius: 6px;
-            font-weight: 700;
+            font-weight: 700 !important;
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
         }
         .nav-cta-btn:hover { background: #e0e0e0 !important; }
+
+        /* ── Hamburger ── */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 44px;
+            min-height: 44px;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: 0.2s;
+        }
 
         /* ── Hero ── */
         .hero {
@@ -101,7 +136,7 @@
         .card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 32px;
             text-decoration: none;
             color: inherit;
@@ -110,11 +145,16 @@
             flex-direction: column;
             justify-content: space-between;
             min-height: 200px;
+            -webkit-tap-highlight-color: transparent;
         }
         .card:hover {
             border-color: rgba(255,255,255,0.3);
             background: rgba(255,255,255,0.06);
             transform: translateY(-2px);
+        }
+        .card:active {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(0);
         }
         .card-tag {
             font-size: 9px;
@@ -139,10 +179,9 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-family: monospace;
         }
         .status-live { color: #00ff41; }
-        .status-lab { color: #f59e0b; }
+        .status-lab  { color: #f59e0b; }
 
         /* ── Trust line ── */
         .trust {
@@ -163,11 +202,56 @@
             border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        @media (max-width: 600px) {
-            .cards { grid-template-columns: 1fr; }
-            .hero { padding: 60px 20px 40px; }
-            .landing-nav { padding: 16px 20px; }
-            .landing-nav .nav-links { gap: 16px; }
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+            .landing-nav { padding: 0 16px; }
+
+            .nav-toggle { display: flex; }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: #000;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                flex-direction: column;
+                padding: 16px 20px;
+                gap: 0;
+                z-index: 999;
+            }
+            .nav-links.open { display: flex; }
+
+            .nav-links a {
+                display: block;
+                width: 100%;
+                padding: 12px 0;
+                font-size: 13px;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+            .nav-cta-btn {
+                display: block;
+                text-align: center;
+                margin-top: 8px;
+                padding: 10px 14px !important;
+                border-radius: 6px;
+            }
+
+            .hero {
+                padding: 40px 20px 40px;
+                justify-content: flex-start;
+            }
+            .hero h1 { letter-spacing: -1px; }
+            .hero p { font-size: 15px; margin-bottom: 32px; }
+
+            .cards {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 40px;
+            }
+            .card { min-height: auto; padding: 24px; }
+            .card-title { font-size: 18px; }
         }
     </style>
 </head>
@@ -175,7 +259,17 @@
 
 <nav class="landing-nav">
     <a href="/" class="brand">PsiloConValley</a>
-    <div class="nav-links">
+
+    <button
+        class="nav-toggle"
+        type="button"
+        aria-label="Menu"
+        aria-expanded="false"
+        aria-controls="landing-nav-links">
+        <span></span><span></span><span></span>
+    </button>
+
+    <div class="nav-links" id="landing-nav-links">
         <a href="/tools">Tools</a>
         <a href="/research">Research</a>
         <a href="/login">Login</a>
@@ -231,6 +325,18 @@
 <footer class="landing-footer">
     PsiloConValley — Independent systems for borderless operators
 </footer>
+
+<script>
+(function () {
+    var btn   = document.querySelector(".nav-toggle");
+    var links = document.getElementById("landing-nav-links");
+    if (!btn || !links) return;
+    btn.addEventListener("click", function () {
+        var open = links.classList.toggle("open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+})();
+</script>
 
 </body>
 </html>
