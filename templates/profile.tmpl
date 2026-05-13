@@ -47,12 +47,48 @@
         <div class="error-banner">{{.Error}}</div>
         {{end}}
 
-        <form method="POST" action="/profile">
+	<form method="POST" action="/profile" enctype="multipart/form-data">
+
             {{.csrfField}}
 
             <div class="section">
                 <div class="section-title">Company Information</div>
-                <div class="grid-2">
+                <!-- Logo Upload -->
+<div class="form-group" style="margin-bottom:32px;">
+    <label>Company Logo</label>
+
+    {{if .Profile}}
+        {{if .Profile.LogoURL}}
+        <div style="margin-bottom:16px;">
+            <img
+                src="{{.Profile.LogoURL}}"
+                alt="Company Logo"
+                style="
+                    max-width:180px;
+                    max-height:80px;
+                    object-fit:contain;
+                    background:#fff;
+                    border:1px solid #eee;
+                    border-radius:8px;
+                    padding:12px;
+                "
+            >
+        </div>
+        {{end}}
+    {{end}}
+
+    <input
+        type="file"
+        name="logo"
+        accept=".png,.jpg,.jpeg,.webp,.svg"
+    >
+
+    <div class="hint">
+        PNG recommended. Max 2MB.
+        Appears on invoices and PDFs.
+    </div>
+</div>
+		<div class="grid-2">
                     <div class="form-group">
                         <label>Company Name *</label>
                         <input type="text" name="name" value="{{if .Profile}}{{.Profile.Name}}{{end}}" required>

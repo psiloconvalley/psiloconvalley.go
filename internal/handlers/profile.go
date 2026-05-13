@@ -3,8 +3,12 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"psiloconvalley/internal/auth"
@@ -41,6 +45,20 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Max upload size: 2MB
+	if err := r.ParseMultipartForm(2 << 20); err != nil {
+		log.Printf("multipart parse error: %v", err)
+
+		h.App.Render(w, r, "profile.tmpl", map[string]any{
+			"Error":      "Upload too large or invalid form data",
+			"Currencies": catalog.SupportedCurrencies,
+		})
+		return
+	}
+
+	// Load existing profile first so we preserve current logo
+	existing, _ := h.App.BizRepo.GetByUserID(r.Context(), user.ID)
+
 	p := &repo.BusinessProfile{
 		UserID:  user.ID,
 		Name:    strings.TrimSpace(r.FormValue("name")),
@@ -52,7 +70,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		Country: strings.TrimSpace(r.FormValue("country")),
 		TaxID:   strings.TrimSpace(r.FormValue("tax_id")),
 		Currency: func() string {
-			c := r.FormValue("currency")
+			c := strings.TrimSpace(r.FormValue("currency"))
 			if c == "" {
 				return "USD"
 			}
@@ -60,17 +78,94 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		}(),
 	}
 
+	// Preserve existing logo by default
+	if existing != nil {
+		p.LogoURL = existing.LogoURL
+	}
+
+	// ============================================================
+	// Logo Upload Handling
+	// ============================================================
+
+	file, header, err := r.FormFile("logo")
+	if err == nil {
+		defer file.Close()
+
+		// Validate extension
+		ext := strings.ToLower(filepath.Ext(header.Filename))
+
+		allowed := map[string]bool{
+			".png":  true,
+			".jpg":  true,
+			".jpeg": true,
+			".webp": true,
+			".svg":  true,
+		}
+
+		if !allowed[ext] {
+			h.App.Render(w, r, "profile.tmpl", map[string]any{
+				"Profile":    p,
+				"Error":      "Unsupported image format. Use PNG, JPG, WEBP, or SVG.",
+				"Currencies": catalog.SupportedCurrencies,
+			})
+			return
+		}
+
+		// Ensure upload directory exists
+		uploadDir := filepath.Join("static", "uploads", "logos")
+
+		if err := os.MkdirAll(uploadDir, 0755); err != nil {
+			log.Printf("mkdir error: %v", err)
+
+			http.Error(w, "Could not prepare upload directory", http.StatusInternalServerError)
+			return
+		}
+
+		// Stable filename per user
+		filename := fmt.Sprintf("logo-user-%d%s", user.ID, ext)
+
+		dstPath := filepath.Join(uploadDir, filename)
+
+		dst, err := os.Create(dstPath)
+		if err != nil {
+			log.Printf("logo create error: %v", err)
+
+			http.Error(w, "Could not save logo", http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+
+		if _, err := io.Copy(dst, file); err != nil {
+			log.Printf("logo write error: %v", err)
+
+			http.Error(w, "Could not write logo", http.StatusInternalServerError)
+			return
+		}
+
+		// Public URL
+		p.LogoURL = "/static/uploads/logos/" + filename
+
+		log.Printf("uploaded logo for user %d: %s", user.ID, p.LogoURL)
+	}
+
+	// ============================================================
+
 	if p.Name == "" {
 		h.App.Render(w, r, "profile.tmpl", map[string]any{
-			"Profile": p, "Error": "Company name is required", "Currencies": catalog.SupportedCurrencies,
+			"Profile":    p,
+			"Error":      "Company name is required",
+			"Currencies": catalog.SupportedCurrencies,
 		})
 		return
 	}
 
 	if err := h.App.BizRepo.Upsert(r.Context(), p); err != nil {
 		log.Printf("profile upsert error: %v", err)
+
 		h.App.Render(w, r, "profile.tmpl", map[string]any{
-			"Profile": p, "Error": "Could not save profile", "Currencies": catalog.SupportedCurrencies,
+			"Profile":    p,
+			"Error":      "Could not save profile",
+			"Currencies": catalog.SupportedCurrencies,
 		})
 		return
 	}
