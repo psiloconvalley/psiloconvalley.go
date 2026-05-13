@@ -1,58 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Research & Experiments | PsiloConValley</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  {{template "nav-styles" .}}
-  <style>
-    body { background:#000; color:#fff; font-family: "JetBrains Mono", "Courier New", monospace; }
-    .wrap { max-width:800px; margin:0 auto; padding:80px 20px; }
-    .label { font-size:10px; letter-spacing:4px; text-transform:uppercase; color:#444; margin-bottom:12px; }
-    h1 { font-size:36px; letter-spacing:-1px; margin-bottom:12px; }
-    .sub { font-size:14px; color:#888; margin-bottom:48px; line-height:1.6; }
-    .card { border:1px solid #1a1a1a; padding:28px; border-radius:4px; margin-bottom:24px; background:#0a0a0a; }
-    .card .tag { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:#444; margin-bottom:8px; }
-    .card h2 { font-size:18px; margin-bottom:8px; }
-    .card p { font-size:13px; color:#888; line-height:1.6; margin-bottom:12px; }
-    .card .meta { font-size:10px; color:#555; }
-    .disclaimer { margin-top:40px; padding:16px; border:1px dashed #222; color:#666; font-size:11px; line-height:1.6; }
-  </style>
+    <title>Research & Experiments | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{template "nav-styles" .}}
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrap {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px 80px;
+        }
+
+        .label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+            line-height: 1.1;
+        }
+
+        .sub {
+            font-size: 15px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 48px;
+            line-height: 1.6;
+            font-weight: 300;
+            max-width: 600px;
+        }
+        .sub strong {
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 28px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        .card:hover {
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .card .tag {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            margin-bottom: 10px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+            color: #fff;
+        }
+
+        .card p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.65;
+            margin-bottom: 12px;
+            font-weight: 300;
+        }
+
+        .card em {
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+        }
+
+        .card .meta {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .disclaimer {
+            margin-top: 40px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            color: rgba(255,255,255,0.35);
+            font-size: 11px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        @media (max-width: 600px) {
+            .wrap { padding: 32px 16px 60px; }
+            h1 { font-size: 28px; }
+            .sub { font-size: 14px; }
+            .card { padding: 20px; }
+            .card h2 { font-size: 16px; }
+        }
+    </style>
 </head>
 <body>
+
 {{template "nav" .}}
+
 <div class="wrap">
-  <div class="label">PsiloConValley Lab</div>
-  <h1>Research & Experiments</h1>
-  <div class="sub">
-    This is a living notebook of ideas, prototypes, and hypotheses we’re exploring.  
-    <strong>Nothing here is a shipped feature, a promise, or an endorsement of any asset/network.</strong>
-  </div>
-
-  <div class="card">
-    <div class="tag">Hypothesis // 001</div>
-    <h2>Borderless invoicing payment instructions (bank-first)</h2>
-    <p>Many independent operators invoice internationally and rely on Wise/ACH/SWIFT. We’re exploring better defaults for payment instructions, multi-currency presentation, and clearer “due date + late policy” language on the PDF/hosted page.</p>
-    <div class="meta">Status: Discovery • Next: 10 customer interviews</div>
-  </div>
-
-  <div class="card">
-    <div class="tag">Hypothesis // 002</div>
-    <h2>Stablecoin payment references (research only)</h2>
-    <p>We’re researching how service providers request payment in stablecoins (e.g., USDC) without turning PsiloConValley into a custody/wallet/payment processor. Current approach: <em>manual payment instructions + reference/memo + optional tx hash confirmation by the invoice owner</em>. No automated on-chain settlement, no wallet integrations planned yet.</p>
-    <div class="meta">Status: Research • Networks under consideration: Polygon, Solana (for low-fee stablecoin transfers) • Not implemented</div>
-  </div>
-
-  <div class="card">
-    <div class="tag">Origin // Note</div>
-    <h2>Where the name comes from</h2>
-    <p>PsiloConValley is a name inspired by the intersection of nature, consciousness, and technology. The growing global conversation around psilocybin research — from Johns Hopkins to Imperial College London — sparked a curiosity about how organic systems (mycelial networks, decentralized growth patterns, adaptive intelligence) might inform how we build software and think about independent infrastructure. The name stuck. Today it is simply the umbrella for building practical, borderless tools.</p>
-
-    <div class="meta">Context only • No product tie-in</div>
+    <div class="label">PsiloConValley Lab</div>
+    <h1>Research & Experiments</h1>
+    <div class="sub">
+        This is a living notebook of ideas, prototypes, and hypotheses we're exploring.
+        <strong>Nothing here is a shipped feature, a promise, or an endorsement of any asset or network.</strong>
     </div>
 
-  <div class="disclaimer">
-    Research & Experiments is for learning and ideation. It does not constitute financial, legal, tax, or investment advice. Any references to blockchains/tokens are strictly educational hypotheses and are not live features, integrations, or endorsements.
-  </div>
+    <div class="card">
+        <div class="tag">Hypothesis // 001</div>
+        <h2>Borderless Invoicing Payment Instructions</h2>
+        <p>
+            Many independent operators invoice internationally and rely on Wise, ACH, and SWIFT.
+            We're exploring better defaults for payment instructions, multi-currency presentation,
+            and clearer due date and late policy language on the PDF and hosted page.
+        </p>
+        <div class="meta">Status: Discovery · Next: 10 customer interviews</div>
+    </div>
+
+    <div class="card">
+        <div class="tag">Hypothesis // 002</div>
+        <h2>Stablecoin Payment References</h2>
+        <p>
+            We're researching how service providers request payment in stablecoins (e.g., USDC)
+            without turning PsiloConValley into a custody, wallet, or payment processor.
+            Current approach: <em>manual payment instructions + reference/memo + optional
+            tx hash confirmation by the invoice owner</em>. No automated on-chain settlement.
+            No wallet integrations planned yet.
+        </p>
+        <div class="meta">Status: Research · Networks under consideration: Polygon, Solana · Not implemented</div>
+    </div>
+
+    <div class="card">
+        <div class="tag">Origin // Note</div>
+        <h2>Where the Name Comes From</h2>
+        <p>
+            PsiloConValley is a name inspired by the intersection of nature, consciousness,
+            and technology. The growing global conversation around psilocybin research — from
+            Johns Hopkins to Imperial College London — sparked a curiosity about how organic
+            systems (mycelial networks, decentralized growth patterns, adaptive intelligence)
+            might inform how we build software and think about independent infrastructure.
+            The name stuck. Today it is simply the umbrella for building practical, borderless tools.
+        </p>
+        <div class="meta">Context only · No product tie-in</div>
+    </div>
+
+    <div class="disclaimer">
+        Research & Experiments is for learning and ideation. It does not constitute financial,
+        legal, tax, or investment advice. Any references to blockchains or tokens are strictly
+        educational hypotheses and are not live features, integrations, or endorsements.
+    </div>
 </div>
+
 </body>
 </html>
