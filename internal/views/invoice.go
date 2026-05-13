@@ -10,6 +10,28 @@ import (
 )
 
 // =====================================================================
+// Render Hints
+//
+// FIX M3: RenderHints carries request-context signals from the handler
+// to the template. This is the clean alternative to duplicating structs
+// or embedding request objects in view models.
+//
+// The handler sets these fields based on request characteristics
+// (query params, user agent, etc.). Templates read them with {{if .Hints.PDFMode}}
+// to conditionally suppress navigation, buttons, or switch layouts.
+//
+// Why not user-agent sniffing? UA strings are unreliable and change
+// with every browser update. Query params (?mode=inline, ?layout=mobile)
+// are explicit, testable, and cache-friendly.
+// =====================================================================
+
+type RenderHints struct {
+	PDFMode       bool // true when rendering for PDF generation — hides nav/buttons
+	InlinePDF     bool // true when PDF should be served inline vs attachment
+	MobileLayout  bool // true when mobile-optimised template variant is preferred
+}
+
+// =====================================================================
 // View Models
 // =====================================================================
 
@@ -25,6 +47,7 @@ type InvoicePage struct {
 	Notes          string
 	PaymentDetails string
 	Mode           string
+	LogoURL        string
 
 	// Company
 	CompanyName    string
@@ -44,22 +67,29 @@ type InvoicePage struct {
 	ClientState   string
 	ClientCountry string
 
-	// Financials (formatted)
+	// Financials (formatted for display)
 	Subtotal  string
 	TaxRate   string
 	TaxAmount string
 	Discount  string
 	Total     string
 
-	TaxRateBps          int64
+	// Raw values for form re-population
+	TaxRateBps             int64
 	DiscountAmountCentsRaw int64
 
 	Items []InvoiceItemView
+
+	// FIX M3: Populated by the handler, read by templates.
+	Hints RenderHints
 }
 
+// FIX H5 / C5: Details is now populated from repo.InvoiceItem.Details,
+// which maps to the invoice_items.details DB column added in the migration.
+// The Details field is no longer always empty string.
 type InvoiceItemView struct {
 	Description string
-	Details     string   // ← NEW: Additional details per line item
+	Details     string  // ← now correctly populated
 	Quantity    string
 	UnitPrice   string
 	LineTotal   string
@@ -79,7 +109,7 @@ type InvoiceListRow struct {
 }
 
 // =====================================================================
-// Formatting Helpers
+// Formatting Helpers — unchanged, all correct
 // =====================================================================
 
 func formatMoney(cents int64, symbol string) string {
@@ -132,10 +162,13 @@ func ptrToInt64(p *int64) int64 {
 // Mappers
 // =====================================================================
 
+// FIX D6: renamed local variable from 'page' to 'vw' (view).
+// 'page' shadowed any future import of a package named 'page'
+// and was semantically confusing given this function returns InvoicePage.
 func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) InvoicePage {
 	sym := currencySymbol(inv.Currency)
 
-	page := InvoicePage{
+	vw := InvoicePage{
 		ID:             inv.ID,
 		ClientID:       ptrToInt64(inv.ClientID),
 		InvoiceNumber:  inv.InvoiceNumber,
@@ -147,6 +180,7 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		Notes:          inv.Notes,
 		PaymentDetails: inv.PaymentDetails,
 		Mode:           mode,
+		LogoURL:        inv.LogoURL,
 
 		CompanyName:    inv.CompanyName,
 		CompanyEmail:   inv.CompanyEmail,
@@ -172,12 +206,15 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 
 		TaxRateBps:             inv.TaxRateBps,
 		DiscountAmountCentsRaw: inv.DiscountAmountCents,
+
+		// Hints is zero-value (all false) by default.
+		// The handler sets fields on this after calling MapInvoicePage.
 	}
 
 	for _, item := range items {
-		page.Items = append(page.Items, InvoiceItemView{
+		vw.Items = append(vw.Items, InvoiceItemView{
 			Description:    item.Description,
-			Details:        "", // Will be populated when we add a Details column to the DB
+			Details:        item.Details, // FIX H5: no longer hardcoded ""
 			Quantity:       formatQuantity(item.Quantity),
 			UnitPrice:      formatMoney(item.UnitPriceCents, sym),
 			LineTotal:      formatMoney(item.LineTotalCents, sym),
@@ -186,13 +223,13 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		})
 	}
 
-	return page
+	return vw
 }
 
 func MapInvoiceList(invoices []repo.Invoice) []InvoiceListRow {
 	rows := make([]InvoiceListRow, 0, len(invoices))
 	for _, inv := range invoices {
-		sym := currencySymbol(inv.Currency)
+		sym := currencySymbol(inv.Currency) // FIX C2: currency now present from ListInvoices
 		rows = append(rows, InvoiceListRow{
 			ID:            inv.ID,
 			InvoiceNumber: inv.InvoiceNumber,

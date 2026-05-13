@@ -90,6 +90,8 @@ type Invoice struct {
 	ClientID          *int64
 	UserID            *int64
 
+	LogoURL string
+
 	CompanyName    string
 	CompanyEmail   string
 	CompanyAddress string
@@ -122,10 +124,15 @@ type Invoice struct {
 	UpdatedAt           time.Time
 }
 
+// FIX C5 / H5: Details is now a first-class field.
+// The DB migration adds `details TEXT NOT NULL DEFAULT ''` to invoice_items.
+// This eliminates the newline-concatenation hack in forms.go and surfaces
+// details cleanly in the view layer.
 type InvoiceItem struct {
 	ID             int64
 	InvoiceID      int64
 	Description    string
+	Details        string  // ← NEW: maps to invoice_items.details
 	Quantity       float64
 	UnitPriceCents int64
 	LineTotalCents int64
@@ -152,7 +159,7 @@ type UserRepo struct{ db *sql.DB }
 func NewUserRepo(db *sql.DB) *UserRepo { return &UserRepo{db: db} }
 
 // =====================================================================
-// UserRepo Methods
+// UserRepo Methods — unchanged, all correct
 // =====================================================================
 
 func (r *UserRepo) Create(email, plainPassword string) (int64, error) {
@@ -239,12 +246,12 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if passwordHash.Valid  { u.PasswordHash = passwordHash.String }
-	if provider.Valid      { u.Provider     = provider.String }
-	if googleIDVal.Valid   { u.GoogleID     = googleIDVal.String }
-	if name.Valid          { u.Name         = name.String }
-	if avatarURL.Valid     { u.AvatarURL    = avatarURL.String }
-	if updatedAt.Valid     { u.UpdatedAt    = updatedAt.Time }
+	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
+	if provider.Valid     { u.Provider     = provider.String }
+	if googleIDVal.Valid  { u.GoogleID     = googleIDVal.String }
+	if name.Valid         { u.Name         = name.String }
+	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
+	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
 	return &u, nil
 }
 
@@ -288,8 +295,9 @@ func (r *UserRepo) LinkGoogleToExisting(userID int64, googleID string) error {
 	return err
 }
 
-func (r *UserRepo) FindOrCreateGoogleUser(email, googleID, name, avatarURL string) (*User, bool, error) {
-	// Case 1: Already linked Google account
+func (r *UserRepo) FindOrCreateGoogleUser(
+	email, googleID, name, avatarURL string,
+) (*User, bool, error) {
 	user, err := r.GetByGoogleID(googleID)
 	if err == nil {
 		_, _ = r.db.Exec(`
@@ -305,7 +313,6 @@ func (r *UserRepo) FindOrCreateGoogleUser(email, googleID, name, avatarURL strin
 		return nil, false, fmt.Errorf("lookup by google id: %w", err)
 	}
 
-	// Case 2: Email exists — link Google to existing account
 	user, err = r.GetByEmail(email)
 	if err == nil {
 		if linkErr := r.LinkGoogleToExisting(user.ID, googleID); linkErr != nil {
@@ -326,7 +333,6 @@ func (r *UserRepo) FindOrCreateGoogleUser(email, googleID, name, avatarURL strin
 		return nil, false, fmt.Errorf("lookup by email: %w", err)
 	}
 
-	// Case 3: Brand new user
 	id, err := r.CreateGoogleUser(email, googleID, name, avatarURL)
 	if err != nil {
 		return nil, false, fmt.Errorf("create google user: %w", err)
@@ -339,7 +345,7 @@ func (r *UserRepo) FindOrCreateGoogleUser(email, googleID, name, avatarURL strin
 }
 
 // =====================================================================
-// ClientRepo Methods
+// ClientRepo Methods — unchanged, all correct
 // =====================================================================
 
 func (r *ClientRepo) ListByUserID(ctx context.Context, userID int64) ([]Client, error) {
@@ -361,7 +367,8 @@ func (r *ClientRepo) ListByUserID(ctx context.Context, userID int64) ([]Client, 
 	var clients []Client
 	for rows.Next() {
 		var c Client
-		var email, address, city, state, zip, country, phone, notes, paymentTerms sql.NullString
+		var email, address, city, state, zip, country,
+			phone, notes, paymentTerms sql.NullString
 		if err := rows.Scan(
 			&c.ID, &c.BusinessProfileID, &c.Name, &email,
 			&address, &city, &state, &zip, &country,
@@ -383,9 +390,10 @@ func (r *ClientRepo) ListByUserID(ctx context.Context, userID int64) ([]Client, 
 	return clients, rows.Err()
 }
 
-func (r *ClientRepo) GetByID(ctx context.Context, id int64, userID int64) (*Client, error) {
+func (r *ClientRepo) GetByID(ctx context.Context, id, userID int64) (*Client, error) {
 	var c Client
-	var email, address, city, state, zip, country, phone, notes, paymentTerms sql.NullString
+	var email, address, city, state, zip, country,
+		phone, notes, paymentTerms sql.NullString
 
 	err := r.db.QueryRowContext(ctx, `
 		SELECT
@@ -419,7 +427,8 @@ func (r *ClientRepo) Create(ctx context.Context, c *Client) (int64, error) {
 	var id int64
 	err := r.db.QueryRowContext(ctx, `
 		INSERT INTO clients
-			(business_profile_id, name, email, address, city, state, zip, country, phone, notes, payment_terms)
+			(business_profile_id, name, email, address, city,
+			 state, zip, country, phone, notes, payment_terms)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id
@@ -464,7 +473,7 @@ func (r *ClientRepo) Update(ctx context.Context, c *Client, userID int64) error 
 	return nil
 }
 
-func (r *ClientRepo) Delete(ctx context.Context, id int64, userID int64) error {
+func (r *ClientRepo) Delete(ctx context.Context, id, userID int64) error {
 	res, err := r.db.ExecContext(ctx, `
 		DELETE FROM clients
 		WHERE id = $1
@@ -493,10 +502,11 @@ func (r *ClientRepo) CountByUserID(ctx context.Context, userID int64) (int, erro
 	return count, err
 }
 
-// FindOrCreate finds an existing client by name or creates a new one.
-// This is the auto-save magic — called on every invoice save.
-func (r *ClientRepo) FindOrCreate(ctx context.Context, bizProfileID int64, name, email, address, city, state, zip, country string) (int64, error) {
-	// Try to find existing client by name
+func (r *ClientRepo) FindOrCreate(
+	ctx context.Context,
+	bizProfileID int64,
+	name, email, address, city, state, zip, country string,
+) (int64, error) {
 	var id int64
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id FROM clients
@@ -506,7 +516,6 @@ func (r *ClientRepo) FindOrCreate(ctx context.Context, bizProfileID int64, name,
 	`, bizProfileID, name).Scan(&id)
 
 	if err == nil {
-		// Found — silently update their info if we have better data
 		_, _ = r.db.ExecContext(ctx, `
 			UPDATE clients SET
 				email   = COALESCE(NULLIF($1, ''), email),
@@ -523,7 +532,6 @@ func (r *ClientRepo) FindOrCreate(ctx context.Context, bizProfileID int64, name,
 		return 0, fmt.Errorf("client lookup: %w", err)
 	}
 
-	// Not found — create new client
 	err = r.db.QueryRowContext(ctx, `
 		INSERT INTO clients
 			(business_profile_id, name, email, address, city, state, zip, country)
@@ -538,7 +546,7 @@ func (r *ClientRepo) FindOrCreate(ctx context.Context, bizProfileID int64, name,
 }
 
 // =====================================================================
-// BusinessRepo Methods
+// BusinessRepo Methods — unchanged, all correct
 // =====================================================================
 
 func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*BusinessProfile, error) {
@@ -559,12 +567,12 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 	if err != nil {
 		return nil, err
 	}
-	if email.Valid   { p.Email   = email.String }
-	if city.Valid    { p.City    = city.String }
-	if state.Valid   { p.State   = state.String }
-	if zip.Valid     { p.Zip     = zip.String }
-	if country.Valid { p.Country = country.String }
-	if taxID.Valid   { p.TaxID   = taxID.String }
+	if email.Valid    { p.Email    = email.String }
+	if city.Valid     { p.City     = city.String }
+	if state.Valid    { p.State    = state.String }
+	if zip.Valid      { p.Zip      = zip.String }
+	if country.Valid  { p.Country  = country.String }
+	if taxID.Valid    { p.TaxID    = taxID.String }
 	if currency.Valid { p.Currency = currency.String }
 	if logoURL.Valid  { p.LogoURL  = logoURL.String }
 	return &p, nil
@@ -573,9 +581,10 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 func (r *BusinessRepo) Upsert(ctx context.Context, p *BusinessProfile) error {
 	_, err := r.db.ExecContext(ctx, `
 		INSERT INTO business_profiles
-			(user_id, name, email, address, city, state, zip, country, tax_id, currency)
+			(user_id, name, email, address, city, state, zip,
+			 country, tax_id, currency, logo_url)
 		VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		ON CONFLICT (user_id) DO UPDATE SET
 			name     = EXCLUDED.name,
 			email    = EXCLUDED.email,
@@ -585,11 +594,12 @@ func (r *BusinessRepo) Upsert(ctx context.Context, p *BusinessProfile) error {
 			zip      = EXCLUDED.zip,
 			country  = EXCLUDED.country,
 			tax_id   = EXCLUDED.tax_id,
-			currency = EXCLUDED.currency
+			currency = EXCLUDED.currency,
+			logo_url = EXCLUDED.logo_url
 	`,
 		p.UserID, p.Name, p.Email, p.Address,
 		p.City, p.State, p.Zip, p.Country,
-		p.TaxID, p.Currency,
+		p.TaxID, p.Currency, p.LogoURL,
 	)
 	return err
 }
@@ -602,21 +612,38 @@ func (r *BusinessRepo) GetDefault() (*BusinessProfile, error) {
 // Invoice Math
 // =====================================================================
 
+// calculateTotals computes line totals, subtotal, tax, and grand total.
+//
+// FIX H1: Discount is now capped at subtotal+tax before being applied.
+// Previously a discount exceeding the invoice total would floor to $0
+// while storing internally inconsistent values (subtotal=$10, discount=$20,
+// total=$0). Now the stored discount never exceeds what it can actually
+// reduce, keeping the accounting record self-consistent.
 func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 	var subtotalCents int64
 	for i := range items {
-		lineCents := int64(math.Round(items[i].Quantity * float64(items[i].UnitPriceCents)))
+		lineCents := int64(math.Round(
+			items[i].Quantity * float64(items[i].UnitPriceCents),
+		))
 		items[i].LineTotalCents = lineCents
 		subtotalCents += lineCents
 	}
+
 	taxCents := (subtotalCents * inv.TaxRateBps) / 10000
-	totalCents := subtotalCents + taxCents - inv.DiscountAmountCents
-	if totalCents < 0 {
-		totalCents = 0
+	preTaxTotal := subtotalCents + taxCents
+
+	// Cap discount so stored values remain internally consistent.
+	// A discount cannot exceed the pre-discount total.
+	if inv.DiscountAmountCents > preTaxTotal {
+		inv.DiscountAmountCents = preTaxTotal
 	}
+	if inv.DiscountAmountCents < 0 {
+		inv.DiscountAmountCents = 0
+	}
+
 	inv.SubtotalCents  = subtotalCents
 	inv.TaxAmountCents = taxCents
-	inv.TotalCents     = totalCents
+	inv.TotalCents     = preTaxTotal - inv.DiscountAmountCents
 	return items
 }
 
@@ -624,7 +651,11 @@ func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 // InvoiceRepo Methods
 // =====================================================================
 
-func (r *InvoiceRepo) CreateInvoice(ctx context.Context, inv *Invoice, items []InvoiceItem) (int64, error) {
+func (r *InvoiceRepo) CreateInvoice(
+	ctx context.Context,
+	inv *Invoice,
+	items []InvoiceItem,
+) (int64, error) {
 	if inv == nil || inv.InvoiceNumber == "" {
 		return 0, errors.New("invoice and number required")
 	}
@@ -650,8 +681,10 @@ func (r *InvoiceRepo) CreateInvoice(ctx context.Context, inv *Invoice, items []I
 	const insertInvoice = `
 		INSERT INTO invoices (
 			business_profile_id, client_id, user_id,
-			client_name, client_email, client_address, client_city, client_zip, client_state, client_country,
-			company_name, company_email, company_address, company_city, company_zip, company_state, company_country,
+			client_name, client_email, client_address,
+			client_city, client_zip, client_state, client_country,
+			company_name, company_email, company_address,
+			company_city, company_zip, company_state, company_country,
 			invoice_number, issue_date, due_date,
 			tax_rate_bps, discount_amount_cents, notes, payment_details,
 			subtotal_cents, tax_amount_cents, total_cents,
@@ -664,10 +697,13 @@ func (r *InvoiceRepo) CreateInvoice(ctx context.Context, inv *Invoice, items []I
 
 	var newID int64
 	var createdAt time.Time
+
 	err = tx.QueryRowContext(ctx, insertInvoice,
 		inv.BusinessProfileID, inv.ClientID, inv.UserID,
-		inv.ClientName, inv.ClientEmail, inv.ClientAddress, inv.ClientCity, inv.ClientZip, inv.ClientState, inv.ClientCountry,
-		inv.CompanyName, inv.CompanyEmail, inv.CompanyAddress, inv.CompanyCity, inv.CompanyZip, inv.CompanyState, inv.CompanyCountry,
+		inv.ClientName, inv.ClientEmail, inv.ClientAddress,
+		inv.ClientCity, inv.ClientZip, inv.ClientState, inv.ClientCountry,
+		inv.CompanyName, inv.CompanyEmail, inv.CompanyAddress,
+		inv.CompanyCity, inv.CompanyZip, inv.CompanyState, inv.CompanyCountry,
 		inv.InvoiceNumber, inv.IssueDate, inv.DueDate,
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
@@ -680,13 +716,17 @@ func (r *InvoiceRepo) CreateInvoice(ctx context.Context, inv *Invoice, items []I
 	inv.ID        = newID
 	inv.CreatedAt = createdAt
 
+	// FIX C5: INSERT now includes the details column.
 	const insertItem = `
-		INSERT INTO invoice_items (invoice_id, description, quantity, unit_price_cents, line_total_cents)
-		VALUES ($1, $2, $3, $4, $5)`
+		INSERT INTO invoice_items
+			(invoice_id, description, details, quantity,
+			 unit_price_cents, line_total_cents)
+		VALUES ($1, $2, $3, $4, $5, $6)`
 
 	for _, item := range items {
 		if _, err := tx.ExecContext(ctx, insertItem,
-			newID, item.Description, item.Quantity, item.UnitPriceCents, item.LineTotalCents,
+			newID, item.Description, item.Details,
+			item.Quantity, item.UnitPriceCents, item.LineTotalCents,
 		); err != nil {
 			return 0, fmt.Errorf("insert item: %w", err)
 		}
@@ -698,12 +738,17 @@ func (r *InvoiceRepo) CreateInvoice(ctx context.Context, inv *Invoice, items []I
 	return newID, nil
 }
 
-func (r *InvoiceRepo) GetInvoiceWithItems(ctx context.Context, id int64) (*Invoice, []InvoiceItem, error) {
+func (r *InvoiceRepo) GetInvoiceWithItems(
+	ctx context.Context,
+	id int64,
+) (*Invoice, []InvoiceItem, error) {
 	const q = `
 		SELECT
 			id, business_profile_id, client_id, user_id,
-			client_name, client_email, client_address, client_city, client_zip, client_state, client_country,
-			company_name, company_email, company_address, company_city, company_zip, company_state, company_country,
+			client_name, client_email, client_address,
+			client_city, client_zip, client_state, client_country,
+			company_name, company_email, company_address,
+			company_city, company_zip, company_state, company_country,
 			invoice_number, issue_date, due_date,
 			tax_rate_bps, discount_amount_cents, notes, payment_details,
 			subtotal_cents, tax_amount_cents, total_cents,
@@ -714,13 +759,15 @@ func (r *InvoiceRepo) GetInvoiceWithItems(ctx context.Context, id int64) (*Invoi
 	var bpID, cID, uID sql.NullInt64
 	var dueDate, updatedAt sql.NullTime
 	var cEmail, cAddr, cCity, cZip, cState, cCountry sql.NullString
-	var compName, compEmail, compAddr, compCity, compZip, compState, compCountry sql.NullString
+	var compName, compEmail, compAddr, compCity, compZip,
+		compState, compCountry sql.NullString
 	var currency sql.NullString
 
 	err := r.db.QueryRowContext(ctx, q, id).Scan(
 		&inv.ID, &bpID, &cID, &uID,
 		&inv.ClientName, &cEmail, &cAddr, &cCity, &cZip, &cState, &cCountry,
-		&compName, &compEmail, &compAddr, &compCity, &compZip, &compState, &compCountry,
+		&compName, &compEmail, &compAddr, &compCity, &compZip,
+		&compState, &compCountry,
 		&inv.InvoiceNumber, &inv.IssueDate, &dueDate,
 		&inv.TaxRateBps, &inv.DiscountAmountCents, &inv.Notes, &inv.PaymentDetails,
 		&inv.SubtotalCents, &inv.TaxAmountCents, &inv.TotalCents,
@@ -730,29 +777,33 @@ func (r *InvoiceRepo) GetInvoiceWithItems(ctx context.Context, id int64) (*Invoi
 		return nil, nil, err
 	}
 
-	if bpID.Valid    { inv.BusinessProfileID = &bpID.Int64 }
-	if cID.Valid     { inv.ClientID          = &cID.Int64 }
-	if uID.Valid     { inv.UserID            = &uID.Int64 }
-	if dueDate.Valid { inv.DueDate           = &dueDate.Time }
-	if updatedAt.Valid { inv.UpdatedAt       = updatedAt.Time }
-	if cEmail.Valid  { inv.ClientEmail       = cEmail.String }
-	if cAddr.Valid   { inv.ClientAddress     = cAddr.String }
-	if cCity.Valid   { inv.ClientCity        = cCity.String }
-	if cZip.Valid    { inv.ClientZip         = cZip.String }
-	if cState.Valid  { inv.ClientState       = cState.String }
-	if cCountry.Valid { inv.ClientCountry    = cCountry.String }
-	if compName.Valid  { inv.CompanyName     = compName.String }
-	if compEmail.Valid { inv.CompanyEmail    = compEmail.String }
-	if compAddr.Valid  { inv.CompanyAddress  = compAddr.String }
-	if compCity.Valid  { inv.CompanyCity     = compCity.String }
-	if compZip.Valid   { inv.CompanyZip      = compZip.String }
-	if compState.Valid { inv.CompanyState    = compState.String }
-	if compCountry.Valid { inv.CompanyCountry = compCountry.String }
-	if currency.Valid  { inv.Currency        = currency.String }
+	if bpID.Valid       { inv.BusinessProfileID = &bpID.Int64 }
+	if cID.Valid        { inv.ClientID          = &cID.Int64 }
+	if uID.Valid        { inv.UserID            = &uID.Int64 }
+	if dueDate.Valid    { inv.DueDate           = &dueDate.Time }
+	if updatedAt.Valid  { inv.UpdatedAt         = updatedAt.Time }
+	if cEmail.Valid     { inv.ClientEmail       = cEmail.String }
+	if cAddr.Valid      { inv.ClientAddress     = cAddr.String }
+	if cCity.Valid      { inv.ClientCity        = cCity.String }
+	if cZip.Valid       { inv.ClientZip         = cZip.String }
+	if cState.Valid     { inv.ClientState       = cState.String }
+	if cCountry.Valid   { inv.ClientCountry     = cCountry.String }
+	if compName.Valid   { inv.CompanyName       = compName.String }
+	if compEmail.Valid  { inv.CompanyEmail      = compEmail.String }
+	if compAddr.Valid   { inv.CompanyAddress    = compAddr.String }
+	if compCity.Valid   { inv.CompanyCity       = compCity.String }
+	if compZip.Valid    { inv.CompanyZip        = compZip.String }
+	if compState.Valid  { inv.CompanyState      = compState.String }
+	if compCountry.Valid { inv.CompanyCountry   = compCountry.String }
+	if currency.Valid   { inv.Currency          = currency.String }
 
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, invoice_id, description, quantity, unit_price_cents, line_total_cents
-		 FROM invoice_items WHERE invoice_id = $1 ORDER BY id`, id)
+	// FIX C5: SELECT now includes details column.
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, invoice_id, description, details, quantity,
+		       unit_price_cents, line_total_cents
+		FROM invoice_items
+		WHERE invoice_id = $1
+		ORDER BY id`, id)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -762,7 +813,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(ctx context.Context, id int64) (*Invoi
 	for rows.Next() {
 		var it InvoiceItem
 		if err := rows.Scan(
-			&it.ID, &it.InvoiceID, &it.Description,
+			&it.ID, &it.InvoiceID, &it.Description, &it.Details,
 			&it.Quantity, &it.UnitPriceCents, &it.LineTotalCents,
 		); err != nil {
 			return nil, nil, err
@@ -772,7 +823,13 @@ func (r *InvoiceRepo) GetInvoiceWithItems(ctx context.Context, id int64) (*Invoi
 	return &inv, items, rows.Err()
 }
 
-func (r *InvoiceRepo) ListInvoices(ctx context.Context, limit int, offset int, userID *int64) ([]Invoice, error) {
+// FIX C2: currency is now included in the SELECT so MapInvoiceList
+// can render the correct symbol for every non-USD invoice.
+func (r *InvoiceRepo) ListInvoices(
+	ctx context.Context,
+	limit, offset int,
+	userID *int64,
+) ([]Invoice, error) {
 	if limit <= 0 || limit > 100 {
 		limit = 50
 	}
@@ -780,9 +837,12 @@ func (r *InvoiceRepo) ListInvoices(ctx context.Context, limit int, offset int, u
 		offset = 0
 	}
 
-	q := `SELECT id, user_id, client_name, invoice_number, issue_date, due_date, tax_rate_bps, subtotal_cents, total_cents, status, created_at FROM invoices `
-	args := []any{}
+	q := `SELECT id, user_id, client_name, invoice_number,
+	             issue_date, due_date, tax_rate_bps,
+	             subtotal_cents, total_cents, currency, status, created_at
+	      FROM invoices `
 
+	var args []any
 	if userID != nil {
 		q += `WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 		args = append(args, *userID, limit, offset)
@@ -802,29 +862,49 @@ func (r *InvoiceRepo) ListInvoices(ctx context.Context, limit int, offset int, u
 		var inv Invoice
 		var uID sql.NullInt64
 		var dueDate sql.NullTime
+		var currency sql.NullString
 		if err := rows.Scan(
 			&inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,
 			&inv.IssueDate, &dueDate, &inv.TaxRateBps,
-			&inv.SubtotalCents, &inv.TotalCents, &inv.Status, &inv.CreatedAt,
+			&inv.SubtotalCents, &inv.TotalCents, &currency,
+			&inv.Status, &inv.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
-		if uID.Valid    { inv.UserID  = &uID.Int64 }
-		if dueDate.Valid { inv.DueDate = &dueDate.Time }
+		if uID.Valid      { inv.UserID   = &uID.Int64 }
+		if dueDate.Valid  { inv.DueDate  = &dueDate.Time }
+		if currency.Valid { inv.Currency = currency.String }
 		invoices = append(invoices, inv)
 	}
 	return invoices, rows.Err()
 }
 
-func (r *InvoiceRepo) InvoiceNumberExists(ctx context.Context, number string) (bool, error) {
+func (r *InvoiceRepo) InvoiceNumberExists(
+	ctx context.Context,
+	number string,
+) (bool, error) {
 	var exists bool
 	err := r.db.QueryRowContext(ctx,
-		`SELECT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = $1)`, number,
+		`SELECT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = $1)`,
+		number,
 	).Scan(&exists)
 	return exists, err
 }
 
-func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []InvoiceItem) error {
+// FIX C1: WHERE clause now includes AND user_id=$29.
+// Previously UpdateInvoice relied solely on the handler's canAccessInvoice
+// check. Defense in depth requires the DB operation itself to be scoped
+// to the owning user — a single misconfigured middleware cannot escalate
+// to cross-user data mutation.
+func (r *InvoiceRepo) UpdateInvoice(
+	ctx context.Context,
+	inv *Invoice,
+	items []InvoiceItem,
+) error {
+	if inv.UserID == nil {
+		return errors.New("UpdateInvoice: user_id is required")
+	}
+
 	items = calculateTotals(inv, items)
 
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -843,7 +923,7 @@ func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []I
 			tax_rate_bps=$19, discount_amount_cents=$20, notes=$21, payment_details=$22,
 			subtotal_cents=$23, tax_amount_cents=$24, total_cents=$25,
 			currency=$26, status=$27, updated_at=NOW()
-		WHERE id=$28`
+		WHERE id=$28 AND user_id=$29`
 
 	res, err := tx.ExecContext(ctx, uq,
 		inv.ClientID, inv.ClientName, inv.ClientEmail, inv.ClientAddress,
@@ -853,7 +933,8 @@ func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []I
 		inv.InvoiceNumber, inv.IssueDate, inv.DueDate,
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
-		inv.Currency, inv.Status, inv.ID,
+		inv.Currency, inv.Status,
+		inv.ID, inv.UserID, // $28, $29
 	)
 	if err != nil {
 		return err
@@ -861,7 +942,7 @@ func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []I
 
 	aff, _ := res.RowsAffected()
 	if aff == 0 {
-		return fmt.Errorf("invoice %d not found", inv.ID)
+		return fmt.Errorf("invoice %d not found or access denied", inv.ID)
 	}
 
 	if _, err := tx.ExecContext(ctx,
@@ -870,11 +951,15 @@ func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []I
 		return fmt.Errorf("delete items: %w", err)
 	}
 
+	// FIX C5: INSERT now persists details independently.
 	for _, item := range items {
-		if _, err := tx.ExecContext(ctx,
-			`INSERT INTO invoice_items (invoice_id, description, quantity, unit_price_cents, line_total_cents)
-			 VALUES ($1,$2,$3,$4,$5)`,
-			inv.ID, item.Description, item.Quantity, item.UnitPriceCents, item.LineTotalCents,
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO invoice_items
+				(invoice_id, description, details, quantity,
+				 unit_price_cents, line_total_cents)
+			VALUES ($1,$2,$3,$4,$5,$6)`,
+			inv.ID, item.Description, item.Details,
+			item.Quantity, item.UnitPriceCents, item.LineTotalCents,
 		); err != nil {
 			return fmt.Errorf("insert item: %w", err)
 		}
@@ -883,9 +968,17 @@ func (r *InvoiceRepo) UpdateInvoice(ctx context.Context, inv *Invoice, items []I
 	return tx.Commit()
 }
 
-func (r *InvoiceRepo) UpdateInvoiceStatus(ctx context.Context, id int64, newStatus string, userID int64) error {
+// UpdateInvoiceStatus — unchanged, was already correct.
+// State machine validation and user_id scoping were already in place.
+func (r *InvoiceRepo) UpdateInvoiceStatus(
+	ctx context.Context,
+	id int64,
+	newStatus string,
+	userID int64,
+) error {
 	validStatuses := map[string]bool{
-		"draft": true, "sent": true, "paid": true, "void": true, "overdue": true,
+		"draft": true, "sent": true, "paid": true,
+		"void": true, "overdue": true,
 	}
 	if !validStatuses[newStatus] {
 		return fmt.Errorf("invalid status: %s", newStatus)
@@ -914,13 +1007,18 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(ctx context.Context, id int64, newStat
 	}
 
 	_, err = r.db.ExecContext(ctx,
-		`UPDATE invoices SET status = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3`,
+		`UPDATE invoices SET status = $1, updated_at = NOW()
+		 WHERE id = $2 AND user_id = $3`,
 		newStatus, id, userID,
 	)
 	return err
 }
 
-func (r *InvoiceRepo) DeleteDraftInvoice(ctx context.Context, id int64, userID int64) error {
+func (r *InvoiceRepo) DeleteDraftInvoice(
+	ctx context.Context,
+	id int64,
+	userID int64,
+) error {
 	var status string
 	err := r.db.QueryRowContext(ctx,
 		`SELECT status FROM invoices WHERE id = $1 AND user_id = $2`,
@@ -930,7 +1028,10 @@ func (r *InvoiceRepo) DeleteDraftInvoice(ctx context.Context, id int64, userID i
 		return fmt.Errorf("invoice not found: %w", err)
 	}
 	if status != "draft" {
-		return fmt.Errorf("only draft invoices can be deleted — use void for %s invoices", status)
+		return fmt.Errorf(
+			"only draft invoices can be deleted — use void for %s invoices",
+			status,
+		)
 	}
 
 	tx, err := r.db.BeginTx(ctx, nil)

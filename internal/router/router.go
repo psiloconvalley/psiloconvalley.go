@@ -1,3 +1,4 @@
+// internal/router/router.go
 package router
 
 import (
@@ -42,7 +43,6 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Post("/clients/new", h.ClientNewPost)
 	r.Get("/research", h.Research)
 
-
 	r.Route("/invoices", func(r chi.Router) {
 		r.Get("/", h.InvoicesList)
 		r.Get("/new", h.InvoiceNewGet)
@@ -52,10 +52,12 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Post("/{id}/edit", h.InvoiceUpdatePost)
 		r.Post("/{id}/status", h.InvoiceStatusPost)
 		r.Get("/{id}/pdf", h.InvoicePDFGet)
-		r.Get("/{id}/send", h.InvoiceSendGet)    // ← NEW
-		r.Post("/{id}/send", h.InvoiceSendPost)  // ← NEW
+		r.Get("/{id}/send", h.InvoiceSendGet)
+		r.Post("/{id}/send", h.InvoiceSendPost)
+		// FIX H2: duplicate route was defined in the handler but never
+		// registered. It is now reachable.
+		r.Get("/{id}/duplicate", h.InvoiceDuplicateGet)
 	})
 
 	return r
-
 }

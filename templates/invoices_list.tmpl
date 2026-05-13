@@ -1,257 +1,280 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Tools | PsiloConValley</title>
+    <title>Invoices | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{template "nav-styles" .}}
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background: #0a0a0a;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 60px 20px;
+            padding: 48px 20px 80px;
         }
 
-        /* ── Header / Tool Title ── */
+        /* ── Header ── */
         .top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            border-left: 2px solid #fff;
-            padding-left: 25px;
+            margin-bottom: 32px;
+            gap: 16px;
+            flex-wrap: wrap;
         }
-
         .top h1 {
-            font-size: 32px;
-            text-transform: uppercase;
+            font-size: 28px;
+            font-weight: 800;
             letter-spacing: -1px;
         }
-
-        .btn {
+        .btn-new {
             background: #fff;
-            color: #0a0a0a;
-            padding: 12px 24px;
+            color: #000;
+            padding: 10px 20px;
             text-decoration: none;
             border-radius: 6px;
+            font-family: inherit;
             font-weight: 700;
-            font-size: 14px;
-            transition: all 0.2s ease;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            /* Mobile: minimum touch target */
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
         }
+        .btn-new:hover { opacity: 0.85; }
 
-        .btn:hover {
-            background: #e5e5e5;
-            transform: translateY(-2px);
+        /* ── Status badges ── */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+        .badge-draft    { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+        .badge-sent     { background: #1e3a5f; color: #93c5fd; }
+        .badge-paid     { background: #14532d; color: #86efac; }
+        .badge-void     { background: #450a0a; color: #fca5a5; }
+        .badge-overdue  { background: #431407; color: #fdba74; }
 
-        /* ── Data Table ── */
-        .table-wrapper {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
+        /* ── Empty state ── */
+        .empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: rgba(255,255,255,0.3);
+        }
+        .empty-icon { font-size: 40px; margin-bottom: 16px; }
+        .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: rgba(255,255,255,0.5); }
+        .empty-sub { font-size: 14px; margin-bottom: 24px; }
+
+        /* ============================================================
+           DESKTOP TABLE (≥ 640px)
+           ============================================================ */
+        .table-wrap {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
             overflow: hidden;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
         }
-
         th {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.4);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.4);
             text-align: left;
-            padding: 16px 20px;
-            font-size: 11px;
+            padding: 12px 16px;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-family: monospace;
+            letter-spacing: 1.5px;
         }
-
         td {
-            padding: 18px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 14px;
             vertical-align: middle;
-            font-size: 15px;
         }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
 
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .invoice-link {
+        .inv-link {
             color: #fff;
             text-decoration: none;
             font-weight: 600;
-            font-family: monospace;
         }
-
-        .invoice-link:hover {
-            text-decoration: underline;
-        }
+        .inv-link:hover { text-decoration: underline; }
 
         .right { text-align: right; }
+        .mono { font-variant-numeric: tabular-nums; }
 
-        /* ── Action Buttons ── */
-        .actions-cell {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
+        /* Hide table on mobile — show cards instead */
+        .table-wrap { display: block; }
+        .card-list  { display: none; }
 
-        .small-btn {
-            background: none;
-            color: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 14px;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
+        /* ============================================================
+           MOBILE CARDS (< 640px)
+           Mobile-first rule: on small screens the table is replaced
+           by a card list. Each card shows the same data in a touch-
+           friendly vertical layout with a 44px minimum tap target.
+           We use display:none / display:flex toggled by the breakpoint
+           rather than hiding columns, because hiding columns still
+           forces the browser to render and reflow the table — cards
+           are semantically and performatively cleaner.
+           ============================================================ */
+        @media (max-width: 639px) {
+            .container { padding: 24px 16px 80px; }
 
-        .small-btn:hover {
-            border-color: #fff;
-            color: #fff;
-        }
+            .top h1 { font-size: 22px; }
 
-        .small-btn.edit {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
+            .table-wrap { display: none; }
+            .card-list  { display: flex; flex-direction: column; gap: 10px; }
 
-        /* ── Status Badges ── */
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-family: monospace;
-        }
+            .inv-card {
+                display: block;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 10px;
+                padding: 16px;
+                text-decoration: none;
+                color: #fff;
+                /* Smooth press feedback on iOS */
+                -webkit-tap-highlight-color: transparent;
+                transition: background 0.15s;
+            }
+            .inv-card:active { background: rgba(255,255,255,0.07); }
 
-        .status-draft { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
-        .status-sent  { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .status-paid  { background: rgba(16, 185, 129, 0.1); color: #10b881; border: 1px solid rgba(16, 185, 129, 0.2); }
-
-        /* ── Empty / Ready State ── */
-        .system-ready-state {
-            text-align: center;
-            padding: 120px 20px;
-            background: rgba(255,255,255,0.02);
-            border: 1px dashed rgba(255,255,255,0.1);
-            border-radius: 16px;
-        }
-        .ready-icon { font-size: 32px; margin-bottom: 24px; opacity: 0.2; }
-        .system-ready-state h2 { 
-            text-transform: uppercase; 
-            letter-spacing: 3px; 
-            font-size: 16px; 
-            margin-bottom: 12px; 
-            font-family: monospace;
-            color: #444;
-        }
-        .system-ready-state p { 
-            color: rgba(255,255,255,0.4); 
-            margin-bottom: 32px; 
-            font-size: 14px; 
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
+            .inv-card-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 8px;
+            }
+            .inv-card-number {
+                font-size: 15px;
+                font-weight: 700;
+                color: #fff;
+            }
+            .inv-card-client {
+                font-size: 13px;
+                color: rgba(255,255,255,0.55);
+                margin-bottom: 10px;
+            }
+            .inv-card-bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .inv-card-dates {
+                font-size: 11px;
+                color: rgba(255,255,255,0.35);
+            }
+            .inv-card-total {
+                font-size: 16px;
+                font-weight: 800;
+                font-variant-numeric: tabular-nums;
+                color: #fff;
+            }
         }
     </style>
 </head>
-
 <body>
 
-{{template "nav-styles" .}}
 {{template "nav" .}}
 
 <div class="container">
 
     <div class="top">
-        <h1>My Tools // Invoices</h1>
-        <a class="btn" href="/invoices/new">
-            + New Invoice
-        </a>
+        <h1>Invoices</h1>
+        <a href="/invoices/new" class="btn-new">+ New Invoice</a>
     </div>
 
-    {{if .Invoices}}
-    <div class="table-wrapper">
+    {{if not .Invoices}}
+    <div class="empty">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">No invoices yet</div>
+        <div class="empty-sub">Create your first invoice to get started.</div>
+        <a href="/invoices/new" class="btn-new">Create Invoice</a>
+    </div>
+    {{else}}
+
+    {{/* ── DESKTOP TABLE ── */}}
+    <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>Record ID</th>
+                    <th>Invoice</th>
                     <th>Client</th>
+                    <th>Issued</th>
+                    <th>Due</th>
                     <th>Status</th>
-                    <th class="right">Value</th>
-                    <th class="right">Operations</th>
+                    <th class="right">Total</th>
                 </tr>
             </thead>
-
             <tbody>
                 {{range .Invoices}}
                 <tr>
                     <td>
-                        <a class="invoice-link" href="/invoices/{{.ID}}">
-                            {{.InvoiceNumber}}
+                        <a href="/invoices/{{.ID}}" class="inv-link">
+                            {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
                         </a>
                     </td>
-
-                    <td>{{.ClientName}}</td>
-
+                    <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
+                    <td>{{if .IssueDate}}{{.IssueDate}}{{else}}—{{end}}</td>
+                    <td>{{if .DueDate}}{{.DueDate}}{{else}}—{{end}}</td>
                     <td>
-                        <span class="status-badge status-{{.Status}}">
-                            {{.Status}}
-                        </span>
+                        <span class="badge badge-{{.Status}}">{{.Status}}</span>
                     </td>
-
-                    <td class="right" style="font-family: monospace; font-weight: 600;">
-                        {{.Total}}
-                    </td>
-
-                    <td class="right">
-                        <div class="actions-cell">
-                            <a class="small-btn" href="/invoices/{{.ID}}">
-                                View
-                            </a>
-
-                            {{if eq .Status "draft"}}
-                            <a class="small-btn edit" href="/invoices/{{.ID}}/edit">
-                                Edit
-                            </a>
-                            {{end}}
-
-                            <a class="small-btn" href="/invoices/{{.ID}}/duplicate">
-                                Duplicate
-                            </a>
-                        </div>
-                    </td>
+                    <td class="right mono">{{.Total}}</td>
                 </tr>
                 {{end}}
             </tbody>
         </table>
     </div>
-    {{else}}
-    <div class="system-ready-state">
-        <div class="ready-icon">⚡</div>
-        <h2>Node Active // No Records Found</h2>
-        <p>Your business tools are initialized. Generate your first high-fidelity invoice to begin tracking operations.</p>
-        <a href="/invoices/new" class="btn">Initialize Module 01</a>
-    </div>
-    {{end}}
 
+    {{/* ── MOBILE CARD LIST ── */}}
+    <div class="card-list">
+        {{range .Invoices}}
+        <a href="/invoices/{{.ID}}" class="inv-card">
+            <div class="inv-card-top">
+                <span class="inv-card-number">
+                    {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}Untitled{{end}}
+                </span>
+                <span class="badge badge-{{.Status}}">{{.Status}}</span>
+            </div>
+            <div class="inv-card-client">
+                {{if .ClientName}}{{.ClientName}}{{else}}No client{{end}}
+            </div>
+            <div class="inv-card-bottom">
+                <div class="inv-card-dates">
+                    {{if .IssueDate}}Issued {{.IssueDate}}{{end}}
+                    {{if .DueDate}} · Due {{.DueDate}}{{end}}
+                </div>
+                <div class="inv-card-total">{{.Total}}</div>
+            </div>
+        </a>
+        {{end}}
+    </div>
+
+    {{end}}
 </div>
 
 </body>
