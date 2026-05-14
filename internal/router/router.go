@@ -19,9 +19,11 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Handle("/static/*", http.StripPrefix("/static/",
 		http.FileServer(http.Dir("static"))))
 
+	// ── Public routes (no login required) ──────────────────────────
 	r.Get("/", h.Index)
-	r.Get("/tools", h.ToolsHub)
 	r.Get("/healthz", h.Health)
+	r.Get("/research", h.Research)
+	r.Get("/tools", h.ToolsHub)
 	r.Post("/feedback", h.Feedback)
 
 	r.Get("/register", h.RegisterGet)
@@ -35,28 +37,30 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/auth/google", auth.GoogleLoginHandler)
 	r.Get("/auth/google/callback", h.GoogleCallback)
 
-	r.Get("/profile", h.ProfileGet)
-	r.Post("/profile", h.ProfilePost)
+	// ── Freemium invoice routes (no login required) ────────────────
+	r.Get("/invoices/new", h.InvoiceNewGet)
+	r.Post("/invoices/create", h.InvoiceCreatePost)
+	r.Get("/invoices/{id}", h.InvoiceDetail)
+	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
 
-	r.Get("/clients", h.ClientsList)
-	r.Get("/clients/new", h.ClientNewGet)
-	r.Post("/clients/new", h.ClientNewPost)
-	r.Get("/research", h.Research)
+	// ── Protected routes (login required) ──────────────────────────
+	r.Group(func(r chi.Router) {
+		r.Use(auth.RequireAuth)
 
-	r.Route("/invoices", func(r chi.Router) {
-		r.Get("/", h.InvoicesList)
-		r.Get("/new", h.InvoiceNewGet)
-		r.Post("/create", h.InvoiceCreatePost)
-		r.Get("/{id}", h.InvoiceDetail)
-		r.Get("/{id}/edit", h.InvoiceEditGet)
-		r.Post("/{id}/edit", h.InvoiceUpdatePost)
-		r.Post("/{id}/status", h.InvoiceStatusPost)
-		r.Get("/{id}/pdf", h.InvoicePDFGet)
-		r.Get("/{id}/send", h.InvoiceSendGet)
-		r.Post("/{id}/send", h.InvoiceSendPost)
-		// FIX H2: duplicate route was defined in the handler but never
-		// registered. It is now reachable.
-		r.Get("/{id}/duplicate", h.InvoiceDuplicateGet)
+		r.Get("/profile", h.ProfileGet)
+		r.Post("/profile", h.ProfilePost)
+
+		r.Get("/clients", h.ClientsList)
+		r.Get("/clients/new", h.ClientNewGet)
+		r.Post("/clients/new", h.ClientNewPost)
+
+		r.Get("/invoices", h.InvoicesList)
+		r.Get("/invoices/{id}/edit", h.InvoiceEditGet)
+		r.Post("/invoices/{id}/edit", h.InvoiceUpdatePost)
+		r.Post("/invoices/{id}/status", h.InvoiceStatusPost)
+		r.Get("/invoices/{id}/send", h.InvoiceSendGet)
+		r.Post("/invoices/{id}/send", h.InvoiceSendPost)
+		r.Get("/invoices/{id}/duplicate", h.InvoiceDuplicateGet)
 	})
 
 	return r
