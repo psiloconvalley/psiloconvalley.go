@@ -21,7 +21,7 @@ func NewHandlers(a *app.App) *Handlers {
 // ---------- Basic pages ----------
 
 func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
-	h.App.Render(w, r, "index.tmpl", nil)
+    h.App.Render(w, r, "home.tmpl", nil)
 }
 func (h *Handlers) Research(w http.ResponseWriter, r *http.Request) {
 	h.App.Render(w, r, "research.tmpl", nil)
@@ -35,9 +35,6 @@ func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "ok")
 }
 
-func (h *Handlers) InvoicePortal(w http.ResponseWriter, r *http.Request) {
-	h.App.Render(w, r, "home.tmpl", nil)
-}
 
 func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 	report := r.FormValue("report")
