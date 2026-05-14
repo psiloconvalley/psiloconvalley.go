@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Clients | PsiloConValley</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients | PsiloConValley</title>
+
+    {{template "nav-styles" .}}
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             background: #0a0a0a;
@@ -16,7 +24,7 @@
         .container {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 60px 20px;
+            padding: 60px 20px 80px;
         }
 
         .top {
@@ -32,6 +40,13 @@
             font-size: 32px;
             text-transform: uppercase;
             letter-spacing: -1px;
+        }
+
+        .top-subtitle {
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            margin-top: 6px;
+            font-family: monospace;
         }
 
         .top-right {
@@ -51,6 +66,11 @@
             transition: all 0.2s ease;
             border: none;
             cursor: pointer;
+            display: inline-block;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn:hover {
@@ -67,6 +87,10 @@
             font-size: 14px;
             cursor: not-allowed;
             border: 1px solid rgba(255,255,255,0.1);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .success-banner {
@@ -95,16 +119,49 @@
             color: #fbbf24;
         }
 
+        .limit-banner a {
+            color: #fbbf24;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .limit-banner a:hover {
+            text-decoration: underline;
+        }
+
+        /* ──────────────────────────────────────────────
+           TABLE WRAPPER — THIS IS THE CRITICAL FIX
+        ────────────────────────────────────────────── */
         .table-wrapper {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
-            overflow: hidden;
+            overflow-x: auto; /* Enable horizontal scroll */
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+        }
+
+        /* Show scrollbar on mobile so users know they can swipe */
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 700px; /* Prevents table from collapsing on mobile */
         }
 
         th {
@@ -116,6 +173,8 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             font-family: monospace;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         td {
@@ -149,6 +208,7 @@
             display: flex;
             gap: 10px;
             justify-content: flex-end;
+            flex-wrap: nowrap;
         }
 
         .small-btn {
@@ -163,6 +223,7 @@
             transition: all 0.2s;
             cursor: pointer;
             font-family: inherit;
+            white-space: nowrap;
         }
 
         .small-btn:hover {
@@ -223,11 +284,50 @@
             background: rgba(16, 185, 129, 0.15);
             color: #6ee7b7;
         }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 16px 60px;
+            }
+
+            .top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+                padding-left: 16px;
+            }
+
+            .top h1 {
+                font-size: 24px;
+            }
+
+            .top-right {
+                width: 100%;
+            }
+
+            .btn, .btn-disabled {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Make table scrollable more obvious on mobile */
+            .table-wrapper::after {
+                content: '← Swipe to see more →';
+                display: block;
+                text-align: center;
+                font-size: 11px;
+                color: rgba(255,255,255,0.3);
+                padding: 12px;
+                font-family: monospace;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+        }
     </style>
 </head>
 <body>
 
-{{template "nav-styles" .}}
 {{template "nav" .}}
 
 <div class="container">
@@ -235,7 +335,7 @@
     <div class="top">
         <div>
             <h1>Clients</h1>
-            <div style="color:rgba(255,255,255,0.4); font-size:13px; margin-top:6px; font-family:monospace;">
+            <div class="top-subtitle">
                 {{.ClientCount}} saved
                 {{if .User}}
                     {{if eq .User.Plan "pro"}}
@@ -260,7 +360,7 @@
         ⚡ You've used all <strong>3 free client slots</strong>.
         Upgrade to <strong>Pro</strong> for unlimited clients, invoice history per client, and revenue analytics.
         <br><br>
-        <a href="/upgrade" style="color:#fbbf24; font-weight:700;">Upgrade to Pro →</a>
+        <a href="/upgrade">Upgrade to Pro →</a>
     </div>
     {{end}}
 
@@ -276,7 +376,7 @@
                     <th>Client</th>
                     <th>Location</th>
                     <th>Phone</th>
-                    <th class="right" style="text-align:right;">Operations</th>
+                    <th style="text-align:right;">Operations</th>
                 </tr>
             </thead>
             <tbody>
