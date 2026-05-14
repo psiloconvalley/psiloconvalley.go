@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Sign In | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{template "nav-styles" .}}
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background: #0a0a0a;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            -webkit-font-smoothing: antialiased;
         }
 
         .auth-container {
@@ -25,103 +32,104 @@
 
         .auth-card {
             width: 100%;
-            max-width: 420px;
-            background: rgba(15, 15, 15, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 48px 40px;
+            max-width: 400px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 40px 32px;
         }
 
         .auth-title {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
         }
 
         .auth-subtitle {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 14px;
-            margin-bottom: 32px;
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            font-weight: 400;
+            margin-bottom: 28px;
         }
 
         .error-banner {
-            background: rgba(220, 38, 38, 0.15);
-            border: 1px solid rgba(220, 38, 38, 0.3);
+            background: rgba(220,38,38,0.1);
+            border: 1px solid rgba(220,38,38,0.2);
             color: #fca5a5;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 24px;
+            font-size: 13px;
+            margin-bottom: 20px;
         }
 
         .limit-banner {
-            background: rgba(234, 179, 8, 0.1);
-            border: 1px solid rgba(234, 179, 8, 0.3);
+            background: rgba(234,179,8,0.08);
+            border: 1px solid rgba(234,179,8,0.2);
             color: #fde68a;
-            padding: 14px 16px;
+            padding: 12px 14px;
             border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 24px;
+            font-size: 13px;
+            margin-bottom: 20px;
             line-height: 1.5;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 8px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 6px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 14px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             color: #fff;
-            font-size: 15px;
+            font-family: inherit;
+            font-size: 14px;
             transition: border-color 0.2s;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.25);
+            color: rgba(255,255,255,0.2);
         }
 
         .submit-btn {
             width: 100%;
-            padding: 16px;
+            padding: 12px;
             background: #fff;
             color: #0a0a0a;
             border: none;
             border-radius: 8px;
-            font-size: 15px;
+            font-family: inherit;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 8px;
-            transition: background 0.2s;
+            margin-top: 4px;
+            transition: opacity 0.2s;
         }
 
-        .submit-btn:hover {
-            background: #e5e5e5;
-        }
+        .submit-btn:hover { opacity: 0.85; }
 
         .divider {
             display: flex;
             align-items: center;
-            margin: 28px 0;
+            margin: 24px 0;
         }
 
         .divider::before,
@@ -129,50 +137,51 @@
             content: "";
             flex: 1;
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.08);
         }
 
         .divider span {
-            padding: 0 16px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.3);
+            padding: 0 14px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.25);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .oauth-btn {
             width: 100%;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 14px;
+            color: rgba(255,255,255,0.3);
+            font-family: inherit;
+            font-size: 13px;
             font-weight: 600;
             cursor: not-allowed;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             text-decoration: none;
         }
 
         .oauth-btn.oauth-active {
             cursor: pointer;
-            color: rgba(255, 255, 255, 0.85);
-            border-color: rgba(255, 255, 255, 0.2);
+            color: rgba(255,255,255,0.8);
+            border-color: rgba(255,255,255,0.15);
         }
 
         .oauth-btn.oauth-active:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.3);
             color: #fff;
         }
 
         .oauth-badge {
-            font-size: 10px;
-            background: rgba(255, 255, 255, 0.1);
+            font-size: 9px;
+            background: rgba(255,255,255,0.08);
             padding: 2px 8px;
             border-radius: 999px;
             text-transform: uppercase;
@@ -181,9 +190,9 @@
 
         .auth-footer {
             text-align: center;
-            margin-top: 28px;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.4);
+            margin-top: 24px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.35);
         }
 
         .auth-footer a {
@@ -192,30 +201,26 @@
             font-weight: 600;
         }
 
-        .auth-footer a:hover {
-            text-decoration: underline;
-        }
+        .auth-footer a:hover { text-decoration: underline; }
 
         @media (max-width: 480px) {
-            .auth-card {
-                padding: 36px 24px;
-            }
+            .auth-card { padding: 32px 20px; }
+            .auth-title { font-size: 22px; }
         }
     </style>
 </head>
 <body>
 
-{{template "nav-styles" .}}
 {{template "nav" .}}
 
 <div class="auth-container">
     <div class="auth-card">
         <h1 class="auth-title">Welcome back</h1>
-        <p class="auth-subtitle">Sign in to your PsiloConValley account.</p>
+        <p class="auth-subtitle">Sign in to your account</p>
 
         {{if .LimitBanner}}
         <div class="limit-banner">
-            ⚡ You've created 3 free invoices. Sign in or create an account to keep going — it's free.
+            You've used your free invoices. Sign in or create an account to continue — it's free.
         </div>
         {{end}}
 
