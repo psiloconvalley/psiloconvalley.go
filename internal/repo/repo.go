@@ -1,3 +1,4 @@
+// internal/repo/repo.go
 package repo
 
 import (
@@ -84,11 +85,16 @@ func (u *User) DisplayName() string {
 	return parts[0]
 }
 
+// =====================================================================
+// Invoice Model — with AnonymousToken for freemium ownership
+// =====================================================================
+
 type Invoice struct {
 	ID                int64
 	BusinessProfileID *int64
 	ClientID          *int64
 	UserID            *int64
+	AnonymousToken    string
 
 	LogoURL string
 
@@ -124,15 +130,11 @@ type Invoice struct {
 	UpdatedAt           time.Time
 }
 
-// FIX C5 / H5: Details is now a first-class field.
-// The DB migration adds `details TEXT NOT NULL DEFAULT ''` to invoice_items.
-// This eliminates the newline-concatenation hack in forms.go and surfaces
-// details cleanly in the view layer.
 type InvoiceItem struct {
 	ID             int64
 	InvoiceID      int64
 	Description    string
-	Details        string  // ← NEW: maps to invoice_items.details
+	Details        string
 	Quantity       float64
 	UnitPriceCents int64
 	LineTotalCents int64
@@ -159,7 +161,7 @@ type UserRepo struct{ db *sql.DB }
 func NewUserRepo(db *sql.DB) *UserRepo { return &UserRepo{db: db} }
 
 // =====================================================================
-// UserRepo Methods — unchanged, all correct
+// UserRepo Methods
 // =====================================================================
 
 func (r *UserRepo) Create(email, plainPassword string) (int64, error) {
@@ -196,12 +198,24 @@ func (r *UserRepo) GetByEmail(email string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
-	if provider.Valid     { u.Provider     = provider.String }
-	if googleID.Valid     { u.GoogleID     = googleID.String }
-	if name.Valid         { u.Name         = name.String }
-	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
-	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
+	if passwordHash.Valid {
+		u.PasswordHash = passwordHash.String
+	}
+	if provider.Valid {
+		u.Provider = provider.String
+	}
+	if googleID.Valid {
+		u.GoogleID = googleID.String
+	}
+	if name.Valid {
+		u.Name = name.String
+	}
+	if avatarURL.Valid {
+		u.AvatarURL = avatarURL.String
+	}
+	if updatedAt.Valid {
+		u.UpdatedAt = updatedAt.Time
+	}
 	return &u, nil
 }
 
@@ -221,12 +235,24 @@ func (r *UserRepo) GetByID(id int64) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
-	if provider.Valid     { u.Provider     = provider.String }
-	if googleID.Valid     { u.GoogleID     = googleID.String }
-	if name.Valid         { u.Name         = name.String }
-	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
-	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
+	if passwordHash.Valid {
+		u.PasswordHash = passwordHash.String
+	}
+	if provider.Valid {
+		u.Provider = provider.String
+	}
+	if googleID.Valid {
+		u.GoogleID = googleID.String
+	}
+	if name.Valid {
+		u.Name = name.String
+	}
+	if avatarURL.Valid {
+		u.AvatarURL = avatarURL.String
+	}
+	if updatedAt.Valid {
+		u.UpdatedAt = updatedAt.Time
+	}
 	return &u, nil
 }
 
@@ -246,12 +272,24 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
-	if provider.Valid     { u.Provider     = provider.String }
-	if googleIDVal.Valid  { u.GoogleID     = googleIDVal.String }
-	if name.Valid         { u.Name         = name.String }
-	if avatarURL.Valid    { u.AvatarURL    = avatarURL.String }
-	if updatedAt.Valid    { u.UpdatedAt    = updatedAt.Time }
+	if passwordHash.Valid {
+		u.PasswordHash = passwordHash.String
+	}
+	if provider.Valid {
+		u.Provider = provider.String
+	}
+	if googleIDVal.Valid {
+		u.GoogleID = googleIDVal.String
+	}
+	if name.Valid {
+		u.Name = name.String
+	}
+	if avatarURL.Valid {
+		u.AvatarURL = avatarURL.String
+	}
+	if updatedAt.Valid {
+		u.UpdatedAt = updatedAt.Time
+	}
 	return &u, nil
 }
 
@@ -305,7 +343,7 @@ func (r *UserRepo) FindOrCreateGoogleUser(
 			SET name = $1, avatar_url = $2, updated_at = NOW()
 			WHERE id = $3
 		`, name, avatarURL, user.ID)
-		user.Name      = name
+		user.Name = name
 		user.AvatarURL = avatarURL
 		return user, false, nil
 	}
@@ -323,10 +361,10 @@ func (r *UserRepo) FindOrCreateGoogleUser(
 			SET name = $1, avatar_url = $2, updated_at = NOW()
 			WHERE id = $3
 		`, name, avatarURL, user.ID)
-		user.GoogleID  = googleID
-		user.Name      = name
+		user.GoogleID = googleID
+		user.Name = name
 		user.AvatarURL = avatarURL
-		user.Provider  = "google"
+		user.Provider = "google"
 		return user, false, nil
 	}
 	if err != sql.ErrNoRows {
@@ -345,7 +383,7 @@ func (r *UserRepo) FindOrCreateGoogleUser(
 }
 
 // =====================================================================
-// ClientRepo Methods — unchanged, all correct
+// ClientRepo Methods
 // =====================================================================
 
 func (r *ClientRepo) ListByUserID(ctx context.Context, userID int64) ([]Client, error) {
@@ -376,15 +414,33 @@ func (r *ClientRepo) ListByUserID(ctx context.Context, userID int64) ([]Client, 
 		); err != nil {
 			return nil, err
 		}
-		if email.Valid        { c.Email        = email.String }
-		if address.Valid      { c.Address      = address.String }
-		if city.Valid         { c.City         = city.String }
-		if state.Valid        { c.State        = state.String }
-		if zip.Valid          { c.Zip          = zip.String }
-		if country.Valid      { c.Country      = country.String }
-		if phone.Valid        { c.Phone        = phone.String }
-		if notes.Valid        { c.Notes        = notes.String }
-		if paymentTerms.Valid { c.PaymentTerms = paymentTerms.String }
+		if email.Valid {
+			c.Email = email.String
+		}
+		if address.Valid {
+			c.Address = address.String
+		}
+		if city.Valid {
+			c.City = city.String
+		}
+		if state.Valid {
+			c.State = state.String
+		}
+		if zip.Valid {
+			c.Zip = zip.String
+		}
+		if country.Valid {
+			c.Country = country.String
+		}
+		if phone.Valid {
+			c.Phone = phone.String
+		}
+		if notes.Valid {
+			c.Notes = notes.String
+		}
+		if paymentTerms.Valid {
+			c.PaymentTerms = paymentTerms.String
+		}
 		clients = append(clients, c)
 	}
 	return clients, rows.Err()
@@ -411,15 +467,33 @@ func (r *ClientRepo) GetByID(ctx context.Context, id, userID int64) (*Client, er
 	if err != nil {
 		return nil, err
 	}
-	if email.Valid        { c.Email        = email.String }
-	if address.Valid      { c.Address      = address.String }
-	if city.Valid         { c.City         = city.String }
-	if state.Valid        { c.State        = state.String }
-	if zip.Valid          { c.Zip          = zip.String }
-	if country.Valid      { c.Country      = country.String }
-	if phone.Valid        { c.Phone        = phone.String }
-	if notes.Valid        { c.Notes        = notes.String }
-	if paymentTerms.Valid { c.PaymentTerms = paymentTerms.String }
+	if email.Valid {
+		c.Email = email.String
+	}
+	if address.Valid {
+		c.Address = address.String
+	}
+	if city.Valid {
+		c.City = city.String
+	}
+	if state.Valid {
+		c.State = state.String
+	}
+	if zip.Valid {
+		c.Zip = zip.String
+	}
+	if country.Valid {
+		c.Country = country.String
+	}
+	if phone.Valid {
+		c.Phone = phone.String
+	}
+	if notes.Valid {
+		c.Notes = notes.String
+	}
+	if paymentTerms.Valid {
+		c.PaymentTerms = paymentTerms.String
+	}
 	return &c, nil
 }
 
@@ -546,7 +620,7 @@ func (r *ClientRepo) FindOrCreate(
 }
 
 // =====================================================================
-// BusinessRepo Methods — unchanged, all correct
+// BusinessRepo Methods
 // =====================================================================
 
 func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*BusinessProfile, error) {
@@ -567,14 +641,30 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 	if err != nil {
 		return nil, err
 	}
-	if email.Valid    { p.Email    = email.String }
-	if city.Valid     { p.City     = city.String }
-	if state.Valid    { p.State    = state.String }
-	if zip.Valid      { p.Zip      = zip.String }
-	if country.Valid  { p.Country  = country.String }
-	if taxID.Valid    { p.TaxID    = taxID.String }
-	if currency.Valid { p.Currency = currency.String }
-	if logoURL.Valid  { p.LogoURL  = logoURL.String }
+	if email.Valid {
+		p.Email = email.String
+	}
+	if city.Valid {
+		p.City = city.String
+	}
+	if state.Valid {
+		p.State = state.String
+	}
+	if zip.Valid {
+		p.Zip = zip.String
+	}
+	if country.Valid {
+		p.Country = country.String
+	}
+	if taxID.Valid {
+		p.TaxID = taxID.String
+	}
+	if currency.Valid {
+		p.Currency = currency.String
+	}
+	if logoURL.Valid {
+		p.LogoURL = logoURL.String
+	}
 	return &p, nil
 }
 
@@ -612,13 +702,6 @@ func (r *BusinessRepo) GetDefault() (*BusinessProfile, error) {
 // Invoice Math
 // =====================================================================
 
-// calculateTotals computes line totals, subtotal, tax, and grand total.
-//
-// FIX H1: Discount is now capped at subtotal+tax before being applied.
-// Previously a discount exceeding the invoice total would floor to $0
-// while storing internally inconsistent values (subtotal=$10, discount=$20,
-// total=$0). Now the stored discount never exceeds what it can actually
-// reduce, keeping the accounting record self-consistent.
 func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 	var subtotalCents int64
 	for i := range items {
@@ -632,8 +715,6 @@ func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 	taxCents := (subtotalCents * inv.TaxRateBps) / 10000
 	preTaxTotal := subtotalCents + taxCents
 
-	// Cap discount so stored values remain internally consistent.
-	// A discount cannot exceed the pre-discount total.
 	if inv.DiscountAmountCents > preTaxTotal {
 		inv.DiscountAmountCents = preTaxTotal
 	}
@@ -641,9 +722,9 @@ func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 		inv.DiscountAmountCents = 0
 	}
 
-	inv.SubtotalCents  = subtotalCents
+	inv.SubtotalCents = subtotalCents
 	inv.TaxAmountCents = taxCents
-	inv.TotalCents     = preTaxTotal - inv.DiscountAmountCents
+	inv.TotalCents = preTaxTotal - inv.DiscountAmountCents
 	return items
 }
 
@@ -651,10 +732,49 @@ func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 // InvoiceRepo Methods
 // =====================================================================
 
+// CreateWithToken creates a simple invoice for anonymous or logged-in users.
+// This is the freemium entry point — anonymous users get token-based ownership.
+func (r *InvoiceRepo) CreateWithToken(
+	ctx context.Context,
+	user *User,
+	anonymousToken string,
+	clientName string,
+	amount float64,
+	description string,
+) (int64, error) {
+	var userID *int64
+	if user != nil {
+		userID = &user.ID
+	}
+
+	inv := &Invoice{
+		UserID:         userID,
+		AnonymousToken: anonymousToken,
+		ClientName:     clientName,
+		InvoiceNumber:  fmt.Sprintf("INV-%d", time.Now().UnixNano()),
+		IssueDate:      time.Now(),
+		Currency:       "USD",
+		Status:         "draft",
+		Notes:          description,
+	}
+
+	items := []InvoiceItem{
+		{
+			Description:    description,
+			Quantity:       1,
+			UnitPriceCents: int64(math.Round(amount * 100)),
+			LineTotalCents: int64(math.Round(amount * 100)),
+		},
+	}
+
+	return r.CreateInvoice(ctx, inv, items, anonymousToken)
+}
+
 func (r *InvoiceRepo) CreateInvoice(
 	ctx context.Context,
 	inv *Invoice,
 	items []InvoiceItem,
+	anonymousToken string,
 ) (int64, error) {
 	if inv == nil || inv.InvoiceNumber == "" {
 		return 0, errors.New("invoice and number required")
@@ -680,7 +800,7 @@ func (r *InvoiceRepo) CreateInvoice(
 
 	const insertInvoice = `
 		INSERT INTO invoices (
-			business_profile_id, client_id, user_id,
+			business_profile_id, client_id, user_id, anonymous_token,
 			client_name, client_email, client_address,
 			client_city, client_zip, client_state, client_country,
 			company_name, company_email, company_address,
@@ -690,16 +810,16 @@ func (r *InvoiceRepo) CreateInvoice(
 			subtotal_cents, tax_amount_cents, total_cents,
 			currency, status
 		) VALUES (
-			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
-			$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
-			$21,$22,$23,$24,$25,$26,$27,$28,$29
+			$1,$2,$3,NULLIF($4,''),$5,$6,$7,$8,$9,$10,$11,
+			$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
+			$22,$23,$24,$25,$26,$27,$28,$29,$30
 		) RETURNING id, created_at`
 
 	var newID int64
 	var createdAt time.Time
 
 	err = tx.QueryRowContext(ctx, insertInvoice,
-		inv.BusinessProfileID, inv.ClientID, inv.UserID,
+		inv.BusinessProfileID, inv.ClientID, inv.UserID, anonymousToken,
 		inv.ClientName, inv.ClientEmail, inv.ClientAddress,
 		inv.ClientCity, inv.ClientZip, inv.ClientState, inv.ClientCountry,
 		inv.CompanyName, inv.CompanyEmail, inv.CompanyAddress,
@@ -713,10 +833,9 @@ func (r *InvoiceRepo) CreateInvoice(
 		return 0, fmt.Errorf("insert invoice: %w", err)
 	}
 
-	inv.ID        = newID
+	inv.ID = newID
 	inv.CreatedAt = createdAt
 
-	// FIX C5: INSERT now includes the details column.
 	const insertItem = `
 		INSERT INTO invoice_items
 			(invoice_id, description, details, quantity,
@@ -738,13 +857,16 @@ func (r *InvoiceRepo) CreateInvoice(
 	return newID, nil
 }
 
+// GetInvoiceWithItems fetches a single invoice and its line items by ID.
+// anonymous_token is scanned as sql.NullString so that NULL in the database
+// stays as "" in Go — never confused with a real token.
 func (r *InvoiceRepo) GetInvoiceWithItems(
 	ctx context.Context,
 	id int64,
 ) (*Invoice, []InvoiceItem, error) {
 	const q = `
 		SELECT
-			id, business_profile_id, client_id, user_id,
+			id, business_profile_id, client_id, user_id, anonymous_token,
 			client_name, client_email, client_address,
 			client_city, client_zip, client_state, client_country,
 			company_name, company_email, company_address,
@@ -757,6 +879,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 
 	var inv Invoice
 	var bpID, cID, uID sql.NullInt64
+	var anonToken sql.NullString // ← NullString: NULL in DB stays "" in Go
 	var dueDate, updatedAt sql.NullTime
 	var cEmail, cAddr, cCity, cZip, cState, cCountry sql.NullString
 	var compName, compEmail, compAddr, compCity, compZip,
@@ -764,7 +887,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 	var currency sql.NullString
 
 	err := r.db.QueryRowContext(ctx, q, id).Scan(
-		&inv.ID, &bpID, &cID, &uID,
+		&inv.ID, &bpID, &cID, &uID, &anonToken, // ← anonToken not &inv.AnonymousToken
 		&inv.ClientName, &cEmail, &cAddr, &cCity, &cZip, &cState, &cCountry,
 		&compName, &compEmail, &compAddr, &compCity, &compZip,
 		&compState, &compCountry,
@@ -777,27 +900,71 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		return nil, nil, err
 	}
 
-	if bpID.Valid       { inv.BusinessProfileID = &bpID.Int64 }
-	if cID.Valid        { inv.ClientID          = &cID.Int64 }
-	if uID.Valid        { inv.UserID            = &uID.Int64 }
-	if dueDate.Valid    { inv.DueDate           = &dueDate.Time }
-	if updatedAt.Valid  { inv.UpdatedAt         = updatedAt.Time }
-	if cEmail.Valid     { inv.ClientEmail       = cEmail.String }
-	if cAddr.Valid      { inv.ClientAddress     = cAddr.String }
-	if cCity.Valid      { inv.ClientCity        = cCity.String }
-	if cZip.Valid       { inv.ClientZip         = cZip.String }
-	if cState.Valid     { inv.ClientState       = cState.String }
-	if cCountry.Valid   { inv.ClientCountry     = cCountry.String }
-	if compName.Valid   { inv.CompanyName       = compName.String }
-	if compEmail.Valid  { inv.CompanyEmail      = compEmail.String }
-	if compAddr.Valid   { inv.CompanyAddress    = compAddr.String }
-	if compCity.Valid   { inv.CompanyCity       = compCity.String }
-	if compZip.Valid    { inv.CompanyZip        = compZip.String }
-	if compState.Valid  { inv.CompanyState      = compState.String }
-	if compCountry.Valid { inv.CompanyCountry   = compCountry.String }
-	if currency.Valid   { inv.Currency          = currency.String }
+	// Nullable fields → Go values
+	if bpID.Valid {
+		inv.BusinessProfileID = &bpID.Int64
+	}
+	if cID.Valid {
+		inv.ClientID = &cID.Int64
+	}
+	if uID.Valid {
+		inv.UserID = &uID.Int64
+	}
+	// CRITICAL: only set AnonymousToken when the DB column is non-NULL.
+	// A NULL token means this invoice was created by a registered user.
+	// An empty-string token must never match an anon visitor with no cookie.
+	if anonToken.Valid && anonToken.String != "" {
+		inv.AnonymousToken = anonToken.String
+	}
+	if dueDate.Valid {
+		inv.DueDate = &dueDate.Time
+	}
+	if updatedAt.Valid {
+		inv.UpdatedAt = updatedAt.Time
+	}
+	if cEmail.Valid {
+		inv.ClientEmail = cEmail.String
+	}
+	if cAddr.Valid {
+		inv.ClientAddress = cAddr.String
+	}
+	if cCity.Valid {
+		inv.ClientCity = cCity.String
+	}
+	if cZip.Valid {
+		inv.ClientZip = cZip.String
+	}
+	if cState.Valid {
+		inv.ClientState = cState.String
+	}
+	if cCountry.Valid {
+		inv.ClientCountry = cCountry.String
+	}
+	if compName.Valid {
+		inv.CompanyName = compName.String
+	}
+	if compEmail.Valid {
+		inv.CompanyEmail = compEmail.String
+	}
+	if compAddr.Valid {
+		inv.CompanyAddress = compAddr.String
+	}
+	if compCity.Valid {
+		inv.CompanyCity = compCity.String
+	}
+	if compZip.Valid {
+		inv.CompanyZip = compZip.String
+	}
+	if compState.Valid {
+		inv.CompanyState = compState.String
+	}
+	if compCountry.Valid {
+		inv.CompanyCountry = compCountry.String
+	}
+	if currency.Valid {
+		inv.Currency = currency.String
+	}
 
-	// FIX C5: SELECT now includes details column.
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, invoice_id, description, details, quantity,
 		       unit_price_cents, line_total_cents
@@ -812,19 +979,21 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 	var items []InvoiceItem
 	for rows.Next() {
 		var it InvoiceItem
+		var details sql.NullString
 		if err := rows.Scan(
-			&it.ID, &it.InvoiceID, &it.Description, &it.Details,
+			&it.ID, &it.InvoiceID, &it.Description, &details,
 			&it.Quantity, &it.UnitPriceCents, &it.LineTotalCents,
 		); err != nil {
 			return nil, nil, err
+		}
+		if details.Valid {
+			it.Details = details.String
 		}
 		items = append(items, it)
 	}
 	return &inv, items, rows.Err()
 }
 
-// FIX C2: currency is now included in the SELECT so MapInvoiceList
-// can render the correct symbol for every non-USD invoice.
 func (r *InvoiceRepo) ListInvoices(
 	ctx context.Context,
 	limit, offset int,
@@ -871,9 +1040,15 @@ func (r *InvoiceRepo) ListInvoices(
 		); err != nil {
 			return nil, err
 		}
-		if uID.Valid      { inv.UserID   = &uID.Int64 }
-		if dueDate.Valid  { inv.DueDate  = &dueDate.Time }
-		if currency.Valid { inv.Currency = currency.String }
+		if uID.Valid {
+			inv.UserID = &uID.Int64
+		}
+		if dueDate.Valid {
+			inv.DueDate = &dueDate.Time
+		}
+		if currency.Valid {
+			inv.Currency = currency.String
+		}
 		invoices = append(invoices, inv)
 	}
 	return invoices, rows.Err()
@@ -891,11 +1066,6 @@ func (r *InvoiceRepo) InvoiceNumberExists(
 	return exists, err
 }
 
-// FIX C1: WHERE clause now includes AND user_id=$29.
-// Previously UpdateInvoice relied solely on the handler's canAccessInvoice
-// check. Defense in depth requires the DB operation itself to be scoped
-// to the owning user — a single misconfigured middleware cannot escalate
-// to cross-user data mutation.
 func (r *InvoiceRepo) UpdateInvoice(
 	ctx context.Context,
 	inv *Invoice,
@@ -934,7 +1104,7 @@ func (r *InvoiceRepo) UpdateInvoice(
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status,
-		inv.ID, inv.UserID, // $28, $29
+		inv.ID, inv.UserID,
 	)
 	if err != nil {
 		return err
@@ -951,7 +1121,6 @@ func (r *InvoiceRepo) UpdateInvoice(
 		return fmt.Errorf("delete items: %w", err)
 	}
 
-	// FIX C5: INSERT now persists details independently.
 	for _, item := range items {
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO invoice_items
@@ -968,8 +1137,6 @@ func (r *InvoiceRepo) UpdateInvoice(
 	return tx.Commit()
 }
 
-// UpdateInvoiceStatus — unchanged, was already correct.
-// State machine validation and user_id scoping were already in place.
 func (r *InvoiceRepo) UpdateInvoiceStatus(
 	ctx context.Context,
 	id int64,

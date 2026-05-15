@@ -2,282 +2,307 @@
 package handlers
 
 import (
-	"database/sql"
+	"bytes"
+	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/pdf"
+	"psiloconvalley/internal/views"
 )
 
 // =====================================================================
-// 1. PUBLIC / FREEMIUM ROUTES
+// PUBLIC / FREEMIUM INVOICE ROUTES
+//
+// Anonymous users may create/view ONLY invoices matching their anon token.
+// Logged-in users may view ONLY invoices matching their user_id.
 // =====================================================================
 
-// InvoiceNewGet renders the creation form. Accessible to everyone.
 func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
-	// If anonymous and reached max free invoices, redirect to register
-	userID, isLoggedIn := auth.GetSessionUserID(r)
-	if !isLoggedIn && auth.AnonLimitReached(r) {
+	user := auth.GetUser(r)
+
+	if user == nil && auth.AnonLimitReached(r) {
 		http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
 		return
 	}
 
-	data := map[string]interface{}{
-		"IsLoggedIn": isLoggedIn,
-		"UserID":     userID,
-	}
-	h.App.Views.Render(w, r, "invoice_new.tmpl", data)
+	h.App.Render(w, r, "invoice_new.tmpl", map[string]any{
+		"User":       user,
+		"IsLoggedIn": user != nil,
+	})
 }
 
-// InvoiceCreatePost handles form submission for both users and guests.
 func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
 		return
 	}
 
-	userID, isLoggedIn := auth.GetSessionUserID(r)
+	user := auth.GetUser(r)
 
-	// Enforce freemium limit for anonymous users
-	if !isLoggedIn {
+	var anonymousToken string
+
+	if user == nil {
 		if auth.AnonLimitReached(r) {
 			http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
 			return
 		}
+
+		existingToken, hasToken := auth.GetAnonymousToken(r)
+		if hasToken && existingToken != "" {
+			anonymousToken = existingToken
+		} else {
+			token, err := auth.GenerateToken(32)
+			if err != nil {
+				http.Error(w, "Failed to generate anonymous ownership token", http.StatusInternalServerError)
+				return
+			}
+
+			anonymousToken = token
+			auth.SetAnonymousToken(w, anonymousToken)
+		}
+
 		count := auth.GetAnonInvoiceCount(r)
 		auth.SetAnonInvoiceCount(w, count+1)
 	}
 
 	amount, _ := strconv.ParseFloat(r.FormValue("amount"), 64)
 
-	// Create invoice record
-	invoiceID, err := h.App.InvoiceRepo.Create(r.Context(), userID, r.FormValue("client_name"), amount, r.FormValue("description"))
+	invoiceID, err := h.App.InvRepo.CreateWithToken(
+		r.Context(),
+		user,
+		anonymousToken,
+		r.FormValue("client_name"),
+		amount,
+		r.FormValue("description"),
+	)
 	if err != nil {
 		http.Error(w, "Failed to create invoice", http.StatusInternalServerError)
 		return
 	}
 
-	// Redirect to the view page
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10), http.StatusSeeOther)
 }
 
-// InvoiceDetail displays a specific invoice. Guarded by Zero-Trust checks.
 func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	invoiceID, err := strconv.ParseInt(idParam, 10, 64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		http.Error(w, "Invalid invoice ID", http.StatusBadRequest)
+		http.NotFound(w, r)
 		return
 	}
 
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "Invoice not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Database error", http.StatusInternalServerError)
-		}
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil {
+		http.NotFound(w, r)
 		return
 	}
 
-	// =========================================================================
-	// MIT-LEVEL SECURITY GATE: ZERO-TRUST OWNERSHIP CHECK
-	// =========================================================================
-	userID, isLoggedIn := auth.GetSessionUserID(r)
-
-	// CASE 1: Invoice belongs to a registered user (e.g., YOU).
-	// If visitor is not logged in, OR logged in as someone else -> BLOCK.
-	if invoice.UserID > 0 {
-		if !isLoggedIn || invoice.UserID != userID {
-			http.Redirect(w, r, "/login?return_to=/invoices/"+idParam, http.StatusSeeOther)
-			return
-		}
-	}
-
-	// CASE 2: Invoice was created anonymously.
-	// If a logged-in user tries to browse anonymous invoices -> BLOCK.
-	if invoice.UserID == 0 && isLoggedIn {
-		http.Error(w, "Forbidden: Invalid Access Context", http.StatusForbidden)
+	if !h.canAccessInvoice(r, inv) {
+		http.Error(w, "Unauthorized - You can only view your own invoices", http.StatusForbidden)
 		return
 	}
-	// =========================================================================
 
-	h.App.Views.Render(w, r, "invoice_detail.tmpl", map[string]interface{}{
-		"Invoice":    invoice,
-		"IsLoggedIn": isLoggedIn,
+	invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	h.App.Render(w, r, "invoice_detail.tmpl", map[string]any{
+		"Invoice":    invoiceView,
+		"IsLoggedIn": auth.GetUser(r) != nil,
 	})
 }
 
-// InvoicePDFGet generates a PDF. Uses identical security gate to Detail.
 func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	invoiceID, err := strconv.ParseInt(idParam, 10, 64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		http.Error(w, "Invalid invoice ID", http.StatusBadRequest)
+		http.NotFound(w, r)
 		return
 	}
 
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil || invoice == nil {
-		http.Error(w, "Invoice not found", http.StatusNotFound)
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil {
+		http.NotFound(w, r)
 		return
 	}
 
-	userID, isLoggedIn := auth.GetSessionUserID(r)
-	if invoice.UserID > 0 && (!isLoggedIn || invoice.UserID != userID) {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	if invoice.UserID == 0 && isLoggedIn {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	if !h.canAccessInvoice(r, inv) {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
 		return
 	}
 
-	// Generate and serve PDF
-	pdfBytes, err := h.App.PDFService.GenerateInvoicePDF(invoice)
+	user := auth.GetUser(r)
+	invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	var buf bytes.Buffer
+
+	templateData := map[string]any{
+		"Invoice":   invoiceView,
+		"User":      user,
+		"csrfField": "",
+	}
+
+	if err := h.App.Templates.ExecuteTemplate(&buf, "invoice_detail.tmpl", templateData); err != nil {
+		http.Error(w, "Could not render invoice", http.StatusInternalServerError)
+		return
+	}
+
+	pdfCtx, pdfCancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer pdfCancel()
+
+	pdfBytes, err := pdf.Generate(pdfCtx, buf.String())
 	if err != nil {
-		http.Error(w, "Failed to generate PDF", http.StatusInternalServerError)
+		http.Error(w, "Could not generate PDF", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/pdf")
-	w.Header().Set("Content-Disposition", "inline; filename=invoice_"+idParam+".pdf")
-	w.Write(pdfBytes)
+	w.Header().Set("Content-Disposition", "inline; filename=invoice-"+strconv.FormatInt(id, 10)+".pdf")
+
+	_, _ = w.Write(pdfBytes)
 }
 
 // =====================================================================
-// 2. PROTECTED MANAGEMENT ROUTES (Requires Login Middleware)
+// PROTECTED INVOICE MANAGEMENT ROUTES
+// All routes below require auth.RequireAuth (enforced in router.go).
+// canAccessInvoice provides a secondary user_id ownership check.
 // =====================================================================
 
-// InvoicesList shows all invoices owned by the logged-in user.
 func (h *Handlers) InvoicesList(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.GetSessionUserID(r)
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
-	// Only fetch invoices matching this user's ID
-	invoices, err := h.App.InvoiceRepo.ListByUserID(r.Context(), userID)
+	invoices, err := h.App.InvRepo.ListInvoices(r.Context(), 50, 0, &user.ID)
 	if err != nil {
 		http.Error(w, "Failed to load invoices", http.StatusInternalServerError)
 		return
 	}
 
-	h.App.Views.Render(w, r, "invoices_list.tmpl", map[string]interface{}{
+	h.App.Render(w, r, "invoices_list.tmpl", map[string]any{
 		"Invoices": invoices,
+		"User":     user,
 	})
 }
 
-// InvoiceEditGet renders the edit form. Guards against editing others' invoices.
 func (h *Handlers) InvoiceEditGet(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.GetSessionUserID(r)
-	invoiceID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil || invoice.UserID != userID {
-		http.Error(w, "Unauthorized or Not Found", http.StatusForbidden)
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	h.App.Views.Render(w, r, "invoice_new.tmpl", map[string]interface{}{
-		"Invoice": invoice,
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	invoiceView := views.MapInvoicePage(inv, items, "edit")
+
+	h.App.Render(w, r, "invoice_new.tmpl", map[string]any{
+		"Invoice": invoiceView,
 		"IsEdit":  true,
+		"User":    user,
 	})
 }
 
-// InvoiceUpdatePost processes edits. Strict ownership check before DB update.
 func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.GetSessionUserID(r)
-	invoiceID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-
-	// Verify ownership before modifying
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil || invoice.UserID != userID {
-		http.Error(w, "Unauthorized attempt to modify record", http.StatusForbidden)
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	amount, _ := strconv.ParseFloat(r.FormValue("amount"), 64)
-	err = h.App.InvoiceRepo.Update(r.Context(), invoiceID, r.FormValue("client_name"), amount, r.FormValue("description"))
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		http.Error(w, "Update failed", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10), http.StatusSeeOther)
+	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
 }
 
-// InvoiceStatusPost updates payment status (paid, pending).
 func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.GetSessionUserID(r)
-	invoiceID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil || invoice.UserID != userID {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, _, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
 		return
 	}
 
 	newStatus := r.FormValue("status")
-	if err := h.App.InvoiceRepo.UpdateStatus(r.Context(), invoiceID, newStatus); err != nil {
+
+	if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, user.ID); err != nil {
 		http.Error(w, "Failed to update status", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10), http.StatusSeeOther)
+	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
 }
 
-// InvoiceSendGet renders the email sending prompt.
-func (h *Handlers) InvoiceSendGet(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.GetSessionUserID(r)
-	invoiceID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil || invoice.UserID != userID {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
-		return
-	}
-
-	h.App.Views.Render(w, r, "invoice_send.tmpl", map[string]interface{}{
-		"Invoice": invoice,
-	})
-}
-
-// InvoiceSendPost dispatches invoice via email.
-func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.GetSessionUserID(r)
-	invoiceID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil || invoice.UserID != userID {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
-		return
-	}
-
-	recipient := r.FormValue("email")
-	err = h.App.Mailer.SendInvoice(recipient, invoice)
-	if err != nil {
-		http.Error(w, "Failed to send email", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10)+"?sent=true", http.StatusSeeOther)
-}
-
-// InvoiceDuplicateGet clones an existing invoice for fast recreation.
 func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
-	userID, _ := auth.GetSessionUserID(r)
-	invoiceID, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-
-	invoice, err := h.App.InvoiceRepo.GetByID(r.Context(), invoiceID)
-	if err != nil || invoice.UserID != userID {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	newID, err := h.App.InvoiceRepo.Duplicate(r.Context(), invoiceID, userID)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		http.Error(w, "Failed to duplicate", http.StatusInternalServerError)
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv.ID = 0
+	inv.InvoiceNumber = inv.InvoiceNumber + "-COPY"
+	inv.Status = "draft"
+	inv.CreatedAt = time.Now()
+	inv.UpdatedAt = time.Now()
+
+	newID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, "")
+	if err != nil {
+		http.Error(w, "Failed to duplicate invoice", http.StatusInternalServerError)
 		return
 	}
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(newID, 10)+"/edit", http.StatusSeeOther)
 }
+
