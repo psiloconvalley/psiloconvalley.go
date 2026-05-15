@@ -253,3 +253,10 @@ func renderEmailTemplate(data InvoiceEmailData) (string, error) {
 	}
 	return buf.String(), nil
 }
+// APIKey returns the Resend API key for external use (e.g., feedback handler)
+func (m *Mailer) APIKey() string {
+	if m == nil {
+		return ""
+	}
+	return os.Getenv("RESEND_API_KEY")
+}
