@@ -15,8 +15,8 @@ import (
 // a product decision to change the free tier limit should be a one-line
 // diff, not a grep-and-replace across the codebase.
 const (
-	freePlanMonthlyLimit = 100
-	freePlanClientLimit  = 3
+	freePlanMonthlyLimit = 10
+	freePlanClientLimit  = 5
 )
 
 func (h *Handlers) canAddClient(r *http.Request) bool {
