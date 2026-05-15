@@ -37,16 +37,13 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/auth/google", auth.GoogleLoginHandler)
 	r.Get("/auth/google/callback", h.GoogleCallback)
 
-	// ── Freemium Creation Funnel (Public) ──────────────────────────
+	// ── Freemium invoice routes (ownership enforced in handlers) ───
 	r.Get("/invoices/new", h.InvoiceNewGet)
 	r.Post("/invoices/create", h.InvoiceCreatePost)
-	
-	// These view routes remain outside the strict auth group so anon users 
-	// can see their free invoices, BUT they are now strictly guarded by handler logic.
 	r.Get("/invoices/{id}", h.InvoiceDetail)
 	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
 
-	// ── Strictly Protected routes (login required) ─────────────────
+	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
 
@@ -57,7 +54,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/clients/new", h.ClientNewGet)
 		r.Post("/clients/new", h.ClientNewPost)
 
-		// Invoices management strictly requires login
+		// Invoice management (requires login)
 		r.Get("/invoices", h.InvoicesList)
 		r.Get("/invoices/{id}/edit", h.InvoiceEditGet)
 		r.Post("/invoices/{id}/edit", h.InvoiceUpdatePost)

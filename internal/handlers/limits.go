@@ -72,12 +72,29 @@ func (h *Handlers) hasReachedLimit(r *http.Request) bool {
 // FIX D1: The exported duplicate CanAccessInvoice in middleware.go has
 // been removed. This method is the sole implementation.
 func (h *Handlers) canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
-	if inv.UserID == nil {
-		return true // guest invoice
-	}
-	user := auth.GetUser(r)
-	if user == nil {
+	if inv == nil {
 		return false
 	}
-	return user.ID == *inv.UserID
+
+	user := auth.GetUser(r)
+
+	// Registered invoice: must belong to logged-in user.
+	if inv.UserID != nil {
+		if user == nil {
+			return false
+		}
+		return user.ID == *inv.UserID
+	}
+
+	// Guest invoice: must be accessed by anonymous browser with matching token.
+	if user != nil {
+		return false
+	}
+
+	anonToken, ok := auth.GetAnonymousToken(r)
+	if !ok || anonToken == "" || inv.AnonymousToken == "" {
+		return false
+	}
+
+	return anonToken == inv.AnonymousToken
 }
