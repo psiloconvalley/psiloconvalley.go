@@ -29,6 +29,8 @@ LABEL org.opencontainers.image.title="PsiloConValley" \
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=UTC
 
+# Chromium pulls most shared libs as dependencies.
+# Keep explicit packages minimal unless you truly need more font coverage.
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
@@ -36,26 +38,13 @@ RUN set -eux; \
       curl \
       tzdata \
       chromium \
-      chromium-sandbox \
       fonts-liberation \
-      fonts-noto-cjk \
       fonts-noto-color-emoji \
-      libnss3 \
-      libatk1.0-0 \
-      libatk-bridge2.0-0 \
-      libcups2 \
-      libdrm2 \
-      libxcomposite1 \
-      libxdamage1 \
-      libxrandr2 \
-      libgbm1 \
-      libpango-1.0-0 \
-      libcairo2 \
-      libasound2 \
-      libxshmfence1 \
-      libx11-xcb1 \
     ; \
     rm -rf /var/lib/apt/lists/*
+
+# If you need CJK characters in generated PDFs, add this back:
+#   fonts-noto-cjk
 
 RUN groupadd --system --gid 1001 appgroup && \
     useradd \
@@ -71,7 +60,10 @@ RUN groupadd --system --gid 1001 appgroup && \
       /tmp/chromedp \
       /home/appuser/.cache/chromium \
       /home/appuser/.config/chromium && \
-    chown -R appuser:appgroup /app /tmp/chromedp /home/appuser
+    chown -R appuser:appgroup \
+      /app \
+      /tmp/chromedp \
+      /home/appuser
 
 WORKDIR /app
 
