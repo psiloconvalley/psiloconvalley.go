@@ -732,8 +732,9 @@ func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 // InvoiceRepo Methods
 // =====================================================================
 
-// CreateWithToken creates a simple invoice for anonymous or logged-in users.
-// This is the freemium entry point — anonymous users get token-based ownership.
+// CreateWithToken creates a freemium invoice for anon or logged-in users.
+// FIX: For logged-in users, we look up their business profile and link
+// it to the invoice so logo and company details appear correctly.
 func (r *InvoiceRepo) CreateWithToken(
 	ctx context.Context,
 	user *User,
@@ -743,19 +744,34 @@ func (r *InvoiceRepo) CreateWithToken(
 	description string,
 ) (int64, error) {
 	var userID *int64
+	var bizProfileID *int64
+
 	if user != nil {
 		userID = &user.ID
+
+		// Look up business profile so the invoice is linked
+		// and the logo/company details flow through correctly.
+		var bpID int64
+		err := r.db.QueryRowContext(ctx,
+			`SELECT id FROM business_profiles WHERE user_id = $1 LIMIT 1`,
+			user.ID,
+		).Scan(&bpID)
+		if err == nil {
+			bizProfileID = &bpID
+		}
+		// If no business profile yet, bizProfileID stays nil — that's fine.
 	}
 
 	inv := &Invoice{
-		UserID:         userID,
-		AnonymousToken: anonymousToken,
-		ClientName:     clientName,
-		InvoiceNumber:  fmt.Sprintf("INV-%d", time.Now().UnixNano()),
-		IssueDate:      time.Now(),
-		Currency:       "USD",
-		Status:         "draft",
-		Notes:          description,
+		UserID:            userID,
+		BusinessProfileID: bizProfileID,
+		AnonymousToken:    anonymousToken,
+		ClientName:        clientName,
+		InvoiceNumber:     fmt.Sprintf("INV-%d", time.Now().UnixNano()),
+		IssueDate:         time.Now(),
+		Currency:          "USD",
+		Status:            "draft",
+		Notes:             description,
 	}
 
 	items := []InvoiceItem{
@@ -858,49 +874,100 @@ func (r *InvoiceRepo) CreateInvoice(
 }
 
 // GetInvoiceWithItems fetches a single invoice and its line items by ID.
-// anonymous_token is scanned as sql.NullString so that NULL in the database
-// stays as "" in Go — never confused with a real token.
+// It LEFT JOINs business_profiles so the logo and company details are
+// always populated from the canonical source — never stale invoice snapshots.
 func (r *InvoiceRepo) GetInvoiceWithItems(
 	ctx context.Context,
 	id int64,
 ) (*Invoice, []InvoiceItem, error) {
 	const q = `
 		SELECT
-			id, business_profile_id, client_id, user_id, anonymous_token,
-			client_name, client_email, client_address,
-			client_city, client_zip, client_state, client_country,
-			company_name, company_email, company_address,
-			company_city, company_zip, company_state, company_country,
-			invoice_number, issue_date, due_date,
-			tax_rate_bps, discount_amount_cents, notes, payment_details,
-			subtotal_cents, tax_amount_cents, total_cents,
-			currency, status, created_at, updated_at
-		FROM invoices WHERE id = $1`
+			i.id,
+			i.business_profile_id,
+			i.client_id,
+			i.user_id,
+			i.anonymous_token,
+			i.client_name,
+			i.client_email,
+			i.client_address,
+			i.client_city,
+			i.client_zip,
+			i.client_state,
+			i.client_country,
+			COALESCE(bp.name,    i.company_name,    '') AS company_name,
+			COALESCE(bp.email,   i.company_email,   '') AS company_email,
+			COALESCE(bp.address, i.company_address, '') AS company_address,
+			COALESCE(bp.city,    i.company_city,    '') AS company_city,
+			COALESCE(bp.zip,     i.company_zip,     '') AS company_zip,
+			COALESCE(bp.state,   i.company_state,   '') AS company_state,
+			COALESCE(bp.country, i.company_country, '') AS company_country,
+			i.invoice_number,
+			i.issue_date,
+			i.due_date,
+			i.tax_rate_bps,
+			i.discount_amount_cents,
+			i.notes,
+			i.payment_details,
+			i.subtotal_cents,
+			i.tax_amount_cents,
+			i.total_cents,
+			i.currency,
+			i.status,
+			i.created_at,
+			i.updated_at,
+			COALESCE(bp.logo_url, '') AS logo_url
+		FROM invoices i
+		LEFT JOIN business_profiles bp ON bp.id = i.business_profile_id
+		WHERE i.id = $1`
 
 	var inv Invoice
-	var bpID, cID, uID sql.NullInt64
-	var anonToken sql.NullString // ← NullString: NULL in DB stays "" in Go
-	var dueDate, updatedAt sql.NullTime
+	var bpID, cID, uID  sql.NullInt64
+	var anonToken        sql.NullString
+	var dueDate          sql.NullTime
+	var updatedAt        sql.NullTime
 	var cEmail, cAddr, cCity, cZip, cState, cCountry sql.NullString
-	var compName, compEmail, compAddr, compCity, compZip,
-		compState, compCountry sql.NullString
-	var currency sql.NullString
+	var currency         sql.NullString
 
 	err := r.db.QueryRowContext(ctx, q, id).Scan(
-		&inv.ID, &bpID, &cID, &uID, &anonToken, // ← anonToken not &inv.AnonymousToken
-		&inv.ClientName, &cEmail, &cAddr, &cCity, &cZip, &cState, &cCountry,
-		&compName, &compEmail, &compAddr, &compCity, &compZip,
-		&compState, &compCountry,
-		&inv.InvoiceNumber, &inv.IssueDate, &dueDate,
-		&inv.TaxRateBps, &inv.DiscountAmountCents, &inv.Notes, &inv.PaymentDetails,
-		&inv.SubtotalCents, &inv.TaxAmountCents, &inv.TotalCents,
-		&currency, &inv.Status, &inv.CreatedAt, &updatedAt,
+		&inv.ID,
+		&bpID,
+		&cID,
+		&uID,
+		&anonToken,
+		&inv.ClientName,
+		&cEmail,
+		&cAddr,
+		&cCity,
+		&cZip,
+		&cState,
+		&cCountry,
+		&inv.CompanyName,
+		&inv.CompanyEmail,
+		&inv.CompanyAddress,
+		&inv.CompanyCity,
+		&inv.CompanyZip,
+		&inv.CompanyState,
+		&inv.CompanyCountry,
+		&inv.InvoiceNumber,
+		&inv.IssueDate,
+		&dueDate,
+		&inv.TaxRateBps,
+		&inv.DiscountAmountCents,
+		&inv.Notes,
+		&inv.PaymentDetails,
+		&inv.SubtotalCents,
+		&inv.TaxAmountCents,
+		&inv.TotalCents,
+		&currency,
+		&inv.Status,
+		&inv.CreatedAt,
+		&updatedAt,
+		&inv.LogoURL,
 	)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// Nullable fields → Go values
 	if bpID.Valid {
 		inv.BusinessProfileID = &bpID.Int64
 	}
@@ -910,9 +977,6 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 	if uID.Valid {
 		inv.UserID = &uID.Int64
 	}
-	// CRITICAL: only set AnonymousToken when the DB column is non-NULL.
-	// A NULL token means this invoice was created by a registered user.
-	// An empty-string token must never match an anon visitor with no cookie.
 	if anonToken.Valid && anonToken.String != "" {
 		inv.AnonymousToken = anonToken.String
 	}
@@ -940,31 +1004,11 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 	if cCountry.Valid {
 		inv.ClientCountry = cCountry.String
 	}
-	if compName.Valid {
-		inv.CompanyName = compName.String
-	}
-	if compEmail.Valid {
-		inv.CompanyEmail = compEmail.String
-	}
-	if compAddr.Valid {
-		inv.CompanyAddress = compAddr.String
-	}
-	if compCity.Valid {
-		inv.CompanyCity = compCity.String
-	}
-	if compZip.Valid {
-		inv.CompanyZip = compZip.String
-	}
-	if compState.Valid {
-		inv.CompanyState = compState.String
-	}
-	if compCountry.Valid {
-		inv.CompanyCountry = compCountry.String
-	}
 	if currency.Valid {
 		inv.Currency = currency.String
 	}
 
+	// ── Line items ────────────────────────────────────────────────────
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, invoice_id, description, details, quantity,
 		       unit_price_cents, line_total_cents
@@ -1029,8 +1073,8 @@ func (r *InvoiceRepo) ListInvoices(
 	var invoices []Invoice
 	for rows.Next() {
 		var inv Invoice
-		var uID sql.NullInt64
-		var dueDate sql.NullTime
+		var uID      sql.NullInt64
+		var dueDate  sql.NullTime
 		var currency sql.NullString
 		if err := rows.Scan(
 			&inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,
