@@ -30,12 +30,23 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.App.Render(w, r, "invoice_new.tmpl", map[string]any{
+	data := map[string]any{
 		"User":       user,
 		"IsLoggedIn": user != nil,
-	})
-}
+		"Invoice":    views.InvoicePage{},
+		"Mode":       "create",
+	}
 
+	// Logged-in users get their client dropdown populated
+	if user != nil {
+		clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
+		if err == nil && len(clients) > 0 {
+			data["Clients"] = clients
+		}
+	}
+
+	h.App.Render(w, r, "invoice_new.tmpl", data)
+}
 func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
