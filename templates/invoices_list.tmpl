@@ -243,7 +243,7 @@
                     <td>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                     </td>
-                    <td class="right mono">{{.Total}}</td>
+                    <td class="right mono">{{money .TotalCents}}</td>
                 </tr>
                 {{end}}
             </tbody>
@@ -268,7 +268,7 @@
                     {{if .IssueDate}}Issued {{.IssueDate}}{{end}}
                     {{if .DueDate}} · Due {{.DueDate}}{{end}}
                 </div>
-                <div class="inv-card-total">{{.Total}}</div>
+                <div class="inv-card-total">{{money .TotalCents}}</div>
             </div>
         </a>
         {{end}}
