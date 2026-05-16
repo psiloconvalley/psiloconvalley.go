@@ -359,9 +359,14 @@ func (h *Handlers) InvoicesList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	monthlyCount, _ := h.App.UserRepo.GetMonthlyInvoiceCount(r.Context(), user.ID)
+
 	h.App.Render(w, r, "invoices_list.tmpl", map[string]any{
-		"Invoices": invoices,
-		"User":     user,
+		"Invoices":     invoices,
+		"User":         user,
+		"MonthlyCount": monthlyCount,
+		"MonthlyLimit": freePlanMonthlyLimit,
+		"IsPro":        user.Plan == "pro",
 	})
 }
 

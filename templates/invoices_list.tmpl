@@ -207,7 +207,54 @@
         <a href="/invoices/new" class="btn-new">+ New Invoice</a>
     </div>
 
-    {{if not .Invoices}}
+    {{if not .IsPro}}
+    <div style="
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    ">
+        <div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">
+                Monthly Usage
+            </div>
+            <div style="font-size: 20px; font-weight: 700;">
+                {{.MonthlyCount}} / {{.MonthlyLimit}} invoices
+            </div>
+        </div>
+        <div style="flex: 1; max-width: 300px; min-width: 150px;">
+            <div style="
+                background: rgba(255,255,255,0.08);
+                border-radius: 6px;
+                height: 8px;
+                overflow: hidden;
+            ">
+                <div style="
+                    background: {{if ge .MonthlyCount .MonthlyLimit}}#ef4444{{else if ge .MonthlyCount 8}}#f59e0b{{else}}#4ade80{{end}};
+                    height: 100%;
+                    width: {{if ge .MonthlyCount .MonthlyLimit}}100{{else}}{{mul .MonthlyCount 10}}{{end}}%;
+                    border-radius: 6px;
+                    transition: width 0.3s;
+                "></div>
+            </div>
+        </div>
+        {{if ge .MonthlyCount 8}}
+        <a href="/pricing" style="
+            font-size: 12px;
+            font-weight: 700;
+            color: #f59e0b;
+            text-decoration: none;
+        ">Upgrade →</a>
+        {{end}}
+    </div>
+    {{end}}
+      {{if not .Invoices}}
     <div class="empty">
         <div class="empty-icon">📭</div>
         <div class="empty-title">No invoices yet</div>

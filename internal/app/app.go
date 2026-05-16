@@ -35,6 +35,8 @@ func NewApp(db *sql.DB) *App {
 		"formatCents":  util.FormatCentsForInput,
 		"bpsToPercent": util.BpsToPercent,
 		"field":        field,
+		"mul": func(a, b int) int { return a * b },
+
 	}
 
 	// Using ParseGlob during migration (easier than embed for now)
