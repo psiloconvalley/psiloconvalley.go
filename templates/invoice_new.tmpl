@@ -707,15 +707,15 @@
                                     {{range .Invoice.Items}}
                                     <tr>
                                         <td><input type="text" name="description[]" class="item-desc"
-                                                   value="{{.Description}}" placeholder="Web Development" required></td>
+                                                   value="{{.Description}}" placeholder="Web Development"></td>
                                         <td><input type="text" name="details[]" class="item-details"
                                                    value="{{.Details}}" placeholder="40 hours @ $X"></td>
                                         <td><input type="number" step="0.01" min="0.01" name="quantity[]"
-                                                   class="qty" value="{{.QuantityRaw}}" required inputmode="decimal"></td>
+                                                   class="qty" value="{{.QuantityRaw}}" inputmode="decimal"></td>
                                         <td><input type="number" step="0.01" min="0" name="unit_price[]"
                                                    class="price"
                                                    value="{{if .UnitPriceCents}}{{formatCents .UnitPriceCents}}{{else}}0.00{{end}}"
-                                                   required inputmode="decimal"></td>
+                                                   inputmode="decimal"></td>
                                         <td class="right row-amount">{{if .LineTotal}}{{.LineTotal}}{{else}}$0.00{{end}}</td>
                                         <td style="text-align:center;">
                                             <button type="button" class="remove-btn" onclick="removeRow(this,'desktop')">×</button>
@@ -725,13 +725,13 @@
                                 {{else}}
                                     <tr>
                                         <td><input type="text" name="description[]" class="item-desc"
-                                                   placeholder="Web Development" required></td>
+                                                   placeholder="Web Development"></td>
                                         <td><input type="text" name="details[]" class="item-details"
                                                    placeholder="40 hours @ $X"></td>
                                         <td><input type="number" step="0.01" min="0.01" name="quantity[]"
-                                                   class="qty" value="1" required inputmode="decimal"></td>
+                                                   class="qty" value="1" inputmode="decimal"></td>
                                         <td><input type="number" step="0.01" min="0" name="unit_price[]"
-                                                   class="price" value="0.00" required inputmode="decimal"></td>
+                                                   class="price" value="0.00" inputmode="decimal"></td>
                                         <td class="right row-amount">$0.00</td>
                                         <td style="text-align:center;">
                                             <button type="button" class="remove-btn" onclick="removeRow(this,'desktop')">×</button>
@@ -754,7 +754,7 @@
                             <div class="item-card-mobile">
                                 <label style="font-size:11px;">Description</label>
                                 <input type="text" name="description[]" class="item-desc"
-                                       value="{{.Description}}" placeholder="Web Development" required>
+                                       value="{{.Description}}" placeholder="Web Development">
                                 <label style="font-size:11px;">Details (optional)</label>
                                 <input type="text" name="details[]" class="item-details"
                                        value="{{.Details}}" placeholder="40 hours @ $X">
@@ -762,14 +762,14 @@
                                     <div>
                                         <label>Qty</label>
                                         <input type="number" step="0.01" min="0.01" name="quantity[]"
-                                               class="qty" value="{{.QuantityRaw}}" required inputmode="decimal">
+                                               class="qty" value="{{.QuantityRaw}}" inputmode="decimal">
                                     </div>
                                     <div>
                                         <label>Price</label>
                                         <input type="number" step="0.01" min="0" name="unit_price[]"
                                                class="price"
                                                value="{{if .UnitPriceCents}}{{formatCents .UnitPriceCents}}{{else}}0.00{{end}}"
-                                               required inputmode="decimal">
+                                               inputmode="decimal">
                                     </div>
                                     <div class="row-total">$0.00</div>
                                     <button type="button" class="remove-btn" onclick="removeRow(this,'mobile')">×</button>
@@ -780,7 +780,7 @@
                             <div class="item-card-mobile">
                                 <label style="font-size:11px;">Description</label>
                                 <input type="text" name="description[]" class="item-desc"
-                                       placeholder="Web Development" required>
+                                       placeholder="Web Development">
                                 <label style="font-size:11px;">Details (optional)</label>
                                 <input type="text" name="details[]" class="item-details"
                                        placeholder="40 hours @ $X">
@@ -788,12 +788,12 @@
                                     <div>
                                         <label>Qty</label>
                                         <input type="number" step="0.01" min="0.01" name="quantity[]"
-                                               class="qty" value="1" required inputmode="decimal">
+                                               class="qty" value="1" inputmode="decimal">
                                     </div>
                                     <div>
                                         <label>Price</label>
                                         <input type="number" step="0.01" min="0" name="unit_price[]"
-                                               class="price" value="0.00" required inputmode="decimal">
+                                               class="price" value="0.00" inputmode="decimal">
                                     </div>
                                     <div class="row-total">$0.00</div>
                                     <button type="button" class="remove-btn" onclick="removeRow(this,'mobile')">×</button>
@@ -960,10 +960,10 @@ function addRow() {
     if (desktopBody) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" name="description[]" class="item-desc" placeholder="Web Development" required></td>
+            <td><input type="text" name="description[]" class="item-desc" placeholder="Web Development"></td>
             <td><input type="text" name="details[]" class="item-details" placeholder="40 hours @ $X"></td>
-            <td><input type="number" step="0.01" min="0.01" name="quantity[]" class="qty" value="1" required inputmode="decimal"></td>
-            <td><input type="number" step="0.01" min="0" name="unit_price[]" class="price" value="0.00" required inputmode="decimal"></td>
+            <td><input type="number" step="0.01" min="0.01" name="quantity[]" class="qty" value="1" inputmode="decimal"></td>
+            <td><input type="number" step="0.01" min="0" name="unit_price[]" class="price" value="0.00" inputmode="decimal"></td>
             <td class="right row-amount">${sym}0.00</td>
             <td style="text-align:center;"><button type="button" class="remove-btn" onclick="removeRow(this,'desktop')">×</button></td>
         `;
@@ -977,17 +977,17 @@ function addRow() {
         card.className = 'item-card-mobile';
         card.innerHTML = `
             <label style="font-size:11px;">Description</label>
-            <input type="text" name="description[]" class="item-desc" placeholder="Web Development" required>
+            <input type="text" name="description[]" class="item-desc" placeholder="Web Development">
             <label style="font-size:11px;">Details (optional)</label>
             <input type="text" name="details[]" class="item-details" placeholder="40 hours @ $X">
             <div class="item-row-meta">
                 <div>
                     <label>Qty</label>
-                    <input type="number" step="0.01" min="0.01" name="quantity[]" class="qty" value="1" required inputmode="decimal">
+                    <input type="number" step="0.01" min="0.01" name="quantity[]" class="qty" value="1" inputmode="decimal">
                 </div>
                 <div>
                     <label>Price</label>
-                    <input type="number" step="0.01" min="0" name="unit_price[]" class="price" value="0.00" required inputmode="decimal">
+                    <input type="number" step="0.01" min="0" name="unit_price[]" class="price" value="0.00" inputmode="decimal">
                 </div>
                 <div class="row-total">${sym}0.00</div>
                 <button type="button" class="remove-btn" onclick="removeRow(this,'mobile')">×</button>
