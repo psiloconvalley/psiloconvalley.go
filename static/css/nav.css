@@ -1,5 +1,5 @@
 .site-nav {
-    background: #0a0a0a;
+    background: #0c1220;
     border-bottom: 1px solid rgba(255,255,255,0.08);
     padding: 0 20px;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -30,7 +30,7 @@
 }
 .nav-links a:hover { color: #fff; }
 .nav-cta {
-    background: #fff !important; color: #0a0a0a !important;
+    background: #fff !important; color: #0c1220 !important;
     padding: 7px 14px; border-radius: 6px; font-weight: 700 !important;
 }
 .nav-cta:hover { background: #e0e0e0 !important; }
@@ -60,7 +60,7 @@
     .nav-toggle { display: flex; }
     .nav-links {
         display: none; position: absolute; top: 56px; left: 0; right: 0;
-        background: #0a0a0a; border-bottom: 1px solid rgba(255,255,255,0.08);
+        background: #0c1220; border-bottom: 1px solid rgba(255,255,255,0.08);
         flex-direction: column; align-items: stretch; padding: 16px 20px; gap: 0; z-index: 1001;
     }
     .nav-links.open { display: flex; }
