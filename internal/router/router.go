@@ -24,6 +24,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/healthz", h.Health)
 	r.Get("/research", h.Research)
 	r.Get("/tools", h.ToolsHub)
+	r.Get("/pricing", h.PricingGet)
+	r.Post("/stripe/webhook", h.StripeWebhook)
 	r.Post("/feedback", h.Feedback)
 
 	r.Get("/register", h.RegisterGet)
@@ -46,6 +48,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
+		r.Post("/checkout", h.CheckoutPost)
 
 		r.Get("/profile", h.ProfileGet)
 		r.Post("/profile", h.ProfilePost)

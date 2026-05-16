@@ -381,6 +381,15 @@ func (r *UserRepo) FindOrCreateGoogleUser(
 	}
 	return user, true, nil
 }
+func (r *UserRepo) UpdateUserPlan(ctx context.Context, userID int64, plan string) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET plan = $1,
+		    updated_at = NOW()
+		WHERE id = $2
+	`, plan, userID)
+	return err
+}
 
 // =====================================================================
 // ClientRepo Methods
@@ -921,12 +930,12 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		WHERE i.id = $1`
 
 	var inv Invoice
-	var bpID, cID, uID  sql.NullInt64
-	var anonToken        sql.NullString
-	var dueDate          sql.NullTime
-	var updatedAt        sql.NullTime
+	var bpID, cID, uID sql.NullInt64
+	var anonToken sql.NullString
+	var dueDate sql.NullTime
+	var updatedAt sql.NullTime
 	var cEmail, cAddr, cCity, cZip, cState, cCountry sql.NullString
-	var currency         sql.NullString
+	var currency sql.NullString
 
 	err := r.db.QueryRowContext(ctx, q, id).Scan(
 		&inv.ID,
@@ -1073,8 +1082,8 @@ func (r *InvoiceRepo) ListInvoices(
 	var invoices []Invoice
 	for rows.Next() {
 		var inv Invoice
-		var uID      sql.NullInt64
-		var dueDate  sql.NullTime
+		var uID sql.NullInt64
+		var dueDate sql.NullTime
 		var currency sql.NullString
 		if err := rows.Scan(
 			&inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,

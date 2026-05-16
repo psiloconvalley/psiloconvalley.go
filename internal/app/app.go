@@ -1,30 +1,32 @@
 package app
 
 import (
-	"os"
 	"bytes"
 	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/justinas/nosurf"
-	"psiloconvalley/internal/mailer"
+	"github.com/stripe/stripe-go/v81"
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/util"
 )
 
 type App struct {
-	Templates  *template.Template
-	InvRepo    *repo.InvoiceRepo
-	ClientRepo *repo.ClientRepo
-	BizRepo    *repo.BusinessRepo
-	UserRepo   *repo.UserRepo
-	Mailer     *mailer.Mailer
-	BaseURL    string
+	Templates   *template.Template
+	InvRepo     *repo.InvoiceRepo
+	ClientRepo  *repo.ClientRepo
+	BizRepo     *repo.BusinessRepo
+	UserRepo    *repo.UserRepo
+	Mailer      *mailer.Mailer
+	BaseURL     string
+	StripePrice string
 }
 
 func NewApp(db *sql.DB) *App {
@@ -46,14 +48,17 @@ func NewApp(db *sql.DB) *App {
 		baseURL = "https://psiloconvalley.com"
 	}
 
+	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	stripePrice := os.Getenv("STRIPE_PRICE_ID")
 	return &App{
-		Templates:  t,
-		InvRepo:    repo.NewInvoiceRepo(db),
-		ClientRepo: repo.NewClientRepo(db),
-		BizRepo:    repo.NewBusinessRepo(db),
-		UserRepo:   repo.NewUserRepo(db),
-		Mailer:     mailer.New(),
-		BaseURL:    baseURL,
+		Templates:   t,
+		InvRepo:     repo.NewInvoiceRepo(db),
+		ClientRepo:  repo.NewClientRepo(db),
+		BizRepo:     repo.NewBusinessRepo(db),
+		UserRepo:    repo.NewUserRepo(db),
+		Mailer:      mailer.New(),
+		BaseURL:     baseURL,
+		StripePrice: stripePrice,
 	}
 }
 
