@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/stripe/stripe-go/v81"
+	billingportalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	checkoutsession "github.com/stripe/stripe-go/v81/checkout/session"
 	"github.com/stripe/stripe-go/v81/webhook"
 
@@ -106,6 +107,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("[stripe] webhook event received: %s", event.Type)
+
 	switch event.Type {
 	case "checkout.session.completed":
 		var cs stripe.CheckoutSession
@@ -134,6 +136,12 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			log.Printf("[stripe] failed upgrading user %d to pro: %v", userID, err)
 			http.Error(w, "Failed to update user plan", http.StatusInternalServerError)
 			return
+		}
+
+		if cs.Customer != nil {
+			if err := h.App.UserRepo.UpdateStripeCustomerID(r.Context(), userID, cs.Customer.ID); err != nil {
+				log.Printf("[stripe] failed saving stripe customer id for user %d: %v", userID, err)
+			}
 		}
 
 		log.Printf("[stripe] upgraded user %d to pro", userID)
@@ -168,4 +176,31 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handlers) BillingPortalPost(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if user.StripeCustomerID == "" {
+		http.Redirect(w, r, "/pricing", http.StatusSeeOther)
+		return
+	}
+
+	params := &stripe.BillingPortalSessionParams{
+		Customer:  stripe.String(user.StripeCustomerID),
+		ReturnURL: stripe.String(h.App.BaseURL + "/pricing"),
+	}
+
+	s, err := billingportalsession.New(params)
+	if err != nil {
+		log.Printf("[stripe] billing portal session failed for user %d: %v", user.ID, err)
+		http.Error(w, "Could not open billing portal", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, s.URL, http.StatusSeeOther)
 }

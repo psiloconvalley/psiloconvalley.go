@@ -255,7 +255,11 @@
 
         {{if .User}}
             {{if eq .User.Plan "pro"}}
-                <div class="plan-state">Your current plan: <strong>Pro</strong></div>
+	     <form method="POST" action="/billing/portal" class="cta-form">
+        {{.csrfField}}
+        <button type="submit" class="btn btn-secondary">Manage Billing</button>
+    </form>
+    <div class="plan-state">Your current plan: <strong>Pro</strong></div>
             {{else}}
                 <form method="POST" action="/checkout" class="cta-form">
                     {{.csrfField}}

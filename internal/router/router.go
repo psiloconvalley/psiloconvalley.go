@@ -49,6 +49,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
 		r.Post("/checkout", h.CheckoutPost)
+		r.Post("/billing/portal", h.BillingPortalPost)
 
 		r.Get("/profile", h.ProfileGet)
 		r.Post("/profile", h.ProfilePost)

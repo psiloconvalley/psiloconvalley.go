@@ -59,6 +59,7 @@ type User struct {
 	GoogleID     string
 	Name         string
 	AvatarURL    string
+	StripeCustomerID string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -184,16 +185,16 @@ func (r *UserRepo) Create(email, plainPassword string) (int64, error) {
 
 func (r *UserRepo) GetByEmail(email string) (*User, error) {
 	var u User
-	var passwordHash, provider, googleID, name, avatarURL sql.NullString
+	var passwordHash, provider, googleID, name, avatarURL, stripeCustomerID sql.NullString
 	var updatedAt sql.NullTime
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-		       name, avatar_url, plan, created_at, updated_at
+		       name, avatar_url, plan, stripe_customer_id, created_at, updated_at
 		FROM users WHERE email = $1
 	`, email).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &u.CreatedAt, &updatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -212,6 +213,9 @@ func (r *UserRepo) GetByEmail(email string) (*User, error) {
 	}
 	if avatarURL.Valid {
 		u.AvatarURL = avatarURL.String
+	}
+	if stripeCustomerID.Valid {
+		u.StripeCustomerID = stripeCustomerID.String
 	}
 	if updatedAt.Valid {
 		u.UpdatedAt = updatedAt.Time
@@ -221,16 +225,16 @@ func (r *UserRepo) GetByEmail(email string) (*User, error) {
 
 func (r *UserRepo) GetByID(id int64) (*User, error) {
 	var u User
-	var passwordHash, provider, googleID, name, avatarURL sql.NullString
+	var passwordHash, provider, googleID, name, avatarURL, stripeCustomerID sql.NullString
 	var updatedAt sql.NullTime
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-		       name, avatar_url, plan, created_at, updated_at
+		       name, avatar_url, plan, stripe_customer_id, created_at, updated_at
 		FROM users WHERE id = $1
 	`, id).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &u.CreatedAt, &updatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -250,6 +254,9 @@ func (r *UserRepo) GetByID(id int64) (*User, error) {
 	if avatarURL.Valid {
 		u.AvatarURL = avatarURL.String
 	}
+	if stripeCustomerID.Valid {
+		u.StripeCustomerID = stripeCustomerID.String
+	}
 	if updatedAt.Valid {
 		u.UpdatedAt = updatedAt.Time
 	}
@@ -258,16 +265,16 @@ func (r *UserRepo) GetByID(id int64) (*User, error) {
 
 func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 	var u User
-	var passwordHash, provider, googleIDVal, name, avatarURL sql.NullString
+	var passwordHash, provider, googleIDVal, name, avatarURL, stripeCustomerID sql.NullString
 	var updatedAt sql.NullTime
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-		       name, avatar_url, plan, created_at, updated_at
+		       name, avatar_url, plan, stripe_customer_id, created_at, updated_at
 		FROM users WHERE google_id = $1
 	`, googleID).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleIDVal,
-		&name, &avatarURL, &u.Plan, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &u.CreatedAt, &updatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -287,11 +294,15 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 	if avatarURL.Valid {
 		u.AvatarURL = avatarURL.String
 	}
+	if stripeCustomerID.Valid {
+		u.StripeCustomerID = stripeCustomerID.String
+	}
 	if updatedAt.Valid {
 		u.UpdatedAt = updatedAt.Time
 	}
 	return &u, nil
 }
+
 
 func (r *UserRepo) GetInvoiceCount(ctx context.Context, userID int64) (int, error) {
 	var count int
@@ -388,6 +399,16 @@ func (r *UserRepo) UpdateUserPlan(ctx context.Context, userID int64, plan string
 		    updated_at = NOW()
 		WHERE id = $2
 	`, plan, userID)
+	return err
+}
+
+func (r *UserRepo) UpdateStripeCustomerID(ctx context.Context, userID int64, customerID string) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET stripe_customer_id = $1,
+		    updated_at = NOW()
+		WHERE id = $2
+	`, customerID, userID)
 	return err
 }
 
