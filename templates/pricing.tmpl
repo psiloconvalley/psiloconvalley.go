@@ -206,6 +206,18 @@
 {{template "nav" .}}
 
 <div class="page">
+	{{if eq .Reason "invoice-limit"}}
+<div class="notice">
+    You've reached the free plan limit of 10 invoices per month. Upgrade to Pro for unlimited invoices.
+</div>
+{{end}}
+
+{{if eq .Reason "client-limit"}}
+<div class="notice">
+    You've reached the free plan limit of 5 clients. Upgrade to Pro for unlimited clients.
+</div>
+{{end}}
+
     {{if .CheckoutSuccess}}
     <div class="notice success">
         Payment received. If your account does not reflect Pro immediately, refresh in a few seconds.

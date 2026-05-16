@@ -43,7 +43,7 @@ func (h *Handlers) ClientNewGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !h.canAddClient(r) {
-		http.Redirect(w, r, "/clients?limit=true", http.StatusSeeOther)
+		http.Redirect(w, r, "/pricing?reason=client-limit", http.StatusSeeOther)
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *Handlers) ClientNewPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !h.canAddClient(r) {
-		http.Redirect(w, r, "/clients?limit=true", http.StatusSeeOther)
+		http.Redirect(w, r, "/pricing?reason=client-limit", http.StatusSeeOther)
 		return
 	}
 

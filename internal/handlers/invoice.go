@@ -20,6 +20,7 @@ import (
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/views"
 )
+
 // =====================================================================
 // PUBLIC / FREEMIUM INVOICE ROUTES
 //
@@ -34,7 +35,10 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
 		return
 	}
-
+	if user != nil && h.hasReachedLimit(r) {
+		http.Redirect(w, r, "/pricing?reason=invoice-limit", http.StatusSeeOther)
+		return
+	}
 	data := map[string]any{
 		"User":       user,
 		"IsLoggedIn": user != nil,
@@ -60,6 +64,10 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := auth.GetUser(r)
+	if user != nil && h.hasReachedLimit(r) {
+		http.Redirect(w, r, "/pricing?reason=invoice-limit", http.StatusSeeOther)
+		return
+	}
 
 	// ── Anonymous token handling ─────────────────────────────────────
 	var anonymousToken string
@@ -83,15 +91,15 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ── Parse all form fields ────────────────────────────────────────
-	clientName    := strings.TrimSpace(r.FormValue("client_name"))
-	companyName   := strings.TrimSpace(r.FormValue("company_name"))
+	clientName := strings.TrimSpace(r.FormValue("client_name"))
+	companyName := strings.TrimSpace(r.FormValue("company_name"))
 	invoiceNumber := strings.TrimSpace(r.FormValue("invoice_number"))
-	currency      := catalog.NormalizeCurrency(r.FormValue("currency"))
+	currency := catalog.NormalizeCurrency(r.FormValue("currency"))
 
 	descriptions := r.Form["description[]"]
-	details      := r.Form["details[]"]
-	quantities   := r.Form["quantity[]"]
-	unitPrices   := r.Form["unit_price[]"]
+	details := r.Form["details[]"]
+	quantities := r.Form["quantity[]"]
+	unitPrices := r.Form["unit_price[]"]
 
 	// ── Build line items ─────────────────────────────────────────────
 	var items []repo.InvoiceItem
@@ -474,4 +482,3 @@ func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(newID, 10)+"/edit", http.StatusSeeOther)
 }
-

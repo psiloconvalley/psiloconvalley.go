@@ -25,6 +25,7 @@ func (h *Handlers) PricingGet(w http.ResponseWriter, r *http.Request) {
 		"CheckoutSuccess":  r.URL.Query().Get("success") == "1",
 		"CheckoutCanceled": r.URL.Query().Get("canceled") == "1",
 		"AlreadyPro":       r.URL.Query().Get("already") == "1",
+		"Reason":           r.URL.Query().Get("reason"),
 	})
 }
 
