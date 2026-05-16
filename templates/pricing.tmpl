@@ -211,6 +211,11 @@
     You've reached the free plan limit of 10 invoices per month. Upgrade to Pro for unlimited invoices.
 </div>
 {{end}}
+{{if eq .Reason "email-pro"}}
+<div class="notice">
+    Email delivery is a Pro feature. Upgrade to send invoices directly to your clients.
+</div>
+{{end}}
 
 {{if eq .Reason "client-limit"}}
 <div class="notice">

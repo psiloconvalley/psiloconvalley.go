@@ -27,7 +27,10 @@ func (h *Handlers) InvoiceSendGet(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-
+	if user.Plan != "pro" {
+		http.Redirect(w, r, "/pricing?reason=email-pro", http.StatusSeeOther)
+		return
+	}
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
@@ -55,7 +58,10 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-
+	if user.Plan != "pro" {
+		http.Redirect(w, r, "/pricing?reason=email-pro", http.StatusSeeOther)
+		return
+	}
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
