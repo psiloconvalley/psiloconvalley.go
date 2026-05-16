@@ -341,7 +341,7 @@
                     {{if eq .User.Plan "pro"}}
                     · <span class="plan-badge pro">Pro — Unlimited</span>
                     {{else}}
-                    · {{.ClientCount}}/3 free slots used
+                    · {{.ClientCount}}/5 free slots used
                     {{end}}
                 {{end}}
             </div>
@@ -357,7 +357,7 @@
 
     {{if .AtLimit}}
     <div class="limit-banner">
-        ⚡ You've used all <strong>3 free client slots</strong>.
+        ⚡ You've used all <strong>5 free client slots</strong>.
         Upgrade to <strong>Pro</strong> for unlimited clients, invoice history per client, and revenue analytics.
         <br><br>
         <a href="/pricing">Upgrade to Pro →</a>

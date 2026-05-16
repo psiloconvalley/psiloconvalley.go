@@ -29,7 +29,7 @@ func (h *Handlers) ClientsList(w http.ResponseWriter, r *http.Request) {
 	h.App.Render(w, r, "clients_list.tmpl", map[string]any{
 		"Clients":      clients,
 		"ClientCount":  count,
-		"AtLimit":      user.Plan != "pro" && count >= 3,
+		"AtLimit":      user.Plan != "pro" && count >= freePlanClientLimit,
 		"CanAddClient": h.canAddClient(r),
 		"saved":        r.URL.Query().Get("saved") == "true",
 	})
