@@ -314,7 +314,89 @@
             color: rgba(255,255,255,0.5);
             margin-bottom: 32px;
         }
+	        /* ═══════════════════════════════════════════════════════════════
+           PRICING CTA
+           ═══════════════════════════════════════════════════════════════ */
+        .pricing-cta {
+            text-align: center;
+            padding: 80px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
 
+        .pricing-cta .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 16px;
+        }
+
+        .pricing-cta h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .pricing-cta .pricing-sub {
+            font-size: 16px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pricing-cta .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .pricing-cta .plan-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .pricing-cta .plan-card.pro {
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .pricing-cta .plan-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 12px;
+        }
+
+        .pricing-cta .plan-price {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .pricing-cta .plan-unit {
+            font-size: 14px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 16px;
+        }
+
+        .pricing-cta .plan-features {
+            list-style: none;
+            font-size: 14px;
+            color: rgba(255,255,255,0.65);
+            line-height: 2;
+        }
+		
         /* ═══════════════════════════════════════════════════════════════
            FOOTER
            ═══════════════════════════════════════════════════════════════ */
@@ -430,6 +512,7 @@
             .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
             .trust-inner { gap: 24px; }
             .steps-section, .features-section { padding: 60px 20px; }
+	    .pricing-cta .pricing-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -639,7 +722,41 @@
             Create Invoice →
         </a>
     </section>
+    <!-- PRICING CTA -->
+    <section class="pricing-cta">
+        <div class="section-label">Simple Pricing</div>
+        <h2>Free to start. $8/mo when you're ready.</h2>
+        <p class="pricing-sub">
+            No trial. No credit card. Use the free tier as long as you want.
+        </p>
 
+        <div class="pricing-grid">
+            <div class="plan-card">
+                <div class="plan-label">Free</div>
+                <div class="plan-price">$0</div>
+                <div class="plan-unit">forever</div>
+                <ul class="plan-features">
+                    <li>10 invoices / month</li>
+                    <li>5 clients</li>
+                    <li>PDF export</li>
+                </ul>
+            </div>
+            <div class="plan-card pro">
+                <div class="plan-label">Pro</div>
+                <div class="plan-price">$8</div>
+                <div class="plan-unit">/ month</div>
+                <ul class="plan-features">
+                    <li>Unlimited invoices</li>
+                    <li>Unlimited clients</li>
+                    <li>Priority features</li>
+                </ul>
+            </div>
+        </div>
+
+        <a href="/pricing" class="btn-primary">
+            View Pricing →
+        </a>
+    </section>
 {{end}}
 
     <footer>
