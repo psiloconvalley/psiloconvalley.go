@@ -42,7 +42,7 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"User":       user,
 		"IsLoggedIn": user != nil,
-		"Invoice": views.InvoicePage{CompanyCountry: "United States", CompanyState: "California"},
+				"Invoice": views.InvoicePage{CompanyCountry: "United States", CompanyState: "California", ClientCountry: "United States", ClientState: "California"},
 		"Mode":       "create",
 		"Currencies": catalog.SupportedCurrencies,
 	}
