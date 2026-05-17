@@ -942,6 +942,18 @@ function calculateLiveTotals() {
     if (el('mobile_total_display'))el('mobile_total_display').textContent = fmt(total);
 }
 
+
+// ── Enter key on last line item adds a new row ────────────────────
+function handleDescEnter(e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const tbody = document.getElementById('items_body_desktop');
+    if (!tbody) return;
+    const rows = tbody.querySelectorAll('tr');
+    const lastDesc = rows[rows.length - 1].querySelector('.item-desc');
+    if (e.target === lastDesc) addRow();
+}
+
 // ── Attach recalculation listeners ────────────────────────────────
 function attachListeners() {
     document.querySelectorAll('.qty, .price, #tax_rate, #currency').forEach(el => {
@@ -950,8 +962,13 @@ function attachListeners() {
         el.addEventListener('input',  calculateLiveTotals);
         el.addEventListener('change', calculateLiveTotals);
     });
-}
 
+    // Enter on last description field adds a new row
+    document.querySelectorAll('#items_body_desktop .item-desc').forEach(el => {
+        el.removeEventListener('keydown', handleDescEnter);
+        el.addEventListener('keydown', handleDescEnter);
+    });
+}
 // ── Add row ───────────────────────────────────────────────────────
 function addRow() {
     const sym = getCurrencySymbol();
@@ -969,6 +986,7 @@ function addRow() {
             <td style="text-align:center;"><button type="button" class="remove-btn" onclick="removeRow(this,'desktop')">×</button></td>
         `;
         desktopBody.appendChild(tr);
+	desktopBody.querySelector('tr:last-child .item-desc')?.focus();
     }
 
     // Mobile card
