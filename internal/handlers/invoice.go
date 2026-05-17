@@ -45,6 +45,7 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 				"Invoice": views.InvoicePage{CompanyCountry: "United States", CompanyState: "California", ClientCountry: "United States", ClientState: "California"},
 		"Mode":       "create",
 		"Currencies": catalog.SupportedCurrencies,
+		"USStates":   catalog.USStates,
 	}
 
 	// Logged-in users get their client dropdown populated
@@ -155,6 +156,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 			"IsLoggedIn": user != nil,
 			"Mode":       "create",
 			"Currencies": catalog.SupportedCurrencies,
+			"USStates":   catalog.USStates,
 			"Errors":     errs,
 			"Invoice": views.InvoicePage{
 				CompanyName:    companyName,
@@ -395,6 +397,8 @@ func (h *Handlers) InvoiceEditGet(w http.ResponseWriter, r *http.Request) {
 		"Invoice": invoiceView,
 		"IsEdit":  true,
 		"User":    user,
+		"USStates":   catalog.USStates,
+		"Currencies": catalog.SupportedCurrencies,
 	})
 }
 
