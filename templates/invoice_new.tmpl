@@ -862,6 +862,7 @@
                     {{else if eq .Mode "duplicate"}}📋 Save Duplicate
                     {{else}}✅ Save Invoice{{end}}
                 </button>
+		                <div id="draft-indicator" style="text-align:center;margin-top:12px;font-size:12px;color:rgba(255,255,255,0.6);opacity:0;transition:opacity 0.3s ease;"></div>
             </aside>
 
         </div>
@@ -1039,10 +1040,119 @@ function fillClient(select) {
     }
 }
 
+// ── Auto-Save Draft to localStorage ──────────────────────────────
+const DRAFT_KEY = 'pscv_invoice_draft';
+const DRAFT_MODE = '{{.Mode}}';
+
+function getFormData() {
+    const form = document.getElementById('invoice-form');
+    if (!form) return null;
+    const data = {};
+    form.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.name && el.type !== 'hidden' && el.name !== 'gorilla.csrf.Token') {
+            data[el.name] = el.value;
+        }
+    });
+    data._lineItems = [];
+    document.querySelectorAll('#items_body_desktop tr').forEach(row => {
+        data._lineItems.push({
+            description: row.querySelector('.item-desc')?.value || '',
+            details:     row.querySelector('.item-details')?.value || '',
+            qty:         row.querySelector('.qty')?.value || '1',
+            price:       row.querySelector('.price')?.value || '0.00'
+        });
+    });
+    return data;
+}
+
+function saveDraft() {
+    if (DRAFT_MODE !== 'create') return;
+    const data = getFormData();
+    if (!data) return;
+    data._savedAt = Date.now();
+    try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+        showDraftIndicator();
+    } catch (e) {}
+}
+
+function restoreDraft() {
+    if (DRAFT_MODE !== 'create') return;
+    try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data._savedAt && Date.now() - data._savedAt > 86400000) {
+            localStorage.removeItem(DRAFT_KEY);
+            return;
+        }
+        const form = document.getElementById('invoice-form');
+        if (!form) return;
+        form.querySelectorAll('input, textarea, select').forEach(el => {
+            if (el.name && el.type !== 'hidden' && el.name !== 'gorilla.csrf.Token') {
+                if (data[el.name] !== undefined) el.value = data[el.name];
+            }
+        });
+        if (data._lineItems && data._lineItems.length > 0) {
+            const tbody = document.getElementById('items_body_desktop');
+            const mobileBody = document.getElementById('items_body_mobile');
+            if (!tbody) return;
+            while (tbody.rows.length > 1) tbody.deleteRow(tbody.rows.length - 1);
+            while (mobileBody && mobileBody.children.length > 1) mobileBody.removeChild(mobileBody.lastChild);
+            data._lineItems.forEach((item, i) => {
+                if (i > 0) addRow();
+                const row = tbody.rows[i];
+                if (row) {
+                    const d = row.querySelector('.item-desc');
+                    const t = row.querySelector('.item-details');
+                    const q = row.querySelector('.qty');
+                    const p = row.querySelector('.price');
+                    if (d) d.value = item.description;
+                    if (t) t.value = item.details;
+                    if (q) q.value = item.qty;
+                    if (p) p.value = item.price;
+                }
+                if (mobileBody && mobileBody.children[i]) {
+                    const card = mobileBody.children[i];
+                    const d = card.querySelector('.item-desc');
+                    const t = card.querySelector('.item-details');
+                    const q = card.querySelector('.qty');
+                    const p = card.querySelector('.price');
+                    if (d) d.value = item.description;
+                    if (t) t.value = item.details;
+                    if (q) q.value = item.qty;
+                    if (p) p.value = item.price;
+                }
+            });
+        }
+        calculateLiveTotals();
+        showDraftIndicator('Restored');
+    } catch (e) {
+        localStorage.removeItem(DRAFT_KEY);
+    }
+}
+
+function clearDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+}
+
+function showDraftIndicator(label) {
+    const el = document.getElementById('draft-indicator');
+    if (!el) return;
+    el.textContent = label ? '📋 ' + label : '💾 Draft saved';
+    el.style.opacity = '1';
+    setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
 // ── Boot ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     attachListeners();
+    restoreDraft();
     calculateLiveTotals();
+    if (DRAFT_MODE === 'create') {
+        setInterval(saveDraft, 5000);
+    }
+    const form = document.getElementById('invoice-form');
+    if (form) form.addEventListener('submit', clearDraft);
 });
 </script>
 
