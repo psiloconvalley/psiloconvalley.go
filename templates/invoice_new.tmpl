@@ -126,6 +126,16 @@
         }
         input[readonly] { background: #f1f5f9; color: var(--ink-muted); cursor: not-allowed; }
         textarea { min-height: 100px; resize: vertical; }
+	
+        /* ── Live validation ── */
+        input.field-invalid {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+        }
+        input.field-valid {
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(21,128,61,0.08);
+        }
 
         /* Sidebar form control overrides */
         .sidebar input, .sidebar textarea, .sidebar select {
@@ -1165,11 +1175,34 @@ function showDraftIndicator(label) {
     el.style.opacity = '1';
     setTimeout(() => { el.style.opacity = '0'; }, 2000);
 }
+</script>
+// ── Live Validation ──────────────────────────────────────────────
+function initValidation() {
+    document.querySelectorAll('input[required]').forEach(el => {
+        el.addEventListener('blur', () => validateField(el));
+        el.addEventListener('input', () => validateField(el));
+    });
+}
+
+function validateField(el) {
+    const val = el.value.trim();
+    if (val.length === 0) {
+        el.classList.remove('field-valid');
+        el.classList.add('field-invalid');
+    } else if (val.length >= 2) {
+        el.classList.remove('field-invalid');
+        el.classList.add('field-valid');
+    } else {
+        el.classList.remove('field-valid', 'field-invalid');
+    }
+}
+
 // ── Boot ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     attachListeners();
     restoreDraft();
     calculateLiveTotals();
+    initValidation();
     if (DRAFT_MODE === 'create') {
         setInterval(saveDraft, 5000);
     }
