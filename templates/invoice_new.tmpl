@@ -533,7 +533,7 @@
                         </div>
                     </div>
 
-                    <div class="grid-2" style="margin-top:16px;">
+                        <div class="grid-2" style="margin-top:16px;">
                         <div>
                             <label>Country</label>
                             <input type="text" name="company_country"
@@ -543,10 +543,12 @@
                         </div>
                         <div>
                             <label>State / Region</label>
-                            <input type="text" name="company_state"
-                                   value="{{field .Invoice.CompanyState}}"
-                                   placeholder="CA"
-                                   autocomplete="address-level1">
+                            <select name="company_state" autocomplete="address-level1">
+                                <option value="">— Select State —</option>
+                                {{range .USStates}}
+                                <option value="{{.Name}}" {{if eq $.Invoice.CompanyState .Name}}selected{{end}}>{{.Name}}</option>
+                                {{end}}
+                            </select>
                         </div>
                     </div>
                 </section>
@@ -655,7 +657,7 @@
                         </div>
                     </div>
 
-                    <div class="grid-2" style="margin-top:16px;">
+                        <div class="grid-2" style="margin-top:16px;">
                         <div>
                             <label>Country</label>
                             <input type="text" name="client_country" id="client_country"
@@ -664,12 +666,14 @@
                         </div>
                         <div>
                             <label>State / Region</label>
-                            <input type="text" name="client_state" id="client_state"
-                                   value="{{field .Invoice.ClientState}}"
-                                   placeholder="TX">
+                            <select name="client_state" id="client_state">
+                                <option value="">— Select State —</option>
+                                {{range .USStates}}
+                                <option value="{{.Name}}" {{if eq $.Invoice.ClientState .Name}}selected{{end}}>{{.Name}}</option>
+                                {{end}}
+                            </select>
                         </div>
                     </div>
-                </section>
 
                 {{/* ── Section 3: Line Items ── */}}
                 <section class="section">
