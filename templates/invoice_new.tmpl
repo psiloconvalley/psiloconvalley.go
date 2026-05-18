@@ -337,6 +337,70 @@
             color: white;
             font-variant-numeric: tabular-nums;
         }
+	
+        /* ── Toggle switches ── */
+        .sidebar-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-section:last-of-type { border-bottom: none; }
+        .sidebar-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 16px;
+        }
+        .config-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 12px;
+            padding: 0;
+        }
+        .config-item-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.85);
+        }
+        .config-toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            width: 44px;
+            height: 24px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 24px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .config-toggle input[type="checkbox"]:checked + .toggle-slider {
+            background: #22c55e;
+            border-color: #16a34a;
+        }
+        .config-toggle input[type="checkbox"]:checked + .toggle-slider .toggle-knob {
+            transform: translateX(20px);
+        }
 
         /* ── Mobile summary bar ──
            On mobile the sidebar moves below the form (grid stacks).
@@ -830,45 +894,84 @@
             {{/* ══════════════════════════════════════════════════════
                  SIDEBAR
             ══════════════════════════════════════════════════════ */}}
+
             <aside class="sidebar">
-                <h2 class="summary-title">Financial Summary</h2>
+                <h2 class="summary-title">Customize Invoice</h2>
 
-                <div class="summary-line">
-                    <span>Subtotal</span>
-                    <span id="subtotal_display">{{if .Invoice.Subtotal}}{{.Invoice.Subtotal}}{{else}}$0.00{{end}}</span>
-                </div>
-                <div class="summary-line">
-                    <span>Tax</span>
-                    <span id="tax_display">{{if .Invoice.TaxAmount}}{{.Invoice.TaxAmount}}{{else}}$0.00{{end}}</span>
-                </div>
-                <div class="summary-line summary-total">
-                    <span>Total</span>
-                    <span id="total_display">{{if .Invoice.Total}}{{.Invoice.Total}}{{else}}$0.00{{end}}</span>
-                </div>
+                {{/* ── Appearance Toggles ── */}}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-label">Appearance</div>
 
-                <div style="margin-top:28px;">
-                    <label>Tax Rate (%)</label>
-                    <input type="number" step="0.01" min="0" name="tax_rate" id="tax_rate"
-                           value="{{if .Invoice.TaxRateBps}}{{bpsToPercent .Invoice.TaxRateBps}}{{else}}0{{end}}"
-                           placeholder="0.00" inputmode="decimal">
+                    <label class="config-toggle">
+                        <span class="config-item-label">Show Logo</span>
+                        <input type="checkbox" name="show_logo" id="toggle_logo" checked>
+                        <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                    </label>
+
+                    <label class="config-toggle">
+                        <span class="config-item-label">Show Invoice Title</span>
+                        <input type="checkbox" name="show_title" id="toggle_title" checked>
+                        <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                    </label>
                 </div>
 
-                <div style="margin-top:16px;">
-                    <label>Currency</label>
-                    <select name="currency" id="currency">
-                        {{range .Currencies}}
-                        <option value="{{.Code}}" data-symbol="{{.Symbol}}"
-                                {{if eq $.Invoice.Currency .Code}}selected{{end}}>
-                            {{.Code}} — {{.Name}}
-                        </option>
-                        {{end}}
-                    </select>
+                {{/* ── Financial Controls ── */}}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-label">Invoice Settings</div>
+
+                    <div style="margin-bottom:16px;">
+                        <label>Currency</label>
+                        <select name="currency" id="currency">
+                            {{range .Currencies}}
+                            <option value="{{.Code}}" data-symbol="{{.Symbol}}"
+                                    {{if eq $.Invoice.Currency .Code}}selected{{end}}>
+                                {{.Code}} — {{.Name}}
+                            </option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <label>Tax Rate (%)</label>
+                        <input type="number" step="0.01" min="0" name="tax_rate" id="tax_rate"
+                               value="{{if .Invoice.TaxRateBps}}{{bpsToPercent .Invoice.TaxRateBps}}{{else}}0{{end}}"
+                               placeholder="0.00" inputmode="decimal">
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <label>Discount ($)</label>
+                        <input type="number" step="0.01" min="0" name="discount_amount" id="discount_amount"
+                               value="{{if .Invoice.DiscountAmountCentsRaw}}{{formatCents .Invoice.DiscountAmountCentsRaw}}{{else}}0.00{{end}}"
+                               placeholder="0.00" inputmode="decimal">
+                    </div>
+
+                    <div>
+                        <label>Payment Instructions</label>
+                        <textarea name="payment_details" rows="3"
+                                  placeholder="Bank: Chase · Routing: xxx · Account: xxxx">{{.Invoice.PaymentDetails}}</textarea>
+                    </div>
                 </div>
 
-                <div style="margin-top:16px;">
-                    <label>Payment Instructions</label>
-                    <textarea name="payment_details" rows="3"
-                              placeholder="Bank: Chase · Routing: xxx · Account: xxxx">{{.Invoice.PaymentDetails}}</textarea>
+                {{/* ── Financial Summary ── */}}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-label">Summary</div>
+
+                    <div class="summary-line">
+                        <span>Subtotal</span>
+                        <span id="subtotal_display">{{if .Invoice.Subtotal}}{{.Invoice.Subtotal}}{{else}}$0.00{{end}}</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Tax</span>
+                        <span id="tax_display">{{if .Invoice.TaxAmount}}{{.Invoice.TaxAmount}}{{else}}$0.00{{end}}</span>
+                    </div>
+                    <div class="summary-line" id="discount_line" style="display:none;">
+                        <span>Discount</span>
+                        <span id="discount_display">-$0.00</span>
+                    </div>
+                    <div class="summary-line summary-total">
+                        <span>Total</span>
+                        <span id="total_display">{{if .Invoice.Total}}{{.Invoice.Total}}{{else}}$0.00{{end}}</span>
+                    </div>
                 </div>
 
                 <button type="submit" class="save-btn">
@@ -876,9 +979,8 @@
                     {{else if eq .Mode "duplicate"}}📋 Save Duplicate
                     {{else}}✅ Save Invoice{{end}}
                 </button>
-		                <div id="draft-indicator" style="text-align:center;margin-top:12px;font-size:12px;color:rgba(255,255,255,0.6);opacity:0;transition:opacity 0.3s ease;"></div>
+                <div id="draft-indicator" style="text-align:center;margin-top:12px;font-size:12px;color:rgba(255,255,255,0.6);opacity:0;transition:opacity 0.3s ease;"></div>
             </aside>
-
         </div>
     </form>
 </div>
