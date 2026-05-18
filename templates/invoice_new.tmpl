@@ -583,7 +583,66 @@
                  MAIN FORM COLUMN
             ══════════════════════════════════════════════════════ */}}
             <div class="main">
+		
+		{{/* ── Live Invoice Preview ──
+     Mirrors exactly what invoice_detail.tmpl renders at the top.
+     Logo and title visibility are controlled by the sidebar toggles.
+     JS sets initial state on DOMContentLoaded from checkbox checked state.
+     If no logo is uploaded yet, a placeholder is shown instead.
+── */}}
+<div id="invoice-preview-header" style="
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+">
+    <div style="
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 14px;
+    ">Invoice Preview</div>
 
+    <div style="height: 4px; background: #0f172a; border-radius: 2px; margin-bottom: 16px;"></div>
+
+    {{/* Logo */}}
+    <div id="preview_logo" style="margin-bottom: 12px;">
+        {{if .Invoice.LogoURL}}
+        <img
+            src="{{.Invoice.LogoURL}}"
+            alt="{{.Invoice.CompanyName}}"
+            style="max-width:200px; max-height:80px; object-fit:contain; display:block;"
+        >
+        {{else}}
+        <div style="
+            width: 120px;
+            height: 48px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+        ">Your Logo</div>
+        {{end}}
+    </div>
+
+    {{/* Title */}}
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+        <span id="preview_title" style="
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #0f172a;
+        ">INVOICE</span>
+        <span style="font-size: 16px; font-weight: 700; color: #64748b;">#{{.Invoice.InvoiceNumber}}</span>
+    </div>
+</div>
                 <h1>
                     {{if eq .Mode "edit"}}Edit Invoice
                     {{else if eq .Mode "duplicate"}}New Invoice Copy
@@ -1388,6 +1447,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const form = document.getElementById('invoice-form');
     if (form) form.addEventListener('submit', clearDraft);
+
+    // ── Live toggle preview ───────────────────────────────────────
+    const toggleLogo  = document.getElementById('toggle_logo');
+    const toggleTitle = document.getElementById('toggle_title');
+    const previewLogo  = document.getElementById('preview_logo');
+    const previewTitle = document.getElementById('preview_title');
+
+    // Set initial visibility from saved checkbox state
+    if (previewLogo)  previewLogo.style.display  = toggleLogo?.checked  ? 'block'  : 'none';
+    if (previewTitle) previewTitle.style.display  = toggleTitle?.checked ? 'inline' : 'none';
+
+    // Live update on toggle change
+    if (toggleLogo && previewLogo) {
+        toggleLogo.addEventListener('change', function () {
+            previewLogo.style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    if (toggleTitle && previewTitle) {
+        toggleTitle.addEventListener('change', function () {
+            previewTitle.style.display = this.checked ? 'inline' : 'none';
+        });
+    }
 });
 </script>
 
