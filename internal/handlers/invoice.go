@@ -42,7 +42,7 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"User":       user,
 		"IsLoggedIn": user != nil,
-				"Invoice": views.InvoicePage{CompanyCountry: "United States", CompanyState: "California", ClientCountry: "United States", ClientState: "California"},
+		"Invoice": views.InvoicePage{CompanyCountry: "United States", CompanyState: "California", ClientCountry: "United States", ClientState: "California", ShowLogo: true, ShowTitle: true},
 		"Mode":       "create",
 		"Currencies": catalog.SupportedCurrencies,
 		"USStates":   catalog.USStates,
@@ -177,6 +177,8 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				Currency:       currency,
 				Notes:          r.FormValue("notes"),
 				PaymentDetails: r.FormValue("payment_details"),
+				ShowLogo:       r.FormValue("show_logo") == "on",
+				ShowTitle:      r.FormValue("show_title") == "on",
 			},
 		}
 		if user != nil {
@@ -210,6 +212,9 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	// ── Discount (dollars → cents) ───────────────────────────────────
 	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
 	discountCents := int64(math.Round(discountAmt * 100))
+	// ── Appearance toggles ───────────────────────────────────────────
+	showLogo := r.FormValue("show_logo") == "on"
+	showTitle := r.FormValue("show_title") == "on"
 
 	// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
@@ -250,6 +255,8 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		DueDate:           dueDate,
 		TaxRateBps:        taxRateBps,
 		DiscountAmountCents: discountCents,
+		ShowLogo:          showLogo,
+		ShowTitle:         showTitle,
 		Currency:          currency,
 		Notes:             strings.TrimSpace(r.FormValue("notes")),
 		PaymentDetails:    strings.TrimSpace(r.FormValue("payment_details")),
@@ -503,6 +510,8 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.ClientZip      = strings.TrimSpace(r.FormValue("client_zip"))
 	inv.ClientState    = strings.TrimSpace(r.FormValue("client_state"))
 	inv.ClientCountry  = strings.TrimSpace(r.FormValue("client_country"))
+	inv.ShowLogo  = r.FormValue("show_logo") == "on"
+	inv.ShowTitle = r.FormValue("show_title") == "on"
 	inv.Currency            = currency
 	inv.TaxRateBps          = taxRateBps
 	inv.DiscountAmountCents = discountCents

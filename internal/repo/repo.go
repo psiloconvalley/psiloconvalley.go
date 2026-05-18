@@ -129,6 +129,8 @@ type Invoice struct {
 	Status              string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
+	ShowLogo            bool
+	ShowTitle           bool
 }
 
 type InvoiceItem struct {
@@ -844,7 +846,7 @@ func (r *InvoiceRepo) CreateInvoice(
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	const insertInvoice = `
+		const insertInvoice = `
 		INSERT INTO invoices (
 			business_profile_id, client_id, user_id, anonymous_token,
 			client_name, client_email, client_address,
@@ -854,11 +856,11 @@ func (r *InvoiceRepo) CreateInvoice(
 			invoice_number, issue_date, due_date,
 			tax_rate_bps, discount_amount_cents, notes, payment_details,
 			subtotal_cents, tax_amount_cents, total_cents,
-			currency, status
+			currency, status, show_logo, show_title
 		) VALUES (
 			$1,$2,$3,NULLIF($4,''),$5,$6,$7,$8,$9,$10,$11,
 			$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-			$22,$23,$24,$25,$26,$27,$28,$29,$30
+			$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32
 		) RETURNING id, created_at`
 
 	var newID int64
@@ -873,7 +875,7 @@ func (r *InvoiceRepo) CreateInvoice(
 		inv.InvoiceNumber, inv.IssueDate, inv.DueDate,
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
-		inv.Currency, inv.Status,
+		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle,
 	).Scan(&newID, &createdAt)
 	if err != nil {
 		return 0, fmt.Errorf("insert invoice: %w", err)
@@ -943,6 +945,8 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.total_cents,
 			i.currency,
 			i.status,
+			i.show_logo,
+			i.show_title,
 			i.created_at,
 			i.updated_at,
 			COALESCE(bp.logo_url, '') AS logo_url
@@ -990,6 +994,8 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.TotalCents,
 		&currency,
 		&inv.Status,
+		&inv.ShowLogo,
+		&inv.ShowTitle,
 		&inv.CreatedAt,
 		&updatedAt,
 		&inv.LogoURL,
@@ -1157,7 +1163,7 @@ func (r *InvoiceRepo) UpdateInvoice(
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	const uq = `
+			const uq = `
 		UPDATE invoices SET
 			client_id=$1, client_name=$2, client_email=$3, client_address=$4,
 			client_city=$5, client_zip=$6, client_state=$7, client_country=$8,
@@ -1166,8 +1172,8 @@ func (r *InvoiceRepo) UpdateInvoice(
 			invoice_number=$16, issue_date=$17, due_date=$18,
 			tax_rate_bps=$19, discount_amount_cents=$20, notes=$21, payment_details=$22,
 			subtotal_cents=$23, tax_amount_cents=$24, total_cents=$25,
-			currency=$26, status=$27, updated_at=NOW()
-		WHERE id=$28 AND user_id=$29`
+			currency=$26, status=$27, show_logo=$28, show_title=$29, updated_at=NOW()
+		WHERE id=$30 AND user_id=$31`
 
 	res, err := tx.ExecContext(ctx, uq,
 		inv.ClientID, inv.ClientName, inv.ClientEmail, inv.ClientAddress,
@@ -1177,10 +1183,10 @@ func (r *InvoiceRepo) UpdateInvoice(
 		inv.InvoiceNumber, inv.IssueDate, inv.DueDate,
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
-		inv.Currency, inv.Status,
+		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle,
 		inv.ID, inv.UserID,
 	)
-	if err != nil {
+		if err != nil {
 		return err
 	}
 

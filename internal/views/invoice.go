@@ -82,6 +82,8 @@ type InvoicePage struct {
 
 	// FIX M3: Populated by the handler, read by templates.
 	Hints RenderHints
+	ShowLogo  bool
+	ShowTitle bool
 }
 
 // FIX H5 / C5: Details is now populated from repo.InvoiceItem.Details,
@@ -206,6 +208,8 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 
 		TaxRateBps:             inv.TaxRateBps,
 		DiscountAmountCentsRaw: inv.DiscountAmountCents,
+		ShowLogo:  inv.ShowLogo,
+		ShowTitle: inv.ShowTitle,
 
 		// Hints is zero-value (all false) by default.
 		// The handler sets fields on this after calling MapInvoicePage.

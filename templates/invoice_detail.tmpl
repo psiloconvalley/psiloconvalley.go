@@ -369,7 +369,7 @@
 
         <div class="top-accent"></div>
 
-        {{if .Invoice.LogoURL}}
+        {{if and .Invoice.LogoURL .Invoice.ShowLogo}}
         <div style="padding: 24px 36px 0;">
             <img
                 src="{{.Invoice.LogoURL}}"
@@ -381,7 +381,7 @@
 
         <header class="header-top">
             <div class="header-title-block">
-                <span class="doc-title">INVOICE</span>
+        	{{if .Invoice.ShowTitle}}<span class="doc-title">INVOICE</span>{{end}}
                 <span class="doc-number">#{{.Invoice.InvoiceNumber}}</span>
             </div>
             <div class="meta-grid">
