@@ -207,6 +207,9 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	// ── Tax rate (percent → bps) ─────────────────────────────────────
 	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
 	taxRateBps := int64(math.Round(taxRatePct * 100))
+	// ── Discount (dollars → cents) ───────────────────────────────────
+	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
+	discountCents := int64(math.Round(discountAmt * 100))
 
 	// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
@@ -246,6 +249,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		IssueDate:         issueDate,
 		DueDate:           dueDate,
 		TaxRateBps:        taxRateBps,
+		DiscountAmountCents: discountCents,
 		Currency:          currency,
 		Notes:             strings.TrimSpace(r.FormValue("notes")),
 		PaymentDetails:    strings.TrimSpace(r.FormValue("payment_details")),
@@ -402,10 +406,16 @@ func (h *Handlers) InvoiceEditGet(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+
 func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
 		return
 	}
 
@@ -415,11 +425,89 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	inv, _, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
 	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
 		http.NotFound(w, r)
 		return
 	}
+
+	// ── Parse form fields ─────────────────────────────────────────────
+	currency := catalog.NormalizeCurrency(r.FormValue("currency"))
+	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
+	taxRateBps := int64(math.Round(taxRatePct * 100))
+	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
+	discountCents := int64(math.Round(discountAmt * 100))
+
+	// ── Parse line items ──────────────────────────────────────────────
+	descriptions := r.Form["description[]"]
+	details      := r.Form["details[]"]
+	quantities   := r.Form["quantity[]"]
+	unitPrices   := r.Form["unit_price[]"]
+
+	var items []repo.InvoiceItem
+	for i, desc := range descriptions {
+		desc = strings.TrimSpace(desc)
+		if desc == "" {
+			continue
+		}
+		qty := float64(1)
+		if i < len(quantities) {
+			qty, _ = strconv.ParseFloat(quantities[i], 64)
+		}
+		if qty <= 0 {
+			qty = 1
+		}
+		var unitPrice float64
+		if i < len(unitPrices) {
+			unitPrice, _ = strconv.ParseFloat(unitPrices[i], 64)
+		}
+		detail := ""
+		if i < len(details) {
+			detail = strings.TrimSpace(details[i])
+		}
+		unitPriceCents := int64(math.Round(unitPrice * 100))
+		items = append(items, repo.InvoiceItem{
+			Description:    desc,
+			Details:        detail,
+			Quantity:       qty,
+			UnitPriceCents: unitPriceCents,
+		})
+	}
+
+	// ── Parse dates ───────────────────────────────────────────────────
+	if d := r.FormValue("issue_date"); d != "" {
+		if t, err := time.Parse("2006-01-02", d); err == nil {
+			inv.IssueDate = t
+		}
+	}
+	var dueDate *time.Time
+	if d := r.FormValue("due_date"); d != "" {
+		if t, err := time.Parse("2006-01-02", d); err == nil {
+			dueDate = &t
+		}
+	}
+	inv.DueDate = dueDate
+
+	// ── Update invoice fields ─────────────────────────────────────────
+	inv.CompanyName    = strings.TrimSpace(r.FormValue("company_name"))
+	inv.CompanyEmail   = strings.TrimSpace(r.FormValue("company_email"))
+	inv.CompanyAddress = strings.TrimSpace(r.FormValue("company_address"))
+	inv.CompanyCity    = strings.TrimSpace(r.FormValue("company_city"))
+	inv.CompanyZip     = strings.TrimSpace(r.FormValue("company_zip"))
+	inv.CompanyState   = strings.TrimSpace(r.FormValue("company_state"))
+	inv.CompanyCountry = strings.TrimSpace(r.FormValue("company_country"))
+	inv.ClientName     = strings.TrimSpace(r.FormValue("client_name"))
+	inv.ClientEmail    = strings.TrimSpace(r.FormValue("client_email"))
+	inv.ClientAddress  = strings.TrimSpace(r.FormValue("client_address"))
+	inv.ClientCity     = strings.TrimSpace(r.FormValue("client_city"))
+	inv.ClientZip      = strings.TrimSpace(r.FormValue("client_zip"))
+	inv.ClientState    = strings.TrimSpace(r.FormValue("client_state"))
+	inv.ClientCountry  = strings.TrimSpace(r.FormValue("client_country"))
+	inv.Currency            = currency
+	inv.TaxRateBps          = taxRateBps
+	inv.DiscountAmountCents = discountCents
+	inv.Notes          = strings.TrimSpace(r.FormValue("notes"))
+	inv.PaymentDetails = strings.TrimSpace(r.FormValue("payment_details"))
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		http.Error(w, "Update failed", http.StatusInternalServerError)
@@ -428,7 +516,6 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
 }
-
 func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
