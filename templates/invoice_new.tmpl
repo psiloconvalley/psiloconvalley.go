@@ -1045,15 +1045,21 @@ function calculateLiveTotals() {
     // The subtotal above counts desktop OR mobile depending on which
     // is rendered — they are mutually exclusive via CSS, so no double-counting.
 
-    const taxRate = parseFloat(document.getElementById('tax_rate')?.value) || 0;
-    const taxAmt  = subtotal * (taxRate / 100);
-    const total   = subtotal + taxAmt;
+    const taxRate      = parseFloat(document.getElementById('tax_rate')?.value) || 0;
+    const taxAmt       = subtotal * (taxRate / 100);
+    const discountAmt  = parseFloat(document.getElementById('discount_amount')?.value) || 0;
+    const total        = subtotal + taxAmt - discountAmt;
 
     const fmt = v => sym + v.toFixed(2);
     const el  = id => document.getElementById(id);
 
+    // Show/hide discount line in summary
+    const discountLine = document.getElementById('discount_line');
+    if (discountLine) discountLine.style.display = discountAmt > 0 ? 'flex' : 'none';
+
     if (el('subtotal_display'))    el('subtotal_display').textContent    = fmt(subtotal);
     if (el('tax_display'))         el('tax_display').textContent         = fmt(taxAmt);
+    if (el('discount_display'))    el('discount_display').textContent    = '-' + fmt(discountAmt);
     if (el('total_display'))       el('total_display').textContent       = fmt(total);
     if (el('mobile_total_display'))el('mobile_total_display').textContent = fmt(total);
 }
@@ -1072,7 +1078,7 @@ function handleDescEnter(e) {
 
 // ── Attach recalculation listeners ────────────────────────────────
 function attachListeners() {
-    document.querySelectorAll('.qty, .price, #tax_rate, #currency').forEach(el => {
+    document.querySelectorAll('.qty, .price, #tax_rate, #currency, #discount_amount').forEach(el => {
         el.removeEventListener('input',  calculateLiveTotals);
         el.removeEventListener('change', calculateLiveTotals);
         el.addEventListener('input',  calculateLiveTotals);
