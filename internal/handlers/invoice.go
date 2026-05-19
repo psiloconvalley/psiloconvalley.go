@@ -162,9 +162,26 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	if len(items) == 0 {
 		errs = append(errs, FormError{Field: "items", Message: "At least one line item with a description is required"})
 	}
+	if invoiceNumber != "" {
+		exists, err := h.App.InvRepo.InvoiceNumberExists(r.Context(), invoiceNumber)
+		if err != nil {
+			log.Printf("[invoice] invoice number exists check error: %v", err)
+			http.Error(w, "Failed to validate invoice number", http.StatusInternalServerError)
+			return
+		}
+		if exists {
+			errs = append(errs, FormError{
+				Field:   "invoice_number",
+				Message: "Invoice number already exists. Choose a different one or leave it blank to auto-generate.",
+			})
+		}
+	}
 
 	if len(errs) > 0 {
-		data := map[string]any{
+
+
+		
+					data := map[string]any{
 			"User":       user,
 			"IsLoggedIn": user != nil,
 			"Mode":       "create",

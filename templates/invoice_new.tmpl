@@ -783,7 +783,15 @@
                                    value="{{field .Invoice.InvoiceNumber}}"
                                    placeholder="INV-2026-001">
                             {{end}}
-                        </div>
+                            {{if .Errors}}
+                            {{range .Errors}}
+                            {{if eq .Field "invoice_number"}}
+                            <div class="field-error">{{.Message}}</div>
+                            {{end}}
+                            {{end}}
+                            {{end}}
+
+		    </div>
                     </div>
 
                     <div class="grid-2" style="margin-top:16px;">
