@@ -131,6 +131,7 @@ type Invoice struct {
 	UpdatedAt           time.Time
 	ShowLogo            bool
 	ShowTitle           bool
+	AutoReminders       bool
 }
 
 type InvoiceItem struct {
@@ -856,11 +857,11 @@ func (r *InvoiceRepo) CreateInvoice(
 			invoice_number, issue_date, due_date,
 			tax_rate_bps, discount_amount_cents, notes, payment_details,
 			subtotal_cents, tax_amount_cents, total_cents,
-			currency, status, show_logo, show_title
+			currency, status, show_logo, show_title, auto_reminders
 		) VALUES (
 			$1,$2,$3,NULLIF($4,''),$5,$6,$7,$8,$9,$10,$11,
 			$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-			$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32
+			$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33
 		) RETURNING id, created_at`
 
 	var newID int64
@@ -875,9 +876,9 @@ func (r *InvoiceRepo) CreateInvoice(
 		inv.InvoiceNumber, inv.IssueDate, inv.DueDate,
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
-		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle,
+		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle, inv.AutoReminders,
 	).Scan(&newID, &createdAt)
-	if err != nil {
+		if err != nil {
 		return 0, fmt.Errorf("insert invoice: %w", err)
 	}
 
@@ -947,6 +948,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.status,
 			i.show_logo,
 			i.show_title,
+			i.auto_reminders,
 			i.created_at,
 			i.updated_at,
 			COALESCE(bp.logo_url, '') AS logo_url
@@ -996,6 +998,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.Status,
 		&inv.ShowLogo,
 		&inv.ShowTitle,
+		&inv.AutoReminders,
 		&inv.CreatedAt,
 		&updatedAt,
 		&inv.LogoURL,
@@ -1172,8 +1175,9 @@ func (r *InvoiceRepo) UpdateInvoice(
 			invoice_number=$16, issue_date=$17, due_date=$18,
 			tax_rate_bps=$19, discount_amount_cents=$20, notes=$21, payment_details=$22,
 			subtotal_cents=$23, tax_amount_cents=$24, total_cents=$25,
-			currency=$26, status=$27, show_logo=$28, show_title=$29, updated_at=NOW()
-		WHERE id=$30 AND user_id=$31`
+			currency=$26, status=$27, show_logo=$28, show_title=$29,
+			auto_reminders=$30, updated_at=NOW()
+			WHERE id=$31 AND user_id=$32`
 
 	res, err := tx.ExecContext(ctx, uq,
 		inv.ClientID, inv.ClientName, inv.ClientEmail, inv.ClientAddress,
@@ -1184,9 +1188,12 @@ func (r *InvoiceRepo) UpdateInvoice(
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle,
+		inv.AutoReminders,
 		inv.ID, inv.UserID,
 	)
-		if err != nil {
+
+			if err != nil {
+
 		return err
 	}
 

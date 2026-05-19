@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"context"
+	"os/signal"
+	"syscall"
 
 	"github.com/joho/godotenv"
 	"github.com/justinas/nosurf"
@@ -62,6 +65,16 @@ func main() {
 		IdleTimeout:  120 * time.Second,
 	}
 
+		// ── Scheduler Engine ─────────────────────────────────────────────
+	// Runs in a goroutine alongside the HTTP server.
+	// Cancelled gracefully when the process receives SIGINT or SIGTERM.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	go application.Scheduler.Start(ctx)
+
 	log.Printf("🚀 PsiloConValley Operating on :%s [CSRF ENABLED]", port)
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(srv.ListenAndServe())	
+
+
 }

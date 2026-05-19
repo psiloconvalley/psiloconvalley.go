@@ -47,6 +47,8 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
     ClientState:    "California",
     ShowLogo:       true,
     ShowTitle:      true,
+
+
 }
 if user != nil {
     if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
@@ -192,6 +194,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				PaymentDetails: r.FormValue("payment_details"),
 				ShowLogo:       r.FormValue("show_logo") == "on",
 				ShowTitle:      r.FormValue("show_title") == "on",
+				AutoReminders:  r.FormValue("auto_reminders") == "on",
 				LogoURL: func() string {
 					if user != nil {
 						if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
@@ -237,6 +240,8 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	// ── Appearance toggles ───────────────────────────────────────────
 	showLogo := r.FormValue("show_logo") == "on"
 	showTitle := r.FormValue("show_title") == "on"
+	autoReminders :=  r.FormValue("auto_reminders") == "on"
+
 
 	// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
@@ -279,6 +284,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		DiscountAmountCents: discountCents,
 		ShowLogo:          showLogo,
 		ShowTitle:         showTitle,
+		AutoReminders:     autoReminders,
 		Currency:          currency,
 		Notes:             strings.TrimSpace(r.FormValue("notes")),
 		PaymentDetails:    strings.TrimSpace(r.FormValue("payment_details")),
@@ -540,6 +546,7 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.ClientCountry  = strings.TrimSpace(r.FormValue("client_country"))
 	inv.ShowLogo  = r.FormValue("show_logo") == "on"
 	inv.ShowTitle = r.FormValue("show_title") == "on"
+	inv.AutoReminders = r.FormValue("auto_reminders") == "on"
 	inv.Currency            = currency
 	inv.TaxRateBps          = taxRateBps
 	inv.DiscountAmountCents = discountCents

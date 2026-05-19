@@ -16,6 +16,9 @@ import (
 	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/util"
+	"psiloconvalley/internal/scheduler"
+schedulerhandlers	"psiloconvalley/internal/scheduler/handlers"
+
 )
 
 type App struct {
@@ -27,6 +30,8 @@ type App struct {
 	Mailer      *mailer.Mailer
 	BaseURL     string
 	StripePrice string
+	SchedulerRepo *repo.SchedulerRepo
+	Scheduler     *scheduler.Scheduler
 }
 
 func NewApp(db *sql.DB) *App {
@@ -52,6 +57,18 @@ func NewApp(db *sql.DB) *App {
 
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	stripePrice := os.Getenv("STRIPE_PRICE_ID")
+
+	schedRepo := repo.NewSchedulerRepo(db)
+	sched := scheduler.New(schedRepo, 60*time.Second)
+
+	// ── Register Job Handlers ─────────────────────────────────────────
+	// Add new job types here. The engine never changes.
+	invRepo := repo.NewInvoiceRepo(db)
+	sched.Register("send_reminder", schedulerhandlers.NewReminderHandler(
+		invRepo,
+		mailer.New(),
+		baseURL,
+	))
 	return &App{
 		Templates:   t,
 		InvRepo:     repo.NewInvoiceRepo(db),
@@ -61,6 +78,8 @@ func NewApp(db *sql.DB) *App {
 		Mailer:      mailer.New(),
 		BaseURL:     baseURL,
 		StripePrice: stripePrice,
+		SchedulerRepo: schedRepo,
+		Scheduler:     sched,
 	}
 }
 

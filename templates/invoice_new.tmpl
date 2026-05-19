@@ -1101,6 +1101,30 @@
                             <span class="toggle-slider"><span class="toggle-knob"></span></span>
                         </label>
                     </div>
+		                        {{/* ── Payment Reminders ── */}}
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Reminders</div>
+
+                        {{if and .User (eq .User.Plan "pro")}}
+                        <label class="config-toggle">
+                            <span class="config-item-label">Auto Reminders</span>
+                            <input type="checkbox" name="auto_reminders" id="toggle_reminders" {{if .Invoice.AutoReminders}}checked{{end}}>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                            Automatically remind your client before and after the due date if unpaid.
+                        </div>
+                        {{else}}
+                        <label class="config-toggle" style="opacity: 0.4; cursor: not-allowed;">
+                            <span class="config-item-label">Auto Reminders</span>
+                            <input type="checkbox" disabled>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                            <a href="/pricing?reason=reminders" style="color: #fbbf24; text-decoration: none; font-weight: 600;">Upgrade to Pro</a> to send automatic payment reminders.
+                        </div>
+                        {{end}}
+                    </div>
 
                     {{/* ── Financial Controls ── */}}
                     <div class="sidebar-section">

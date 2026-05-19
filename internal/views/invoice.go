@@ -84,6 +84,7 @@ type InvoicePage struct {
 	Hints RenderHints
 	ShowLogo  bool
 	ShowTitle bool
+	AutoReminders bool
 }
 
 // FIX H5 / C5: Details is now populated from repo.InvoiceItem.Details,
@@ -210,6 +211,7 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		DiscountAmountCentsRaw: inv.DiscountAmountCents,
 		ShowLogo:  inv.ShowLogo,
 		ShowTitle: inv.ShowTitle,
+		AutoReminders: inv.AutoReminders,
 
 		// Hints is zero-value (all false) by default.
 		// The handler sets fields on this after calling MapInvoicePage.
