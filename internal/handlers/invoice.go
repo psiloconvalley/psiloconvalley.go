@@ -357,9 +357,45 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Increment anon counter after successful save
+		// Increment anon counter after successful save
 	if user == nil {
 		count := auth.GetAnonInvoiceCount(r)
 		auth.SetAnonInvoiceCount(w, count+1)
+	}
+
+	// ── Create recurring schedule if enabled ─────────────────────────
+	if user != nil && r.FormValue("is_recurring") == "on" {
+		frequency := r.FormValue("recurring_frequency")
+		if frequency == "" {
+			frequency = "monthly"
+		}
+		autoSend := r.FormValue("recurring_auto_send") == "on"
+
+		nextRun := calculateNextRun(frequency, time.Now())
+
+		sched := &repo.RecurringSchedule{
+			UserID:            user.ID,
+			TemplateInvoiceID: invoiceID,
+			Frequency:         frequency,
+			SendAutomatically: autoSend,
+			Active:            true,
+			NextRunAt:         nextRun,
+		}
+
+		schedID, err := h.App.SchedulerRepo.CreateRecurringSchedule(r.Context(), sched)
+		if err != nil {
+			log.Printf("[invoice] failed to create recurring schedule: %v", err)
+		} else {
+			// Schedule the first job
+			payload := map[string]any{"schedule_id": schedID}
+			jobID, err := h.App.SchedulerRepo.CreateJob(r.Context(), "generate_recurring_invoice", payload, nextRun)
+			if err != nil {
+				log.Printf("[invoice] failed to schedule first recurring job: %v", err)
+			} else {
+				log.Printf("[invoice] recurring schedule %d created for invoice %d (first run job %d at %s)",
+					schedID, invoiceID, jobID, nextRun.Format("2006-01-02"))
+			}
+		}
 	}
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10), http.StatusSeeOther)
@@ -689,4 +725,19 @@ func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(newID, 10)+"/edit", http.StatusSeeOther)
+}
+// calculateNextRun returns the next run time based on frequency.
+func calculateNextRun(frequency string, from time.Time) time.Time {
+	switch frequency {
+	case "weekly":
+		return from.AddDate(0, 0, 7)
+	case "monthly":
+		return from.AddDate(0, 1, 0)
+	case "quarterly":
+		return from.AddDate(0, 3, 0)
+	case "yearly":
+		return from.AddDate(1, 0, 0)
+	default:
+		return from.AddDate(0, 1, 0)
+	}
 }

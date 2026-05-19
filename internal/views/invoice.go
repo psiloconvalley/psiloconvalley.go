@@ -85,6 +85,12 @@ type InvoicePage struct {
 	ShowLogo  bool
 	ShowTitle bool
 	AutoReminders bool
+
+
+	//Recurring
+	IsRecurring bool
+	RecurringFrequency string
+	RecurringAutoSend bool
 }
 
 // FIX H5 / C5: Details is now populated from repo.InvoiceItem.Details,

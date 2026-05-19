@@ -1125,6 +1125,48 @@
                         </div>
                         {{end}}
                     </div>
+		                        {{/* ── Recurring Schedule ── */}}
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Recurring</div>
+
+                        {{if and .User (eq .User.Plan "pro")}}
+                        <label class="config-toggle">
+                            <span class="config-item-label">Make Recurring</span>
+                            <input type="checkbox" name="is_recurring" id="toggle_recurring" {{if .Invoice.IsRecurring}}checked{{end}}>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+
+                        <div id="recurring_options" style="display: none; margin-top: 12px;">
+                            <div style="margin-bottom: 12px;">
+                                <label>Frequency</label>
+                                <select name="recurring_frequency" id="recurring_frequency" style="width: 100%;">
+                                    <option value="weekly" {{if eq .Invoice.RecurringFrequency "weekly"}}selected{{end}}>Weekly</option>
+                                    <option value="monthly" {{if eq .Invoice.RecurringFrequency "monthly"}}selected{{end}}>Monthly</option>
+                                    <option value="quarterly" {{if eq .Invoice.RecurringFrequency "quarterly"}}selected{{end}}>Quarterly</option>
+                                    <option value="yearly" {{if eq .Invoice.RecurringFrequency "yearly"}}selected{{end}}>Yearly</option>
+                                </select>
+                            </div>
+
+                            <label class="config-toggle">
+                                <span class="config-item-label">Auto-send</span>
+                                <input type="checkbox" name="recurring_auto_send" id="toggle_auto_send" {{if .Invoice.RecurringAutoSend}}checked{{end}}>
+                                <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                            </label>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                                Automatically email the invoice when generated.
+                            </div>
+                        </div>
+                        {{else}}
+                        <label class="config-toggle" style="opacity: 0.4; cursor: not-allowed;">
+                            <span class="config-item-label">Make Recurring</span>
+                            <input type="checkbox" disabled>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                            <a href="/pricing?reason=recurring" style="color: #fbbf24; text-decoration: none; font-weight: 600;">Upgrade to Pro</a> to create recurring invoices.
+                        </div>
+                        {{end}}
+                    </div>
 
                     {{/* ── Financial Controls ── */}}
                     <div class="sidebar-section">
@@ -1591,10 +1633,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (toggleLogo)    toggleLogo.addEventListener('change',    function () { syncLogo(this.checked); });
     if (toggleLogoMob) toggleLogoMob.addEventListener('change', function () { syncLogo(this.checked); });
     if (toggleTitle)    toggleTitle.addEventListener('change',    function () { syncTitle(this.checked); });
-    if (toggleTitleMob) toggleTitleMob.addEventListener('change', function () { syncTitle(this.checked); });
-   
-   });
+       if (toggleTitleMob) toggleTitleMob.addEventListener('change', function () { syncTitle(this.checked); });
 
+    // ── Recurring toggle show/hide ───────────────────────────────────
+    const toggleRecurring = document.getElementById('toggle_recurring');
+    const recurringOptions = document.getElementById('recurring_options');
+
+    function syncRecurring(checked) {
+        if (recurringOptions) {
+            recurringOptions.style.display = checked ? 'block' : 'none';
+        }
+    }
+
+    // Set initial state
+    if (toggleRecurring) {
+        syncRecurring(toggleRecurring.checked);
+        toggleRecurring.addEventListener('change', function () {
+            syncRecurring(this.checked);
+        });
+    }
+}); 
     </script>
 
 </body>

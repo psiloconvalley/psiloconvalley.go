@@ -159,3 +159,146 @@ func (r *SchedulerRepo) CancelJobsForInvoice(ctx context.Context, invoiceID int6
 	}
 	return result.RowsAffected()
 }
+
+// =====================================================================
+// Recurring Schedules
+// =====================================================================
+
+type RecurringSchedule struct {
+	ID                int64
+	UserID            int64
+	TemplateInvoiceID int64
+	Frequency         string // weekly, monthly, quarterly, yearly
+	SendAutomatically bool
+	Active            bool
+	NextRunAt         time.Time
+	LastRunAt         *time.Time
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+// CreateRecurringSchedule inserts a new recurring schedule and returns its ID.
+func (r *SchedulerRepo) CreateRecurringSchedule(ctx context.Context, sched *RecurringSchedule) (int64, error) {
+	const q = `
+		INSERT INTO recurring_schedules 
+			(user_id, template_invoice_id, frequency, send_automatically, active, next_run_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id`
+
+	var id int64
+	err := r.db.QueryRowContext(ctx, q,
+		sched.UserID,
+		sched.TemplateInvoiceID,
+		sched.Frequency,
+		sched.SendAutomatically,
+		sched.Active,
+		sched.NextRunAt,
+	).Scan(&id)
+	return id, err
+}
+
+// GetRecurringScheduleByInvoice returns the recurring schedule for a template invoice, if any.
+func (r *SchedulerRepo) GetRecurringScheduleByInvoice(ctx context.Context, invoiceID int64) (*RecurringSchedule, error) {
+	const q = `
+		SELECT id, user_id, template_invoice_id, frequency, send_automatically, 
+		       active, next_run_at, last_run_at, created_at, updated_at
+		FROM recurring_schedules
+		WHERE template_invoice_id = $1`
+
+	var s RecurringSchedule
+	var lastRun sql.NullTime
+
+	err := r.db.QueryRowContext(ctx, q, invoiceID).Scan(
+		&s.ID, &s.UserID, &s.TemplateInvoiceID, &s.Frequency, &s.SendAutomatically,
+		&s.Active, &s.NextRunAt, &lastRun, &s.CreatedAt, &s.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if lastRun.Valid {
+		s.LastRunAt = &lastRun.Time
+	}
+	return &s, nil
+}
+
+// UpdateRecurringSchedule updates an existing schedule (e.g., after generating an invoice).
+func (r *SchedulerRepo) UpdateRecurringSchedule(ctx context.Context, sched *RecurringSchedule) error {
+	const q = `
+		UPDATE recurring_schedules
+		SET frequency = $1, send_automatically = $2, active = $3, 
+		    next_run_at = $4, last_run_at = $5, updated_at = NOW()
+		WHERE id = $6`
+
+	_, err := r.db.ExecContext(ctx, q,
+		sched.Frequency,
+		sched.SendAutomatically,
+		sched.Active,
+		sched.NextRunAt,
+		sched.LastRunAt,
+		sched.ID,
+	)
+	return err
+}
+
+// DeleteRecurringSchedule removes a recurring schedule.
+func (r *SchedulerRepo) DeleteRecurringSchedule(ctx context.Context, id int64) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM recurring_schedules WHERE id = $1`, id)
+	return err
+}
+
+// ListActiveRecurringSchedulesDue returns all active schedules where next_run_at <= now.
+func (r *SchedulerRepo) ListActiveRecurringSchedulesDue(ctx context.Context) ([]RecurringSchedule, error) {
+	const q = `
+		SELECT id, user_id, template_invoice_id, frequency, send_automatically,
+		       active, next_run_at, last_run_at, created_at, updated_at
+		FROM recurring_schedules
+		WHERE active = true AND next_run_at <= NOW()
+		ORDER BY next_run_at ASC`
+
+	rows, err := r.db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var schedules []RecurringSchedule
+	for rows.Next() {
+		var s RecurringSchedule
+		var lastRun sql.NullTime
+		err := rows.Scan(
+			&s.ID, &s.UserID, &s.TemplateInvoiceID, &s.Frequency, &s.SendAutomatically,
+			&s.Active, &s.NextRunAt, &lastRun, &s.CreatedAt, &s.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		if lastRun.Valid {
+			s.LastRunAt = &lastRun.Time
+		}
+		schedules = append(schedules, s)
+	}
+	return schedules, rows.Err()
+}
+// GetRecurringScheduleByID fetches a single recurring schedule by its ID.
+func (r *SchedulerRepo) GetRecurringScheduleByID(ctx context.Context, id int64) (*RecurringSchedule, error) {
+	const q = `
+		SELECT id, user_id, template_invoice_id, frequency, send_automatically,
+		       active, next_run_at, last_run_at, created_at, updated_at
+		FROM recurring_schedules
+		WHERE id = $1`
+
+	var s RecurringSchedule
+	var lastRun sql.NullTime
+
+	err := r.db.QueryRowContext(ctx, q, id).Scan(
+		&s.ID, &s.UserID, &s.TemplateInvoiceID, &s.Frequency, &s.SendAutomatically,
+		&s.Active, &s.NextRunAt, &lastRun, &s.CreatedAt, &s.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if lastRun.Valid {
+		s.LastRunAt = &lastRun.Time
+	}
+	return &s, nil
+}
