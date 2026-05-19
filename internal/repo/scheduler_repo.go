@@ -140,4 +140,22 @@ func (r *SchedulerRepo) CreateJob(ctx context.Context, jobType string, payload a
 	var id int64
 	err = r.db.QueryRowContext(ctx, q, jobType, marshaled, runAt).Scan(&id)
 	return id, err
+
+}
+
+
+// CancelJobsForInvoice deletes all pending reminder jobs for a given invoice.
+// Called when an invoice is marked paid or voided.
+func (r *SchedulerRepo) CancelJobsForInvoice(ctx context.Context, invoiceID int64) (int64, error) {
+	const q = `
+		DELETE FROM scheduled_jobs
+		WHERE status = 'pending'
+		AND job_type = 'send_reminder'
+		AND payload->>'invoice_id' = $1::text`
+
+	result, err := r.db.ExecContext(ctx, q, invoiceID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }

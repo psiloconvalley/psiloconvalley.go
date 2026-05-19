@@ -147,8 +147,56 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[send] invoice %s sent to %s by user %d",
 		inv.InvoiceNumber, toEmail, user.ID)
 
+	// ── Schedule automatic reminders if enabled ──────────────────────
+	if inv.AutoReminders && inv.DueDate != nil {
+		h.scheduleReminders(r.Context(), inv.ID, *inv.DueDate)
+	}
+
 	http.Redirect(w, r,
 		fmt.Sprintf("/invoices/%d?sent=true", id),
 		http.StatusSeeOther,
 	)
+}
+
+
+// scheduleReminders queues reminder jobs based on the invoice due date.
+// Jobs are inserted into scheduled_jobs and the engine picks them up
+// automatically when each run_at arrives.
+func (h *Handlers) scheduleReminders(ctx context.Context, invoiceID int64, dueDate time.Time) {
+	type reminder struct {
+		offset       time.Duration
+		reminderType string
+	}
+
+	schedule := []reminder{
+		{-3 * 24 * time.Hour, "due_soon"},     // 3 days before
+		{0, "due_today"},                        // day of
+		{3 * 24 * time.Hour, "overdue"},         // 3 days after
+		{7 * 24 * time.Hour, "overdue"},         // 7 days after
+		{14 * 24 * time.Hour, "overdue"},        // 14 days after
+	}
+
+	for _, r := range schedule {
+		runAt := dueDate.Add(r.offset)
+
+		// Don't schedule reminders in the past
+		if runAt.Before(time.Now()) {
+			continue
+		}
+
+		payload := map[string]any{
+			"invoice_id":    invoiceID,
+			"reminder_type": r.reminderType,
+		}
+
+		jobID, err := h.App.SchedulerRepo.CreateJob(ctx, "send_reminder", payload, runAt)
+		if err != nil {
+			log.Printf("[send] failed to schedule %s reminder for invoice %d: %v",
+				r.reminderType, invoiceID, err)
+			continue
+		}
+
+		log.Printf("[send] scheduled %s reminder for invoice %d (job %d, run_at %s)",
+			r.reminderType, invoiceID, jobID, runAt.Format("2006-01-02 15:04"))
+	}
 }

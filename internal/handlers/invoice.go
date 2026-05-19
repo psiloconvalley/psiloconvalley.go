@@ -581,13 +581,23 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 
 	newStatus := r.FormValue("status")
 
-	if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, user.ID); err != nil {
+		if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, user.ID); err != nil {
 		http.Error(w, "Failed to update status", http.StatusInternalServerError)
 		return
 	}
 
+	// ── Cancel pending reminders when invoice is paid or voided ──────
+	if newStatus == "paid" || newStatus == "void" {
+		cancelled, err := h.App.SchedulerRepo.CancelJobsForInvoice(r.Context(), id)
+		if err != nil {
+			log.Printf("[status] failed to cancel reminders for invoice %d: %v", id, err)
+		} else if cancelled > 0 {
+			log.Printf("[status] cancelled %d pending reminders for invoice %d", cancelled, id)
+		}
+	}
+
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
-}
+	}
 
 func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
