@@ -531,6 +531,13 @@
             /* Larger date inputs on mobile — iOS renders them small */
             input[type="date"] { font-size: 16px; } /* prevents iOS zoom on focus */
         }
+	    .mobile-appearance { display: none; }
+        .desktop-appearance { display: block; }
+
+        @media (max-width: 1000px) {
+            .mobile-appearance { display: block; }
+            .desktop-appearance { display: none; }
+        }
             @keyframes hintPulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
@@ -587,7 +594,40 @@
                  MAIN FORM COLUMN
             ══════════════════════════════════════════════════════ */}}
             <div class="main">
-		
+		{{/* ── Mobile-only Appearance Controls ──
+     Shown above the preview on mobile so users don't have to
+     scroll to the bottom sidebar to toggle logo/title.
+     These have separate IDs from the sidebar toggles.
+     JS syncs both pairs.
+── */}}
+<div class="mobile-appearance" style="
+    background: #0f172a;
+    color: white;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+">
+    <div style="
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.5);
+        margin-bottom: 12px;
+    ">Appearance</div>
+
+    <label class="config-toggle">
+        <span class="config-item-label">Show Logo</span>
+        <input type="checkbox" id="toggle_logo_mobile" {{if .Invoice.ShowLogo}}checked{{end}}>
+        <span class="toggle-slider"><span class="toggle-knob"></span></span>
+    </label>
+
+    <label class="config-toggle" style="margin-bottom:0;">
+        <span class="config-item-label">Show Invoice Title</span>
+        <input type="checkbox" id="toggle_title_mobile" {{if .Invoice.ShowTitle}}checked{{end}}>
+        <span class="toggle-slider"><span class="toggle-knob"></span></span>
+    </label>
+</div>
 		{{/* ── Live Invoice Preview ──
      Mirrors exactly what invoice_detail.tmpl renders at the top.
      Logo and title visibility are controlled by the sidebar toggles.
@@ -1046,7 +1086,7 @@
                     <h2 class="summary-title">Customize Invoice</h2>
 
                     {{/* ── Appearance Toggles ── */}}
-                    <div class="sidebar-section">
+                    <div class="sidebar-section desktop-appearance">
                         <div class="sidebar-section-label">Appearance</div>
 
                         <label class="config-toggle">
@@ -1499,29 +1539,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('invoice-form');
     if (form) form.addEventListener('submit', clearDraft);
 
-    // ── Live toggle preview ───────────────────────────────────────
-    const toggleLogo  = document.getElementById('toggle_logo');
-    const toggleTitle = document.getElementById('toggle_title');
-    const previewLogo  = document.getElementById('preview_logo');
-    const previewTitle = document.getElementById('preview_title');
+        // ── Live toggle preview ───────────────────────────────────────
+    const toggleLogo       = document.getElementById('toggle_logo');
+    const toggleTitle      = document.getElementById('toggle_title');
+    const toggleLogoMob    = document.getElementById('toggle_logo_mobile');
+    const toggleTitleMob   = document.getElementById('toggle_title_mobile');
+    const previewLogo      = document.getElementById('preview_logo');
+    const previewTitle     = document.getElementById('preview_title');
 
-    // Set initial visibility from saved checkbox state
-    if (previewLogo)  previewLogo.style.display  = toggleLogo?.checked  ? 'block'  : 'none';
-    if (previewTitle) previewTitle.style.display  = toggleTitle?.checked ? 'inline' : 'none';
+    function syncLogo(checked) {
+        if (previewLogo)   previewLogo.style.display  = checked ? 'block'  : 'none';
+        if (toggleLogo)    toggleLogo.checked    = checked;
+        if (toggleLogoMob) toggleLogoMob.checked = checked;
+    }
 
-    // Live update on toggle change
-    if (toggleLogo && previewLogo) {
-        toggleLogo.addEventListener('change', function () {
-            previewLogo.style.display = this.checked ? 'block' : 'none';
-        });
+    function syncTitle(checked) {
+        if (previewTitle)   previewTitle.style.display = checked ? 'inline' : 'none';
+        if (toggleTitle)    toggleTitle.checked    = checked;
+        if (toggleTitleMob) toggleTitleMob.checked = checked;
     }
-    if (toggleTitle && previewTitle) {
-        toggleTitle.addEventListener('change', function () {
-            previewTitle.style.display = this.checked ? 'inline' : 'none';
-        });
-    }
-});
-</script>
+
+    // Set initial visibility
+    syncLogo(toggleLogo?.checked || toggleLogoMob?.checked || false);
+    syncTitle(toggleTitle?.checked || toggleTitleMob?.checked || false);
+
+    // Wire both desktop and mobile toggles
+    if (toggleLogo)    toggleLogo.addEventListener('change',    function () { syncLogo(this.checked); });
+    if (toggleLogoMob) toggleLogoMob.addEventListener('change', function () { syncLogo(this.checked); });
+    if (toggleTitle)    toggleTitle.addEventListener('change',    function () { syncTitle(this.checked); });
+    if (toggleTitleMob) toggleTitleMob.addEventListener('change', function () { syncTitle(this.checked); });
+   
+   });
+
+    </script>
 
 </body>
 </html>
