@@ -66,7 +66,12 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/invoices/{id}/send", h.InvoiceSendGet)
 		r.Post("/invoices/{id}/send", h.InvoiceSendPost)
 		r.Get("/invoices/{id}/duplicate", h.InvoiceDuplicateGet)
-	})
 
+		// Recurring invoice management
+		r.Get("/recurring", h.RecurringList)
+		r.Post("/recurring/{id}/pause", h.RecurringPause)
+		r.Post("/recurring/{id}/resume", h.RecurringResume)
+		r.Post("/recurring/{id}/delete", h.RecurringDelete)
+	})
 	return r
 }

@@ -302,3 +302,77 @@ func (r *SchedulerRepo) GetRecurringScheduleByID(ctx context.Context, id int64) 
 	}
 	return &s, nil
 }
+// RecurringScheduleView is a display-friendly version that includes invoice details.
+type RecurringScheduleView struct {
+	ID                int64
+	TemplateInvoiceID int64
+	InvoiceNumber     string
+	ClientName        string
+	Frequency         string
+	SendAutomatically bool
+	Active            bool
+	NextRunAt         time.Time
+	LastRunAt         *time.Time
+}
+
+// ListRecurringByUserID returns all recurring schedules for a user, joined with invoice details.
+func (r *SchedulerRepo) ListRecurringByUserID(ctx context.Context, userID int64) ([]RecurringScheduleView, error) {
+	const q = `
+		SELECT rs.id, rs.template_invoice_id, i.invoice_number, i.client_name,
+		       rs.frequency, rs.send_automatically, rs.active, rs.next_run_at, rs.last_run_at
+		FROM recurring_schedules rs
+		JOIN invoices i ON i.id = rs.template_invoice_id
+		WHERE rs.user_id = $1
+		ORDER BY rs.created_at DESC`
+
+	rows, err := r.db.QueryContext(ctx, q, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var views []RecurringScheduleView
+	for rows.Next() {
+		var v RecurringScheduleView
+		var lastRun sql.NullTime
+		err := rows.Scan(
+			&v.ID, &v.TemplateInvoiceID, &v.InvoiceNumber, &v.ClientName,
+			&v.Frequency, &v.SendAutomatically, &v.Active, &v.NextRunAt, &lastRun,
+		)
+		if err != nil {
+			return nil, err
+		}
+		if lastRun.Valid {
+			v.LastRunAt = &lastRun.Time
+		}
+		views = append(views, v)
+	}
+	return views, rows.Err()
+}
+
+// PauseRecurringSchedule sets active = false.
+func (r *SchedulerRepo) PauseRecurringSchedule(ctx context.Context, id int64, userID int64) error {
+	_, err := r.db.ExecContext(ctx,
+		`UPDATE recurring_schedules SET active = false, updated_at = NOW() WHERE id = $1 AND user_id = $2`,
+		id, userID,
+	)
+	return err
+}
+
+// ResumeRecurringSchedule sets active = true.
+func (r *SchedulerRepo) ResumeRecurringSchedule(ctx context.Context, id int64, userID int64) error {
+	_, err := r.db.ExecContext(ctx,
+		`UPDATE recurring_schedules SET active = true, updated_at = NOW() WHERE id = $1 AND user_id = $2`,
+		id, userID,
+	)
+	return err
+}
+
+// DeleteRecurringScheduleByUser deletes a schedule only if owned by the user.
+func (r *SchedulerRepo) DeleteRecurringScheduleByUser(ctx context.Context, id int64, userID int64) error {
+	_, err := r.db.ExecContext(ctx,
+		`DELETE FROM recurring_schedules WHERE id = $1 AND user_id = $2`,
+		id, userID,
+	)
+	return err
+}

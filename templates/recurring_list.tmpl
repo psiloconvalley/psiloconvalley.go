@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Recurring Invoices | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{template "nav-styles" .}}
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0c1220;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .top h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-white { background: #fff; color: #000; }
+        .btn-white:hover { opacity: 0.85; }
+        .btn-danger { background: #450a0a; color: #fca5a5; }
+        .btn-danger:hover { background: #7f1d1d; }
+        .btn-muted {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-muted:hover { background: rgba(255,255,255,0.1); }
+        .btn-success { background: #14532d; color: #86efac; }
+        .btn-success:hover { background: #166534; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-active  { background: #14532d; color: #86efac; }
+        .badge-paused  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+
+        .freq-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ── Table ── */
+        .table-wrap {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.4);
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .inv-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .inv-link:hover { text-decoration: underline; }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ── Empty state ── */
+        .empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: rgba(255,255,255,0.3);
+        }
+        .empty-icon { font-size: 40px; margin-bottom: 16px; }
+        .empty-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.5);
+        }
+        .empty-sub { font-size: 14px; margin-bottom: 24px; }
+
+        /* ── Info banner ── */
+        .info-banner {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #93c5fd;
+            line-height: 1.5;
+        }
+
+        /* ── Mobile cards ── */
+        .card-list { display: none; }
+
+        @media (max-width: 639px) {
+            .container { padding: 24px 16px 80px; }
+            .top h1 { font-size: 22px; }
+            .table-wrap { display: none; }
+            .card-list { display: flex; flex-direction: column; gap: 10px; }
+
+            .rec-card {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 10px;
+                padding: 16px;
+            }
+            .rec-card-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 8px;
+            }
+            .rec-card-number { font-size: 15px; font-weight: 700; }
+            .rec-card-client {
+                font-size: 13px;
+                color: rgba(255,255,255,0.55);
+                margin-bottom: 12px;
+            }
+            .rec-card-meta {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 12px;
+            }
+            .rec-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+            .rec-card-actions .btn { font-size: 12px; padding: 8px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="container">
+
+    <div class="top">
+        <h1>🔁 Recurring Invoices</h1>
+        <a href="/invoices/new" class="btn btn-white">+ New Invoice</a>
+    </div>
+
+    <div class="info-banner">
+        Recurring invoices are automatically generated and optionally sent to your client on your chosen schedule.
+        To create one, open any invoice and turn on <strong>Make Recurring</strong> in the sidebar.
+    </div>
+
+    {{if not .Schedules}}
+    <div class="empty">
+        <div class="empty-icon">🔁</div>
+        <div class="empty-title">No recurring invoices yet</div>
+        <div class="empty-sub">
+            Create an invoice and turn on "Make Recurring" in the sidebar to get started.
+        </div>
+        <a href="/invoices/new" class="btn btn-white">Create Invoice</a>
+    </div>
+    {{else}}
+
+    {{/* ── DESKTOP TABLE ── */}}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Template Invoice</th>
+                    <th>Client</th>
+                    <th>Frequency</th>
+                    <th>Auto-Send</th>
+                    <th>Next Run</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Schedules}}
+                <tr>
+                    <td>
+                        <a href="/invoices/{{.TemplateInvoiceID}}" class="inv-link">
+                            {{.InvoiceNumber}}
+                        </a>
+                    </td>
+                    <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
+                    <td><span class="freq-badge">{{.Frequency}}</span></td>
+                    <td>{{if .SendAutomatically}}✅{{else}}📝 Draft only{{end}}</td>
+                    <td style="font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.6);">
+                        {{.NextRunAt.Format "Jan 2, 2006"}}
+                    </td>
+                    <td>
+                        {{if .Active}}
+                        <span class="badge badge-active">Active</span>
+                        {{else}}
+                        <span class="badge badge-paused">Paused</span>
+                        {{end}}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            {{if .Active}}
+                            <form method="POST" action="/recurring/{{.ID}}/pause">
+                                {{$.csrfField}}
+                                <button type="submit" class="btn btn-muted">⏸ Pause</button>
+                            </form>
+                            {{else}}
+                            <form method="POST" action="/recurring/{{.ID}}/resume">
+                                {{$.csrfField}}
+                                <button type="submit" class="btn btn-success">▶ Resume</button>
+                            </form>
+                            {{end}}
+                            <form method="POST" action="/recurring/{{.ID}}/delete"
+                                  onsubmit="return confirm('Delete this recurring schedule? This cannot be undone.')">
+                                {{$.csrfField}}
+                                <button type="submit" class="btn btn-danger">🗑 Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    {{/* ── MOBILE CARDS ── */}}
+    <div class="card-list">
+        {{range .Schedules}}
+        <div class="rec-card">
+            <div class="rec-card-top">
+                <a href="/invoices/{{.TemplateInvoiceID}}" class="inv-link rec-card-number">
+                    {{.InvoiceNumber}}
+                </a>
+                {{if .Active}}
+                <span class="badge badge-active">Active</span>
+                {{else}}
+                <span class="badge badge-paused">Paused</span>
+                {{end}}
+            </div>
+            <div class="rec-card-client">
+                {{if .ClientName}}{{.ClientName}}{{else}}No client{{end}}
+            </div>
+            <div class="rec-card-meta">
+                <span class="freq-badge">{{.Frequency}}</span>
+                {{if .SendAutomatically}}
+                <span class="freq-badge">Auto-send ✅</span>
+                {{else}}
+                <span class="freq-badge">Draft only 📝</span>
+                {{end}}
+                <span class="freq-badge" style="color: rgba(255,255,255,0.4);">
+                    Next: {{.NextRunAt.Format "Jan 2, 2006"}}
+                </span>
+            </div>
+            <div class="rec-card-actions">
+                {{if .Active}}
+                <form method="POST" action="/recurring/{{.ID}}/pause">
+                    {{$.csrfField}}
+                    <button type="submit" class="btn btn-muted">⏸ Pause</button>
+                </form>
+                {{else}}
+                <form method="POST" action="/recurring/{{.ID}}/resume">
+                    {{$.csrfField}}
+                    <button type="submit" class="btn btn-success">▶ Resume</button>
+                </form>
+                {{end}}
+                <form method="POST" action="/recurring/{{.ID}}/delete"
+                      onsubmit="return confirm('Delete this recurring schedule?')">
+                    {{$.csrfField}}
+                    <button type="submit" class="btn btn-danger">🗑 Delete</button>
+                </form>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    {{end}}
+</div>
+
+</body>
+</html>
