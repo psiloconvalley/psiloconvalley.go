@@ -291,13 +291,71 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		Status:            "draft",
 	}
 
-	invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
+
+		invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {
 		log.Printf("[invoice] create error: %v", err)
+
+		// Catch duplicate invoice number from DB constraint
+		if strings.Contains(err.Error(), "invoices_invoice_number_key") {
+			dupErrs := []struct {
+				Field   string
+				Message string
+			}{
+				{Field: "invoice_number", Message: "Invoice number already exists. Please choose a different one or leave it blank to auto-generate."},
+			}
+			data := map[string]any{
+				"User":       user,
+				"IsLoggedIn": user != nil,
+				"Mode":       "create",
+				"Currencies": catalog.SupportedCurrencies,
+				"USStates":   catalog.USStates,
+				"Errors":     dupErrs,
+				"Invoice": views.InvoicePage{
+					CompanyName:    inv.CompanyName,
+					CompanyEmail:   inv.CompanyEmail,
+					CompanyAddress: inv.CompanyAddress,
+					CompanyCity:    inv.CompanyCity,
+					CompanyZip:     inv.CompanyZip,
+					CompanyState:   inv.CompanyState,
+					CompanyCountry: inv.CompanyCountry,
+					ClientName:     inv.ClientName,
+					ClientEmail:    inv.ClientEmail,
+					ClientAddress:  inv.ClientAddress,
+					ClientCity:     inv.ClientCity,
+					ClientZip:      inv.ClientZip,
+					ClientState:    inv.ClientState,
+					ClientCountry:  inv.ClientCountry,
+					InvoiceNumber:  inv.InvoiceNumber,
+					Currency:       inv.Currency,
+					Notes:          inv.Notes,
+					PaymentDetails: inv.PaymentDetails,
+					ShowLogo:       inv.ShowLogo,
+					ShowTitle:      inv.ShowTitle,
+					AutoReminders:  inv.AutoReminders,
+					LogoURL: func() string {
+						if user != nil {
+							if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
+								return bp.LogoURL
+							}
+						}
+						return ""
+					}(),
+				},
+			}
+			if user != nil {
+				clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
+				if err == nil && len(clients) > 0 {
+					data["Clients"] = clients
+				}
+			}
+			h.App.Render(w, r, "invoice_new.tmpl", data)
+			return
+		}
+
 		http.Error(w, "Failed to create invoice", http.StatusInternalServerError)
 		return
 	}
-
 	// Increment anon counter after successful save
 	if user == nil {
 		count := auth.GetAnonInvoiceCount(r)
