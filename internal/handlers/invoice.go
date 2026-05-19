@@ -39,15 +39,28 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/pricing?reason=invoice-limit", http.StatusSeeOther)
 		return
 	}
-	data := map[string]any{
-		"User":       user,
-		"IsLoggedIn": user != nil,
-		"Invoice": views.InvoicePage{CompanyCountry: "United States", CompanyState: "California", ClientCountry: "United States", ClientState: "California", ShowLogo: true, ShowTitle: true},
-		"Mode":       "create",
-		"Currencies": catalog.SupportedCurrencies,
-		"USStates":   catalog.USStates,
-	}
-
+	
+    invoiceData := views.InvoicePage{
+    CompanyCountry: "United States",
+    CompanyState:   "California",
+    ClientCountry:  "United States",
+    ClientState:    "California",
+    ShowLogo:       true,
+    ShowTitle:      true,
+}
+if user != nil {
+    if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
+        invoiceData.LogoURL = bp.LogoURL
+    }
+}
+data := map[string]any{
+    "User":       user,
+    "IsLoggedIn": user != nil,
+    "Invoice":    invoiceData,
+    "Mode":       "create",
+    "Currencies": catalog.SupportedCurrencies,
+    "USStates":   catalog.USStates,
+}
 	// Logged-in users get their client dropdown populated
 	if user != nil {
 		clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
@@ -179,8 +192,17 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				PaymentDetails: r.FormValue("payment_details"),
 				ShowLogo:       r.FormValue("show_logo") == "on",
 				ShowTitle:      r.FormValue("show_title") == "on",
-			},
+				LogoURL: func() string {
+					if user != nil {
+						if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
+							return bp.LogoURL
 		}
+	}
+	return ""
+}(),
+},
+
+					}
 		if user != nil {
 			clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
 			if err == nil && len(clients) > 0 {
@@ -404,15 +426,21 @@ func (h *Handlers) InvoiceEditGet(w http.ResponseWriter, r *http.Request) {
 
 	invoiceView := views.MapInvoicePage(inv, items, "edit")
 
+	// Pull logo from business profile if not already on invoice
+	if invoiceView.LogoURL == "" {
+		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
+			invoiceView.LogoURL = bp.LogoURL
+		}
+	}
+
 	h.App.Render(w, r, "invoice_new.tmpl", map[string]any{
-		"Invoice": invoiceView,
-		"IsEdit":  true,
-		"User":    user,
+		"Invoice":    invoiceView,
+		"IsEdit":     true,
+		"User":       user,
 		"USStates":   catalog.USStates,
 		"Currencies": catalog.SupportedCurrencies,
 	})
 }
-
 
 func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
