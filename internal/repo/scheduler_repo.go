@@ -376,3 +376,18 @@ func (r *SchedulerRepo) DeleteRecurringScheduleByUser(ctx context.Context, id in
 	)
 	return err
 }
+// CancelJobsForRecurringSchedule deletes all pending recurring-generation jobs
+// for a given schedule ID.
+func (r *SchedulerRepo) CancelJobsForRecurringSchedule(ctx context.Context, scheduleID int64) (int64, error) {
+	const q = `
+		DELETE FROM scheduled_jobs
+		WHERE status = 'pending'
+		AND job_type = 'generate_recurring_invoice'
+		AND payload->>'schedule_id' = $1::text`
+
+	result, err := r.db.ExecContext(ctx, q, scheduleID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
