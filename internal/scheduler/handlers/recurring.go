@@ -97,15 +97,50 @@ func NewRecurringHandler(
 			if err := m.SendInvoice(templateInv.ClientEmail, emailData, nil, ""); err != nil {
 				log.Printf("[recurring] failed to auto-send invoice %d: %v", newID, err)
 				// Don't return error — invoice was created, just email failed
-			} else {
+
+							} else {
 				log.Printf("[recurring] auto-sent invoice %d to %s", newID, templateInv.ClientEmail)
 				// Mark as sent
 				if templateInv.UserID != nil {
 					_ = invRepo.UpdateInvoiceStatus(ctx, newID, "sent", *templateInv.UserID)
 				}
+				// Schedule reminders if enabled and due date exists
+				if templateInv.AutoReminders && newInv.DueDate != nil {
+					// Cancel any stale reminders first
+					_, _ = schedRepo.CancelJobsForInvoice(ctx, newID)
+					// Schedule fresh reminder set
+					reminderSchedule := []struct {
+						offset       time.Duration
+						reminderType string
+					}{
+						{-3 * 24 * time.Hour, "due_soon"},
+						{0, "due_today"},
+						{3 * 24 * time.Hour, "overdue"},
+						{7 * 24 * time.Hour, "overdue"},
+						{14 * 24 * time.Hour, "overdue"},
+					}
+					for _, rem := range reminderSchedule {
+						runAt := newInv.DueDate.Add(rem.offset)
+						if runAt.Before(time.Now()) {
+							continue
+						}
+						payload := map[string]any{
+							"invoice_id":    newID,
+							"reminder_type": rem.reminderType,
+						}
+						_, err := schedRepo.CreateJob(ctx, "send_reminder", payload, runAt)
+						if err != nil {
+							log.Printf("[recurring] failed to schedule %s reminder for invoice %d: %v",
+								rem.reminderType, newID, err)
+						} else {
+							log.Printf("[recurring] scheduled %s reminder for recurring invoice %d",
+								rem.reminderType, newID)
+						}
+					}
+				}
 			}
 		}
-
+			
 		// Update schedule: advance next_run_at and set last_run_at
 		now := time.Now()
 		sched.LastRunAt = &now

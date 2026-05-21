@@ -148,7 +148,15 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 		inv.InvoiceNumber, toEmail, user.ID)
 
 	// ── Schedule automatic reminders if enabled ──────────────────────
+	// Cancel any existing pending reminders first to prevent duplicates
+	// when the same invoice is sent more than once.
 	if inv.AutoReminders && inv.DueDate != nil {
+		cancelled, err := h.App.SchedulerRepo.CancelJobsForInvoice(r.Context(), inv.ID)
+		if err != nil {
+			log.Printf("[send] warning: failed to cancel existing reminders for invoice %d: %v", inv.ID, err)
+		} else if cancelled > 0 {
+			log.Printf("[send] cleared %d stale reminder jobs for invoice %d before rescheduling", cancelled, inv.ID)
+		}
 		h.scheduleReminders(r.Context(), inv.ID, *inv.DueDate)
 	}
 
