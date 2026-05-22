@@ -853,9 +853,101 @@
                         <span id="demo-total">$0.00</span>
                     </div>
                 </div>
+		
+	            </div>
+
+            <!-- Send animation area -->
+            <div id="demo-send-area" style="
+                padding: 0 32px 24px;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.6s ease, transform 0.6s ease;
+            ">
+                <div style="
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    padding: 16px 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                ">
+                    <div id="demo-send-icon" style="
+                        font-size: 20px;
+                        width: 40px;
+                        height: 40px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: #dbeafe;
+                        border-radius: 10px;
+                        transition: all 0.4s ease;
+                    ">📨</div>
+                    <div>
+                        <div id="demo-send-title" style="
+                            font-size: 13px;
+                            font-weight: 700;
+                            color: #0d1422;
+                            transition: all 0.3s ease;
+                        ">Sending to client...</div>
+                        <div id="demo-send-sub" style="
+                            font-size: 11px;
+                            color: #64748b;
+                            margin-top: 2px;
+                        ">client@globexcorp.com</div>
+                    </div>
+                    <div id="demo-send-progress" style="
+                        margin-left: auto;
+                        width: 80px;
+                        height: 4px;
+                        background: #e2e8f0;
+                        border-radius: 4px;
+                        overflow: hidden;
+                    ">
+                        <div id="demo-send-bar" style="
+                            width: 0%;
+                            height: 100%;
+                            background: linear-gradient(90deg, #3b82f6, #22d3ee);
+                            border-radius: 4px;
+                            transition: width 1.2s ease;
+                        "></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA after demo -->
+            <div id="demo-cta" style="
+                padding: 0 32px 32px;
+                text-align: center;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.6s ease, transform 0.6s ease;
+            ">
+                <a href="/invoices/new" style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #0d1422;
+                    color: #ffffff;
+                    padding: 14px 32px;
+                    border-radius: 10px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    text-decoration: none;
+                    letter-spacing: -0.3px;
+                    transition: all 0.25s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'"
+                   onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'">
+                    Create yours free →
+                </a>
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 10px;">
+                    No signup required · Takes 30 seconds
+                </div>
             </div>
         </div>
-    </section>
+    </section>	
+</section>
 
     <!-- HOW IT WORKS -->
     <section class="steps-section">
@@ -1074,15 +1166,62 @@ function runInvoiceDemo() {
             document.getElementById('demo-subtotal').textContent = '$' + runningTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
             document.getElementById('demo-tax').textContent = '$' + tax.toLocaleString(undefined, {minimumFractionDigits: 2});
             document.getElementById('demo-total').textContent = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
-
-            if (i === demoItems.length - 1) {
+		            if (i === demoItems.length - 1) {
                 setTimeout(() => {
                     status.textContent = 'READY';
                     status.style.background = '#dcfce7';
                     status.style.color = '#15803d';
+
+                    // Beat 2: Send animation
+                    setTimeout(() => {
+                        const sendArea = document.getElementById('demo-send-area');
+                        const sendBar = document.getElementById('demo-send-bar');
+                        const sendIcon = document.getElementById('demo-send-icon');
+                        const sendTitle = document.getElementById('demo-send-title');
+                        const sendSub = document.getElementById('demo-send-sub');
+
+                        if (sendArea) {
+                            sendArea.style.opacity = '1';
+                            sendArea.style.transform = 'translateY(0)';
+                        }
+
+                        // Progress bar fills
+                        setTimeout(() => {
+                            if (sendBar) sendBar.style.width = '100%';
+                        }, 100);
+
+                        // Sent confirmation
+                        setTimeout(() => {
+                            status.textContent = 'SENT';
+                            status.style.background = '#dbeafe';
+                            status.style.color = '#1d4ed8';
+
+                            if (sendIcon) {
+                                sendIcon.textContent = '✅';
+                                sendIcon.style.background = '#dcfce7';
+                            }
+                            if (sendTitle) {
+                                sendTitle.textContent = 'Delivered successfully';
+                                sendTitle.style.color = '#15803d';
+                            }
+                            if (sendSub) {
+                                sendSub.textContent = 'Invoice emailed with PDF attached';
+                            }
+
+                            // Beat 3: CTA appears
+                            setTimeout(() => {
+                                const cta = document.getElementById('demo-cta');
+                                if (cta) {
+                                    cta.style.opacity = '1';
+                                    cta.style.transform = 'translateY(0)';
+                                }
+                            }, 600);
+                        }, 1400);
+                    }, 800);
                 }, 400);
             }
-        }, 800 * (i + 1));
+
+                    }, 800 * (i + 1));
     });
 }
 
