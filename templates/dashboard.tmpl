@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{template "nav-styles" .}}
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0c1220;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+        /* ── Header ── */
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .top h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .top-sub {
+            font-size: 14px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+        }
+        .btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-white { background: #fff; color: #000; }
+        .btn-white:hover { opacity: 0.85; }
+
+        /* ── Stats grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 12px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
+            color: #fff;
+        }
+        .stat-value.green { color: #4ade80; }
+        .stat-value.yellow { color: #fbbf24; }
+        .stat-value.red { color: #f87171; }
+        .stat-sub {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 6px;
+        }
+
+        /* ── Section ── */
+        .section {
+            margin-bottom: 32px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .section-link {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+        }
+        .section-link:hover { color: white; }
+
+        /* ── Table ── */
+        .table-wrap {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.4);
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .inv-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .inv-link:hover { text-decoration: underline; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-draft   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+        .badge-sent    { background: #1e3a5f; color: #93c5fd; }
+        .badge-paid    { background: #14532d; color: #86efac; }
+        .badge-void    { background: #450a0a; color: #fca5a5; }
+        .badge-overdue { background: #431407; color: #fdba74; }
+
+        .right { text-align: right; }
+        .mono { font-variant-numeric: tabular-nums; }
+
+        /* ── Quick actions ── */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        .action-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 20px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .action-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+        .action-icon { font-size: 24px; }
+        .action-title { font-size: 14px; font-weight: 700; }
+        .action-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+        /* ── Pro upgrade banner ── */
+        .upgrade-banner {
+            background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(245,158,11,0.05) 100%);
+            border: 1px solid rgba(251,191,36,0.2);
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+        .upgrade-text { font-size: 14px; color: rgba(255,255,255,0.8); }
+        .upgrade-text strong { color: #fbbf24; }
+        .btn-upgrade {
+            background: #fbbf24;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+            white-space: nowrap;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-upgrade:hover { background: #f59e0b; }
+
+        /* ── Empty state ── */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255,255,255,0.3);
+        }
+        .empty-icon { font-size: 32px; margin-bottom: 12px; }
+        .empty-title { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+        .empty-sub { font-size: 13px; }
+
+        /* ── Mobile ── */
+        @media (max-width: 639px) {
+            .container { padding: 24px 16px 80px; }
+            .top h1 { font-size: 22px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .stat-value { font-size: 22px; }
+            .quick-actions { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 400px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="container">
+
+    <div class="top">
+        <div>
+            <h1>Command Center</h1>
+            <div class="top-sub">Welcome back{{if .User.Name}}, {{.User.Name}}{{end}}</div>
+        </div>
+        <a href="/invoices/new" class="btn btn-white">+ New Invoice</a>
+    </div>
+
+    {{/* ── Upgrade banner for free users ── */}}
+    {{if not .IsPro}}
+    <div class="upgrade-banner">
+        <div class="upgrade-text">
+            <strong>Upgrade to Pro</strong> — Unlock recurring invoices, automatic payment reminders, and unlimited clients.
+        </div>
+        <a href="/pricing" class="btn-upgrade">Upgrade for $8/mo →</a>
+    </div>
+    {{end}}
+
+    {{/* ── Stats ── */}}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">💰 Total Revenue</div>
+            <div class="stat-value green">{{.Revenue}}</div>
+            <div class="stat-sub">From paid invoices</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">📤 Outstanding</div>
+            <div class="stat-value yellow">{{.Outstanding}}</div>
+            <div class="stat-sub">Awaiting payment</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">⚠️ Overdue</div>
+            <div class="stat-value red">{{.Overdue}}</div>
+            <div class="stat-sub">Past due date</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">📋 This Month</div>
+            <div class="stat-value">{{.MonthlyCount}}</div>
+            <div class="stat-sub">{{.TotalCount}} invoices total</div>
+        </div>
+    </div>
+
+    {{/* ── Quick actions ── */}}
+    <div class="quick-actions">
+        <a href="/invoices/new" class="action-card">
+            <span class="action-icon">✏️</span>
+            <div>
+                <div class="action-title">New Invoice</div>
+                <div class="action-sub">Create and send in seconds</div>
+            </div>
+        </a>
+        <a href="/recurring" class="action-card">
+            <span class="action-icon">🔁</span>
+            <div>
+                <div class="action-title">Recurring</div>
+                <div class="action-sub">{{.ActiveRecurring}} active schedule{{if ne .ActiveRecurring 1}}s{{end}}</div>
+            </div>
+        </a>
+        <a href="/clients" class="action-card">
+            <span class="action-icon">👥</span>
+            <div>
+                <div class="action-title">Clients</div>
+                <div class="action-sub">Manage saved clients</div>
+            </div>
+        </a>
+    </div>
+
+    {{/* ── Recent invoices ── */}}
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">Recent Invoices</div>
+            <a href="/invoices" class="section-link">View all →</a>
+        </div>
+
+        {{if .RecentInvoices}}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Client</th>
+                        <th>Status</th>
+                        <th>Due</th>
+                        <th class="right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .RecentInvoices}}
+                    <tr>
+                        <td>
+                            <a href="/invoices/{{.ID}}" class="inv-link">
+                                {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
+                            </a>
+                        </td>
+                        <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
+                        <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+                        <td style="color: rgba(255,255,255,0.5);">
+                            {{if .DueDate}}{{.DueDate}}{{else}}—{{end}}
+                        </td>
+                        <td class="right mono">{{money .TotalCents}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <div class="table-wrap">
+            <div class="empty">
+                <div class="empty-icon">📭</div>
+                <div class="empty-title">No invoices yet</div>
+                <div class="empty-sub">Create your first invoice to get started.</div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1309,3 +1309,39 @@ func (r *InvoiceRepo) DeleteDraftInvoice(
 
 	return tx.Commit()
 }
+// =====================================================================
+// Dashboard Stats
+// =====================================================================
+
+type DashboardStats struct {
+	RevenueCents     int64
+	OutstandingCents int64
+	OverdueCents     int64
+	MonthlyCount     int64
+	TotalCount       int64
+}
+
+func (r *InvoiceRepo) GetDashboardStats(ctx context.Context, userID int64) (*DashboardStats, error) {
+	const q = `
+		SELECT
+			COALESCE(SUM(CASE WHEN status = 'paid' THEN total_cents ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN status = 'sent' THEN total_cents ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN status = 'overdue' THEN total_cents ELSE 0 END), 0),
+			COUNT(CASE WHEN created_at >= date_trunc('month', NOW()) THEN 1 END),
+			COUNT(*)
+		FROM invoices
+		WHERE user_id = $1`
+
+	var s DashboardStats
+	err := r.db.QueryRowContext(ctx, q, userID).Scan(
+		&s.RevenueCents,
+		&s.OutstandingCents,
+		&s.OverdueCents,
+		&s.MonthlyCount,
+		&s.TotalCount,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &s, nil
+}

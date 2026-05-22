@@ -59,6 +59,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Post("/clients/new", h.ClientNewPost)
 
 		// Invoice management (requires login)
+		r.Get("/dashboard", h.DashboardGet)
 		r.Get("/invoices", h.InvoicesList)
 		r.Get("/invoices/{id}/edit", h.InvoiceEditGet)
 		r.Post("/invoices/{id}/edit", h.InvoiceUpdatePost)
