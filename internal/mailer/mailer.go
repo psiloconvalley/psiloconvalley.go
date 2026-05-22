@@ -49,14 +49,14 @@ func New() *Mailer {
 // =====================================================================
 
 type InvoiceEmailData struct {
-	InvoiceNumber  string
-	ClientName     string
-	CompanyName    string
-	Total          string
-	Currency       string
-	DueDate        string
-	InvoiceURL     string
-	PersonalNote   string
+	InvoiceNumber string
+	ClientName    string
+	CompanyName   string
+	Total         string
+	Currency      string
+	DueDate       string
+	InvoiceURL    string
+	PersonalNote  string
 }
 
 func (m *Mailer) SendInvoice(
@@ -119,69 +119,69 @@ var emailTemplate = template.Must(template.New("invoice_email").Parse(`
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice {{.InvoiceNumber}}</title>
 </head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Courier New',monospace;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 20px;">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
-          <!-- Header -->
+          <!-- Logo / Brand -->
           <tr>
-            <td style="padding:0 0 32px 0;">
-              <p style="margin:0;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#444;">
-                PSILOCONVALLEY // INVOICE SYSTEM
+            <td style="padding:0 0 24px 0;text-align:center;">
+              <p style="margin:0;font-size:14px;font-weight:700;letter-spacing:1px;color:#1f2937;">
+                PSILOCONVALLEY
               </p>
             </td>
           </tr>
 
           <!-- Main Card -->
           <tr>
-            <td style="background:#111;border:1px solid #222;border-radius:4px;overflow:hidden;">
+            <td style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
 
               <!-- Top accent -->
-              <div style="height:3px;background:#fff;"></div>
+              <div style="height:4px;background:linear-gradient(90deg,#4ade80,#22d3ee,#818cf8);"></div>
 
               <!-- Body -->
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="padding:36px 40px;">
+                  <td style="padding:40px 40px 32px;">
 
-                    <!-- Invoice number -->
-                    <p style="margin:0 0 8px 0;font-size:10px;letter-spacing:3px;
-                               text-transform:uppercase;color:#444;">
+                    <!-- Invoice label + number -->
+                    <p style="margin:0 0 6px 0;font-size:11px;letter-spacing:2px;
+                               text-transform:uppercase;color:#9ca3af;font-weight:600;">
                       INVOICE
                     </p>
-                    <p style="margin:0 0 32px 0;font-size:28px;font-weight:700;
-                               color:#fff;letter-spacing:-1px;">
+                    <p style="margin:0 0 28px 0;font-size:26px;font-weight:800;
+                               color:#111827;letter-spacing:-0.5px;">
                       {{.InvoiceNumber}}
                     </p>
 
                     <!-- Greeting -->
-                    <p style="margin:0 0 24px 0;font-size:14px;color:#aaa;line-height:1.6;">
+                    <p style="margin:0 0 20px 0;font-size:15px;color:#374151;line-height:1.6;">
                       Hi {{.ClientName}},
                     </p>
 
-                    <p style="margin:0 0 32px 0;font-size:14px;color:#aaa;line-height:1.6;">
+                    <p style="margin:0 0 28px 0;font-size:15px;color:#374151;line-height:1.6;">
                       {{.CompanyName}} has sent you an invoice.
-                      {{if .PersonalNote}}{{.PersonalNote}}{{end}}
+                      {{if .PersonalNote}}<br><br><em style="color:#6b7280;">{{.PersonalNote}}</em>{{end}}
                     </p>
 
                     <!-- Amount block -->
                     <table width="100%" cellpadding="0" cellspacing="0"
-                           style="background:#0a0a0a;border:1px solid #1a1a1a;
-                                  border-radius:4px;margin-bottom:32px;">
+                           style="background:#f9fafb;border:1px solid #e5e7eb;
+                                  border-radius:10px;margin-bottom:28px;">
                       <tr>
                         <td style="padding:24px 28px;">
-                          <p style="margin:0 0 4px 0;font-size:9px;letter-spacing:2px;
-                                     text-transform:uppercase;color:#444;">
+                          <p style="margin:0 0 6px 0;font-size:10px;letter-spacing:2px;
+                                     text-transform:uppercase;color:#9ca3af;font-weight:600;">
                             AMOUNT DUE
                           </p>
-                          <p style="margin:0 0 16px 0;font-size:32px;font-weight:700;
-                                     color:#fff;letter-spacing:-1px;">
+                          <p style="margin:0 0 12px 0;font-size:36px;font-weight:800;
+                                     color:#111827;letter-spacing:-1px;">
                             {{.Currency}} {{.Total}}
                           </p>
                           {{if .DueDate}}
-                          <p style="margin:0;font-size:12px;color:#666;">
+                          <p style="margin:0;font-size:13px;color:#6b7280;">
                             Due: {{.DueDate}}
                           </p>
                           {{end}}
@@ -190,37 +190,39 @@ var emailTemplate = template.Must(template.New("invoice_email").Parse(`
                     </table>
 
                     <!-- CTA Button -->
-                    <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                    <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;" width="100%">
                       <tr>
-                        <td style="background:#fff;border-radius:4px;">
+                        <td align="center">
                           <a href="{{.InvoiceURL}}"
-                             style="display:inline-block;padding:14px 32px;
-                                    font-family:'Courier New',monospace;
-                                    font-size:12px;font-weight:700;
-                                    letter-spacing:2px;text-transform:uppercase;
-                                    color:#000;text-decoration:none;">
-                            VIEW INVOICE →
+                             style="display:inline-block;padding:14px 40px;
+                                    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+                                    font-size:14px;font-weight:700;
+                                    color:#ffffff;text-decoration:none;
+                                    background:#111827;border-radius:8px;
+                                    letter-spacing:0.3px;">
+                            View Invoice →
                           </a>
                         </td>
                       </tr>
                     </table>
 
                     <!-- PDF note -->
-                    <p style="margin:0 0 32px 0;font-size:12px;color:#555;line-height:1.6;">
+                    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;text-align:center;">
                       A PDF copy of this invoice is attached to this email.
                     </p>
 
-                    <!-- Divider -->
-                    <div style="border-top:1px solid #1a1a1a;margin-bottom:24px;"></div>
+                  </td>
+                </tr>
+              </table>
 
-                    <!-- Footer note -->
-                    <p style="margin:0;font-size:11px;color:#444;line-height:1.6;">
-                      Sent via PsiloConValley — Global invoicing for borderless operators.<br>
-                      <a href="{{.InvoiceURL}}" style="color:#666;">
-                        {{.InvoiceURL}}
-                      </a>
+              <!-- Footer inside card -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:20px 40px;border-top:1px solid #f3f4f6;">
+                    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;">
+                      Sent via <a href="https://psiloconvalley.com" style="color:#6b7280;text-decoration:none;font-weight:600;">PsiloConValley</a>
+                       — Professional invoicing for modern operators.
                     </p>
-
                   </td>
                 </tr>
               </table>
@@ -228,12 +230,13 @@ var emailTemplate = template.Must(template.New("invoice_email").Parse(`
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Outer footer -->
           <tr>
-            <td style="padding:24px 0 0 0;">
-              <p style="margin:0;font-size:9px;letter-spacing:2px;
-                         text-transform:uppercase;color:#333;text-align:center;">
-                PSILOCONVALLEY.COM // ENCRYPTED CONNECTION
+            <td style="padding:24px 0 0 0;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#9ca3af;">
+                <a href="{{.InvoiceURL}}" style="color:#9ca3af;text-decoration:none;">
+                  {{.InvoiceURL}}
+                </a>
               </p>
             </td>
           </tr>
@@ -253,6 +256,7 @@ func renderEmailTemplate(data InvoiceEmailData) (string, error) {
 	}
 	return buf.String(), nil
 }
+
 // =====================================================================
 // SendReminder
 // Sends payment reminder email to client — no PDF attachment
@@ -321,71 +325,109 @@ var reminderTemplate = template.Must(template.New("reminder_email").Parse(`
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment Reminder — {{.InvoiceNumber}}</title>
 </head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Courier New',monospace;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 20px;">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
+          <!-- Logo / Brand -->
           <tr>
-            <td style="padding:0 0 32px 0;">
-              <p style="margin:0;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#444;">
-                PSILOCONVALLEY // PAYMENT REMINDER
+            <td style="padding:0 0 24px 0;text-align:center;">
+              <p style="margin:0;font-size:14px;font-weight:700;letter-spacing:1px;color:#1f2937;">
+                PSILOCONVALLEY
               </p>
             </td>
           </tr>
 
+          <!-- Main Card -->
           <tr>
-            <td style="background:#111;border:1px solid #222;border-radius:4px;overflow:hidden;">
+            <td style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
 
+              <!-- Top accent — color changes by urgency -->
               {{if eq .ReminderType "overdue"}}
-              <div style="height:3px;background:#dc2626;"></div>
+              <div style="height:4px;background:linear-gradient(90deg,#ef4444,#f97316);"></div>
               {{else if eq .ReminderType "due_today"}}
-              <div style="height:3px;background:#f59e0b;"></div>
+              <div style="height:4px;background:linear-gradient(90deg,#f59e0b,#eab308);"></div>
               {{else}}
-              <div style="height:3px;background:#fff;"></div>
+              <div style="height:4px;background:linear-gradient(90deg,#4ade80,#22d3ee);"></div>
               {{end}}
 
+              <!-- Body -->
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="padding:36px 40px;">
+                  <td style="padding:40px 40px 32px;">
 
-                    <p style="margin:0 0 8px 0;font-size:10px;letter-spacing:3px;
-                               text-transform:uppercase;color:#444;">
-                      {{if eq .ReminderType "overdue"}}OVERDUE NOTICE
-                      {{else if eq .ReminderType "due_today"}}DUE TODAY
-                      {{else}}UPCOMING PAYMENT{{end}}
+                    <!-- Urgency badge -->
+                    {{if eq .ReminderType "overdue"}}
+                    <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                      <tr>
+                        <td style="background:#fef2f2;border:1px solid #fecaca;border-radius:20px;padding:6px 14px;">
+                          <p style="margin:0;font-size:11px;font-weight:700;color:#dc2626;letter-spacing:0.5px;">
+                            ⚠️ OVERDUE — {{.DaysOverdue}} DAYS PAST DUE
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    {{else if eq .ReminderType "due_today"}}
+                    <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                      <tr>
+                        <td style="background:#fffbeb;border:1px solid #fde68a;border-radius:20px;padding:6px 14px;">
+                          <p style="margin:0;font-size:11px;font-weight:700;color:#d97706;letter-spacing:0.5px;">
+                            📅 DUE TODAY
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    {{else}}
+                    <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                      <tr>
+                        <td style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:6px 14px;">
+                          <p style="margin:0;font-size:11px;font-weight:700;color:#16a34a;letter-spacing:0.5px;">
+                            🔔 UPCOMING PAYMENT
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    {{end}}
+
+                    <!-- Invoice label + number -->
+                    <p style="margin:0 0 6px 0;font-size:11px;letter-spacing:2px;
+                               text-transform:uppercase;color:#9ca3af;font-weight:600;">
+                      INVOICE
                     </p>
-                    <p style="margin:0 0 32px 0;font-size:28px;font-weight:700;
-                               color:#fff;letter-spacing:-1px;">
+                    <p style="margin:0 0 28px 0;font-size:26px;font-weight:800;
+                               color:#111827;letter-spacing:-0.5px;">
                       {{.InvoiceNumber}}
                     </p>
 
-                    <p style="margin:0 0 24px 0;font-size:14px;color:#aaa;line-height:1.6;">
+                    <!-- Greeting -->
+                    <p style="margin:0 0 20px 0;font-size:15px;color:#374151;line-height:1.6;">
                       Hi {{.ClientName}},
                     </p>
 
-                    <p style="margin:0 0 32px 0;font-size:14px;color:#aaa;line-height:1.6;">
-                      {{if eq .ReminderType "overdue"}}This is a friendly reminder that invoice {{.InvoiceNumber}} from {{.CompanyName}} is {{.DaysOverdue}} days past due.
-                      {{else if eq .ReminderType "due_today"}}This is a reminder that invoice {{.InvoiceNumber}} from {{.CompanyName}} is due today.
-                      {{else}}This is a friendly reminder that invoice {{.InvoiceNumber}} from {{.CompanyName}} is due soon.{{end}}
+                    <p style="margin:0 0 28px 0;font-size:15px;color:#374151;line-height:1.6;">
+                      {{if eq .ReminderType "overdue"}}This is a friendly reminder that invoice <strong>{{.InvoiceNumber}}</strong> from <strong>{{.CompanyName}}</strong> is {{.DaysOverdue}} days past due.
+                      {{else if eq .ReminderType "due_today"}}This is a reminder that invoice <strong>{{.InvoiceNumber}}</strong> from <strong>{{.CompanyName}}</strong> is due today.
+                      {{else}}This is a friendly heads-up that invoice <strong>{{.InvoiceNumber}}</strong> from <strong>{{.CompanyName}}</strong> is due soon.{{end}}
                     </p>
 
+                    <!-- Amount block -->
                     <table width="100%" cellpadding="0" cellspacing="0"
-                           style="background:#0a0a0a;border:1px solid #1a1a1a;
-                                  border-radius:4px;margin-bottom:32px;">
+                           style="background:#f9fafb;border:1px solid #e5e7eb;
+                                  border-radius:10px;margin-bottom:28px;">
                       <tr>
                         <td style="padding:24px 28px;">
-                          <p style="margin:0 0 4px 0;font-size:9px;letter-spacing:2px;
-                                     text-transform:uppercase;color:#444;">
+                          <p style="margin:0 0 6px 0;font-size:10px;letter-spacing:2px;
+                                     text-transform:uppercase;color:#9ca3af;font-weight:600;">
                             AMOUNT DUE
                           </p>
-                          <p style="margin:0 0 16px 0;font-size:32px;font-weight:700;
-                                     color:#fff;letter-spacing:-1px;">
+                          <p style="margin:0 0 12px 0;font-size:36px;font-weight:800;
+                                     color:#111827;letter-spacing:-1px;">
                             {{.Currency}} {{.Total}}
                           </p>
                           {{if .DueDate}}
-                          <p style="margin:0;font-size:12px;color:#666;">
+                          <p style="margin:0;font-size:13px;color:#6b7280;">
                             Due: {{.DueDate}}
                           </p>
                           {{end}}
@@ -393,32 +435,40 @@ var reminderTemplate = template.Must(template.New("reminder_email").Parse(`
                       </tr>
                     </table>
 
-                    <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                    <!-- CTA Button -->
+                    <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;" width="100%">
                       <tr>
-                        <td style="background:#fff;border-radius:4px;">
+                        <td align="center">
                           <a href="{{.InvoiceURL}}"
-                             style="display:inline-block;padding:14px 32px;
-                                    font-family:'Courier New',monospace;
-                                    font-size:12px;font-weight:700;
-                                    letter-spacing:2px;text-transform:uppercase;
-                                    color:#000;text-decoration:none;">
-                            VIEW INVOICE →
+                             style="display:inline-block;padding:14px 40px;
+                                    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+                                    font-size:14px;font-weight:700;
+                                    color:#ffffff;text-decoration:none;
+                                    background:#111827;border-radius:8px;
+                                    letter-spacing:0.3px;">
+                            View Invoice →
                           </a>
                         </td>
                       </tr>
                     </table>
 
-                    <p style="margin:0 0 32px 0;font-size:12px;color:#555;line-height:1.6;">
+                    <!-- Dismissal note -->
+                    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;text-align:center;">
                       If you have already made this payment, please disregard this message.
                     </p>
 
-                    <div style="border-top:1px solid #1a1a1a;margin-bottom:24px;"></div>
+                  </td>
+                </tr>
+              </table>
 
-                    <p style="margin:0;font-size:11px;color:#444;line-height:1.6;">
-                      Sent via PsiloConValley — Global invoicing for borderless operators.<br>
-                      <a href="{{.InvoiceURL}}" style="color:#666;">{{.InvoiceURL}}</a>
+              <!-- Footer inside card -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:20px 40px;border-top:1px solid #f3f4f6;">
+                    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;">
+                      Sent via <a href="https://psiloconvalley.com" style="color:#6b7280;text-decoration:none;font-weight:600;">PsiloConValley</a>
+                       — Professional invoicing for modern operators.
                     </p>
-
                   </td>
                 </tr>
               </table>
@@ -426,11 +476,13 @@ var reminderTemplate = template.Must(template.New("reminder_email").Parse(`
             </td>
           </tr>
 
+          <!-- Outer footer -->
           <tr>
-            <td style="padding:24px 0 0 0;">
-              <p style="margin:0;font-size:9px;letter-spacing:2px;
-                         text-transform:uppercase;color:#333;text-align:center;">
-                PSILOCONVALLEY.COM // AUTOMATED REMINDER
+            <td style="padding:24px 0 0 0;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#9ca3af;">
+                <a href="{{.InvoiceURL}}" style="color:#9ca3af;text-decoration:none;">
+                  {{.InvoiceURL}}
+                </a>
               </p>
             </td>
           </tr>
@@ -450,6 +502,7 @@ func renderReminderTemplate(data ReminderEmailData) (string, error) {
 	}
 	return buf.String(), nil
 }
+
 // APIKey returns the Resend API key for external use (e.g., feedback handler)
 func (m *Mailer) APIKey() string {
 	if m == nil {
