@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"net/url"
 
 	"github.com/go-chi/chi/v5"
 
@@ -160,10 +161,10 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 		h.scheduleReminders(r.Context(), inv.ID, *inv.DueDate)
 	}
 
-	http.Redirect(w, r,
-		fmt.Sprintf("/invoices/%d?sent=true", id),
-		http.StatusSeeOther,
-	)
+http.Redirect(w, r,
+	fmt.Sprintf("/invoices/%d?sent=true&to=%s", id, url.QueryEscape(toEmail)),
+	http.StatusSeeOther,
+)
 }
 
 

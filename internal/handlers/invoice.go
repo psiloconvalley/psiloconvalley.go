@@ -421,9 +421,11 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 	invoiceView := views.MapInvoicePage(inv, items, "view")
 
 	h.App.Render(w, r, "invoice_detail.tmpl", map[string]any{
-		"Invoice":    invoiceView,
-		"IsLoggedIn": auth.GetUser(r) != nil,
-	})
+    "Invoice":    invoiceView,
+    "IsLoggedIn": auth.GetUser(r) != nil,
+    "Sent":       r.URL.Query().Get("sent") == "true",
+    "SentTo":     r.URL.Query().Get("to"),
+})
 }
 
 func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
