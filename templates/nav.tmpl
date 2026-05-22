@@ -13,16 +13,12 @@
         </button>
 
         <div class="nav-links" id="nav-links">
-            <a href="/tools">Tools</a>
-            <a href="/research">Research</a>
-	    <a href="/pricing">Pricing</a>
-            <a href="/invoices/new">New Invoice</a>
-
             {{if .User}}
-		<a href="/dashboard">Dashboard</a>
+                <a href="/dashboard">Dashboard</a>
                 <a href="/invoices">Invoices</a>
-		<a href="/recurring">Recurring</a>
+                <a href="/recurring">Recurring</a>
                 <a href="/clients">Clients</a>
+                <a href="/pricing">Pricing</a>
                 <a href="/profile">Profile</a>
 
                 <form method="POST" action="/logout">
@@ -30,6 +26,10 @@
                     <button type="submit" class="nav-logout">Logout</button>
                 </form>
             {{else}}
+                <a href="/tools">Tools</a>
+                <a href="/research">Research</a>
+                <a href="/pricing">Pricing</a>
+                <a href="/invoices/new">New Invoice</a>
                 <a href="/login">Login</a>
                 <a href="/register" class="nav-cta">Sign Up</a>
             {{end}}
@@ -37,7 +37,6 @@
     </div>
 </nav>
 
-<!-- Load the external JS after the nav HTML -->
 <script src="/static/js/nav.js" defer></script>
 {{end}}
 
