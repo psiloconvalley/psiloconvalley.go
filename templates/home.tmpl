@@ -798,6 +798,64 @@
             </div>
         </div>
     </div>
+    <!-- LIVE DEMO -->
+    <section class="demo-section reveal">
+        <p class="section-title">See it in action</p>
+        <h2 class="section-headline">Your invoice, generated instantly</h2>
+
+        <div class="demo-card" id="demo-invoice">
+            <div class="demo-accent"></div>
+            <div class="demo-header">
+                <div>
+                    <div class="demo-title">INVOICE</div>
+                    <div class="demo-number">#INV-2026-001</div>
+                </div>
+                <div class="demo-badge" id="demo-status">GENERATING...</div>
+            </div>
+            <div class="demo-addresses">
+                <div>
+                    <div class="demo-addr-label">From</div>
+                    <div class="demo-addr-name">Your Company</div>
+                    <div class="demo-addr-line">123 Innovation Way<br>San Francisco, CA 94103</div>
+                </div>
+                <div>
+                    <div class="demo-addr-label">Bill To</div>
+                    <div class="demo-addr-name">Client Name</div>
+                    <div class="demo-addr-line">456 Enterprise Dr<br>Austin, TX 73301</div>
+                </div>
+            </div>
+            <div class="demo-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="right">Qty</th>
+                            <th class="right">Price</th>
+                            <th class="right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="demo-items-body">
+                    </tbody>
+                </table>
+            </div>
+            <div class="demo-total-row">
+                <div class="demo-total-box">
+                    <div class="demo-total-line">
+                        <span>Subtotal</span>
+                        <span id="demo-subtotal">$0.00</span>
+                    </div>
+                    <div class="demo-total-line">
+                        <span>Tax (8.5%)</span>
+                        <span id="demo-tax">$0.00</span>
+                    </div>
+                    <div class="demo-total-line grand">
+                        <span>Total</span>
+                        <span id="demo-total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- HOW IT WORKS -->
     <section class="steps-section">
@@ -966,6 +1024,80 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
     revealObserver.observe(el);
 });
+// ── Live Invoice Demo ─────────────────────────────────────────────
+const demoItems = [
+    { desc: 'Website Redesign', qty: 1, price: 3500 },
+    { desc: 'SEO Optimization', qty: 1, price: 1200 },
+    { desc: 'Monthly Hosting', qty: 12, price: 49 },
+];
+
+function runInvoiceDemo() {
+    const tbody = document.getElementById('demo-items-body');
+    const status = document.getElementById('demo-status');
+    if (!tbody || !status) return;
+
+    tbody.innerHTML = '';
+    status.textContent = 'GENERATING...';
+    status.style.background = '#fef3c7';
+    status.style.color = '#854d0e';
+
+    document.getElementById('demo-subtotal').textContent = '$0.00';
+    document.getElementById('demo-tax').textContent = '$0.00';
+    document.getElementById('demo-total').textContent = '$0.00';
+
+    let runningTotal = 0;
+    const taxRate = 0.085;
+
+    demoItems.forEach((item, i) => {
+        setTimeout(() => {
+            const amount = item.qty * item.price;
+            runningTotal += amount;
+            const tax = runningTotal * taxRate;
+            const total = runningTotal + tax;
+
+            const tr = document.createElement('tr');
+            tr.className = 'demo-row-animate';
+            tr.innerHTML = `
+                <td><span class="demo-item-desc">${item.desc}</span></td>
+                <td class="right">${item.qty}</td>
+                <td class="right">$${item.price.toLocaleString()}</td>
+                <td class="right">$${amount.toLocaleString()}</td>
+            `;
+            tbody.appendChild(tr);
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    tr.classList.add('show');
+                });
+            });
+
+            document.getElementById('demo-subtotal').textContent = '$' + runningTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('demo-tax').textContent = '$' + tax.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('demo-total').textContent = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+            if (i === demoItems.length - 1) {
+                setTimeout(() => {
+                    status.textContent = 'READY';
+                    status.style.background = '#dcfce7';
+                    status.style.color = '#15803d';
+                }, 400);
+            }
+        }, 800 * (i + 1));
+    });
+}
+
+// Run demo when it scrolls into view
+const demoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.dataset.played) {
+            entry.target.dataset.played = 'true';
+            setTimeout(runInvoiceDemo, 300);
+        }
+    });
+}, { threshold: 0.3 });
+
+const demoEl = document.getElementById('demo-invoice');
+if (demoEl) demoObserver.observe(demoEl);
     const canvas = document.getElementById("mycelium-canvas");
     const ctx = canvas.getContext("2d");
     let width = (canvas.width = window.innerWidth);
