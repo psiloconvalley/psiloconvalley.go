@@ -3,16 +3,14 @@ package handlers
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
+	"psiloconvalley/internal/logo"
 	"psiloconvalley/internal/repo"
 )
 
@@ -84,68 +82,48 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ============================================================
-	// Logo Upload Handling
+	// Logo Upload Handling — Top Class
+	// Validates, resizes to 200px height (Lanczos3), stores as PNG
 	// ============================================================
 
-	file, header, err := r.FormFile("logo")
+	file, _, err := r.FormFile("logo")
 	if err == nil {
 		defer file.Close()
 
-		// Validate extension
-		ext := strings.ToLower(filepath.Ext(header.Filename))
-
-		allowed := map[string]bool{
-			".png":  true,
-			".jpg":  true,
-			".jpeg": true,
-			".webp": true,
-			".svg":  true,
-		}
-
-		if !allowed[ext] {
+		// Read all bytes — needed for content-type detection and processing
+		rawBytes, err := io.ReadAll(file)
+		if err != nil {
+			log.Printf("logo read error: %v", err)
 			h.App.Render(w, r, "profile.tmpl", map[string]any{
 				"Profile":    p,
-				"Error":      "Unsupported image format. Use PNG, JPG, WEBP, or SVG.",
+				"Error":      "Could not read uploaded file.",
 				"Currencies": catalog.SupportedCurrencies,
 			})
 			return
 		}
 
-		// Ensure upload directory exists
-		uploadDir := filepath.Join("static", "uploads", "logos")
-
-		if err := os.MkdirAll(uploadDir, 0755); err != nil {
-			log.Printf("mkdir error: %v", err)
-
-			http.Error(w, "Could not prepare upload directory", http.StatusInternalServerError)
+		// Process: validate, resize, encode to PNG
+		processed, err := logo.Process(rawBytes)
+		if err != nil {
+			log.Printf("logo process error: %v", err)
+			h.App.Render(w, r, "profile.tmpl", map[string]any{
+				"Profile":    p,
+				"Error":      "Invalid image: " + err.Error(),
+				"Currencies": catalog.SupportedCurrencies,
+			})
 			return
 		}
 
-		// Stable filename per user
-		filename := fmt.Sprintf("logo-user-%d%s", user.ID, ext)
-
-		dstPath := filepath.Join(uploadDir, filename)
-
-		dst, err := os.Create(dstPath)
+		// Store and get public URL
+		publicURL, err := h.App.LogoStore.Save(user.ID, processed)
 		if err != nil {
-			log.Printf("logo create error: %v", err)
-
+			log.Printf("logo store error: %v", err)
 			http.Error(w, "Could not save logo", http.StatusInternalServerError)
 			return
 		}
-		defer dst.Close()
 
-		if _, err := io.Copy(dst, file); err != nil {
-			log.Printf("logo write error: %v", err)
-
-			http.Error(w, "Could not write logo", http.StatusInternalServerError)
-			return
-		}
-
-		// Public URL
-		p.LogoURL = "/static/uploads/logos/" + filename
-
-		log.Printf("uploaded logo for user %d: %s", user.ID, p.LogoURL)
+		p.LogoURL = publicURL
+		log.Printf("[logo] saved for user %d: %s", user.ID, p.LogoURL)
 	}
 
 	// ============================================================

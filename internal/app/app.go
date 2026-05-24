@@ -13,25 +13,26 @@ import (
 	"github.com/justinas/nosurf"
 	"github.com/stripe/stripe-go/v81"
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/logo"
 	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
-	"psiloconvalley/internal/util"
 	"psiloconvalley/internal/scheduler"
-schedulerhandlers	"psiloconvalley/internal/scheduler/handlers"
-
+	schedulerhandlers "psiloconvalley/internal/scheduler/handlers"
+	"psiloconvalley/internal/util"
 )
 
 type App struct {
-	Templates   *template.Template
-	InvRepo     *repo.InvoiceRepo
-	ClientRepo  *repo.ClientRepo
-	BizRepo     *repo.BusinessRepo
-	UserRepo    *repo.UserRepo
-	Mailer      *mailer.Mailer
-	BaseURL     string
-	StripePrice string
+	Templates     *template.Template
+	InvRepo       *repo.InvoiceRepo
+	ClientRepo    *repo.ClientRepo
+	BizRepo       *repo.BusinessRepo
+	UserRepo      *repo.UserRepo
+	Mailer        *mailer.Mailer
+	BaseURL       string
+	StripePrice   string
 	SchedulerRepo *repo.SchedulerRepo
 	Scheduler     *scheduler.Scheduler
+	LogoStore     logo.Store
 }
 
 func NewApp(db *sql.DB) *App {
@@ -40,8 +41,7 @@ func NewApp(db *sql.DB) *App {
 		"formatCents":  util.FormatCentsForInput,
 		"bpsToPercent": util.BpsToPercent,
 		"field":        field,
-		"mul": func(a, b int) int { return a * b },
-
+		"mul":          func(a, b int) int { return a * b },
 	}
 
 	// Using ParseGlob during migration (easier than embed for now)
@@ -75,18 +75,34 @@ func NewApp(db *sql.DB) *App {
 		mailer.New(),
 		baseURL,
 	))
+
 	return &App{
-		Templates:   t,
-		InvRepo:     repo.NewInvoiceRepo(db),
-		ClientRepo:  repo.NewClientRepo(db),
-		BizRepo:     repo.NewBusinessRepo(db),
-		UserRepo:    repo.NewUserRepo(db),
-		Mailer:      mailer.New(),
-		BaseURL:     baseURL,
-		StripePrice: stripePrice,
+		Templates:     t,
+		InvRepo:       repo.NewInvoiceRepo(db),
+		ClientRepo:    repo.NewClientRepo(db),
+		BizRepo:       repo.NewBusinessRepo(db),
+		UserRepo:      repo.NewUserRepo(db),
+		Mailer:        mailer.New(),
+		BaseURL:       baseURL,
+		StripePrice:   stripePrice,
 		SchedulerRepo: schedRepo,
 		Scheduler:     sched,
+		LogoStore:     newLogoStore(baseURL),
 	}
+}
+
+// newLogoStore selects the logo backend based on LOGO_STORAGE env var.
+// LOGO_STORAGE=supabase → SupabaseStore (production)
+// anything else         → LocalStore    (default / development)
+func newLogoStore(baseURL string) logo.Store {
+	if os.Getenv("LOGO_STORAGE") == "supabase" {
+		store, err := logo.NewSupabaseStore()
+		if err != nil {
+			log.Fatalf("supabase store init: %v", err)
+		}
+		return store
+	}
+	return logo.NewLocalStore("static/uploads/logos", baseURL)
 }
 
 func field(v any) string {

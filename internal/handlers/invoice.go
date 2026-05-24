@@ -4,10 +4,13 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -39,30 +42,28 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/pricing?reason=invoice-limit", http.StatusSeeOther)
 		return
 	}
-	
-    invoiceData := views.InvoicePage{
-    CompanyCountry: "United States",
-    CompanyState:   "California",
-    ClientCountry:  "United States",
-    ClientState:    "California",
-    ShowLogo:       true,
-    ShowTitle:      true,
 
-
-}
-if user != nil {
-    if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
-        invoiceData.LogoURL = bp.LogoURL
-    }
-}
-data := map[string]any{
-    "User":       user,
-    "IsLoggedIn": user != nil,
-    "Invoice":    invoiceData,
-    "Mode":       "create",
-    "Currencies": catalog.SupportedCurrencies,
-    "USStates":   catalog.USStates,
-}
+	invoiceData := views.InvoicePage{
+		CompanyCountry: "United States",
+		CompanyState:   "California",
+		ClientCountry:  "United States",
+		ClientState:    "California",
+		ShowLogo:       true,
+		ShowTitle:      true,
+	}
+	if user != nil {
+		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
+			invoiceData.LogoURL = bp.LogoURL
+		}
+	}
+	data := map[string]any{
+		"User":       user,
+		"IsLoggedIn": user != nil,
+		"Invoice":    invoiceData,
+		"Mode":       "create",
+		"Currencies": catalog.SupportedCurrencies,
+		"USStates":   catalog.USStates,
+	}
 	// Logged-in users get their client dropdown populated
 	if user != nil {
 		clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
@@ -199,13 +200,12 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 					if user != nil {
 						if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
 							return bp.LogoURL
-		}
-	}
-	return ""
-}(),
-},
-
+						}
 					}
+					return ""
+				}(),
+			},
+		}
 		if user != nil {
 			clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
 			if err == nil && len(clients) > 0 {
@@ -240,8 +240,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	// ── Appearance toggles ───────────────────────────────────────────
 	showLogo := r.FormValue("show_logo") == "on"
 	showTitle := r.FormValue("show_title") == "on"
-	autoReminders :=  r.FormValue("auto_reminders") == "on"
-
+	autoReminders := r.FormValue("auto_reminders") == "on"
 
 	// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
@@ -260,39 +259,38 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	inv := &repo.Invoice{
-		UserID:            userID,
-		BusinessProfileID: bizProfileID,
-		AnonymousToken:    anonymousToken,
-		CompanyName:       companyName,
-		CompanyEmail:      strings.TrimSpace(r.FormValue("company_email")),
-		CompanyAddress:    strings.TrimSpace(r.FormValue("company_address")),
-		CompanyCity:       strings.TrimSpace(r.FormValue("company_city")),
-		CompanyZip:        strings.TrimSpace(r.FormValue("company_zip")),
-		CompanyState:      strings.TrimSpace(r.FormValue("company_state")),
-		CompanyCountry:    strings.TrimSpace(r.FormValue("company_country")),
-		ClientName:        clientName,
-		ClientEmail:       strings.TrimSpace(r.FormValue("client_email")),
-		ClientAddress:     strings.TrimSpace(r.FormValue("client_address")),
-		ClientCity:        strings.TrimSpace(r.FormValue("client_city")),
-		ClientZip:         strings.TrimSpace(r.FormValue("client_zip")),
-		ClientState:       strings.TrimSpace(r.FormValue("client_state")),
-		ClientCountry:     strings.TrimSpace(r.FormValue("client_country")),
-		InvoiceNumber:     invoiceNumber,
-		IssueDate:         issueDate,
-		DueDate:           dueDate,
-		TaxRateBps:        taxRateBps,
+		UserID:              userID,
+		BusinessProfileID:   bizProfileID,
+		AnonymousToken:      anonymousToken,
+		CompanyName:         companyName,
+		CompanyEmail:        strings.TrimSpace(r.FormValue("company_email")),
+		CompanyAddress:      strings.TrimSpace(r.FormValue("company_address")),
+		CompanyCity:         strings.TrimSpace(r.FormValue("company_city")),
+		CompanyZip:          strings.TrimSpace(r.FormValue("company_zip")),
+		CompanyState:        strings.TrimSpace(r.FormValue("company_state")),
+		CompanyCountry:      strings.TrimSpace(r.FormValue("company_country")),
+		ClientName:          clientName,
+		ClientEmail:         strings.TrimSpace(r.FormValue("client_email")),
+		ClientAddress:       strings.TrimSpace(r.FormValue("client_address")),
+		ClientCity:          strings.TrimSpace(r.FormValue("client_city")),
+		ClientZip:           strings.TrimSpace(r.FormValue("client_zip")),
+		ClientState:         strings.TrimSpace(r.FormValue("client_state")),
+		ClientCountry:       strings.TrimSpace(r.FormValue("client_country")),
+		InvoiceNumber:       invoiceNumber,
+		IssueDate:           issueDate,
+		DueDate:             dueDate,
+		TaxRateBps:          taxRateBps,
 		DiscountAmountCents: discountCents,
-		ShowLogo:          showLogo,
-		ShowTitle:         showTitle,
-		AutoReminders:     autoReminders,
-		Currency:          currency,
-		Notes:             strings.TrimSpace(r.FormValue("notes")),
-		PaymentDetails:    strings.TrimSpace(r.FormValue("payment_details")),
-		Status:            "draft",
+		ShowLogo:            showLogo,
+		ShowTitle:           showTitle,
+		AutoReminders:       autoReminders,
+		Currency:            currency,
+		Notes:               strings.TrimSpace(r.FormValue("notes")),
+		PaymentDetails:      strings.TrimSpace(r.FormValue("payment_details")),
+		Status:              "draft",
 	}
 
-
-		invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
+	invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {
 		log.Printf("[invoice] create error: %v", err)
 
@@ -357,7 +355,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Increment anon counter after successful save
-		// Increment anon counter after successful save
+	// Increment anon counter after successful save
 	if user == nil {
 		count := auth.GetAnonInvoiceCount(r)
 		auth.SetAnonInvoiceCount(w, count+1)
@@ -421,11 +419,11 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 	invoiceView := views.MapInvoicePage(inv, items, "view")
 
 	h.App.Render(w, r, "invoice_detail.tmpl", map[string]any{
-    "Invoice":    invoiceView,
-    "IsLoggedIn": auth.GetUser(r) != nil,
-    "Sent":       r.URL.Query().Get("sent") == "true",
-    "SentTo":     r.URL.Query().Get("to"),
-})
+		"Invoice":    invoiceView,
+		"IsLoggedIn": auth.GetUser(r) != nil,
+		"Sent":       r.URL.Query().Get("sent") == "true",
+		"SentTo":     r.URL.Query().Get("to"),
+	})
 }
 
 func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
@@ -448,6 +446,29 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 
 	user := auth.GetUser(r)
 	invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	// PDF mode: Headless Chrome can be highly unreliable fetching images over the network.
+	// To guarantee the logo appears, we fetch it here in Go and inject it as a Base64 Data URI.
+	if invoiceView.LogoURL != "" {
+		if strings.HasPrefix(invoiceView.LogoURL, "/static/") {
+			// Local disk (Phase 1)
+			filePath := "." + invoiceView.LogoURL
+			if b, err := os.ReadFile(filePath); err == nil {
+				mime := http.DetectContentType(b)
+				invoiceView.LogoURL = "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b)
+			}
+		} else if strings.HasPrefix(invoiceView.LogoURL, "http") {
+			// Remote (Supabase / Phase 2)
+			client := &http.Client{Timeout: 5 * time.Second}
+			if resp, err := client.Get(invoiceView.LogoURL); err == nil && resp.StatusCode == http.StatusOK {
+				if b, err := io.ReadAll(resp.Body); err == nil {
+					mime := http.DetectContentType(b)
+					invoiceView.LogoURL = "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b)
+				}
+				resp.Body.Close()
+			}
+		}
+	}
 
 	var buf bytes.Buffer
 
@@ -577,9 +598,9 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 
 	// ── Parse line items ──────────────────────────────────────────────
 	descriptions := r.Form["description[]"]
-	details      := r.Form["details[]"]
-	quantities   := r.Form["quantity[]"]
-	unitPrices   := r.Form["unit_price[]"]
+	details := r.Form["details[]"]
+	quantities := r.Form["quantity[]"]
+	unitPrices := r.Form["unit_price[]"]
 
 	var items []repo.InvoiceItem
 	for i, desc := range descriptions {
@@ -626,27 +647,27 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.DueDate = dueDate
 
 	// ── Update invoice fields ─────────────────────────────────────────
-	inv.CompanyName    = strings.TrimSpace(r.FormValue("company_name"))
-	inv.CompanyEmail   = strings.TrimSpace(r.FormValue("company_email"))
+	inv.CompanyName = strings.TrimSpace(r.FormValue("company_name"))
+	inv.CompanyEmail = strings.TrimSpace(r.FormValue("company_email"))
 	inv.CompanyAddress = strings.TrimSpace(r.FormValue("company_address"))
-	inv.CompanyCity    = strings.TrimSpace(r.FormValue("company_city"))
-	inv.CompanyZip     = strings.TrimSpace(r.FormValue("company_zip"))
-	inv.CompanyState   = strings.TrimSpace(r.FormValue("company_state"))
+	inv.CompanyCity = strings.TrimSpace(r.FormValue("company_city"))
+	inv.CompanyZip = strings.TrimSpace(r.FormValue("company_zip"))
+	inv.CompanyState = strings.TrimSpace(r.FormValue("company_state"))
 	inv.CompanyCountry = strings.TrimSpace(r.FormValue("company_country"))
-	inv.ClientName     = strings.TrimSpace(r.FormValue("client_name"))
-	inv.ClientEmail    = strings.TrimSpace(r.FormValue("client_email"))
-	inv.ClientAddress  = strings.TrimSpace(r.FormValue("client_address"))
-	inv.ClientCity     = strings.TrimSpace(r.FormValue("client_city"))
-	inv.ClientZip      = strings.TrimSpace(r.FormValue("client_zip"))
-	inv.ClientState    = strings.TrimSpace(r.FormValue("client_state"))
-	inv.ClientCountry  = strings.TrimSpace(r.FormValue("client_country"))
-	inv.ShowLogo  = r.FormValue("show_logo") == "on"
+	inv.ClientName = strings.TrimSpace(r.FormValue("client_name"))
+	inv.ClientEmail = strings.TrimSpace(r.FormValue("client_email"))
+	inv.ClientAddress = strings.TrimSpace(r.FormValue("client_address"))
+	inv.ClientCity = strings.TrimSpace(r.FormValue("client_city"))
+	inv.ClientZip = strings.TrimSpace(r.FormValue("client_zip"))
+	inv.ClientState = strings.TrimSpace(r.FormValue("client_state"))
+	inv.ClientCountry = strings.TrimSpace(r.FormValue("client_country"))
+	inv.ShowLogo = r.FormValue("show_logo") == "on"
 	inv.ShowTitle = r.FormValue("show_title") == "on"
 	inv.AutoReminders = r.FormValue("auto_reminders") == "on"
-	inv.Currency            = currency
-	inv.TaxRateBps          = taxRateBps
+	inv.Currency = currency
+	inv.TaxRateBps = taxRateBps
 	inv.DiscountAmountCents = discountCents
-	inv.Notes          = strings.TrimSpace(r.FormValue("notes"))
+	inv.Notes = strings.TrimSpace(r.FormValue("notes"))
 	inv.PaymentDetails = strings.TrimSpace(r.FormValue("payment_details"))
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
@@ -677,7 +698,7 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 
 	newStatus := r.FormValue("status")
 
-		if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, user.ID); err != nil {
+	if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, user.ID); err != nil {
 		http.Error(w, "Failed to update status", http.StatusInternalServerError)
 		return
 	}
@@ -693,7 +714,7 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
-	}
+}
 
 func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
@@ -728,6 +749,7 @@ func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(newID, 10)+"/edit", http.StatusSeeOther)
 }
+
 // calculateNextRun returns the next run time based on frequency.
 func calculateNextRun(frequency string, from time.Time) time.Time {
 	switch frequency {

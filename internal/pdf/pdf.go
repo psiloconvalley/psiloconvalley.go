@@ -119,15 +119,12 @@ func Generate(ctx context.Context, html string) ([]byte, error) {
 			}
 			return page.SetDocumentContent(frameTree.Frame.ID, html).Do(ctx)
 		}),
-		// FIX H6: replaced chromedp.Sleep(500ms) with a poll on
-		// document.readyState. Since we inject HTML directly (no network
-		// requests), readyState reaches 'complete' as soon as the parser
-		// finishes — typically <50ms. The poll exits as soon as it's ready
-		// rather than always waiting a fixed 500ms, and correctly handles
-		// the edge case where parsing takes longer under load.
+		// Wait for both the DOM to be ready AND all injected images (like the logo)
+		// to finish downloading over the network. If we don't wait for images,
+		// headless Chrome will snapshot a broken "ripped page" icon.
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			return chromedp.Poll(
-				`document.readyState === 'complete'`,
+				`document.readyState === 'complete' && Array.from(document.images).every(i => i.complete)`,
 				nil,
 				chromedp.WithPollingInterval(50*time.Millisecond),
 			).Do(ctx)
