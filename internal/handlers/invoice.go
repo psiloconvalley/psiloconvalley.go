@@ -447,25 +447,38 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	invoiceView := views.MapInvoicePage(inv, items, "view")
 
-	// PDF mode: Headless Chrome can be highly unreliable fetching images over the network.
-	// To guarantee the logo appears, we fetch it here in Go and inject it as a Base64 Data URI.
+	// PDF mode: headless Chromium cannot reliably fetch external images.
+	// Fetch the logo here in Go and inject it as a base64 data URI instead.
 	if invoiceView.LogoURL != "" {
 		if strings.HasPrefix(invoiceView.LogoURL, "/static/") {
-			// Local disk (Phase 1)
+			// Local disk (LocalStore)
 			filePath := "." + invoiceView.LogoURL
 			if b, err := os.ReadFile(filePath); err == nil {
 				mime := http.DetectContentType(b)
 				invoiceView.LogoURL = "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b)
+			} else {
+				log.Printf("[pdf] logo read from disk error for invoice %d: %v", id, err)
 			}
 		} else if strings.HasPrefix(invoiceView.LogoURL, "http") {
-			// Remote (Supabase / Phase 2)
-			client := &http.Client{Timeout: 5 * time.Second}
-			if resp, err := client.Get(invoiceView.LogoURL); err == nil && resp.StatusCode == http.StatusOK {
-				if b, err := io.ReadAll(resp.Body); err == nil {
-					mime := http.DetectContentType(b)
-					invoiceView.LogoURL = "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b)
+			// Remote (SupabaseStore) — fetch and inline so Chrome needs no outbound network.
+			client := &http.Client{Timeout: 10 * time.Second}
+			resp, err := client.Get(invoiceView.LogoURL)
+			if err != nil {
+				log.Printf("[pdf] logo fetch error for invoice %d: %v", id, err)
+			} else {
+				defer resp.Body.Close()
+				if resp.StatusCode != http.StatusOK {
+					log.Printf("[pdf] logo fetch non-200 for invoice %d: status=%d url=%s", id, resp.StatusCode, invoiceView.LogoURL)
+				} else {
+					b, err := io.ReadAll(resp.Body)
+					if err != nil {
+						log.Printf("[pdf] logo read error for invoice %d: %v", id, err)
+					} else {
+						mime := http.DetectContentType(b)
+						invoiceView.LogoURL = "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b)
+						log.Printf("[pdf] logo inlined as base64 for invoice %d (%d bytes)", id, len(b))
+					}
 				}
-				resp.Body.Close()
 			}
 		}
 	}
@@ -497,7 +510,6 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 
 	_, _ = w.Write(pdfBytes)
 }
-
 // =====================================================================
 // PROTECTED INVOICE MANAGEMENT ROUTES
 // All routes below require auth.RequireAuth (enforced in router.go).
