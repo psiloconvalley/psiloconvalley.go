@@ -91,7 +91,11 @@ type InvoicePage struct {
 	ShowTitle     bool
 	AutoReminders bool
 
-	//Recurring
+	// Template customization (Pro feature)
+	TemplateID string // "classic", "minimal", "bold"
+	BrandColor string // "#RRGGBB" hex accent color
+
+	//Recurring	
 	IsRecurring        bool
 	RecurringFrequency string
 	RecurringAutoSend  bool
@@ -222,6 +226,8 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		ShowLogo:               inv.ShowLogo,
 		ShowTitle:              inv.ShowTitle,
 		AutoReminders:          inv.AutoReminders,
+		TemplateID:		inv.TemplateID,
+		BrandColor:		inv.BrandColor,
 
 		// Hints is zero-value (all false) by default.
 		// The handler sets fields on this after calling MapInvoicePage.

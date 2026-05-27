@@ -132,6 +132,8 @@ type Invoice struct {
 	ShowLogo            bool
 	ShowTitle           bool
 	AutoReminders       bool
+	TemplateID	    string // "classic", "minimal","bold"
+	BrandColor	    string // "#RRGGBB" hex accent color
 }
 
 type InvoiceItem struct {
@@ -857,11 +859,13 @@ func (r *InvoiceRepo) CreateInvoice(
 			invoice_number, issue_date, due_date,
 			tax_rate_bps, discount_amount_cents, notes, payment_details,
 			subtotal_cents, tax_amount_cents, total_cents,
-			currency, status, show_logo, show_title, auto_reminders
+			currency, status, show_logo, show_title, auto_reminders,
+			template_id, brand_color
 		) VALUES (
 			$1,$2,$3,NULLIF($4,''),$5,$6,$7,$8,$9,$10,$11,
 			$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-			$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33
+			$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,
+			$34,$35
 		) RETURNING id, created_at`
 
 	var newID int64
@@ -877,6 +881,7 @@ func (r *InvoiceRepo) CreateInvoice(
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle, inv.AutoReminders,
+		inv.TemplateID, inv.BrandColor,
 	).Scan(&newID, &createdAt)
 		if err != nil {
 		return 0, fmt.Errorf("insert invoice: %w", err)
@@ -951,11 +956,13 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.auto_reminders,
 			i.created_at,
 			i.updated_at,
-			COALESCE(bp.logo_url, '') AS logo_url
+			COALESCE(bp.logo_url, '') AS logo_url,
+			i.template_id,
+			i.brand_color
 		FROM invoices i
 		LEFT JOIN business_profiles bp ON bp.id = i.business_profile_id
 		WHERE i.id = $1`
-
+		
 	var inv Invoice
 	var bpID, cID, uID sql.NullInt64
 	var anonToken sql.NullString
@@ -1002,6 +1009,8 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.CreatedAt,
 		&updatedAt,
 		&inv.LogoURL,
+		&inv.TemplateID,
+		&inv.BrandColor,
 	)
 	if err != nil {
 		return nil, nil, err
@@ -1166,7 +1175,7 @@ func (r *InvoiceRepo) UpdateInvoice(
 	}
 	defer func() { _ = tx.Rollback() }()
 
-			const uq = `
+		const uq = `
 		UPDATE invoices SET
 			client_id=$1, client_name=$2, client_email=$3, client_address=$4,
 			client_city=$5, client_zip=$6, client_state=$7, client_country=$8,
@@ -1176,8 +1185,9 @@ func (r *InvoiceRepo) UpdateInvoice(
 			tax_rate_bps=$19, discount_amount_cents=$20, notes=$21, payment_details=$22,
 			subtotal_cents=$23, tax_amount_cents=$24, total_cents=$25,
 			currency=$26, status=$27, show_logo=$28, show_title=$29,
-			auto_reminders=$30, updated_at=NOW()
-			WHERE id=$31 AND user_id=$32`
+			auto_reminders=$30, template_id=$31, brand_color=$32,
+			updated_at=NOW()
+		WHERE id=$33 AND user_id=$34`
 
 	res, err := tx.ExecContext(ctx, uq,
 		inv.ClientID, inv.ClientName, inv.ClientEmail, inv.ClientAddress,
@@ -1188,10 +1198,9 @@ func (r *InvoiceRepo) UpdateInvoice(
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle,
-		inv.AutoReminders,
+		inv.AutoReminders, inv.TemplateID, inv.BrandColor,
 		inv.ID, inv.UserID,
-	)
-
+	)	
 			if err != nil {
 
 		return err
