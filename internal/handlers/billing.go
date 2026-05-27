@@ -205,3 +205,107 @@ func (h *Handlers) BillingPortalPost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, s.URL, http.StatusSeeOther)
 }
+
+// StripeConnectStart redirects the user to Stripe's OAuth flow
+// to connect their Stripe account to Psilocon Valley.
+func (h *Handlers) StripeConnectStart(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	clientID := os.Getenv("STRIPE_CONNECT_CLIENT_ID")
+	if clientID == "" {
+		log.Println("[stripe-connect] STRIPE_CONNECT_CLIENT_ID not set")
+		http.Error(w, "Stripe Connect is not configured", http.StatusInternalServerError)
+		return
+	}
+
+	redirectURI := h.App.BaseURL + "/auth/stripe/callback"
+
+	// Standard OAuth2 authorize URL for Stripe Connect (Standard accounts)
+	url := "https://connect.stripe.com/oauth/authorize" +
+		"?response_type=code" +
+		"&client_id=" + clientID +
+		"&scope=read_write" +
+		"&redirect_uri=" + redirectURI +
+		"&state=" + strconv.FormatInt(user.ID, 10)
+
+	http.Redirect(w, r, url, http.StatusSeeOther)
+}
+
+// StripeConnectCallback handles the OAuth redirect from Stripe.
+// It exchanges the authorization code for the connected account ID
+// and saves it to the user record.
+func (h *Handlers) StripeConnectCallback(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Check for OAuth errors from Stripe
+	if errMsg := r.URL.Query().Get("error"); errMsg != "" {
+		errDesc := r.URL.Query().Get("error_description")
+		log.Printf("[stripe-connect] OAuth error for user %d: %s — %s", user.ID, errMsg, errDesc)
+		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
+		return
+	}
+
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		log.Printf("[stripe-connect] missing authorization code for user %d", user.ID)
+		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
+		return
+	}
+
+	// Exchange authorization code for connected account ID
+	// This is a direct POST to Stripe's OAuth token endpoint
+	secret := os.Getenv("STRIPE_SECRET_KEY")
+	resp, err := http.PostForm("https://connect.stripe.com/oauth/token", map[string][]string{
+		"client_secret": {secret},
+		"code":          {code},
+		"grant_type":    {"authorization_code"},
+	})
+	if err != nil {
+		log.Printf("[stripe-connect] token exchange failed for user %d: %v", user.ID, err)
+		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
+		return
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		StripeUserID string `json:"stripe_user_id"`
+		Error        string `json:"error"`
+		ErrorDesc    string `json:"error_description"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		log.Printf("[stripe-connect] failed to decode token response for user %d: %v", user.ID, err)
+		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
+		return
+	}
+
+	if result.Error != "" {
+		log.Printf("[stripe-connect] token error for user %d: %s — %s", user.ID, result.Error, result.ErrorDesc)
+		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
+		return
+	}
+
+	if result.StripeUserID == "" {
+		log.Printf("[stripe-connect] empty stripe_user_id for user %d", user.ID)
+		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
+		return
+	}
+
+	// Save the connected account ID
+	if err := h.App.UserRepo.SaveStripeConnectID(r.Context(), user.ID, result.StripeUserID); err != nil {
+		log.Printf("[stripe-connect] failed to save connect ID for user %d: %v", user.ID, err)
+		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
+		return
+	}
+
+	log.Printf("[stripe-connect] user %d connected Stripe account %s", user.ID, result.StripeUserID)
+	http.Redirect(w, r, "/profile?stripe_connected=1", http.StatusSeeOther)
+}

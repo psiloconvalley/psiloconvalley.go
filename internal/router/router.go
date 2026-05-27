@@ -50,6 +50,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Use(auth.RequireAuth)
 		r.Post("/checkout", h.CheckoutPost)
 		r.Post("/billing/portal", h.BillingPortalPost)
+		r.Get("/auth/stripe/connect", h.StripeConnectStart)
+		r.Get("/auth/stripe/callback", h.StripeConnectCallback)
 
 		r.Get("/profile", h.ProfileGet)
 		r.Post("/profile", h.ProfilePost)
