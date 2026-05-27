@@ -242,6 +242,9 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	showLogo := r.FormValue("show_logo") == "on"
 	showTitle := r.FormValue("show_title") == "on"
 	autoReminders := r.FormValue("auto_reminders") == "on"
+	// ── Template customization ──────────────────────────────────────
+	templateID := r.FormValue("template_id")
+	brandColor := r.FormValue("brand_color")
 
 	// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
@@ -285,12 +288,15 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		ShowLogo:            showLogo,
 		ShowTitle:           showTitle,
 		AutoReminders:       autoReminders,
+		TemplateID:	     templateID,
+		BrandColor:	     brandColor,
 		Currency:            currency,
 		Notes:               strings.TrimSpace(r.FormValue("notes")),
 		PaymentDetails:      strings.TrimSpace(r.FormValue("payment_details")),
 		Status:              "draft",
 	}
-
+	isPro := user != nil && user.Plan == "pro"
+	normalizeTemplateFields(inv, isPro)
 	invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {
 		log.Printf("[invoice] create error: %v", err)
@@ -679,11 +685,15 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.ShowLogo = r.FormValue("show_logo") == "on"
 	inv.ShowTitle = r.FormValue("show_title") == "on"
 	inv.AutoReminders = r.FormValue("auto_reminders") == "on"
+	inv.TemplateID = r.FormValue("template_id")
+	inv.BrandColor = r.FormValue("brand_color")
 	inv.Currency = currency
 	inv.TaxRateBps = taxRateBps
 	inv.DiscountAmountCents = discountCents
 	inv.Notes = strings.TrimSpace(r.FormValue("notes"))
 	inv.PaymentDetails = strings.TrimSpace(r.FormValue("payment_details"))
+	isPro := user != nil && user.Plan == "pro"
+	normalizeTemplateFields(inv, isPro)
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		http.Error(w, "Update failed", http.StatusInternalServerError)
@@ -778,5 +788,34 @@ func calculateNextRun(frequency string, from time.Time) time.Time {
 		return from.AddDate(1, 0, 0)
 	default:
 		return from.AddDate(0, 1, 0)
+	}
+}
+
+// isValidHexColor returns true if s is a valid #RRGGBB hex color.
+func isValidHexColor(s string) bool {
+	if len(s) != 7 || s[0] != '#' {
+		return false
+	}
+	for _, c := range s[1:] {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+			return false
+		}
+	}
+	return true
+}
+
+// normalizeTemplateFields validates and applies Pro gating to
+// template_id and brand_color. Free users are silently reset
+// to defaults regardless of what the form submitted.
+func normalizeTemplateFields(inv *repo.Invoice, isPro bool) {
+	if !catalog.ValidTemplateID(inv.TemplateID) {
+		inv.TemplateID = catalog.DefaultTemplateID
+	}
+	if !isValidHexColor(inv.BrandColor) {
+		inv.BrandColor = catalog.DefaultBrandColor
+	}
+	if !isPro {
+		inv.TemplateID = catalog.DefaultTemplateID
+		inv.BrandColor = catalog.DefaultBrandColor
 	}
 }
