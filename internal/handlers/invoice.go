@@ -51,19 +51,22 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 		ClientState:    "California",
 		ShowLogo:       true,
 		ShowTitle:      true,
+		TemplateID:     catalog.DefaultTemplateID,
+		BrandColor:     catalog.DefaultBrandColor,
 	}
 	if user != nil {
 		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
 			invoiceData.LogoURL = template.URL(bp.LogoURL)
 		}
 	}
-	data := map[string]any{
+		data := map[string]any{
 		"User":       user,
 		"IsLoggedIn": user != nil,
 		"Invoice":    invoiceData,
 		"Mode":       "create",
 		"Currencies": catalog.SupportedCurrencies,
 		"USStates":   catalog.USStates,
+		"Templates":  catalog.InvoiceTemplates,
 	}
 	// Logged-in users get their client dropdown populated
 	if user != nil {
@@ -174,6 +177,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 			"Mode":       "create",
 			"Currencies": catalog.SupportedCurrencies,
 			"USStates":   catalog.USStates,
+			"Templates":  catalog.InvoiceTemplates,
 			"Errors":     errs,
 			"Invoice": views.InvoicePage{
 				CompanyName:    companyName,
@@ -315,6 +319,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				"Mode":       "create",
 				"Currencies": catalog.SupportedCurrencies,
 				"USStates":   catalog.USStates,
+				"Templates":  catalog.InvoiceTemplates,
 				"Errors":     dupErrs,
 				"Invoice": views.InvoicePage{
 					CompanyName:    inv.CompanyName,
@@ -583,6 +588,7 @@ func (h *Handlers) InvoiceEditGet(w http.ResponseWriter, r *http.Request) {
 		"User":       user,
 		"USStates":   catalog.USStates,
 		"Currencies": catalog.SupportedCurrencies,
+		"Templates":  catalog.InvoiceTemplates,
 	})
 }
 
