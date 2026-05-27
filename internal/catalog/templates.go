@@ -15,9 +15,9 @@ type InvoiceTemplate struct {
 // The invoice form reads this list to render the template picker.
 var InvoiceTemplates = []InvoiceTemplate{
 	{ID: "classic", Name: "Classic", Description: "Deep slate accents, professional layout", ProOnly: false},
-	{ID: "minimal", Name: "Minimal", Description: "Clean lines, light grey, modern feel", ProOnly: true},
-	{ID: "bold", Name: "Bold", Description: "High contrast header, strong typography", ProOnly: true},
-}
+	{ID: "minimal", Name: "Minimal", Description: "Clean lines, light grey, modern feel", ProOnly: false},
+	{ID: "bold", Name: "Bold", Description: "High contrast header, strong typography", ProOnly: false},
+	}
 
 const DefaultTemplateID = "classic"
 const DefaultBrandColor = "#0d1422"

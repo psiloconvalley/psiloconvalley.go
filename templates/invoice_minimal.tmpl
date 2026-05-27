@@ -550,13 +550,9 @@
                 <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
                 {{end}}
 
-	{{if .User}}
-    		{{if eq .User.Plan "pro"}}
-    		<a href="/invoices/{{.Invoice.ID}}/send" class="btn-primary">📨 Send Invoice</a>
-    {{else}}
-    <a href="/pricing?reason=email-pro" class="btn-secondary" style="opacity: 0.5;">🔒 Send Invoice (Pro)</a>
-    {{end}}
-{{end}} 
+			{{if .User}}
+		<a href="/invoices/{{.Invoice.ID}}/send" class="btn-primary">📨 Send Invoice</a>
+	{{end}}
                 <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn-secondary">📋 Duplicate</a>
                 <button type="button" onclick="window.print()" class="btn-secondary">🖨️ Print</button>
 
