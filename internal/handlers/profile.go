@@ -29,12 +29,14 @@ func (h *Handlers) ProfileGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.App.Render(w, r, "profile.tmpl", map[string]any{
-		"Profile":    profile,
-		"Saved":      r.URL.Query().Get("saved") == "true",
-		"Welcome":    r.URL.Query().Get("welcome") == "true",
-		"Currencies": catalog.SupportedCurrencies,
+	   "Profile":         profile,
+	   "Saved":           r.URL.Query().Get("saved") == "true",
+	   "Welcome":         r.URL.Query().Get("welcome") == "true",
+	   "Currencies":      catalog.SupportedCurrencies,
+	   "StripeConnected": r.URL.Query().Get("stripe_connected") == "1",
+	   "StripeError":     r.URL.Query().Get("stripe_error") == "1",
 	})
-}
+	}
 
 func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
@@ -145,7 +147,8 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 			"Error":      "Could not save profile",
 			"Currencies": catalog.SupportedCurrencies,
 		})
-		return
+		
+          	return
 	}
 
 	http.Redirect(w, r, "/profile?saved=true", http.StatusSeeOther)
