@@ -4,6 +4,7 @@ package views
 import (
 	"fmt"
 	"time"
+	"html/template"
 
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
@@ -47,7 +48,7 @@ type InvoicePage struct {
 	Notes          string
 	PaymentDetails string
 	Mode           string
-	LogoURL        string
+	LogoURL        template.URL
 
 	// Company
 	CompanyName    string
@@ -189,7 +190,7 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		Notes:          inv.Notes,
 		PaymentDetails: inv.PaymentDetails,
 		Mode:           mode,
-		LogoURL:        inv.LogoURL,
+		LogoURL:        template.URL(inv.LogoURL),
 
 		CompanyName:    inv.CompanyName,
 		CompanyEmail:   inv.CompanyEmail,
