@@ -429,8 +429,7 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	invoiceView := views.MapInvoicePage(inv, items, "view")
-
-	h.App.Render(w, r, "invoice_detail.tmpl", map[string]any{
+		h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
 		"Invoice":    invoiceView,
 		"IsLoggedIn": auth.GetUser(r) != nil,
 		"Sent":       r.URL.Query().Get("sent") == "true",
@@ -503,7 +502,7 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 		"csrfField": "",
 	}
 
-	if err := h.App.Templates.ExecuteTemplate(&buf, "invoice_detail.tmpl", templateData); err != nil {
+		if err := h.App.Templates.ExecuteTemplate(&buf, invoiceTemplateName(invoiceView.TemplateID), templateData); err != nil {
 		http.Error(w, "Could not render invoice", http.StatusInternalServerError)
 		return
 	}
@@ -779,6 +778,16 @@ func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(newID, 10)+"/edit", http.StatusSeeOther)
+}
+// invoiceTemplateName returns the detail template filename for the given
+// template ID. Falls back to classic if the template file would not exist.
+func invoiceTemplateName(templateID string) string {
+	switch templateID {
+	case "minimal", "bold":
+		return "invoice_" + templateID + ".tmpl"
+	default:
+		return "invoice_detail.tmpl"
+	}
 }
 
 // calculateNextRun returns the next run time based on frequency.

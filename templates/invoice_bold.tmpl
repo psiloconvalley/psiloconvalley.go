@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{.Invoice.InvoiceNumber}} — {{.Invoice.ClientName}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {{template "nav-styles" .}}
+
+       <style>
+        :root { --brand: {{.Invoice.BrandColor}}; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } 
+        body {
+            background: #e2e8f0;
+            color: #111827;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 13px;
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .invoice-card {
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(15,23,42,0.15);
+            overflow: hidden;
+            border: none;
+        } 
+	.top-accent { height: 12px; background: var(--brand); }
+        /* ── Header ── */
+        .header-top {
+            padding: 28px 36px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-title-block {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .doc-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+	    color: var(--brand);
+	}
+        .doc-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #64748b;
+        }
+        .meta-grid {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #475569;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .meta-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.8px;
+        }
+        .meta-value { font-weight: 600; color: #0d1422; margin-top: 2px; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-draft   { background: #f3f4f6; color: #374151; }
+        .status-sent    { background: #dbeafe; color: #1d4ed8; }
+        .status-paid    { background: #dcfce7; color: #15803d; }
+        .status-void    { background: #fee2e2; color: #dc2626; }
+        .status-overdue { background: #fef9c3; color: #854d0e; }
+
+        /* ── Addresses ── */
+        .addresses-band {
+            padding: 0 36px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+        .address-col {
+            background: #f8fafc;
+            padding: 20px 24px;
+            border-radius: 4px;
+            border: none;
+            border-left: 4px solid var(--brand);
+        }
+	       .address-label {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+        .address-name { font-size: 14px; font-weight: 800; color: #0d1422; margin-bottom: 4px; }
+        .address-line { color: #475569; font-size: 12px; line-height: 1.5; }
+
+        /* ── Line items table ── */
+        .table-wrapper { padding: 0 36px; }
+
+        .items-table { width: 100%; border-collapse: collapse; }
+        .items-table thead th {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #64748b;
+            padding: 8px 10px;
+            border-bottom: 2px solid #cbd5e1;
+            text-align: left;
+        }
+        .items-table th.right,
+        .items-table td.right { text-align: right; }
+
+        .items-table tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: top;
+            font-size: 12px;
+        }
+        .item-description { font-weight: 700; color: #0d1422; white-space: pre-line; }
+        .item-details { margin-top: 2px; color: #64748b; font-size: 11px; line-height: 1.4; white-space: pre-line; }
+        .money, .numeric { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+        /* ── Mobile line items — stacked cards ── */
+        .items-mobile { display: none; padding: 0 16px; }
+        .item-card-m {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 12px 0;
+        }
+        .item-card-m:last-child { border-bottom: none; }
+        .item-card-m-desc { font-weight: 700; color: #0d1422; font-size: 13px; }
+        .item-card-m-detail { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .item-card-m-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .item-card-m-total { font-weight: 700; color: #0d1422; font-variant-numeric: tabular-nums; }
+
+        /* ── Footer split ── */
+        .invoice-footer-split {
+            padding: 20px 36px 36px;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 40px;
+            align-items: flex-start;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .notes-block { display: flex; flex-direction: column; gap: 16px; }
+        .info-label {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        .info-content { font-size: 11.5px; color: #475569; line-height: 1.5; white-space: pre-line; }
+
+        .totals-box {
+	    background: var(--brand);
+            border-radius: 4px;
+            padding: 16px 20px;
+            border: none;
+                   }
+              .totals-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; }
+        .totals-label { color: rgba(255,255,255,0.7); font-weight: 600; }
+        .totals-value { color: #ffffff; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .grand-total {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            margin-top: 6px;
+            padding-top: 10px;
+            padding-bottom: 2px;
+        }
+        .grand-total .totals-label { color: #ffffff; font-size: 14px; font-weight: 800; }
+        .grand-total .totals-value { color: #ffffff; font-size: 18px; font-weight: 800; } 
+        /* ── Actions ── */
+        .invoice-actions-wrapper {
+            margin-top: 20px;
+            padding: 26px 36px;
+            border-top: 1px solid #e5e7eb;
+            background: #fafafa;
+        }
+        .primary-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary, .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            /* Mobile minimum touch target */
+            min-height: 44px;
+        }
+	.btn-primary { background: var(--brand); color: #ffffff; border-radius: 4px; font-weight: 800; letter-spacing: 0.3px; }
+        .btn-secondary { background: #ffffff; color: #0d1422; border: 1px solid #cbd5e1; }
+        .btn-primary:hover  { background: #1e293b; }
+        .btn-secondary:hover { background: #f8fafc; }
+
+        .status-panel {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        .status-panel-title {
+            font-size: 9px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+        }
+        .status-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .status-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            min-height: 44px; /* touch target */
+        }
+
+        /* ── PDF mode: hide everything except the invoice card ──
+           RenderHints.PDFMode is set by the handler when generating PDF.
+           The template reads it to suppress nav and action buttons,
+           giving Chrome a clean surface to print from with no UI chrome.
+           This replaces the old approach of relying solely on @media print
+           rules — PDFMode works even when the browser doesn't honour print
+           media queries in headless mode.
+        ── */
+        {{if .Invoice.Hints.PDFMode}}
+        .site-nav,
+        .invoice-actions-wrapper { display: none !important; }
+        .page { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+        .invoice-card { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+        {{end}}
+
+        /* ── Responsive ── */
+        @media (max-width: 700px) {
+            .page { margin: 0; padding: 0; }
+
+            .invoice-card { border-radius: 0; border-left: none; border-right: none; }
+
+            .header-top { padding: 20px 16px 12px; }
+
+            .meta-grid { justify-content: flex-start; }
+            .meta-item { align-items: flex-start; }
+
+            .addresses-band {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 0 16px 16px;
+            }
+
+            /* Hide desktop table, show mobile item cards */
+            .table-wrapper { display: none; }
+            .items-mobile  { display: block; }
+
+            .invoice-footer-split {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 16px;
+            }
+
+            .invoice-actions-wrapper { padding: 16px; }
+
+            .primary-actions { gap: 8px; }
+            .btn-primary, .btn-secondary { flex: 1 1 auto; font-size: 13px; }
+
+            .status-actions { gap: 8px; }
+            .status-btn { flex: 1 1 auto; }
+        }
+
+        /* ── Print ── */
+        @media print {
+            @page { size: letter; margin: 0.3in !important; }
+
+            html, body {
+                background: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body { font-size: 11px !important; line-height: 1.35 !important; }
+
+            .site-nav,
+            .invoice-actions-wrapper,
+            .items-mobile { display: none !important; }
+
+            .page { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .invoice-card { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+            .top-accent { height: 4px !important; }
+
+            .header-top { padding: 16px 0 12px !important; }
+            .addresses-band { padding: 0 0 16px !important; gap: 16px !important; }
+            .address-col { padding: 10px 12px !important; background: #ffffff !important; }
+
+            .table-wrapper { display: block !important; padding: 0 !important; }
+            .items-table thead th { padding: 6px 8px !important; font-size: 9px !important; }
+            .items-table tbody td { padding: 8px !important; font-size: 11px !important; }
+
+            .invoice-footer-split { padding: 16px 0 0 !important; gap: 20px !important; }
+            .totals-box { padding: 8px 12px !important; background: #ffffff !important; }
+            .totals-row { padding: 4px 0 !important; font-size: 11px !important; }
+            .grand-total .totals-label,
+            .grand-total .totals-value { font-size: 13px !important; }
+
+            thead { display: table-header-group !important; }
+            tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            .invoice-footer-split { page-break-inside: avoid !important; }
+        }
+    </style>
+</head>
+
+<body>
+
+{{if .Sent}}
+<div style="
+    background:#dcfce7;
+    border-bottom:1px solid #bbf7d0;
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:'Inter',-apple-system,sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:#15803d;
+">
+    <span style="font-size:18px;">✅</span>
+    <div>
+        Invoice <strong>{{.Invoice.InvoiceNumber}}</strong> sent successfully.
+        {{if .SentTo}}A PDF copy was delivered to <strong>{{.SentTo}}</strong>.{{end}}
+    </div>
+</div>
+{{end}}
+
+{{template "nav" .}}
+
+<div class="page">
+    <div class="invoice-card">
+
+        <div class="top-accent"></div>
+
+        {{if and .Invoice.LogoURL .Invoice.ShowLogo}}
+        <div style="padding: 24px 36px 0;">
+            <img
+                src="{{.Invoice.LogoURL}}"
+                alt="{{.Invoice.CompanyName}}"
+                style="max-width:200px; max-height:80px; object-fit:contain; display:block;"
+            >
+        </div>
+        {{end}}
+
+        <header class="header-top">
+            <div class="header-title-block">
+        	{{if .Invoice.ShowTitle}}<span class="doc-title">INVOICE</span>{{end}}
+                <span class="doc-number">#{{.Invoice.InvoiceNumber}}</span>
+            </div>
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Status</span>
+                    <span class="meta-value">
+                        <span class="status-badge status-{{.Invoice.Status}}">{{.Invoice.Status}}</span>
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Issued</span>
+                    <span class="meta-value">{{.Invoice.IssueDate}}</span>
+                </div>
+                {{if .Invoice.DueDate}}
+                <div class="meta-item">
+                    <span class="meta-label">Due</span>
+                    <span class="meta-value">{{.Invoice.DueDate}}</span>
+                </div>
+                {{end}}
+                <div class="meta-item">
+                    <span class="meta-label">Currency</span>
+                    <span class="meta-value">{{.Invoice.Currency}}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="addresses-band">
+            <div class="address-col">
+                <div class="address-label">From</div>
+                <div class="address-name">{{.Invoice.CompanyName}}</div>
+                <div class="address-line">
+                    {{if .Invoice.CompanyAddress}}{{.Invoice.CompanyAddress}}<br>{{end}}
+                    {{if .Invoice.CompanyCity}}{{.Invoice.CompanyCity}}{{if .Invoice.CompanyState}}, {{.Invoice.CompanyState}}{{end}} {{.Invoice.CompanyZip}}<br>{{end}}
+                    {{if .Invoice.CompanyCountry}}{{.Invoice.CompanyCountry}}<br>{{end}}
+                    {{if .Invoice.CompanyEmail}}{{.Invoice.CompanyEmail}}{{end}}
+                </div>
+            </div>
+            <div class="address-col">
+                <div class="address-label">Bill To</div>
+                <div class="address-name">{{.Invoice.ClientName}}</div>
+                <div class="address-line">
+                    {{if .Invoice.ClientAddress}}{{.Invoice.ClientAddress}}<br>{{end}}
+                    {{if .Invoice.ClientCity}}{{.Invoice.ClientCity}}{{if .Invoice.ClientState}}, {{.Invoice.ClientState}}{{end}} {{.Invoice.ClientZip}}<br>{{end}}
+                    {{if .Invoice.ClientCountry}}{{.Invoice.ClientCountry}}<br>{{end}}
+                    {{if .Invoice.ClientEmail}}{{.Invoice.ClientEmail}}{{end}}
+                </div>
+            </div>
+        </section>
+
+        {{/* ── Desktop line items table ── */}}
+        <div class="table-wrapper">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="right">Qty</th>
+                        <th class="right">Unit Price</th>
+                        <th class="right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Invoice.Items}}
+                    <tr>
+                        <td>
+                            <div class="item-description">{{.Description}}</div>
+                            {{if .Details}}
+                            <div class="item-details">{{.Details}}</div>
+                            {{end}}
+                        </td>
+                        <td class="right numeric">{{.Quantity}}</td>
+                        <td class="right money">{{.UnitPrice}}</td>
+                        <td class="right money">{{.LineTotal}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        {{/* ── Mobile line items cards ──
+             Replaces the table on screens < 700px.
+             Each item is a self-contained card with description,
+             optional details, qty × price, and line total.
+             touch targets are not needed here (read-only view).
+        ── */}}
+        <div class="items-mobile">
+            {{range .Invoice.Items}}
+            <div class="item-card-m">
+                <div class="item-card-m-desc">{{.Description}}</div>
+                {{if .Details}}
+                <div class="item-card-m-detail">{{.Details}}</div>
+                {{end}}
+                <div class="item-card-m-meta">
+                    <span>{{.Quantity}} × {{.UnitPrice}}</span>
+                    <span class="item-card-m-total">{{.LineTotal}}</span>
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+        <footer class="invoice-footer-split">
+            <div class="notes-block">
+                {{if .Invoice.PaymentDetails}}
+                <div>
+                    <div class="info-label">Payment Instructions</div>
+                    <div class="info-content">{{.Invoice.PaymentDetails}}</div>
+                </div>
+                {{end}}
+                {{if .Invoice.Notes}}
+                <div>
+                    <div class="info-label">Notes & Memo</div>
+                    <div class="info-content">{{.Invoice.Notes}}</div>
+                </div>
+                {{end}}
+            </div>
+
+            <div class="totals-box">
+                <div class="totals-row">
+                    <span class="totals-label">Subtotal</span>
+                    <span class="totals-value">{{.Invoice.Subtotal}}</span>
+                </div>
+                {{if ne .Invoice.TaxRate "0"}}
+                <div class="totals-row">
+                    <span class="totals-label">Tax ({{.Invoice.TaxRate}}%)</span>
+                    <span class="totals-value">{{.Invoice.TaxAmount}}</span>
+                </div>
+                {{end}}
+                {{if ne .Invoice.Discount "$0.00"}}
+                <div class="totals-row">
+                    <span class="totals-label">Discount</span>
+                    <span class="totals-value">-{{.Invoice.Discount}}</span>
+                </div>
+                {{end}}
+                <div class="totals-row grand-total">
+                    <span class="totals-label">Total Due</span>
+                    <span class="totals-value">{{.Invoice.Total}}</span>
+                </div>
+            </div>
+        </footer>
+
+        {{/* ── Actions: hidden in PDF mode ── */}}
+        {{if not .Invoice.Hints.PDFMode}}
+        <section class="invoice-actions-wrapper">
+            <div class="primary-actions">
+                {{if eq .Invoice.Status "draft"}}
+                <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
+                {{end}}
+
+	{{if .User}}
+    		{{if eq .User.Plan "pro"}}
+    		<a href="/invoices/{{.Invoice.ID}}/send" class="btn-primary">📨 Send Invoice</a>
+    {{else}}
+    <a href="/pricing?reason=email-pro" class="btn-secondary" style="opacity: 0.5;">🔒 Send Invoice (Pro)</a>
+    {{end}}
+{{end}} 
+                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn-secondary">📋 Duplicate</a>
+                <button type="button" onclick="window.print()" class="btn-secondary">🖨️ Print</button>
+
+                {{/* Desktop: download. Mobile: inline preview in browser tab. */}}
+                <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-secondary desktop-only">📥 Download PDF</a>
+                <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="btn-secondary mobile-only">👁 Preview PDF</a>
+            </div>
+
+            {{if .User}}
+            <div class="status-panel">
+                <div class="status-panel-title">Change Invoice Status</div>
+                <div class="status-actions">
+                    {{if eq .Invoice.Status "draft"}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="sent">
+                        <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">Mark as Sent</button>
+                    </form>
+                    {{end}}
+
+                    {{if eq .Invoice.Status "sent"}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="paid">
+                        <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
+                    </form>
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="overdue">
+                        <button type="submit" class="status-btn" style="background:#fef9c3; color:#854d0e;">Mark Overdue</button>
+                    </form>
+                    {{end}}
+
+                    {{if eq .Invoice.Status "overdue"}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="paid">
+                        <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
+                    </form>
+                    {{end}}
+
+                    {{if and (ne .Invoice.Status "void") (ne .Invoice.Status "paid")}}
+                    <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                        {{.csrfField}}
+                        <input type="hidden" name="status" value="void">
+                        <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">Void</button>
+                    </form>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </section>
+        {{end}}
+
+    </div>
+</div>
+
+</body>
+</html>
