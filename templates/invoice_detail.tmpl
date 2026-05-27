@@ -10,9 +10,9 @@
 
     {{template "nav-styles" .}}
 
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+       <style>
+        :root { --brand: {{.Invoice.BrandColor}}; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } 
         body {
             background: #f3f4f6;
             color: #111827;
@@ -36,8 +36,7 @@
             border: 1px solid #e5e7eb;
         }
 
-        .top-accent { height: 6px; background: #0d1422; }
-
+	.top-accent { height: 6px; background: var(--brand); }
         /* ── Header ── */
         .header-top {
             padding: 28px 36px 16px;
@@ -57,8 +56,8 @@
             font-size: 24px;
             font-weight: 800;
             letter-spacing: -0.5px;
-            color: #0d1422;
-        }
+	    color: var(--brand);
+	}
         .doc-number {
             font-size: 18px;
             font-weight: 700;
@@ -238,7 +237,7 @@
             /* Mobile minimum touch target */
             min-height: 44px;
         }
-        .btn-primary  { background: #0d1422; color: #ffffff; }
+	.btn-primary  { background: var(--brand); color: #ffffff; }
         .btn-secondary { background: #ffffff; color: #0d1422; border: 1px solid #cbd5e1; }
         .btn-primary:hover  { background: #1e293b; }
         .btn-secondary:hover { background: #f8fafc; }
