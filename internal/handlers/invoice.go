@@ -197,7 +197,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				ShowLogo:       r.FormValue("show_logo") == "on",
 				ShowTitle:      r.FormValue("show_title") == "on",
 				AutoReminders:  r.FormValue("auto_reminders") == "on",
-								LogoURL: func() template.URL {
+				LogoURL: func() template.URL {
 					if user != nil {
 						if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
 							return template.URL(bp.LogoURL)
@@ -205,7 +205,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 					}
 					return ""
 				}(),
-							},
+			},
 		}
 		if user != nil {
 			clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
@@ -327,21 +327,21 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 					ClientCountry:  inv.ClientCountry,
 					InvoiceNumber:  inv.InvoiceNumber,
 					Currency:       inv.Currency,
-											Notes:          inv.Notes,
-						PaymentDetails: inv.PaymentDetails,
-						ShowLogo:       inv.ShowLogo,
-						ShowTitle:      inv.ShowTitle,
-						AutoReminders:  inv.AutoReminders,
-						LogoURL: func() template.URL {
-							if user != nil {
-								if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
-									return template.URL(bp.LogoURL)
-								}
+					Notes:          inv.Notes,
+					PaymentDetails: inv.PaymentDetails,
+					ShowLogo:       inv.ShowLogo,
+					ShowTitle:      inv.ShowTitle,
+					AutoReminders:  inv.AutoReminders,
+					LogoURL: func() template.URL {
+						if user != nil {
+							if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
+								return template.URL(bp.LogoURL)
 							}
-							return ""
-						}(),
-					},
-								}
+						}
+						return ""
+					}(),
+				},
+			}
 			if user != nil {
 				clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
 				if err == nil && len(clients) > 0 {
@@ -450,7 +450,7 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 
 	// PDF mode: headless Chromium cannot reliably fetch external images.
 	// Fetch the logo here in Go and inject it as a base64 data URI instead.
-		logoStr := string(invoiceView.LogoURL)
+	logoStr := string(invoiceView.LogoURL)
 	if logoStr != "" {
 		if strings.HasPrefix(logoStr, "/static/") {
 			// Local disk (LocalStore)
@@ -478,13 +478,12 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 					} else {
 						mime := http.DetectContentType(b)
 						invoiceView.LogoURL = template.URL("data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b))
-						log.Printf("[pdf] logo inlined as base64 for invoice %d (%d bytes) mime=%s", id, len(b), mime)
+						log.Printf("[pdf] logo inlined as base64 for invoice %d (%d bytes)", id, len(b))
 					}
 				}
 			}
 		}
 	}
-
 	var buf bytes.Buffer
 
 	templateData := map[string]any{
@@ -512,6 +511,7 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 
 	_, _ = w.Write(pdfBytes)
 }
+
 // =====================================================================
 // PROTECTED INVOICE MANAGEMENT ROUTES
 // All routes below require auth.RequireAuth (enforced in router.go).

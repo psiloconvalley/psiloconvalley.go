@@ -3,8 +3,8 @@ package views
 
 import (
 	"fmt"
-	"time"
 	"html/template"
+	"time"
 
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
@@ -27,9 +27,9 @@ import (
 // =====================================================================
 
 type RenderHints struct {
-	PDFMode       bool // true when rendering for PDF generation — hides nav/buttons
-	InlinePDF     bool // true when PDF should be served inline vs attachment
-	MobileLayout  bool // true when mobile-optimised template variant is preferred
+	PDFMode      bool // true when rendering for PDF generation — hides nav/buttons
+	InlinePDF    bool // true when PDF should be served inline vs attachment
+	MobileLayout bool // true when mobile-optimised template variant is preferred
 }
 
 // =====================================================================
@@ -48,7 +48,11 @@ type InvoicePage struct {
 	Notes          string
 	PaymentDetails string
 	Mode           string
-	LogoURL        template.URL
+	// LogoURL must be template.URL, not string. The PDF handler injects
+	// base64 data URIs here. If this is typed as string, html/template
+	// will silently sanitize the data: scheme to #ZgotmplZ and the logo
+	// will render as a broken image in PDFs. No error. No log. Silent.
+	LogoURL template.URL
 
 	// Company
 	CompanyName    string
@@ -82,16 +86,15 @@ type InvoicePage struct {
 	Items []InvoiceItemView
 
 	// FIX M3: Populated by the handler, read by templates.
-	Hints RenderHints
-	ShowLogo  bool
-	ShowTitle bool
+	Hints         RenderHints
+	ShowLogo      bool
+	ShowTitle     bool
 	AutoReminders bool
 
-
 	//Recurring
-	IsRecurring bool
+	IsRecurring        bool
 	RecurringFrequency string
-	RecurringAutoSend bool
+	RecurringAutoSend  bool
 }
 
 // FIX H5 / C5: Details is now populated from repo.InvoiceItem.Details,
@@ -99,7 +102,7 @@ type InvoicePage struct {
 // The Details field is no longer always empty string.
 type InvoiceItemView struct {
 	Description string
-	Details     string  // ← now correctly populated
+	Details     string // ← now correctly populated
 	Quantity    string
 	UnitPrice   string
 	LineTotal   string
@@ -216,9 +219,9 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 
 		TaxRateBps:             inv.TaxRateBps,
 		DiscountAmountCentsRaw: inv.DiscountAmountCents,
-		ShowLogo:  inv.ShowLogo,
-		ShowTitle: inv.ShowTitle,
-		AutoReminders: inv.AutoReminders,
+		ShowLogo:               inv.ShowLogo,
+		ShowTitle:              inv.ShowTitle,
+		AutoReminders:          inv.AutoReminders,
 
 		// Hints is zero-value (all false) by default.
 		// The handler sets fields on this after calling MapInvoicePage.

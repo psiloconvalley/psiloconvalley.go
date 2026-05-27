@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"sync"
 	"time"
 
@@ -25,7 +26,7 @@ var (
 	allocCancel context.CancelFunc
 	initOnce    sync.Once
 
-	// FIX H7: Semaphore limiting concurrent PDF generations.
+	// Semaphore limiting concurrent PDF generations.
 	// Chrome tabs are cheap but not free — each holds a V8 isolate and
 	// a layout engine. On Railway's 512MB containers, more than 3
 	// concurrent PDF renders will exhaust memory and OOM-kill the process.
@@ -33,6 +34,15 @@ var (
 	// behaviour for a bursty but low-sustained-volume workload.
 	// Increase to 5 if you upgrade to a 1GB Railway plan.
 	pdfSem = make(chan struct{}, 3)
+
+	// Strip <link> tags referencing Google Fonts. Headless Chrome has
+	// disable-background-networking set, so these requests never complete.
+	// Font stylesheets are render-blocking — document.readyState never
+	// reaches 'complete' and PDF generation times out. The invoice falls
+	// back to the system sans-serif stack which is visually identical.
+	googleFontsRe = regexp.MustCompile(
+		`(?i)<link[^>]*fonts\.(googleapis|gstatic)\.com[^>]*>`,
+	)
 )
 
 // Init starts the persistent Chrome allocator.
@@ -46,11 +56,8 @@ func Init() {
 			chromedp.Flag("disable-dev-shm-usage", true),
 			chromedp.Flag("disable-setuid-sandbox", true),
 			chromedp.Flag("no-first-run", true),
-			// FIX H8: single-process removed — deprecated in Chromium 117+
-			// and causes renderer instability on modern Linux containers.
-			// no-zygote achieves the same memory isolation goal without
-			// the instability risk. single-process + no-zygote together
-			// was redundant; no-zygote alone is the correct flag for Railway.
+			// no-zygote achieves memory isolation without the instability
+			// of the deprecated single-process flag (removed in Chromium 117+).
 			chromedp.Flag("no-zygote", true),
 			chromedp.Flag("disable-extensions", true),
 			chromedp.Flag("disable-background-networking", true),
@@ -82,6 +89,12 @@ func Shutdown() {
 	}
 }
 
+// sanitizeForPDF removes render-blocking external resources that
+// headless Chrome cannot fetch due to disable-background-networking.
+func sanitizeForPDF(html string) string {
+	return googleFontsRe.ReplaceAllString(html, "")
+}
+
 // Generate takes a fully rendered HTML string and returns PDF bytes.
 //
 // It acquires a slot from the concurrency semaphore before opening a
@@ -90,6 +103,8 @@ func Shutdown() {
 // immediately with the context error — no goroutine leak.
 func Generate(ctx context.Context, html string) ([]byte, error) {
 	Init() // idempotent — safe to call if Init() wasn't called from main
+
+	html = sanitizeForPDF(html)
 
 	// Acquire semaphore slot — blocks if 3 renders are already in progress.
 	// Respects caller context cancellation (e.g., user closed the browser tab).
@@ -119,12 +134,14 @@ func Generate(ctx context.Context, html string) ([]byte, error) {
 			}
 			return page.SetDocumentContent(frameTree.Frame.ID, html).Do(ctx)
 		}),
-		// Wait for both the DOM to be ready AND all injected images (like the logo)
-		// to finish downloading over the network. If we don't wait for images,
-		// headless Chrome will snapshot a broken "ripped page" icon.
+		// Wait for DOM ready AND all images fully decoded.
+		// i.complete alone returns true for broken images — a broken image
+		// has naturalWidth === 0. Checking both ensures Chrome has actually
+		// decoded the image bytes before we snapshot to PDF.
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			return chromedp.Poll(
-				`document.readyState === 'complete' && Array.from(document.images).every(i => i.complete)`,
+				`document.readyState === 'complete' && `+
+					`Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)`,
 				nil,
 				chromedp.WithPollingInterval(50*time.Millisecond),
 			).Do(ctx)
