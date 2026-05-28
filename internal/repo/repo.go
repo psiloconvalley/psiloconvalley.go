@@ -3,7 +3,9 @@ package repo
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math"
@@ -135,6 +137,7 @@ type Invoice struct {
 	AutoReminders       bool
 	TemplateID	    string // "classic", "minimal","bold"
 	BrandColor	    string // "#RRGGBB" hex accent color
+	PublicToken         string // secure share token for client access
 }
 
 type InvoiceItem struct {
@@ -978,11 +981,12 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.updated_at,
 			COALESCE(bp.logo_url, '') AS logo_url,
 			i.template_id,
-			i.brand_color
+			i.brand_color,
+			COALESCE(i.public_token, '') AS public_token
 		FROM invoices i
 		LEFT JOIN business_profiles bp ON bp.id = i.business_profile_id
 		WHERE i.id = $1`
-		
+
 	var inv Invoice
 	var bpID, cID, uID sql.NullInt64
 	var anonToken sql.NullString
@@ -1031,6 +1035,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.LogoURL,
 		&inv.TemplateID,
 		&inv.BrandColor,
+		&inv.PublicToken,
 	)
 	if err != nil {
 		return nil, nil, err
@@ -1337,6 +1342,45 @@ func (r *InvoiceRepo) DeleteDraftInvoice(
 	}
 
 	return tx.Commit()
+}
+
+// EnsurePublicToken returns the existing public token for an invoice or
+// generates and saves a new one if it does not yet exist.
+func (r *InvoiceRepo) EnsurePublicToken(ctx context.Context, invoiceID int64) (string, error) {
+	var existing sql.NullString
+	err := r.db.QueryRowContext(ctx,
+		`SELECT public_token FROM invoices WHERE id = $1`,
+		invoiceID,
+	).Scan(&existing)
+	if err != nil {
+		return "", err
+	}
+	if existing.Valid && existing.String != "" {
+		return existing.String, nil
+	}
+
+	token, err := generatePublicToken()
+	if err != nil {
+		return "", err
+	}
+
+	_, err = r.db.ExecContext(ctx,
+		`UPDATE invoices SET public_token = $1 WHERE id = $2`,
+		token, invoiceID,
+	)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+// generatePublicToken creates a 32-byte hex token (64 chars).
+func generatePublicToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
 // =====================================================================
 // Dashboard Stats
