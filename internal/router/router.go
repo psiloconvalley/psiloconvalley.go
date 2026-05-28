@@ -60,7 +60,10 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/clients", h.ClientsList)
 		r.Get("/clients/new", h.ClientNewGet)
 		r.Post("/clients/new", h.ClientNewPost)
-
+		r.Get("/clients/{id}/edit", h.ClientEditGet)
+		r.Post("/clients/{id}/edit", h.ClientEditPost)
+		r.Post("/clients/{id}/delete", h.ClientDelete)
+		
 		// Invoice management (requires login)
 		r.Get("/dashboard", h.DashboardGet)
 		r.Get("/invoices", h.InvoicesList)
