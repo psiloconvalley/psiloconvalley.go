@@ -110,7 +110,14 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 
 	// ── Build email payload ───────────────────────────────────────────
 	baseURL := h.App.BaseURL
+	token, err := h.App.InvRepo.EnsurePublicToken(r.Context(), id)
+	if err != nil {
+		log.Printf("[send] failed to ensure public token for invoice %d: %v", id, err)
+	}
 	invoiceURL := fmt.Sprintf("%s/invoices/%d", baseURL, id)
+	if token != "" {
+		invoiceURL += "?access=" + token
+	}
 
 	emailData := mailer.InvoiceEmailData{
 		InvoiceNumber: inv.InvoiceNumber,

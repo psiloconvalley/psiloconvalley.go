@@ -349,6 +349,10 @@ func (h *Handlers) InvoicePayGet(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	if !h.canViewInvoice(r, inv) {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
 
 	// Cannot pay invoices that are already paid or voided
 	if inv.Status == "paid" || inv.Status == "void" {

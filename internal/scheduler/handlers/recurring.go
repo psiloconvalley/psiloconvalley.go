@@ -71,7 +71,15 @@ func NewRecurringHandler(
 
 		// Auto-send if enabled
 		if sched.SendAutomatically && templateInv.ClientEmail != "" {
+			token, err := invRepo.EnsurePublicToken(ctx, newID)
+			if err != nil {
+				log.Printf("[recurring] failed to ensure public token for invoice %d: %v", newID, err)
+			}
 			invoiceURL := fmt.Sprintf("%s/invoices/%d", baseURL, newID)
+			if token != "" {
+				invoiceURL += "?access=" + token
+			}
+
 
 			dueDate := ""
 			if newInv.DueDate != nil {

@@ -585,7 +585,7 @@
                 <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="btn-secondary mobile-only">👁 Preview PDF</a>
 		
                 {{if .PayNowEnabled}}
-                <a href="/invoices/{{.Invoice.ID}}/pay" class="btn-pay">💳 Pay Now</a>
+		<a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" class="btn-pay">💳 Pay Now</a>
                 {{end}}
             </div>
 

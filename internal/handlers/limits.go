@@ -98,3 +98,39 @@ func (h *Handlers) canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
 
 	return anonToken == inv.AnonymousToken
 }
+
+// canViewInvoice allows read-only access to an invoice.
+// Used by the detail and pay handlers — anyone with the link can view.
+// This is safe because invoices contain no secrets — they are documents
+// meant to be shared with clients via email links.
+// Owner-only operations (edit, delete, status) still use canAccessInvoice.
+func (h *Handlers) canViewInvoice(r *http.Request, inv *repo.Invoice) bool {
+	if inv == nil {
+		return false
+	}
+
+	// 1. Any logged-in user who owns this invoice
+	user := auth.GetUser(r)
+	if inv.UserID != nil && user != nil && user.ID == *inv.UserID {
+		return true
+	}
+
+	// 2. Anonymous token match (for guest invoices)
+	if inv.AnonymousToken != "" {
+		anonToken, ok := auth.GetAnonymousToken(r)
+		if ok && anonToken == inv.AnonymousToken {
+			return true
+		}
+	}
+
+	// 3. Public access token match (for shared registered invoices)
+	// Check query parameter ?access=...
+	if inv.PublicToken != "" {
+		accessToken := r.URL.Query().Get("access")
+		if accessToken != "" && accessToken == inv.PublicToken {
+			return true
+		}
+	}
+
+	return false
+}

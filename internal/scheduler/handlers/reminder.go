@@ -71,7 +71,14 @@ func NewReminderHandler(
 		}
 
 		// Build invoice URL
+		token, err := invRepo.EnsurePublicToken(ctx, inv.ID)
+		if err != nil {
+			log.Printf("[reminder] failed to ensure public token for invoice %d: %v", inv.ID, err)
+		}
 		invoiceURL := fmt.Sprintf("%s/invoices/%d", baseURL, inv.ID)
+		if token != "" {
+			invoiceURL += "?access=" + token
+		}
 
 		emailData := mailer.ReminderEmailData{
 			InvoiceNumber: inv.InvoiceNumber,

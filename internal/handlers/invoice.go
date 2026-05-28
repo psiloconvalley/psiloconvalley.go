@@ -423,7 +423,7 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.canAccessInvoice(r, inv) {
+	if !h.canViewInvoice(r, inv) {
 		http.Error(w, "Unauthorized - You can only view your own invoices", http.StatusForbidden)
 		return
 	}
@@ -439,14 +439,18 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+		accessToken := r.URL.Query().Get("access")
+
 	h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
 		"Invoice":       invoiceView,
 		"IsLoggedIn":    auth.GetUser(r) != nil,
 		"Sent":          r.URL.Query().Get("sent") == "true",
 		"SentTo":        r.URL.Query().Get("to"),
+		"Paid":          r.URL.Query().Get("paid") == "1",
 		"PayNowEnabled": payNowEnabled,
+		"AccessToken":   accessToken,
 	})
-}
+	}
 
 func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
