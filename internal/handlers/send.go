@@ -89,7 +89,7 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 		"csrfField": "",
 	}
 
-	if err := h.App.Templates.ExecuteTemplate(&buf, "invoice_detail.tmpl", templateData); err != nil {
+	if err := h.App.Templates.ExecuteTemplate(&buf, invoiceTemplateName(invoiceView.TemplateID), templateData); err != nil {
 		log.Printf("[send] template render error: %v", err)
 		http.Error(w, "Could not render invoice", http.StatusInternalServerError)
 		return
