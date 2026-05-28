@@ -570,10 +570,12 @@
         {{if not .Invoice.Hints.PDFMode}}
         <section class="invoice-actions-wrapper">
             <div class="primary-actions">
-                {{if eq .Invoice.Status "draft"}}
-                <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
+	       {{if eq .Invoice.Status "draft"}}
+		 <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
+                {{if .User}}
+                <button type="button" class="btn-danger" onclick="openDeleteModal('{{.Invoice.InvoiceNumber}}', {{.Invoice.ID}})">🗑 Delete Draft</button>
                 {{end}}
-
+                {{end}}
 				{{if .User}}
     		<a href="/invoices/{{.Invoice.ID}}/send" class="btn-primary">📨 Send Invoice</a>
 	{{end}}
@@ -635,8 +637,76 @@
         </section>
         {{end}}
 
+       </div>
+</div>
+
+<!-- ═══════════ DELETE CONFIRMATION MODAL ═══════════ -->
+<div id="delete-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:500;">
+    <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:16px; padding:32px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="font-size:20px; font-weight:800; color:#0d1422; margin-bottom:8px;">Delete Draft Invoice</div>
+        <div style="font-size:13px; color:#666; margin-bottom:20px; line-height:1.5;">This action <strong>cannot be undone</strong>. The invoice and all its line items will be permanently deleted.</div>
+        <div style="font-size:13px; font-weight:600; color:#444; margin-bottom:8px;">Type the invoice number to confirm:</div>
+        <div style="font-size:13px; font-weight:700; color:#dc2626; background:#fee2e2; border-radius:6px; padding:8px 12px; margin-bottom:12px; font-family:monospace;" id="delete-modal-number"></div>
+        <input
+            type="text"
+            id="delete-confirm-input"
+            placeholder="Type invoice number here"
+            oninput="checkDeleteConfirm()"
+            style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; font-family:'Inter',sans-serif; margin-bottom:16px;"
+        >
+        <div style="display:flex; gap:12px;">
+            <button type="button" onclick="closeDeleteModal()" style="flex:1; padding:11px; border:1px solid #ddd; background:white; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">Cancel</button>
+            <form id="delete-form" method="POST" action="" style="flex:1;">
+                {{.csrfField}}
+                <input type="hidden" name="confirm_number" id="delete-confirm-hidden">
+                <button type="submit" id="delete-submit-btn" disabled
+                    style="width:100%; padding:11px; background:#dc2626; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; opacity:0.4;">
+                    Delete Permanently
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
+<script>
+var _deleteInvoiceNumber = '';
+
+function openDeleteModal(invoiceNumber, invoiceID) {
+    _deleteInvoiceNumber = invoiceNumber;
+    document.getElementById('delete-modal-number').textContent = invoiceNumber;
+    document.getElementById('delete-confirm-input').value = '';
+    document.getElementById('delete-confirm-hidden').value = '';
+    document.getElementById('delete-submit-btn').disabled = true;
+    document.getElementById('delete-submit-btn').style.opacity = '0.4';
+    document.getElementById('delete-form').action = '/invoices/' + invoiceID + '/delete';
+    document.getElementById('delete-overlay').style.display = 'block';
+    setTimeout(function(){ document.getElementById('delete-confirm-input').focus(); }, 50);
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-overlay').style.display = 'none';
+}
+
+function checkDeleteConfirm() {
+    var val = document.getElementById('delete-confirm-input').value.trim();
+    var btn = document.getElementById('delete-submit-btn');
+    var hidden = document.getElementById('delete-confirm-hidden');
+    if (val === _deleteInvoiceNumber) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        hidden.value = val;
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.4';
+        hidden.value = '';
+    }
+}
+
+// Close on overlay click
+document.getElementById('delete-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+</script>
+
 </body>
-</html>
+</html> 

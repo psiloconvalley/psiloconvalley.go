@@ -833,6 +833,48 @@ func isValidHexColor(s string) bool {
 	}
 	return true
 }
+// InvoiceDeletePost permanently deletes a draft invoice.
+// Only draft invoices can be deleted — sent/paid/overdue invoices must be voided.
+// Requires the user to confirm by typing the invoice number exactly.
+func (h *Handlers) InvoiceDeletePost(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, _, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
+	if inv.Status != "draft" {
+		http.Error(w, "Only draft invoices can be deleted", http.StatusBadRequest)
+		return
+	}
+
+	confirmation := strings.TrimSpace(r.FormValue("confirm_number"))
+	if confirmation != inv.InvoiceNumber {
+		http.Error(w, "Confirmation did not match invoice number", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.App.InvRepo.DeleteDraftInvoice(r.Context(), id, user.ID); err != nil {
+		log.Printf("[invoice] delete error: %v", err)
+		http.Error(w, "Could not delete invoice", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("[invoice] draft invoice %d deleted by user %d", id, user.ID)
+	http.Redirect(w, r, "/invoices?deleted=true", http.StatusSeeOther)
+}
 
 // normalizeTemplateFields validates and applies Pro gating to
 // template_id and brand_color. Free users are silently reset

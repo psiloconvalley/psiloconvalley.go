@@ -70,6 +70,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/invoices/{id}/edit", h.InvoiceEditGet)
 		r.Post("/invoices/{id}/edit", h.InvoiceUpdatePost)
 		r.Post("/invoices/{id}/status", h.InvoiceStatusPost)
+		r.Post("/invoices/{id}/delete", h.InvoiceDeletePost)
 		r.Get("/invoices/{id}/send", h.InvoiceSendGet)
 		r.Post("/invoices/{id}/send", h.InvoiceSendPost)
 		r.Get("/invoices/{id}/duplicate", h.InvoiceDuplicateGet)
