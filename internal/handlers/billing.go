@@ -119,6 +119,30 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// ── Invoice payment (Stripe Connect) ────────────────────────
+		if invoiceIDStr := cs.Metadata["invoice_id"]; invoiceIDStr != "" {
+			invoiceID, err := strconv.ParseInt(invoiceIDStr, 10, 64)
+			if err != nil {
+				log.Printf("[stripe-connect] invalid invoice_id in metadata: %s", invoiceIDStr)
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			userIDStr := cs.Metadata["user_id"]
+			userID, _ := strconv.ParseInt(userIDStr, 10, 64)
+
+			if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), invoiceID, "paid", userID); err != nil {
+				log.Printf("[stripe-connect] failed to mark invoice %d as paid: %v", invoiceID, err)
+				http.Error(w, "Failed to update invoice status", http.StatusInternalServerError)
+				return
+			}
+
+			log.Printf("[stripe-connect] invoice %d marked as paid via Stripe Connect", invoiceID)
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// ── Pro subscription upgrade ─────────────────────────────────
 		userIDStr := cs.ClientReferenceID
 		if userIDStr == "" {
 			userIDStr = cs.Metadata["user_id"]
@@ -180,7 +204,6 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
-
 func (h *Handlers) BillingPortalPost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
