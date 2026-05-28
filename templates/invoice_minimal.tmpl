@@ -559,6 +559,9 @@
                 {{/* Desktop: download. Mobile: inline preview in browser tab. */}}
                 <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-secondary desktop-only">📥 Download PDF</a>
                 <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="btn-secondary mobile-only">👁 Preview PDF</a>
+                {{if .PayNowEnabled}}
+                <a href="/invoices/{{.Invoice.ID}}/pay" class="btn-pay">💳 Pay Now</a>
+                {{end}}
             </div>
 
             {{if .User}}

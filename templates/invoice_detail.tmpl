@@ -241,6 +241,31 @@
         .btn-secondary { background: #ffffff; color: #0d1422; border: 1px solid #cbd5e1; }
         .btn-primary:hover  { background: #1e293b; }
         .btn-secondary:hover { background: #f8fafc; }
+	.btn-pay {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-decoration: none;
+            color: #0d1422;
+            background: #f0eee9;
+            border: 1.5px solid #d5d0c8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            cursor: pointer;
+            font-family: inherit;
+            min-height: 44px;
+            transition: all 0.2s ease;
+        }
+        .btn-pay:hover {
+            background: #e8e5df;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
 
         .status-panel {
             background: #ffffff;
@@ -558,6 +583,10 @@
                 {{/* Desktop: download. Mobile: inline preview in browser tab. */}}
                 <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-secondary desktop-only">📥 Download PDF</a>
                 <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="btn-secondary mobile-only">👁 Preview PDF</a>
+		
+                {{if .PayNowEnabled}}
+                <a href="/invoices/{{.Invoice.ID}}/pay" class="btn-pay">💳 Pay Now</a>
+                {{end}}
             </div>
 
             {{if .User}}

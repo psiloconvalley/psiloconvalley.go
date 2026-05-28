@@ -428,12 +428,23 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	invoiceView := views.MapInvoicePage(inv, items, "view")
-		h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
-		"Invoice":    invoiceView,
-		"IsLoggedIn": auth.GetUser(r) != nil,
-		"Sent":       r.URL.Query().Get("sent") == "true",
-		"SentTo":     r.URL.Query().Get("to"),
+		invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	// Check if the invoice owner has Stripe Connect enabled
+	payNowEnabled := false
+	if inv.UserID != nil && inv.Status != "paid" && inv.Status != "void" {
+		owner, err := h.App.UserRepo.GetByID(*inv.UserID)
+		if err == nil && owner.StripeConnectID != "" {
+			payNowEnabled = true
+		}
+	}
+
+	h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
+		"Invoice":       invoiceView,
+		"IsLoggedIn":    auth.GetUser(r) != nil,
+		"Sent":          r.URL.Query().Get("sent") == "true",
+		"SentTo":        r.URL.Query().Get("to"),
+		"PayNowEnabled": payNowEnabled,
 	})
 }
 
