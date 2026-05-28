@@ -88,6 +88,138 @@
         Appears on invoices and PDFs.
     </div>
 </div>
+
+<!-- ── Invoice Preview Card ── -->
+<div id="invoice-preview" style="
+    margin-bottom: 32px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 380px;
+">
+    <!-- Accent bar -->
+    <div style="height: 5px; background: #0d1422;"></div>
+
+    <div style="padding: 20px 24px;">
+        <!-- Logo area -->
+        {{if .Profile}}
+            {{if .Profile.LogoURL}}
+            <img
+                id="preview-logo"
+                src="{{.Profile.LogoURL}}"
+                alt="Logo preview"
+                style="max-width: 120px; max-height: 50px; object-fit: contain; display: block; margin-bottom: 12px;"
+            >
+            {{else}}
+            <div id="preview-logo-placeholder" style="
+                width: 120px; height: 40px;
+                background: #e2e8f0; border-radius: 6px;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 10px; color: #94a3b8; font-weight: 600;
+                margin-bottom: 12px;
+            ">YOUR LOGO</div>
+            {{end}}
+        {{else}}
+        <div id="preview-logo-placeholder" style="
+            width: 120px; height: 40px;
+            background: #e2e8f0; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #94a3b8; font-weight: 600;
+            margin-bottom: 12px;
+        ">YOUR LOGO</div>
+        {{end}}
+
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px;">
+            <div>
+                <div style="font-size: 14px; font-weight: 800; color: #0d1422; letter-spacing: -0.3px;">INVOICE</div>
+                <div id="preview-company" style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 2px;">
+                    {{if .Profile}}{{if .Profile.Name}}{{.Profile.Name}}{{else}}Your Company{{end}}{{else}}Your Company{{end}}
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.8px;">Invoice</div>
+                <div style="font-size: 11px; font-weight: 600; color: #0d1422;">#INV-001</div>
+            </div>
+        </div>
+
+        <!-- Fake line items -->
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-bottom: 6px;">
+                <span style="font-weight: 700; color: #0d1422;">Web Design</span>
+                <span style="font-variant-numeric: tabular-nums;">$1,200.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-bottom: 6px;">
+                <span style="font-weight: 700; color: #0d1422;">Brand Strategy</span>
+                <span style="font-variant-numeric: tabular-nums;">$800.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b;">
+                <span style="font-weight: 700; color: #0d1422;">Consulting</span>
+                <span style="font-variant-numeric: tabular-nums;">$500.00</span>
+            </div>
+        </div>
+
+        <!-- Total -->
+        <div style="
+            border-top: 1px solid #cbd5e1;
+            margin-top: 12px;
+            padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 800;
+            color: #0d1422;
+        ">
+            <span>Total</span>
+            <span style="font-variant-numeric: tabular-nums;">$2,500.00</span>
+        </div>
+    </div>
+</div>
+
+<script>
+// Live preview: update company name as user types
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.querySelector('input[name="name"]');
+    const previewCompany = document.getElementById('preview-company');
+    if (nameInput && previewCompany) {
+        nameInput.addEventListener('input', function() {
+            previewCompany.textContent = this.value || 'Your Company';
+        });
+    }
+
+    // Live preview: update logo when file is selected
+    const logoInput = document.querySelector('input[name="logo"]');
+    if (logoInput) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                // Update the main logo display
+                let mainImg = document.querySelector('.form-group img[alt="Company Logo"]');
+
+                // Update or create preview logo
+                let previewImg = document.getElementById('preview-logo');
+                let placeholder = document.getElementById('preview-logo-placeholder');
+
+                if (previewImg) {
+                    previewImg.src = ev.target.result;
+                } else if (placeholder) {
+                    const img = document.createElement('img');
+                    img.id = 'preview-logo';
+                    img.src = ev.target.result;
+                    img.alt = 'Logo preview';
+                    img.style.cssText = 'max-width:120px; max-height:50px; object-fit:contain; display:block; margin-bottom:12px;';
+                    placeholder.replaceWith(img);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+});
+</script>
 		<div class="grid-2">
                     <div class="form-group">
                         <label>Company Name *</label>
