@@ -44,6 +44,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Post("/invoices/create", h.InvoiceCreatePost)
 	r.Get("/invoices/{id}", h.InvoiceDetail)
 	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
+	r.Get("/invoices/{id}/pay", h.InvoicePayGet)
 
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {

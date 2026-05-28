@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/stripe/stripe-go/v81"
 	billingportalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	checkoutsession "github.com/stripe/stripe-go/v81/checkout/session"
@@ -308,4 +310,84 @@ func (h *Handlers) StripeConnectCallback(w http.ResponseWriter, r *http.Request)
 
 	log.Printf("[stripe-connect] user %d connected Stripe account %s", user.ID, result.StripeUserID)
 	http.Redirect(w, r, "/profile?stripe_connected=1", http.StatusSeeOther)
+}
+
+// InvoicePayGet creates a Stripe Checkout session on the invoice owner's
+// connected account and redirects the client to pay.
+func (h *Handlers) InvoicePayGet(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, _, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Cannot pay invoices that are already paid or voided
+	if inv.Status == "paid" || inv.Status == "void" {
+		http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
+		return
+	}
+
+	// Invoice must have an owner with Stripe Connect
+	if inv.UserID == nil {
+		http.Error(w, "This invoice does not support online payments", http.StatusBadRequest)
+		return
+	}
+
+	owner, err := h.App.UserRepo.GetByID(*inv.UserID)
+	if err != nil || owner.StripeConnectID == "" {
+		http.Error(w, "Online payments are not enabled for this invoice", http.StatusBadRequest)
+		return
+	}
+
+	// Build Stripe Checkout session on the connected account
+	currency := strings.ToLower(inv.Currency)
+	if currency == "" {
+		currency = "usd"
+	}
+
+	params := &stripe.CheckoutSessionParams{
+		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
+		Mode:               stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL:         stripe.String(h.App.BaseURL + "/invoices/" + strconv.FormatInt(id, 10) + "?paid=1"),
+		CancelURL:          stripe.String(h.App.BaseURL + "/invoices/" + strconv.FormatInt(id, 10)),
+		LineItems: []*stripe.CheckoutSessionLineItemParams{
+			{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String(currency),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Name:        stripe.String("Invoice " + inv.InvoiceNumber),
+						Description: stripe.String("Payment to " + inv.CompanyName),
+					},
+					UnitAmount: stripe.Int64(inv.TotalCents),
+				},
+				Quantity: stripe.Int64(1),
+			},
+		},
+		PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
+			ApplicationFeeAmount: stripe.Int64(0), // No platform fee for now
+		},
+		Metadata: map[string]string{
+			"invoice_id": strconv.FormatInt(id, 10),
+			"user_id":    strconv.FormatInt(*inv.UserID, 10),
+		},
+	}
+
+	// Create the session on the connected account
+	params.SetStripeAccount(owner.StripeConnectID)
+
+	s, err := checkoutsession.New(params)
+	if err != nil {
+		log.Printf("[stripe-connect] checkout session failed for invoice %d: %v", id, err)
+		http.Error(w, "Could not start payment", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("[stripe-connect] payment session created for invoice %d on account %s", id, owner.StripeConnectID)
+	http.Redirect(w, r, s.URL, http.StatusSeeOther)
 }
