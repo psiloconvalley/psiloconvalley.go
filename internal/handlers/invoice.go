@@ -578,6 +578,7 @@ func (h *Handlers) InvoicesList(w http.ResponseWriter, r *http.Request) {
 		"MonthlyCount": monthlyCount,
 		"MonthlyLimit": freePlanMonthlyLimit,
 		"IsPro":        user.Plan == "pro",
+		"Deleted":      r.URL.Query().Get("deleted") == "true",
 	})
 }
 

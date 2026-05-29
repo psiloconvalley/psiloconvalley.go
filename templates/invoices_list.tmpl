@@ -274,11 +274,25 @@
                 {{end}}
             </div>
         </div>
-                <a href="/invoices/new" class="btn-new">+ New Invoice</a>
+	                <a href="/invoices/new" class="btn-new">+ New Invoice</a>
     </div>
-   
-    {{if not .IsPro}}
+
+    {{if .Deleted}}
     <div style="
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.3);
+        color: #6ee7b7;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        font-family: monospace;
+    ">✓ Invoice deleted successfully</div>
+    {{end}}
+
+    {{if not .IsPro}}
+        <div style="
         background: rgba(255,255,255,0.03);
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 10px;
