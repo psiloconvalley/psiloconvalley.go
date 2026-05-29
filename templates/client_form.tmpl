@@ -5,16 +5,13 @@
         {{if eq .Mode "edit"}}Edit Client{{else}}New Client{{end}} | PsiloConValley
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background: #0a0f1a;
             color: #fff;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    	    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             min-height: 100vh;
         }
 
@@ -33,11 +30,12 @@
 
         .page-title {
             font-size: 32px;
-            font-weight: 700;
+            text-transform: uppercase;
             letter-spacing: -1px;
             margin-bottom: 8px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
         }
-
         .page-subtitle {
             color: rgba(255, 255, 255, 0.5);
             font-size: 14px;
@@ -101,7 +99,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 8px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+	    font-family: inherit;
             color: #fff;
         }
 
@@ -136,7 +134,7 @@
             border-radius: 8px;
             font-size: 14px;
             font-weight: 700;
-            font-family: 'Inter', sans-serif;
+	    font-family: inherit;
             cursor: pointer;
             flex: 1;
         }
@@ -153,7 +151,7 @@
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
-            font-family: 'Inter', sans-serif;
+	    font-family: inherit;
             cursor: pointer;
             text-decoration: none;
             display: flex;

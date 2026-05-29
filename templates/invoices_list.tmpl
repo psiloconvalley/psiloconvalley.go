@@ -3,9 +3,6 @@
 <head>
     <title>Invoices | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     {{template "nav-styles" .}}
 
@@ -15,7 +12,7 @@
         body {
             background: #0a0f1a;
             color: #fff;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+	    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
@@ -27,20 +24,26 @@
         }
 
         /* ── Header ── */
-        .top {
+	.top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
-            gap: 16px;
-            flex-wrap: wrap;
+            margin-bottom: 40px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
         }
         .top h1 {
-            font-size: 28px;
-            font-weight: 800;
+            font-size: 32px;
+            text-transform: uppercase;
             letter-spacing: -1px;
         }
-        .btn-new {
+        .top-subtitle {
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            margin-top: 6px;
+            font-family: monospace;
+        }
+                .btn-new {
             background: #fff;
             color: #000;
             padding: 10px 20px;
@@ -143,6 +146,7 @@
         @media (max-width: 639px) {
             .container { padding: 24px 16px 80px; }
 
+	    .top { padding-left: 16px; }
             .top h1 { font-size: 22px; }
 
             .table-wrap { display: none; }
@@ -202,11 +206,23 @@
 
 <div class="container">
 
-    <div class="top">
-        <h1>Invoices</h1>
-        <a href="/invoices/new" class="btn-new">+ New Invoice</a>
+       <div class="top">
+	<div>
+            <h1>Invoices</h1>
+            <div class="top-subtitle">
+                {{len .Invoices}} total
+                {{if .User}}
+                    {{if .IsPro}}
+                    · <span style="color:#4ade80;">Pro — Unlimited</span>
+                    {{else}}
+                    · {{.MonthlyCount}}/{{.MonthlyLimit}} this month
+                    {{end}}
+                {{end}}
+            </div>
+        </div>
+                <a href="/invoices/new" class="btn-new">+ New Invoice</a>
     </div>
-
+   
     {{if not .IsPro}}
     <div style="
         background: rgba(255,255,255,0.03);
