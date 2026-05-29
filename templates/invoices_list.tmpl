@@ -278,7 +278,7 @@
     </div>
 
     {{if .Deleted}}
-    <div style="
+    <div id="success-banner" style="
         background: rgba(16,185,129,0.1);
         border: 1px solid rgba(16,185,129,0.3);
         color: #6ee7b7;
@@ -288,9 +288,36 @@
         font-weight: 600;
         margin-bottom: 24px;
         font-family: monospace;
-    ">✓ Invoice deleted successfully</div>
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        cursor: pointer;
+    " onclick="dismissBanner()">
+        <span>✓ Invoice deleted successfully</span>
+        <span style="font-size: 18px; opacity: 0.5;">✕</span>
+    </div>
+    <script>
+    (function() {
+        var banner = document.getElementById('success-banner');
+        requestAnimationFrame(function() {
+            banner.style.opacity = '1';
+            banner.style.transform = 'translateY(0)';
+        });
+        setTimeout(function() { dismissBanner(); }, 4000);
+    })();
+    function dismissBanner() {
+        var banner = document.getElementById('success-banner');
+        if (!banner) return;
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateY(-8px)';
+        setTimeout(function() { banner.remove(); }, 400);
+    }
+    </script>
     {{end}}
-
+   
     {{if not .IsPro}}
         <div style="
         background: rgba(255,255,255,0.03);
