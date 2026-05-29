@@ -429,16 +429,20 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 		invoiceView := views.MapInvoicePage(inv, items, "view")
-
-	// Check if the invoice owner has Stripe Connect enabled
+	
+	// Check if the invoice owner has Stripe Connect enabled.
+	// Only show Pay Now to non-owners (clients viewing via access token).
+	// The owner uses "Mark as Paid" instead.
 	payNowEnabled := false
-	if inv.UserID != nil && inv.Status != "paid" && inv.Status != "void" {
+	user := auth.GetUser(r)
+	isOwner := user != nil && inv.UserID != nil && user.ID == *inv.UserID
+	if !isOwner && inv.UserID != nil && inv.Status != "paid" && inv.Status != "void" {
 		owner, err := h.App.UserRepo.GetByID(*inv.UserID)
 		if err == nil && owner.StripeConnectID != "" {
 			payNowEnabled = true
 		}
 	}
-
+		
 		accessToken := r.URL.Query().Get("access")
 
 	h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
