@@ -43,7 +43,7 @@
             margin-top: 6px;
             font-family: monospace;
         }
-                .btn-new {
+        .btn-new {
             background: #fff;
             color: #000;
             padding: 10px 20px;
@@ -126,9 +126,70 @@
         }
         .inv-link:hover { text-decoration: underline; }
 
-        .right { text-align: right; }
+	.right { text-align: right; }
         .mono { font-variant-numeric: tabular-nums; }
 
+        /* ── Row actions ── */
+        .row-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+        .row-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: inherit;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.7);
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .row-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: rgba(255,255,255,0.25);
+        }
+        .row-btn-primary {
+            background: rgba(255,255,255,0.9);
+            color: #0a0f1a;
+            border-color: transparent;
+        }
+        .row-btn-primary:hover {
+            background: #fff;
+        }
+        .row-btn-danger {
+            border-color: rgba(220,38,38,0.3);
+            color: #fca5a5;
+        }
+        .row-btn-danger:hover {
+            background: rgba(220,38,38,0.15);
+            border-color: rgba(220,38,38,0.5);
+        }
+
+        /* ── Mobile card actions ── */
+        .inv-card-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .inv-card-actions .row-btn {
+            flex: 1;
+            justify-content: center;
+            min-height: 36px;
+        }
+        
         /* Hide table on mobile — show cards instead */
         .table-wrap { display: block; }
         .card-list  { display: none; }
@@ -290,10 +351,11 @@
                     <th>Due</th>
                     <th>Status</th>
                     <th class="right">Total</th>
+		    <th class="right">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {{range .Invoices}}
+		{{range .Invoices}}
                 <tr>
                     <td>
                         <a href="/invoices/{{.ID}}" class="inv-link">
@@ -307,35 +369,65 @@
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                     </td>
                     <td class="right mono">{{money .TotalCents}}</td>
+                    <td>
+                        <div class="row-actions">
+                            {{if eq .Status "draft"}}
+                            <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Send</a>
+                            <a href="/invoices/{{.ID}}/edit" class="row-btn">✏️ Edit</a>
+                            {{end}}
+                            {{if or (eq .Status "sent") (eq .Status "overdue")}}
+                            <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Resend</a>
+                            {{end}}
+                            <a href="/invoices/{{.ID}}/duplicate" class="row-btn">📋</a>
+                            {{if eq .Status "draft"}}
+                            <a href="/invoices/{{.ID}}" class="row-btn row-btn-danger" title="Delete">🗑</a>
+                            {{end}}
+                        </div>
+                    </td>
                 </tr>
                 {{end}}
-            </tbody>
+                            </tbody>
         </table>
     </div>
 
     {{/* ── MOBILE CARD LIST ── */}}
     <div class="card-list">
-        {{range .Invoices}}
-        <a href="/invoices/{{.ID}}" class="inv-card">
-            <div class="inv-card-top">
-                <span class="inv-card-number">
-                    {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}Untitled{{end}}
-                </span>
-                <span class="badge badge-{{.Status}}">{{.Status}}</span>
-            </div>
-            <div class="inv-card-client">
-                {{if .ClientName}}{{.ClientName}}{{else}}No client{{end}}
-            </div>
-            <div class="inv-card-bottom">
-                <div class="inv-card-dates">
-                    {{if .IssueDate}}Issued {{.IssueDate}}{{end}}
-                    {{if .DueDate}} · Due {{.DueDate}}{{end}}
+	{{range .Invoices}}
+        <div class="inv-card">
+            <a href="/invoices/{{.ID}}" style="text-decoration:none; color:inherit; display:block;">
+                <div class="inv-card-top">
+                    <span class="inv-card-number">
+                        {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}Untitled{{end}}
+                    </span>
+                    <span class="badge badge-{{.Status}}">{{.Status}}</span>
                 </div>
-                <div class="inv-card-total">{{money .TotalCents}}</div>
+                <div class="inv-card-client">
+                    {{if .ClientName}}{{.ClientName}}{{else}}No client{{end}}
+                </div>
+                <div class="inv-card-bottom">
+                    <div class="inv-card-dates">
+                        {{if .IssueDate}}Issued {{.IssueDate}}{{end}}
+                        {{if .DueDate}} · Due {{.DueDate}}{{end}}
+                    </div>
+                    <div class="inv-card-total">{{money .TotalCents}}</div>
+                </div>
+            </a>
+            <div class="inv-card-actions">
+                {{if eq .Status "draft"}}
+                <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Send</a>
+                <a href="/invoices/{{.ID}}/edit" class="row-btn">✏️ Edit</a>
+                {{end}}
+                {{if or (eq .Status "sent") (eq .Status "overdue")}}
+                <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Resend</a>
+                {{end}}
+                <a href="/invoices/{{.ID}}/duplicate" class="row-btn">📋 Duplicate</a>
+                {{if eq .Status "draft"}}
+                <a href="/invoices/{{.ID}}" class="row-btn row-btn-danger">🗑 Delete</a>
+                {{end}}
             </div>
-        </a>
+        </div>
         {{end}}
-    </div>
+            </div>
 
     {{end}}
 </div>
