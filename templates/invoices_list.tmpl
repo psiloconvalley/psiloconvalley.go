@@ -356,8 +356,8 @@
                         </a>
                     </td>
                     <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
-                    <td>{{if .IssueDate}}{{.IssueDate}}{{else}}—{{end}}</td>
-                    <td>{{if .DueDate}}{{.DueDate}}{{else}}—{{end}}</td>
+		    <td>{{if .IssueDate}}{{.IssueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
+		    <td>{{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
                     <td>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                     </td>
@@ -399,9 +399,9 @@
                 </div>
                 <div class="inv-card-bottom">
                     <div class="inv-card-dates">
-                        {{if .IssueDate}}Issued {{.IssueDate}}{{end}}
-                        {{if .DueDate}} · Due {{.DueDate}}{{end}}
-                    </div>
+		     {{if .IssueDate}}Issued {{.IssueDate.Format "Jan 2, 2006"}}{{end}}
+          	     {{if .DueDate}} · Due {{.DueDate.Format "Jan 2, 2006"}}{{end}}
+		</div>
                     <div class="inv-card-total">{{money .TotalCents}}</div>
                 </div>
             </a>
