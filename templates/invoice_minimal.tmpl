@@ -32,10 +32,10 @@
             background: #ffffff;
             border-radius: 0;
             box-shadow: none;
-            overflow: hidden;
+            overflow: visible;
             border: 1px solid #e5e7eb;
         }
-	.top-accent { height: 2px; background: var(--brand); }
+	.top-accent { height: 2px; background: var(--brand); border-radius: 12px 12px 0 0; }
         /* ── Header ── */
         .header-top {
             padding: 28px 36px 16px;
@@ -209,40 +209,84 @@
         .grand-total .totals-label { color: #0d1422; font-size: 14px; font-weight: 800; }
         .grand-total .totals-value { color: #0d1422; font-size: 15px; font-weight: 800; }
 
-        /* ── Actions ── */
+               /* ── Actions ── */
         .invoice-actions-wrapper {
             margin-top: 20px;
-            padding: 26px 36px;
+            padding: 20px 36px;
             border-top: 1px solid #e5e7eb;
             background: #fafafa;
+            overflow: visible;
+            position: relative;
+            z-index: 10;
         }
         .primary-actions {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
 
-        .btn-primary, .btn-secondary {
+        .action-btn {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 10px 16px;
+            gap: 5px;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: inherit;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #334155;
+            transition: all 0.15s ease;
+        }
+        .action-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .action-btn-primary {
+            background: var(--brand); color: #fff; border-color: var(--brand);
+        }
+        .action-btn-primary:hover { background: #1e293b; border-color: #1e293b; }
+        .action-btn-pay {
+            background: #f0eee9; color: #0d1422; border-color: #d5d0c8;
+        }
+        .action-btn-pay:hover { background: #e8e5df; }
+
+        .more-dropdown { position: relative; display: inline-flex; }
+        .more-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: #fff;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            min-width: 180px;
+            z-index: 50;
+            padding: 4px 0;
+        }
+        .more-dropdown.open .more-dropdown-menu { display: block; }
+        .more-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
             text-decoration: none;
             cursor: pointer;
             border: none;
+            background: none;
+            width: 100%;
             font-family: inherit;
-            /* Mobile minimum touch target */
-            min-height: 44px;
         }
-	.btn-primary  { background: var(--brand); color: #ffffff;border-radius: 4px; }
-        .btn-secondary { background: #ffffff; color: #0d1422; border: 1px solid #cbd5e1; }
-        .btn-primary:hover  { background: #1e293b; }
-        .btn-secondary:hover { background: #f8fafc; }
-
+        .more-dropdown-item:hover { background: #f8fafc; }
+        .more-dropdown-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
+        .more-dropdown-item-danger { color: #dc2626; }
+        .more-dropdown-item-danger:hover { background: #fff5f5; } 
         .status-panel {
             background: #ffffff;
             padding: 16px;
@@ -544,26 +588,37 @@
 
         {{/* ── Actions: hidden in PDF mode ── */}}
         {{if not .Invoice.Hints.PDFMode}}
-        <section class="invoice-actions-wrapper">
+	        <section class="invoice-actions-wrapper">
             <div class="primary-actions">
-                {{if eq .Invoice.Status "draft"}}
-                <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
+                {{if .User}}
+                <a href="/invoices/{{.Invoice.ID}}/send" class="action-btn action-btn-primary">📨 Send</a>
                 {{end}}
 
-			{{if .User}}
-		<a href="/invoices/{{.Invoice.ID}}/send" class="btn-primary">📨 Send Invoice</a>
-	{{end}}
-                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn-secondary">📋 Duplicate</a>
-                <button type="button" onclick="window.print()" class="btn-secondary">🖨️ Print</button>
-
-                {{/* Desktop: download. Mobile: inline preview in browser tab. */}}
-                <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-secondary desktop-only">📥 Download PDF</a>
-                <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="btn-secondary mobile-only">👁 Preview PDF</a>
                 {{if .PayNowEnabled}}
-		<a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" class="btn-pay">💳 Pay Now</a>
+                <a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" class="action-btn action-btn-pay">💳 Pay Now</a>
                 {{end}}
-            </div>
 
+                {{if eq .Invoice.Status "draft"}}
+                <a href="/invoices/{{.Invoice.ID}}/edit" class="action-btn">✏️ Edit</a>
+                {{end}}
+
+                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>
+
+                <!-- More dropdown -->
+                <div class="more-dropdown" id="moreDropdown">
+                    <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
+                    <div class="more-dropdown-menu">
+                        <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
+                        <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
+                        <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="more-dropdown-item mobile-only">👁 Preview PDF</a>
+                        {{if .User}}{{if eq .Invoice.Status "draft"}}
+                        <div class="more-dropdown-divider"></div>
+                        <button type="button" class="more-dropdown-item more-dropdown-item-danger" onclick="closeMoreMenu(); openDeleteModal('{{.Invoice.InvoiceNumber}}', {{.Invoice.ID}})">🗑 Delete Draft</button>
+                        {{end}}{{end}}
+                    </div>
+                </div>
+            </div>
+        
             {{if .User}}
             <div class="status-panel">
                 <div class="status-panel-title">Change Invoice Status</div>
@@ -610,8 +665,78 @@
         </section>
         {{end}}
 
+       </div>
+</div>
+
+<!-- ═══════════ DELETE CONFIRMATION MODAL ═══════════ -->
+<div id="delete-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:500;">
+    <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:16px; padding:32px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="font-size:20px; font-weight:800; color:#0d1422; margin-bottom:8px;">Delete Draft Invoice</div>
+        <div style="font-size:13px; color:#666; margin-bottom:20px; line-height:1.5;">This action <strong>cannot be undone</strong>. The invoice and all its line items will be permanently deleted.</div>
+        <div style="font-size:13px; font-weight:600; color:#444; margin-bottom:8px;">Type the invoice number to confirm:</div>
+        <div style="font-size:13px; font-weight:700; color:#dc2626; background:#fee2e2; border-radius:6px; padding:8px 12px; margin-bottom:12px; font-family:monospace;" id="delete-modal-number"></div>
+        <input type="text" id="delete-confirm-input" placeholder="Type invoice number here" oninput="checkDeleteConfirm()"
+            style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; font-family:inherit; margin-bottom:16px;">
+        <div style="display:flex; gap:12px;">
+            <button type="button" onclick="closeDeleteModal()" style="flex:1; padding:11px; border:1px solid #ddd; background:white; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">Cancel</button>
+            <form id="delete-form" method="POST" action="" style="flex:1;">
+                {{.csrfField}}
+                <input type="hidden" name="confirm_number" id="delete-confirm-hidden">
+                <button type="submit" id="delete-submit-btn" disabled
+                    style="width:100%; padding:11px; background:#dc2626; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; opacity:0.4;">
+                    Delete Permanently
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
+<script>
+var _deleteInvoiceNumber = '';
+
+function toggleMoreMenu() {
+    document.getElementById('moreDropdown').classList.toggle('open');
+}
+function closeMoreMenu() {
+    document.getElementById('moreDropdown').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+    var dd = document.getElementById('moreDropdown');
+    if (dd && !dd.contains(e.target)) dd.classList.remove('open');
+});
+
+function openDeleteModal(invoiceNumber, invoiceID) {
+    _deleteInvoiceNumber = invoiceNumber;
+    document.getElementById('delete-modal-number').textContent = invoiceNumber;
+    document.getElementById('delete-confirm-input').value = '';
+    document.getElementById('delete-confirm-hidden').value = '';
+    document.getElementById('delete-submit-btn').disabled = true;
+    document.getElementById('delete-submit-btn').style.opacity = '0.4';
+    document.getElementById('delete-form').action = '/invoices/' + invoiceID + '/delete';
+    document.getElementById('delete-overlay').style.display = 'block';
+    setTimeout(function(){ document.getElementById('delete-confirm-input').focus(); }, 50);
+}
+function closeDeleteModal() {
+    document.getElementById('delete-overlay').style.display = 'none';
+}
+function checkDeleteConfirm() {
+    var val = document.getElementById('delete-confirm-input').value.trim();
+    var btn = document.getElementById('delete-submit-btn');
+    var hidden = document.getElementById('delete-confirm-hidden');
+    if (val === _deleteInvoiceNumber) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        hidden.value = val;
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.4';
+        hidden.value = '';
+    }
+}
+document.getElementById('delete-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+</script>
+
 </body>
-</html>
+</html> 
