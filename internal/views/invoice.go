@@ -140,14 +140,14 @@ func formatDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.Format("2006-01-02")
+	return t.Format("Jan 2, 2006")
 }
 
 func formatDatePtr(t *time.Time) string {
 	if t == nil {
 		return ""
 	}
-	return t.Format("2006-01-02")
+	return t.Format("Jan 2, 2006")
 }
 
 func formatPercent(bps int64) string {
