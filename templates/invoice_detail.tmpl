@@ -32,11 +32,11 @@
             background: #ffffff;
             border-radius: 12px;
             box-shadow: 0 8px 30px rgba(15,23,42,0.08);
-            overflow: hidden;
+            overflow: visible;
             border: 1px solid #e5e7eb;
         }
 
-	.top-accent { height: 6px; background: var(--brand); }
+	.top-accent { height: 6px; background: var(--brand); border-radius: 12px 12px 0 0; }
         /* ── Header ── */
         .header-top {
             padding: 28px 36px 16px;
@@ -208,65 +208,88 @@
         .grand-total .totals-label { color: #0d1422; font-size: 14px; font-weight: 800; }
         .grand-total .totals-value { color: #0d1422; font-size: 15px; font-weight: 800; }
 
-        /* ── Actions ── */
-        .invoice-actions-wrapper {
+            /* ── Actions ── */
+		.invoice-actions-wrapper {
             margin-top: 20px;
-            padding: 26px 36px;
+            padding: 20px 36px;
             border-top: 1px solid #e5e7eb;
             background: #fafafa;
+            overflow: visible;
+            position: relative;
+            z-index: 10;
         }
-        .primary-actions {
+                .primary-actions {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
 
-        .btn-primary, .btn-secondary {
+        .action-btn {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 10px 16px;
+            gap: 5px;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: inherit;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #334155;
+            transition: all 0.15s ease;
+        }
+        .action-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .action-btn-primary {
+            background: var(--brand); color: #fff; border-color: var(--brand);
+        }
+        .action-btn-primary:hover { background: #1e293b; border-color: #1e293b; }
+        .action-btn-pay {
+            background: #f0eee9; color: #0d1422; border-color: #d5d0c8;
+        }
+        .action-btn-pay:hover { background: #e8e5df; }
+
+        /* ── More Dropdown ── */
+        .more-dropdown {
+            position: relative;
+            display: inline-flex;
+        }
+        .more-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: #fff;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            min-width: 180px;
+            z-index: 50;
+            padding: 4px 0;
+        }
+        .more-dropdown.open .more-dropdown-menu { display: block; }
+        .more-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
             text-decoration: none;
             cursor: pointer;
             border: none;
+            background: none;
+            width: 100%;
             font-family: inherit;
-            /* Mobile minimum touch target */
-            min-height: 44px;
         }
-	.btn-primary  { background: var(--brand); color: #ffffff; }
-        .btn-secondary { background: #ffffff; color: #0d1422; border: 1px solid #cbd5e1; }
-        .btn-primary:hover  { background: #1e293b; }
-        .btn-secondary:hover { background: #f8fafc; }
-	.btn-pay {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            text-decoration: none;
-            color: #0d1422;
-            background: #f0eee9;
-            border: 1.5px solid #d5d0c8;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            cursor: pointer;
-            font-family: inherit;
-            min-height: 44px;
-            transition: all 0.2s ease;
-        }
-        .btn-pay:hover {
-            background: #e8e5df;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-1px);
-        }
-
+        .more-dropdown-item:hover { background: #f8fafc; }
+        .more-dropdown-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
+        .more-dropdown-item-danger { color: #dc2626; }
+        .more-dropdown-item-danger:hover { background: #fff5f5; } 
         .status-panel {
             background: #ffffff;
             padding: 16px;
@@ -338,8 +361,7 @@
             .invoice-actions-wrapper { padding: 16px; }
 
             .primary-actions { gap: 8px; }
-            .btn-primary, .btn-secondary { flex: 1 1 auto; font-size: 13px; }
-
+            .action-btn { font-size: 11px; padding: 7px 10px; }
             .status-actions { gap: 8px; }
             .status-btn { flex: 1 1 auto; }
         }
@@ -566,31 +588,38 @@
             </div>
         </footer>
 
-        {{/* ── Actions: hidden in PDF mode ── */}}
+              {{/* ── Actions: hidden in PDF mode ── */}}
         {{if not .Invoice.Hints.PDFMode}}
         <section class="invoice-actions-wrapper">
             <div class="primary-actions">
-	       {{if eq .Invoice.Status "draft"}}
-		 <a href="/invoices/{{.Invoice.ID}}/edit" class="btn-secondary">✏️ Edit Draft</a>
                 {{if .User}}
-                <button type="button" class="btn-danger" onclick="openDeleteModal('{{.Invoice.InvoiceNumber}}', {{.Invoice.ID}})">🗑 Delete Draft</button>
+                <a href="/invoices/{{.Invoice.ID}}/send" class="action-btn action-btn-primary">📨 Send</a>
                 {{end}}
-                {{end}}
-				{{if .User}}
-    		<a href="/invoices/{{.Invoice.ID}}/send" class="btn-primary">📨 Send Invoice</a>
-	{{end}}
-	                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="btn-secondary">📋 Duplicate</a>
-                <button type="button" onclick="window.print()" class="btn-secondary">🖨️ Print</button>
 
-                {{/* Desktop: download. Mobile: inline preview in browser tab. */}}
-                <a href="/invoices/{{.Invoice.ID}}/pdf" class="btn-secondary desktop-only">📥 Download PDF</a>
-                <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="btn-secondary mobile-only">👁 Preview PDF</a>
-		
                 {{if .PayNowEnabled}}
-		<a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" class="btn-pay">💳 Pay Now</a>
+                <a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" class="action-btn action-btn-pay">💳 Pay Now</a>
                 {{end}}
-            </div>
 
+                {{if eq .Invoice.Status "draft"}}
+                <a href="/invoices/{{.Invoice.ID}}/edit" class="action-btn">✏️ Edit</a>
+                {{end}}
+
+                <a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>
+
+                <!-- More dropdown -->
+                <div class="more-dropdown" id="moreDropdown">
+                    <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
+                    <div class="more-dropdown-menu">
+                        <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
+                        <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
+                        <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="more-dropdown-item mobile-only">👁 Preview PDF</a>
+                        {{if .User}}{{if eq .Invoice.Status "draft"}}
+                        <div class="more-dropdown-divider"></div>
+                        <button type="button" class="more-dropdown-item more-dropdown-item-danger" onclick="closeMoreMenu(); openDeleteModal('{{.Invoice.InvoiceNumber}}', {{.Invoice.ID}})">🗑 Delete Draft</button>
+                        {{end}}{{end}}
+                    </div>
+                </div>
+            </div> 
             {{if .User}}
             <div class="status-panel">
                 <div class="status-panel-title">Change Invoice Status</div>
@@ -670,6 +699,21 @@
 
 <script>
 var _deleteInvoiceNumber = '';
+function toggleMoreMenu() {
+    document.getElementById('moreDropdown').classList.toggle('open');
+}
+
+function closeMoreMenu() {
+    document.getElementById('moreDropdown').classList.remove('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    var dd = document.getElementById('moreDropdown');
+    if (dd && !dd.contains(e.target)) {
+        dd.classList.remove('open');
+    }
+});
 
 function openDeleteModal(invoiceNumber, invoiceID) {
     _deleteInvoiceNumber = invoiceNumber;
