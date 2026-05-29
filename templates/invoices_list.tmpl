@@ -129,67 +129,53 @@
 	.right { text-align: right; }
         .mono { font-variant-numeric: tabular-nums; }
 
-        /* ── Row actions ── */
+	          /* ── Row actions (matches clients page) ── */
         .row-actions {
             display: flex;
-            align-items: center;
-            gap: 6px;
+            gap: 10px;
             justify-content: flex-end;
+            flex-wrap: nowrap;
         }
-        .row-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 600;
+        .small-btn {
+            background: none;
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 14px;
             text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.2s;
             cursor: pointer;
             font-family: inherit;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.04);
-            color: rgba(255,255,255,0.7);
-            transition: all 0.15s ease;
             white-space: nowrap;
         }
-        .row-btn:hover {
-            background: rgba(255,255,255,0.1);
+        .small-btn:hover {
+            border-color: #fff;
             color: #fff;
-            border-color: rgba(255,255,255,0.25);
         }
-        .row-btn-primary {
-            background: rgba(255,255,255,0.9);
-            color: #0a0f1a;
-            border-color: transparent;
-        }
-        .row-btn-primary:hover {
-            background: #fff;
-        }
-        .row-btn-danger {
-            border-color: rgba(220,38,38,0.3);
-            color: #fca5a5;
-        }
-        .row-btn-danger:hover {
-            background: rgba(220,38,38,0.15);
-            border-color: rgba(220,38,38,0.5);
+        .small-btn.danger:hover {
+            border-color: #ef4444;
+            color: #ef4444;
         }
 
         /* ── Mobile card actions ── */
         .inv-card-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid rgba(255,255,255,0.06);
         }
-        .inv-card-actions .row-btn {
+        .inv-card-actions .small-btn {
             flex: 1;
-            justify-content: center;
+            text-align: center;
             min-height: 36px;
-        }
-        
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }               
         /* Hide table on mobile — show cards instead */
         .table-wrap { display: block; }
         .card-list  { display: none; }
@@ -370,20 +356,20 @@
                     </td>
                     <td class="right mono">{{money .TotalCents}}</td>
                     <td>
-                        <div class="row-actions">
+			<div class="row-actions">
                             {{if eq .Status "draft"}}
-                            <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Send</a>
-                            <a href="/invoices/{{.ID}}/edit" class="row-btn">✏️ Edit</a>
+                            <a href="/invoices/{{.ID}}/send" class="small-btn">Send</a>
+                            <a href="/invoices/{{.ID}}/edit" class="small-btn">Edit</a>
                             {{end}}
                             {{if or (eq .Status "sent") (eq .Status "overdue")}}
-                            <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Resend</a>
+                            <a href="/invoices/{{.ID}}/send" class="small-btn">Resend</a>
                             {{end}}
-                            <a href="/invoices/{{.ID}}/duplicate" class="row-btn">📋</a>
+                            <a href="/invoices/{{.ID}}/duplicate" class="small-btn">Duplicate</a>
                             {{if eq .Status "draft"}}
-                            <a href="/invoices/{{.ID}}" class="row-btn row-btn-danger" title="Delete">🗑</a>
+                            <a href="/invoices/{{.ID}}" class="small-btn danger">Delete</a>
                             {{end}}
                         </div>
-                    </td>
+                                            </td>
                 </tr>
                 {{end}}
                             </tbody>
@@ -412,20 +398,20 @@
                     <div class="inv-card-total">{{money .TotalCents}}</div>
                 </div>
             </a>
-            <div class="inv-card-actions">
+	   <div class="inv-card-actions">
                 {{if eq .Status "draft"}}
-                <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Send</a>
-                <a href="/invoices/{{.ID}}/edit" class="row-btn">✏️ Edit</a>
+                <a href="/invoices/{{.ID}}/send" class="small-btn">Send</a>
+                <a href="/invoices/{{.ID}}/edit" class="small-btn">Edit</a>
                 {{end}}
                 {{if or (eq .Status "sent") (eq .Status "overdue")}}
-                <a href="/invoices/{{.ID}}/send" class="row-btn row-btn-primary">📨 Resend</a>
+                <a href="/invoices/{{.ID}}/send" class="small-btn">Resend</a>
                 {{end}}
-                <a href="/invoices/{{.ID}}/duplicate" class="row-btn">📋 Duplicate</a>
+                <a href="/invoices/{{.ID}}/duplicate" class="small-btn">Duplicate</a>
                 {{if eq .Status "draft"}}
-                <a href="/invoices/{{.ID}}" class="row-btn row-btn-danger">🗑 Delete</a>
+                <a href="/invoices/{{.ID}}" class="small-btn danger">Delete</a>
                 {{end}}
             </div>
-        </div>
+                    </div>
         {{end}}
             </div>
 
