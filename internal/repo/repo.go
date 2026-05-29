@@ -1214,6 +1214,60 @@ func (r *InvoiceRepo) ListInvoices(
 	return invoices, rows.Err()
 }
 
+// ListEstimates returns estimates for a user, ordered by most recent.
+func (r *InvoiceRepo) ListEstimates(
+	ctx context.Context,
+	limit, offset int,
+	userID int64,
+) ([]Invoice, error) {
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	q := `SELECT id, user_id, client_name, invoice_number,
+	             issue_date, due_date, tax_rate_bps,
+	             subtotal_cents, total_cents, currency, status, document_type, created_at
+	      FROM invoices
+	      WHERE user_id = $1 AND document_type = 'estimate'
+	      ORDER BY created_at DESC LIMIT $2 OFFSET $3`
+
+	rows, err := r.db.QueryContext(ctx, q, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var estimates []Invoice
+	for rows.Next() {
+		var inv Invoice
+		var uID sql.NullInt64
+		var dueDate sql.NullTime
+		var currency sql.NullString
+		if err := rows.Scan(
+			&inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,
+			&inv.IssueDate, &dueDate, &inv.TaxRateBps,
+			&inv.SubtotalCents, &inv.TotalCents, &currency,
+			&inv.Status, &inv.DocumentType, &inv.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		if uID.Valid {
+			inv.UserID = &uID.Int64
+		}
+		if dueDate.Valid {
+			inv.DueDate = &dueDate.Time
+		}
+		if currency.Valid {
+			inv.Currency = currency.String
+		}
+		estimates = append(estimates, inv)
+	}
+	return estimates, rows.Err()
+}
+
 func (r *InvoiceRepo) InvoiceNumberExists(
 	ctx context.Context,
 	number string,

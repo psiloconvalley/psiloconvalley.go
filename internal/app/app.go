@@ -22,6 +22,7 @@ import (
 )
 
 type App struct {
+	db            *sql.DB
 	Templates     *template.Template
 	InvRepo       *repo.InvoiceRepo
 	ClientRepo    *repo.ClientRepo
@@ -34,6 +35,8 @@ type App struct {
 	Scheduler     *scheduler.Scheduler
 	LogoStore     logo.Store
 }
+// DB returns the underlying database connection for direct queries.
+func (a *App) DB() *sql.DB { return a.db }
 
 func NewApp(db *sql.DB) *App {
 	funcs := template.FuncMap{
@@ -78,6 +81,7 @@ func NewApp(db *sql.DB) *App {
 	))
 
 	return &App{
+		db:            db,
 		Templates:     t,
 		InvRepo:       repo.NewInvoiceRepo(db),
 		ClientRepo:    repo.NewClientRepo(db),

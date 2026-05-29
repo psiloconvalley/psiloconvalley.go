@@ -80,6 +80,15 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Post("/recurring/{id}/pause", h.RecurringPause)
 		r.Post("/recurring/{id}/resume", h.RecurringResume)
 		r.Post("/recurring/{id}/delete", h.RecurringDelete)
-	})
+
+		// Estimate management
+		r.Get("/estimates", h.EstimatesList)
+		r.Get("/estimates/new", h.EstimateNewGet)
+		r.Post("/estimates/create", h.EstimateCreatePost)
+		r.Get("/estimates/{id}", h.EstimateDetail)
+		r.Post("/estimates/{id}/status", h.EstimateStatusPost)
+		r.Post("/estimates/{id}/delete", h.EstimateDeletePost)
+		r.Post("/estimates/{id}/convert", h.EstimateConvertPost)
+		})
 	return r
 }
