@@ -21,10 +21,10 @@ type RecurringPayload struct {
 func NewRecurringHandler(
 	invRepo *repo.InvoiceRepo,
 	schedRepo *repo.SchedulerRepo,
+	userRepo *repo.UserRepo,
 	m *mailer.Mailer,
 	baseURL string,
 ) func(ctx context.Context, payload json.RawMessage) error {
-
 	return func(ctx context.Context, payload json.RawMessage) error {
 		var p RecurringPayload
 		if err := json.Unmarshal(payload, &p); err != nil {
@@ -50,7 +50,18 @@ func NewRecurringHandler(
 		// Clone the invoice
 		newInv := *templateInv
 		newInv.ID = 0
-		newInv.InvoiceNumber = fmt.Sprintf("REC-%d", time.Now().UnixNano())
+				// Generate sequential invoice number for the owner
+		if templateInv.UserID != nil {
+			num, err := userRepo.NextInvoiceNumber(ctx, *templateInv.UserID)
+			if err != nil {
+				log.Printf("[recurring] failed to generate invoice number: %v", err)
+				newInv.InvoiceNumber = fmt.Sprintf("REC-%d", time.Now().UnixNano())
+			} else {
+				newInv.InvoiceNumber = num
+			}
+		} else {
+			newInv.InvoiceNumber = fmt.Sprintf("REC-%d", time.Now().UnixNano())
+		}
 		newInv.IssueDate = time.Now()
 		newInv.Status = "draft"
 		newInv.CreatedAt = time.Now()

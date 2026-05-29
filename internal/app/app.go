@@ -72,6 +72,7 @@ func NewApp(db *sql.DB) *App {
 	sched.Register("generate_recurring_invoice", schedulerhandlers.NewRecurringHandler(
 		invRepo,
 		schedRepo,
+		repo.NewUserRepo(db),
 		mailer.New(),
 		baseURL,
 	))

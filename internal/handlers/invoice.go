@@ -250,9 +250,19 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	templateID := r.FormValue("template_id")
 	brandColor := r.FormValue("brand_color")
 
-	// ── Auto-generate invoice number if blank ─────────────────────────
+		// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
-		invoiceNumber = fmt.Sprintf("INV-%d", time.Now().UnixNano())
+		if user != nil {
+			num, err := h.App.UserRepo.NextInvoiceNumber(r.Context(), user.ID)
+			if err != nil {
+				log.Printf("[invoice] failed to generate invoice number: %v", err)
+				invoiceNumber = fmt.Sprintf("INV-%d", time.Now().UnixNano())
+			} else {
+				invoiceNumber = num
+			}
+		} else {
+			invoiceNumber = fmt.Sprintf("INV-%d", time.Now().UnixNano())
+		}
 	}
 
 	// ── Build invoice ────────────────────────────────────────────────

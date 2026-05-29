@@ -63,6 +63,7 @@ type User struct {
 	AvatarURL    string
 	StripeCustomerID string
 	StripeConnectID  string
+	NextInvoiceSeq   int
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -199,13 +200,13 @@ func (r *UserRepo) GetByEmail(email string) (*User, error) {
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-		name, avatar_url, plan, stripe_customer_id, stripe_connect_id, created_at, updated_at
+		name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, created_at, updated_at
 		FROM users WHERE email = $1
 	`, email).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.CreatedAt, &updatedAt,
 	)
-	if err != nil {
+		if err != nil {
 		return nil, err
 	}
 	if passwordHash.Valid {
@@ -242,13 +243,13 @@ func (r *UserRepo) GetByID(id int64) (*User, error) {
 
 	err := r.db.QueryRow(`
 			SELECT id, email, password_hash, provider, google_id,
-			       name, avatar_url, plan, stripe_customer_id, stripe_connect_id, created_at, updated_at
+			       name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, created_at, updated_at
 			FROM users WHERE id = $1
 	`, id).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.CreatedAt, &updatedAt,
 			)
-	if err != nil {
+		if err != nil {
 		return nil, err
 	}
 	if passwordHash.Valid {
@@ -286,13 +287,13 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 
 	err := r.db.QueryRow(`
 			SELECT id, email, password_hash, provider, google_id,
-			       name, avatar_url, plan, stripe_customer_id, stripe_connect_id, created_at, updated_at
+			       name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, created_at, updated_at
 				FROM users WHERE google_id = $1
 	`, googleID).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleIDVal,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.CreatedAt, &updatedAt,
 		)
-	if err != nil {
+		if err != nil {
 		return nil, err
 	}
 	if passwordHash.Valid {
@@ -322,6 +323,23 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 	return &u, nil
 }
 
+// NextInvoiceNumber atomically increments and returns the next invoice
+// number for a user. Format: INV-0001, INV-0002, etc.
+// The sequence is never reused — deleted drafts do not reclaim numbers.
+func (r *UserRepo) NextInvoiceNumber(ctx context.Context, userID int64) (string, error) {
+	var seq int
+	err := r.db.QueryRowContext(ctx, `
+		UPDATE users
+		SET next_invoice_seq = next_invoice_seq + 1,
+		    updated_at = NOW()
+		WHERE id = $1
+		RETURNING next_invoice_seq - 1
+	`, userID).Scan(&seq)
+	if err != nil {
+		return "", fmt.Errorf("next invoice seq: %w", err)
+	}
+	return fmt.Sprintf("INV-%04d", seq), nil
+}
 
 func (r *UserRepo) GetInvoiceCount(ctx context.Context, userID int64) (int, error) {
 	var count int
