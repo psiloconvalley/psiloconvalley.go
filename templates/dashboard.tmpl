@@ -278,6 +278,7 @@
     </div>
     {{end}}
 
+       {{if .TotalCount}}
     {{/* ── Stats ── */}}
     <div class="stats-grid">
         <div class="stat-card">
@@ -301,7 +302,59 @@
             <div class="stat-sub">{{.TotalCount}} invoices total</div>
         </div>
     </div>
-
+    {{else}}
+    {{/* ── Onboarding: first-time user ── */}}
+    <div style="
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 48px 40px;
+        text-align: center;
+        margin-bottom: 32px;
+    ">
+        <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
+        <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px;">Welcome to PsiloConValley</div>
+        <div style="font-size: 14px; color: rgba(255,255,255,0.5); max-width: 420px; margin: 0 auto 28px; line-height: 1.6;">
+            Create your first invoice in under 60 seconds. Set up your business profile, add a client, and start getting paid.
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="/profile" style="
+                background: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,255,255,0.15);
+                color: #fff;
+                padding: 12px 24px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 700;
+                transition: all 0.2s;
+            ">1. Set Up Profile</a>
+            <a href="/clients/new" style="
+                background: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,255,255,0.15);
+                color: #fff;
+                padding: 12px 24px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 700;
+                transition: all 0.2s;
+            ">2. Add a Client</a>
+            <a href="/invoices/new" style="
+                background: #fff;
+                color: #0a0f1a;
+                padding: 12px 24px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 700;
+                border: none;
+                transition: all 0.2s;
+            ">3. Create Invoice →</a>
+        </div>
+    </div>
+    {{end}}
+   
     {{/* ── Quick actions ── */}}
     <div class="quick-actions">
         <a href="/invoices/new" class="action-card">
