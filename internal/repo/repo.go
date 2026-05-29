@@ -64,6 +64,7 @@ type User struct {
 	StripeCustomerID string
 	StripeConnectID  string
 	NextInvoiceSeq   int
+	NextEstimateSeq  int
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -131,6 +132,7 @@ type Invoice struct {
 	TotalCents          int64
 	Currency            string
 	Status              string
+	DocumentType        string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	ShowLogo            bool
@@ -200,13 +202,13 @@ func (r *UserRepo) GetByEmail(email string) (*User, error) {
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-		name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, created_at, updated_at
+		name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, created_at, updated_at
 		FROM users WHERE email = $1
 	`, email).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.CreatedAt, &updatedAt,
 	)
-		if err != nil {
+	if err != nil {
 		return nil, err
 	}
 	if passwordHash.Valid {
@@ -242,13 +244,14 @@ func (r *UserRepo) GetByID(id int64) (*User, error) {
 	var updatedAt sql.NullTime
 
 	err := r.db.QueryRow(`
-			SELECT id, email, password_hash, provider, google_id,
-			       name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, created_at, updated_at
-			FROM users WHERE id = $1
+		SELECT id, email, password_hash, provider, google_id,
+			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, created_at, updated_at
+		FROM users WHERE id = $1
 	`, id).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.CreatedAt, &updatedAt,
 			)
+
 		if err != nil {
 		return nil, err
 	}
@@ -286,12 +289,12 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 
 
 	err := r.db.QueryRow(`
-			SELECT id, email, password_hash, provider, google_id,
-			       name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, created_at, updated_at
-				FROM users WHERE google_id = $1
+		SELECT id, email, password_hash, provider, google_id,
+			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, created_at, updated_at
+		FROM users WHERE google_id = $1
 	`, googleID).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleIDVal,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.CreatedAt, &updatedAt,
 		)
 		if err != nil {
 		return nil, err
@@ -329,7 +332,7 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 func (r *UserRepo) NextInvoiceNumber(ctx context.Context, userID int64) (string, error) {
 	var seq int
 	err := r.db.QueryRowContext(ctx, `
-		UPDATE users
+			UPDATE users
 		SET next_invoice_seq = next_invoice_seq + 1,
 		    updated_at = NOW()
 		WHERE id = $1
@@ -341,6 +344,22 @@ func (r *UserRepo) NextInvoiceNumber(ctx context.Context, userID int64) (string,
 	return fmt.Sprintf("INV-%04d", seq), nil
 }
 
+// NextEstimateNumber atomically increments and returns the next estimate
+// number for a user. Format: EST-0001, EST-0002, etc.
+func (r *UserRepo) NextEstimateNumber(ctx context.Context, userID int64) (string, error) {
+	var seq int
+	err := r.db.QueryRowContext(ctx, `
+		UPDATE users
+		SET next_estimate_seq = next_estimate_seq + 1,
+		    updated_at = NOW()
+		WHERE id = $1
+		RETURNING next_estimate_seq - 1
+	`, userID).Scan(&seq)
+	if err != nil {
+		return "", fmt.Errorf("next estimate seq: %w", err)
+	}
+	return fmt.Sprintf("EST-%04d", seq), nil
+}	
 func (r *UserRepo) GetInvoiceCount(ctx context.Context, userID int64) (int, error) {
 	var count int
 	err := r.db.QueryRowContext(ctx,
@@ -891,7 +910,7 @@ func (r *InvoiceRepo) CreateInvoice(
 	defer func() { _ = tx.Rollback() }()
 
 		const insertInvoice = `
-		INSERT INTO invoices (
+				INSERT INTO invoices (
 			business_profile_id, client_id, user_id, anonymous_token,
 			client_name, client_email, client_address,
 			client_city, client_zip, client_state, client_country,
@@ -901,16 +920,20 @@ func (r *InvoiceRepo) CreateInvoice(
 			tax_rate_bps, discount_amount_cents, notes, payment_details,
 			subtotal_cents, tax_amount_cents, total_cents,
 			currency, status, show_logo, show_title, auto_reminders,
-			template_id, brand_color
+			template_id, brand_color, document_type
 		) VALUES (
 			$1,$2,$3,NULLIF($4,''),$5,$6,$7,$8,$9,$10,$11,
 			$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
 			$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,
-			$34,$35
+			$34,$35,$36
 		) RETURNING id, created_at`
 
 	var newID int64
 	var createdAt time.Time
+
+	if inv.DocumentType == "" {
+		inv.DocumentType = "invoice"
+	}
 
 	err = tx.QueryRowContext(ctx, insertInvoice,
 		inv.BusinessProfileID, inv.ClientID, inv.UserID, anonymousToken,
@@ -922,7 +945,7 @@ func (r *InvoiceRepo) CreateInvoice(
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle, inv.AutoReminders,
-		inv.TemplateID, inv.BrandColor,
+		inv.TemplateID, inv.BrandColor, inv.DocumentType,
 	).Scan(&newID, &createdAt)
 		if err != nil {
 		return 0, fmt.Errorf("insert invoice: %w", err)
@@ -992,6 +1015,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.total_cents,
 			i.currency,
 			i.status,
+			i.document_type,
 			i.show_logo,
 			i.show_title,
 			i.auto_reminders,
@@ -1045,6 +1069,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.TotalCents,
 		&currency,
 		&inv.Status,
+		&inv.DocumentType,
 		&inv.ShowLogo,
 		&inv.ShowTitle,
 		&inv.AutoReminders,
@@ -1142,16 +1167,16 @@ func (r *InvoiceRepo) ListInvoices(
 	}
 
 	q := `SELECT id, user_id, client_name, invoice_number,
-	             issue_date, due_date, tax_rate_bps,
-	             subtotal_cents, total_cents, currency, status, created_at
+	        issue_date, due_date, tax_rate_bps,
+	        subtotal_cents, total_cents, currency, status, document_type, created_at
 	      FROM invoices `
 
 	var args []any
 	if userID != nil {
-		q += `WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
+		q += `WHERE user_id = $1 AND document_type = 'invoice' ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 		args = append(args, *userID, limit, offset)
 	} else {
-		q += `ORDER BY created_at DESC LIMIT $1 OFFSET $2`
+		q += `WHERE document_type = 'invoice' ORDER BY created_at DESC LIMIT $1 OFFSET $2`
 		args = append(args, limit, offset)
 	}
 
@@ -1168,12 +1193,12 @@ func (r *InvoiceRepo) ListInvoices(
 		var dueDate sql.NullTime
 		var currency sql.NullString
 		if err := rows.Scan(
-			&inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,
-			&inv.IssueDate, &dueDate, &inv.TaxRateBps,
-			&inv.SubtotalCents, &inv.TotalCents, &currency,
-			&inv.Status, &inv.CreatedAt,
+		    &inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,
+		    &inv.IssueDate, &dueDate, &inv.TaxRateBps,
+		    &inv.SubtotalCents, &inv.TotalCents, &currency,
+		    &inv.Status, &inv.DocumentType, &inv.CreatedAt,
 		); err != nil {
-			return nil, err
+		return nil, err
 		}
 		if uID.Valid {
 			inv.UserID = &uID.Int64
@@ -1229,8 +1254,8 @@ func (r *InvoiceRepo) UpdateInvoice(
 			subtotal_cents=$23, tax_amount_cents=$24, total_cents=$25,
 			currency=$26, status=$27, show_logo=$28, show_title=$29,
 			auto_reminders=$30, template_id=$31, brand_color=$32,
-			updated_at=NOW()
-		WHERE id=$33 AND user_id=$34`
+			document_type=$33, updated_at=NOW()
+		WHERE id=$34 AND user_id=$35`
 
 	res, err := tx.ExecContext(ctx, uq,
 		inv.ClientID, inv.ClientName, inv.ClientEmail, inv.ClientAddress,
@@ -1242,9 +1267,9 @@ func (r *InvoiceRepo) UpdateInvoice(
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle,
 		inv.AutoReminders, inv.TemplateID, inv.BrandColor,
-		inv.ID, inv.UserID,
-	)	
-			if err != nil {
+		inv.DocumentType, inv.ID, inv.UserID,
+	)
+				if err != nil {
 
 		return err
 	}
