@@ -443,13 +443,14 @@
 
         <header class="header-top">
             <div class="header-title-block">
-        	{{if .Invoice.ShowTitle}}<span class="doc-title">INVOICE</span>{{end}}
+		{{if .Invoice.ShowTitle}}<span class="doc-title">{{if .IsEstimate}}ESTIMATE{{else}}INVOICE{{end}}</span>{{end}}
                 <span class="doc-number">#{{.Invoice.InvoiceNumber}}</span>
             </div>
             <div class="meta-grid">
                 <div class="meta-item">
                     <span class="meta-label">Status</span>
                     <span class="meta-value">
+
                         <span class="status-badge status-{{.Invoice.Status}}">{{.Invoice.Status}}</span>
                     </span>
                 </div>
