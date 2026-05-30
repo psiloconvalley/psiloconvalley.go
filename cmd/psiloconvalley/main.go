@@ -40,6 +40,7 @@ func main() {
 	// 5. Apply Global CSRF Protection
 	csrfHandler := nosurf.New(baseRouter)
 	csrfHandler.ExemptPath("/stripe/webhook")
+	csrfHandler.ExemptGlob("/estimates/*/respond")
 	csrfHandler.SetBaseCookie(http.Cookie{
 		HttpOnly: true,
 		Path:     "/",

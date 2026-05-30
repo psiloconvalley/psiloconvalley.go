@@ -1187,7 +1187,7 @@
 
 	            <aside class="sidebar">
                 <div class="sidebar-box">
-                    <h2 class="summary-title">Customize Invoice</h2>
+                    <h2 class="summary-title">{{if eq .DocumentType "estimate"}}Customize Estimate{{else}}Customize Invoice{{end}}</h2>
 
                     {{/* ── Appearance Toggles ── */}}
                     <div class="sidebar-section desktop-appearance">
