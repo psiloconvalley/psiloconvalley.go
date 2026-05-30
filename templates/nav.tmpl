@@ -13,10 +13,16 @@
         </button>
         <div class="nav-links" id="nav-links">
             {{if .User}}
-                <a href="/dashboard">Dashboard</a>
-                <a href="/invoices">Invoices</a>
-		<a href="/estimates">Estimates</a>
-                <a href="/recurring">Recurring</a>
+		
+		<a href="/dashboard">Dashboard</a>
+                <div class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-btn" onclick="toggleNavDropdown()">Billing ▾</button>
+                    <div class="nav-dropdown-menu" id="navDropdownMenu">
+                        <a href="/invoices">Invoices</a>
+                        <a href="/estimates">Estimates</a>
+                        <a href="/recurring">Recurring</a>
+                    </div>
+                </div>
                 <a href="/clients">Clients</a>
                 <a href="/pricing">Pricing</a>
                 <a href="/profile">Profile</a>
@@ -38,6 +44,17 @@
 </nav>
 
 <script src="/static/js/nav.js" defer></script>
+<script>
+function toggleNavDropdown() {
+    document.getElementById('navDropdownMenu').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+    var dd = document.querySelector('.nav-dropdown');
+    if (dd && !dd.contains(e.target)) {
+        document.getElementById('navDropdownMenu').classList.remove('open');
+    }
+});
+</script>
 {{end}}
 
 {{define "nav-styles"}}
