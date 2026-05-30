@@ -654,7 +654,7 @@
 
     {{if eq .Mode "edit"}}
     <div class="banner" style="margin: 16px 16px 0;">
-        <span>✏️ Editing Invoice</span>
+	  <span>✏️ Editing {{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}}</span>
         <strong>#{{.Invoice.InvoiceNumber}}</strong>
     </div>
     {{end}}
@@ -723,7 +723,7 @@
     </label>
 
     <label class="config-toggle" style="margin-bottom:0;">
-        <span class="config-item-label">Show Invoice Title</span>
+	 <span class="config-item-label">Show {{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}} Title</span>
         <input type="checkbox" id="toggle_title_mobile" {{if .Invoice.ShowTitle}}checked{{end}}>
         <span class="toggle-slider"><span class="toggle-knob"></span></span>
     </label>
@@ -748,7 +748,7 @@
         text-transform: uppercase;
         color: #94a3b8;
         margin-bottom: 14px;
-    ">Invoice Preview</div>
+">{{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}} Preview</div>
 
     <div style="height: 4px; background: #0d1422; border-radius: 2px; margin-bottom: 16px;"></div>
 
@@ -1200,7 +1200,7 @@
                         </label>
 
                         <label class="config-toggle">
-                            <span class="config-item-label">Show Invoice Title</span>
+				<span class="config-item-label">Show {{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}} Title</span>
                                  <input type="checkbox" name="show_title" id="toggle_title" {{if .Invoice.ShowTitle}}checked{{end}}>
                             <span class="toggle-slider"><span class="toggle-knob"></span></span>
                         </label>
