@@ -90,6 +90,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/estimates/new", h.EstimateNewGet)
 		r.Post("/estimates/create", h.EstimateCreatePost)
 		r.Get("/estimates/{id}", h.EstimateDetail)
+		r.Get("/estimates/{id}/edit", h.EstimateEditGet)
+		r.Post("/estimates/{id}/edit", h.EstimateEditPost)
 		r.Post("/estimates/{id}/status", h.EstimateStatusPost)
 		r.Post("/estimates/{id}/delete", h.EstimateDeletePost)
 		r.Post("/estimates/{id}/convert", h.EstimateConvertPost)

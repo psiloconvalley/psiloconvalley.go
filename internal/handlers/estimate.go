@@ -715,3 +715,191 @@ func (h *Handlers) EstimateSendPost(w http.ResponseWriter, r *http.Request) {
 		http.StatusSeeOther,
 	)
 }
+// EstimateEditGet shows the edit form for an estimate.
+func (h *Handlers) EstimateEditGet(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	if inv.DocumentType != "estimate" {
+		http.NotFound(w, r)
+		return
+	}
+
+	invoiceView := views.MapInvoicePage(inv, items, "edit")
+
+	if invoiceView.LogoURL == "" {
+		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
+			invoiceView.LogoURL = template.URL(bp.LogoURL)
+		}
+	}
+
+	data := map[string]any{
+		"Invoice":      invoiceView,
+		"IsEdit":       true,
+		"User":         user,
+		"Mode":         "edit",
+		"DocumentType": "estimate",
+		"USStates":     catalog.USStates,
+		"Currencies":   catalog.SupportedCurrencies,
+		"Templates":    catalog.InvoiceTemplates,
+	}
+
+	clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
+	if err == nil && len(clients) > 0 {
+		data["Clients"] = clients
+	}
+
+	h.App.Render(w, r, "invoice_new.tmpl", data)
+}
+
+// EstimateEditPost updates an existing estimate.
+func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, _, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	if inv.DocumentType != "estimate" {
+		http.NotFound(w, r)
+		return
+	}
+
+	clientName := strings.TrimSpace(r.FormValue("client_name"))
+	companyName := strings.TrimSpace(r.FormValue("company_name"))
+	invoiceNumber := strings.TrimSpace(r.FormValue("invoice_number"))
+	currency := catalog.NormalizeCurrency(r.FormValue("currency"))
+
+	descriptions := r.Form["description[]"]
+	details := r.Form["details[]"]
+	quantities := r.Form["quantity[]"]
+	unitPrices := r.Form["unit_price[]"]
+
+	var items []repo.InvoiceItem
+	for i, desc := range descriptions {
+		desc = strings.TrimSpace(desc)
+		if desc == "" {
+			continue
+		}
+		qty := float64(1)
+		if i < len(quantities) {
+			qty, _ = strconv.ParseFloat(quantities[i], 64)
+		}
+		if qty <= 0 {
+			qty = 1
+		}
+		var unitPrice float64
+		if i < len(unitPrices) {
+			unitPrice, _ = strconv.ParseFloat(unitPrices[i], 64)
+		}
+		detail := ""
+		if i < len(details) {
+			detail = strings.TrimSpace(details[i])
+		}
+		unitPriceCents := int64(math.Round(unitPrice * 100))
+		items = append(items, repo.InvoiceItem{
+			Description:    desc,
+			Details:        detail,
+			Quantity:       qty,
+			UnitPriceCents: unitPriceCents,
+		})
+	}
+
+	if len(items) == 0 {
+		http.Error(w, "At least one line item is required", http.StatusBadRequest)
+		return
+	}
+
+	issueDate := time.Now()
+	if d := r.FormValue("issue_date"); d != "" {
+		if t, err := time.Parse("2006-01-02", d); err == nil {
+			issueDate = t
+		}
+	}
+
+	var dueDate *time.Time
+	if d := r.FormValue("due_date"); d != "" {
+		if t, err := time.Parse("2006-01-02", d); err == nil {
+			dueDate = &t
+		}
+	}
+
+	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
+	taxRateBps := int64(math.Round(taxRatePct * 100))
+	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
+	discountCents := int64(math.Round(discountAmt * 100))
+
+	if invoiceNumber == "" {
+		invoiceNumber = inv.InvoiceNumber
+	}
+
+	inv.CompanyName = companyName
+	inv.CompanyEmail = strings.TrimSpace(r.FormValue("company_email"))
+	inv.CompanyAddress = strings.TrimSpace(r.FormValue("company_address"))
+	inv.CompanyCity = strings.TrimSpace(r.FormValue("company_city"))
+	inv.CompanyZip = strings.TrimSpace(r.FormValue("company_zip"))
+	inv.CompanyState = strings.TrimSpace(r.FormValue("company_state"))
+	inv.CompanyCountry = strings.TrimSpace(r.FormValue("company_country"))
+	inv.ClientName = clientName
+	inv.ClientEmail = strings.TrimSpace(r.FormValue("client_email"))
+	inv.ClientAddress = strings.TrimSpace(r.FormValue("client_address"))
+	inv.ClientCity = strings.TrimSpace(r.FormValue("client_city"))
+	inv.ClientZip = strings.TrimSpace(r.FormValue("client_zip"))
+	inv.ClientState = strings.TrimSpace(r.FormValue("client_state"))
+	inv.ClientCountry = strings.TrimSpace(r.FormValue("client_country"))
+	inv.InvoiceNumber = invoiceNumber
+	inv.IssueDate = issueDate
+	inv.DueDate = dueDate
+	inv.TaxRateBps = taxRateBps
+	inv.DiscountAmountCents = discountCents
+	inv.Notes = strings.TrimSpace(r.FormValue("notes"))
+	inv.PaymentDetails = strings.TrimSpace(r.FormValue("payment_details"))
+	inv.Currency = currency
+	inv.ShowLogo = r.FormValue("show_logo") == "on"
+	inv.ShowTitle = r.FormValue("show_title") == "on"
+	inv.TemplateID = r.FormValue("template_id")
+	inv.BrandColor = r.FormValue("brand_color")
+
+	isPro := user.Plan == "pro"
+	normalizeTemplateFields(inv, isPro)
+
+	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
+		log.Printf("[estimate] update error: %v", err)
+		http.Error(w, "Failed to update estimate", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/estimates/%d", id), http.StatusSeeOther)
+}
