@@ -8,6 +8,7 @@ import (
 	"context"
 	"os/signal"
 	"syscall"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/justinas/nosurf"
@@ -40,7 +41,10 @@ func main() {
 	// 5. Apply Global CSRF Protection
 	csrfHandler := nosurf.New(baseRouter)
 	csrfHandler.ExemptPath("/stripe/webhook")
-	csrfHandler.ExemptGlob("/estimates/*/respond")
+	csrfHandler.ExemptFunc(func(r *http.Request) bool {
+	return strings.HasPrefix(r.URL.Path, "/estimates/") &&
+			strings.HasSuffix(r.URL.Path, "/respond")
+	})
 	csrfHandler.SetBaseCookie(http.Cookie{
 		HttpOnly: true,
 		Path:     "/",
