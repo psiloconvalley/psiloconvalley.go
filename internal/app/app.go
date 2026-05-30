@@ -34,6 +34,7 @@ type App struct {
 	SchedulerRepo *repo.SchedulerRepo
 	Scheduler     *scheduler.Scheduler
 	LogoStore     logo.Store
+	EstRespRepo   *repo.EstimateResponseRepo
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }

@@ -15,6 +15,7 @@ import (
 
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
+	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/views"
 )
@@ -434,14 +435,12 @@ func (h *Handlers) EstimateConvertPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate new invoice number
 	invoiceNumber, err := h.App.UserRepo.NextInvoiceNumber(r.Context(), user.ID)
 	if err != nil {
 		log.Printf("[estimate] failed to generate invoice number: %v", err)
 		invoiceNumber = fmt.Sprintf("INV-%d", time.Now().UnixNano())
 	}
 
-	// Clone estimate into new invoice
 	newInv := *inv
 	newInv.ID = 0
 	newInv.InvoiceNumber = invoiceNumber
@@ -459,7 +458,6 @@ func (h *Handlers) EstimateConvertPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Mark estimate as converted
 	_, _ = h.App.DB().ExecContext(r.Context(),
 		`UPDATE invoices SET status = 'converted', updated_at = NOW() WHERE id = $1 AND user_id = $2`,
 		id, user.ID,
@@ -467,4 +465,253 @@ func (h *Handlers) EstimateConvertPost(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[estimate] estimate %d converted to invoice %d by user %d", id, newID, user.ID)
 	http.Redirect(w, r, fmt.Sprintf("/invoices/%d", newID), http.StatusSeeOther)
+}
+
+// EstimateRespondGet shows the client-facing response page.
+// Public route — no login required. Access controlled by public_token.
+func (h *Handlers) EstimateRespondGet(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	if inv.DocumentType != "estimate" {
+		http.NotFound(w, r)
+		return
+	}
+
+	accessToken := r.URL.Query().Get("access")
+	if inv.PublicToken == "" || accessToken == "" || accessToken != inv.PublicToken {
+		http.Error(w, "Invalid or missing access token", http.StatusForbidden)
+		return
+	}
+
+	if inv.Status == "accepted" || inv.Status == "declined" || inv.Status == "converted" {
+		h.App.Render(w, r, "estimate_responded.tmpl", map[string]any{
+			"Status":      inv.Status,
+			"EstimateNum": inv.InvoiceNumber,
+			"CompanyName": inv.CompanyName,
+		})
+		return
+	}
+
+	invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	h.App.Render(w, r, "estimate_respond.tmpl", map[string]any{
+		"Invoice":     invoiceView,
+		"AccessToken": accessToken,
+		"IsEstimate":  true,
+	})
+}
+
+// EstimateRespondPost handles the client's response — accept, decline, or suggest.
+// Public route — no login required. Access controlled by public_token.
+func (h *Handlers) EstimateRespondPost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, _, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	if inv.DocumentType != "estimate" {
+		http.NotFound(w, r)
+		return
+	}
+
+	accessToken := r.URL.Query().Get("access")
+	if inv.PublicToken == "" || accessToken == "" || accessToken != inv.PublicToken {
+		http.Error(w, "Invalid or missing access token", http.StatusForbidden)
+		return
+	}
+
+	if inv.Status != "sent" {
+		http.Redirect(w, r, fmt.Sprintf("/estimates/%d/respond?access=%s", id, accessToken), http.StatusSeeOther)
+		return
+	}
+
+	action := r.FormValue("action")
+	message := strings.TrimSpace(r.FormValue("message"))
+	clientName := strings.TrimSpace(r.FormValue("client_name"))
+
+	validActions := map[string]bool{
+		"accepted": true, "declined": true, "suggestion": true,
+	}
+	if !validActions[action] {
+		http.Error(w, "Invalid action", http.StatusBadRequest)
+		return
+	}
+
+	resp := &repo.EstimateResponse{
+		EstimateID: id,
+		Action:     action,
+		Message:    message,
+		ClientName: clientName,
+	}
+	if err := h.App.EstRespRepo.Create(r.Context(), resp); err != nil {
+		log.Printf("[estimate] response save error: %v", err)
+	}
+
+	if action == "accepted" || action == "declined" {
+		_, _ = h.App.DB().ExecContext(r.Context(),
+			`UPDATE invoices SET status = $1, updated_at = NOW() WHERE id = $2`,
+			action, id,
+		)
+	}
+
+	if inv.UserID != nil {
+		owner, err := h.App.UserRepo.GetByID(*inv.UserID)
+		if err == nil && owner.Email != "" {
+			estimateURL := fmt.Sprintf("%s/estimates/%d", h.App.BaseURL, id)
+			_ = h.App.Mailer.SendEstimateResponse(owner.Email, mailer.EstimateResponseEmailData{
+				EstimateNumber: inv.InvoiceNumber,
+				ClientName:     clientName,
+				CompanyName:    inv.CompanyName,
+				Action:         action,
+				Message:        message,
+				EstimateURL:    estimateURL,
+			})
+		}
+	}
+
+	log.Printf("[estimate] client responded to estimate %d: action=%s", id, action)
+
+	h.App.Render(w, r, "estimate_responded.tmpl", map[string]any{
+		"Action":       action,
+		"EstimateNum":  inv.InvoiceNumber,
+		"CompanyName":  inv.CompanyName,
+		"IsSuggestion": action == "suggestion",
+	})
+}
+// EstimateSendGet shows the send form for an estimate.
+func (h *Handlers) EstimateSendGet(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	if inv.DocumentType != "estimate" {
+		http.NotFound(w, r)
+		return
+	}
+
+	invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	h.App.Render(w, r, "invoice_send.tmpl", map[string]any{
+		"Invoice":      invoiceView,
+		"ClientEmail":  inv.ClientEmail,
+		"InvoiceID":    id,
+		"IsEstimate":   true,
+		"DocumentType": "estimate",
+	})
+}
+
+// EstimateSendPost sends the estimate email to the client.
+func (h *Handlers) EstimateSendPost(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
+		http.NotFound(w, r)
+		return
+	}
+
+	if inv.DocumentType != "estimate" {
+		http.NotFound(w, r)
+		return
+	}
+
+	toEmail := r.FormValue("to_email")
+	personalNote := r.FormValue("personal_note")
+
+	if toEmail == "" {
+		http.Error(w, "Recipient email is required", http.StatusBadRequest)
+		return
+	}
+
+	// Ensure public token exists for the respond link
+	token, err := h.App.InvRepo.EnsurePublicToken(r.Context(), id)
+	if err != nil {
+		log.Printf("[estimate] failed to ensure public token for estimate %d: %v", id, err)
+	}
+
+	respondURL := fmt.Sprintf("%s/estimates/%d/respond", h.App.BaseURL, id)
+	if token != "" {
+		respondURL += "?access=" + token
+	}
+
+	invoiceView := views.MapInvoicePage(inv, items, "view")
+
+	validUntil := ""
+	if inv.DueDate != nil {
+		validUntil = inv.DueDate.Format("January 2, 2006")
+	}
+
+	emailData := mailer.EstimateEmailData{
+		EstimateNumber: inv.InvoiceNumber,
+		ClientName:     inv.ClientName,
+		CompanyName:    inv.CompanyName,
+		Total:          invoiceView.Total,
+		Currency:       inv.Currency,
+		ValidUntil:     validUntil,
+		RespondURL:     respondURL,
+		PersonalNote:   personalNote,
+	}
+
+	if err := h.App.Mailer.SendEstimate(toEmail, emailData); err != nil {
+		log.Printf("[estimate] email send error: %v", err)
+		http.Error(w, "Failed to send estimate email. Please try again.", http.StatusInternalServerError)
+		return
+	}
+
+	// Advance status draft → sent
+	if inv.Status == "draft" && inv.UserID != nil {
+		_, _ = h.App.DB().ExecContext(r.Context(),
+			`UPDATE invoices SET status = 'sent', updated_at = NOW() WHERE id = $1 AND user_id = $2`,
+			id, *inv.UserID,
+		)
+	}
+
+	log.Printf("[estimate] estimate %s sent to %s by user %d",
+		inv.InvoiceNumber, toEmail, user.ID)
+
+	http.Redirect(w, r,
+		fmt.Sprintf("/estimates/%d?sent=true&to=%s", id, toEmail),
+		http.StatusSeeOther,
+	)
 }

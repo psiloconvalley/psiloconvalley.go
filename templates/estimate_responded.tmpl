@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Estimate Response | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #f8fafc;
+            color: #0d1422;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .card {
+            max-width: 480px;
+            width: 90%;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            padding: 48px 40px;
+            text-align: center;
+        }
+
+        .card-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .card-message {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .card-estimate {
+            display: inline-block;
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            font-family: monospace;
+            margin-bottom: 32px;
+        }
+
+        .card-link {
+            display: inline-block;
+            background: #0d1422;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+        .card-link:hover { background: #1e293b; }
+
+        .powered-by {
+            margin-top: 32px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .powered-by a { color: #64748b; text-decoration: none; font-weight: 600; }
+
+        @media (max-width: 500px) {
+            .card { padding: 36px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    {{if eq .Action "accepted"}}
+    <div class="card-icon">✅</div>
+    <div class="card-title">Estimate Accepted!</div>
+    <div class="card-message">
+        Thank you for accepting this estimate. {{.CompanyName}} has been notified and will be in touch shortly to get started.
+    </div>
+    {{else if eq .Action "declined"}}
+    <div class="card-icon">👋</div>
+    <div class="card-title">Estimate Declined</div>
+    <div class="card-message">
+        Thank you for your response. {{.CompanyName}} has been notified. If you change your mind, feel free to reach out directly.
+    </div>
+    {{else if eq .Action "suggestion"}}
+    <div class="card-icon">💬</div>
+    <div class="card-title">Suggestion Sent!</div>
+    <div class="card-message">
+        Your suggested changes have been sent to {{.CompanyName}}. They'll review your feedback and follow up with an updated estimate.
+    </div>
+    {{else}}
+    <div class="card-icon">📝</div>
+    <div class="card-title">Response Received</div>
+    <div class="card-message">
+        Your response has been recorded and {{.CompanyName}} has been notified.
+    </div>
+    {{end}}
+
+    <div class="card-estimate">{{.EstimateNum}}</div>
+
+    <div class="powered-by">
+        Powered by <a href="https://psiloconvalley.com">PsiloConValley</a>
+    </div>
+</div>
+
+</body>
+</html>

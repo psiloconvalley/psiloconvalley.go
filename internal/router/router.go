@@ -46,6 +46,10 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
 	r.Get("/invoices/{id}/pay", h.InvoicePayGet)
 
+	// ── Public estimate response routes ───────────────────────────────
+	r.Get("/estimates/{id}/respond", h.EstimateRespondGet)
+	r.Post("/estimates/{id}/respond", h.EstimateRespondPost)
+
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
@@ -89,6 +93,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Post("/estimates/{id}/status", h.EstimateStatusPost)
 		r.Post("/estimates/{id}/delete", h.EstimateDeletePost)
 		r.Post("/estimates/{id}/convert", h.EstimateConvertPost)
+		r.Get("/estimates/{id}/send", h.EstimateSendGet)
+		r.Post("/estimates/{id}/send", h.EstimateSendPost)
 		})
 	return r
 }

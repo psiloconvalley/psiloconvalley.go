@@ -510,3 +510,253 @@ func (m *Mailer) APIKey() string {
 	}
 	return os.Getenv("RESEND_API_KEY")
 }
+	// =====================================================================
+// SendEstimateResponse
+// Notifies the owner when a client responds to an estimate
+// =====================================================================
+
+type EstimateResponseEmailData struct {
+	EstimateNumber string
+	ClientName     string
+	CompanyName    string
+	Action         string // "accepted", "declined", "suggestion"
+	Message        string
+	EstimateURL    string
+}
+
+func (m *Mailer) SendEstimateResponse(toEmail string, data EstimateResponseEmailData) error {
+	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
+		log.Printf("[mailer] skipping estimate response — no API key")
+		return nil
+	}
+
+	actionLabel := map[string]string{
+		"accepted":   "✅ Accepted",
+		"declined":   "❌ Declined",
+		"suggestion": "💬 Suggested Changes",
+	}[data.Action]
+
+	subject := fmt.Sprintf(
+		"Client %s your estimate %s",
+		actionLabel,
+		data.EstimateNumber,
+	)
+
+	actionColor := map[string]string{
+		"accepted":   "#14532d",
+		"declined":   "#7f1d1d",
+		"suggestion": "#1e3a5f",
+	}[data.Action]
+
+	actionBg := map[string]string{
+		"accepted":   "#dcfce7",
+		"declined":   "#fee2e2",
+		"suggestion": "#dbeafe",
+	}[data.Action]
+
+	actionText := map[string]string{
+		"accepted":   "#15803d",
+		"declined":   "#dc2626",
+		"suggestion": "#1d4ed8",
+	}[data.Action]
+
+	body := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+          <tr>
+            <td style="background:%s;border-radius:12px 12px 0 0;height:6px;"></td>
+          </tr>
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;margin-bottom:8px;">Estimate Response</div>
+              <h1 style="font-size:24px;font-weight:800;color:#0d1422;margin:0 0 24px;letter-spacing:-0.5px;">%s responded to your estimate</h1>
+
+              <div style="background:%s;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+                <div style="font-size:13px;font-weight:700;color:%s;">%s — %s</div>
+              </div>
+
+              %s
+
+              <div style="margin-top:28px;">
+                <a href="%s" style="display:inline-block;background:#0d1422;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">View Estimate →</a>
+              </div>
+
+              <p style="margin-top:32px;font-size:12px;color:#94a3b8;">
+                This notification was sent from PsiloConValley for estimate %s
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+		actionColor,
+		data.ClientName,
+		actionBg,
+		actionText,
+		actionLabel,
+		data.EstimateNumber,
+		func() string {
+			if data.Message != "" {
+				return fmt.Sprintf(`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:8px;">Their Message</div>
+                  <div style="font-size:14px;color:#0d1422;line-height:1.6;">%s</div>
+                </div>`, data.Message)
+			}
+			return ""
+		}(),
+		data.EstimateURL,
+		data.EstimateNumber,
+	)
+
+	_, err := m.client.Emails.Send(&resend.SendEmailRequest{
+		From:    m.from,
+		To:      []string{toEmail},
+		Subject: subject,
+		Html:    body,
+	})
+	if err != nil {
+		log.Printf("[mailer] estimate response email error: %v", err)
+	}
+	return err
+
+}
+// =====================================================================
+// SendEstimate
+// Sends estimate to client with a respond link (no PDF attachment)
+// =====================================================================
+
+type EstimateEmailData struct {
+	EstimateNumber string
+	ClientName     string
+	CompanyName    string
+	Total          string
+	Currency       string
+	ValidUntil     string
+	RespondURL     string
+	PersonalNote   string
+}
+
+func (m *Mailer) SendEstimate(toEmail string, data EstimateEmailData) error {
+	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
+		log.Printf("[mailer] skipping estimate send — no API key (would have sent to %s)", toEmail)
+		return nil
+	}
+
+	subject := fmt.Sprintf(
+		"Estimate %s from %s — %s %s",
+		data.EstimateNumber,
+		data.CompanyName,
+		data.Currency,
+		data.Total,
+	)
+
+	body := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%%%%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%%%%.">
+
+          <tr>
+            <td style="padding:0 0 24px 0;text-align:center;">
+              <p style="margin:0;font-size:14px;font-weight:700;letter-spacing:1px;color:#1f2937;">PSILOCONVALLEY</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+              <div style="height:4px;background:linear-gradient(90deg,#4ade80,#22d3ee,#818cf8);"></div>
+              <table width="100%%%%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:40px 40px 32px;">
+                    <p style="margin:0 0 6px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;font-weight:600;">ESTIMATE</p>
+                    <p style="margin:0 0 28px 0;font-size:26px;font-weight:800;color:#111827;letter-spacing:-0.5px;">%s</p>
+
+                    <p style="margin:0 0 20px 0;font-size:15px;color:#374151;line-height:1.6;">Hi %s,</p>
+                    <p style="margin:0 0 28px 0;font-size:15px;color:#374151;line-height:1.6;">
+                      %s has sent you an estimate for your review.
+                      %s
+                    </p>
+
+                    <table width="100%%%%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:28px;">
+                      <tr>
+                        <td style="padding:24px 28px;">
+                          <p style="margin:0 0 6px 0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;font-weight:600;">ESTIMATED TOTAL</p>
+                          <p style="margin:0 0 4px 0;font-size:36px;font-weight:800;color:#111827;letter-spacing:-1px;">%s %s</p>
+                          %s
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table width="100%%%%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" style="padding:8px 0 32px;">
+                          <a href="%s" style="display:inline-block;background:#0d1422;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.3px;">
+                            Review &amp; Respond →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;">
+                      This estimate was sent via PsiloConValley. Click the button above to review and respond.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+		data.EstimateNumber,
+		data.ClientName,
+		data.CompanyName,
+		func() string {
+			if data.PersonalNote != "" {
+				return fmt.Sprintf(`<br><br><em style="color:#6b7280;">%s</em>`, data.PersonalNote)
+			}
+			return ""
+		}(),
+		data.Currency,
+		data.Total,
+		func() string {
+			if data.ValidUntil != "" {
+				return fmt.Sprintf(`<p style="margin:8px 0 0 0;font-size:13px;color:#6b7280;">Valid until %s</p>`, data.ValidUntil)
+			}
+			return ""
+		}(),
+		data.RespondURL,
+	)
+
+	_, err := m.client.Emails.Send(&resend.SendEmailRequest{
+		From:    m.from,
+		To:      []string{toEmail},
+		Subject: subject,
+		Html:    body,
+	})
+	if err != nil {
+		log.Printf("[mailer] estimate send error: %v", err)
+		return err
+	}
+
+	log.Printf("[mailer] estimate %s sent to %s", data.EstimateNumber, toEmail)
+	return nil
+}
+
