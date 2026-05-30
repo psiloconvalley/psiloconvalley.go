@@ -351,31 +351,29 @@
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                     </td>
                     <td class="right mono">{{money .TotalCents}}</td>
-                    <td>
+				                        <td>
                         <div class="row-actions">
                             {{if eq .Status "draft"}}
-                            <a href="/estimates/{{.ID}}" class="small-btn">Send</a>
-                            {{end}}
-                            {{if eq .Status "sent"}}
-                            <form method="POST" action="/estimates/{{.ID}}/status" style="display:inline;">
-                                {{$.csrfField}}
-                                <input type="hidden" name="status" value="accepted">
-                                <button type="submit" class="small-btn success">Accept</button>
-                            </form>
-                            {{end}}
-                            {{if eq .Status "accepted"}}
+                            <a href="/estimates/{{.ID}}/send" class="small-btn">Send</a>
+                            <a href="/estimates/{{.ID}}" class="small-btn">Edit</a>
+                            <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
+                            {{else if eq .Status "sent"}}
+                            <a href="/estimates/{{.ID}}/send" class="small-btn">Resend</a>
+                            <a href="/estimates/{{.ID}}" class="small-btn">View</a>
+                            {{else if eq .Status "accepted"}}
                             <form method="POST" action="/estimates/{{.ID}}/convert" style="display:inline;">
                                 {{$.csrfField}}
                                 <button type="submit" class="small-btn success">Convert</button>
                             </form>
-                            {{end}}
                             <a href="/estimates/{{.ID}}" class="small-btn">View</a>
-                            {{if eq .Status "draft"}}
-                            <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
+                            {{else if or (eq .Status "rejected") (eq .Status "expired")}}
+                            <a href="/estimates/{{.ID}}" class="small-btn">View</a>
+                            {{else if eq .Status "converted"}}
+                            <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                             {{end}}
                         </div>
                     </td>
-                </tr>
+                                    </tr>
                 {{end}}
             </tbody>
         </table>
@@ -402,21 +400,24 @@
                     <div class="inv-card-total">{{money .TotalCents}}</div>
                 </div>
             </a>
-            <div class="inv-card-actions">
+        <div class="inv-card-actions">
                 {{if eq .Status "draft"}}
-                <a href="/estimates/{{.ID}}" class="small-btn">Send</a>
-                {{end}}
-                {{if eq .Status "accepted"}}
+                <a href="/estimates/{{.ID}}/send" class="small-btn">Send</a>
+                <a href="/estimates/{{.ID}}" class="small-btn">Edit</a>
+                <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
+                {{else if eq .Status "sent"}}
+                <a href="/estimates/{{.ID}}/send" class="small-btn">Resend</a>
+                <a href="/estimates/{{.ID}}" class="small-btn">View</a>
+                {{else if eq .Status "accepted"}}
                 <form method="POST" action="/estimates/{{.ID}}/convert" style="display:inline; flex:1;">
                     {{$.csrfField}}
-                    <button type="submit" class="small-btn success" style="width:100%;">Convert to Invoice</button>
+                    <button type="submit" class="small-btn success" style="width:100%;">Convert</button>
                 </form>
-                {{end}}
                 <a href="/estimates/{{.ID}}" class="small-btn">View</a>
-                {{if eq .Status "draft"}}
-                <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
+                {{else}}
+                <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                 {{end}}
-            </div>
+            </div> 
         </div>
         {{end}}
     </div>
@@ -432,7 +433,8 @@
         <div style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.6); margin-bottom:8px;">Type the estimate number to confirm:</div>
         <div style="font-size:13px; font-weight:700; color:#fca5a5; background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); border-radius:6px; padding:8px 12px; margin-bottom:12px; font-family:monospace;" id="delete-modal-number"></div>
         <input type="text" id="delete-confirm-input" placeholder="Type estimate number here" oninput="checkDeleteConfirm()"
-            style="width:100%; padding:10px 12px; border:1px solid rgba(255,255,255,0.15); border-radius:8px; font-size:14px; font-family:inherit; margin-bottom:16px; background:rgba(255,255,255,0.05); color:#fff;">
+            style="width:100%; padding:10px 12px; border:1px solid rgba(255,255,255,0.15); border-radius:8px; font-size:14px; :wq
+	    font-family:inherit; margin-bottom:16px; background:rgba(255,255,255,0.05); color:#fff;">
         <div style="display:flex; gap:12px;">
             <button type="button" onclick="closeDeleteModal()" style="flex:1; padding:11px; border:1px solid rgba(255,255,255,0.15); background:transparent; color:rgba(255,255,255,0.6); border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">Cancel</button>
             <form id="delete-form" method="POST" action="" style="flex:1;">
@@ -441,7 +443,7 @@
                 <button type="submit" id="delete-submit-btn" disabled
                     style="width:100%; padding:11px; background:#dc2626; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; opacity:0.4;">
                     Delete Permanently
-                </button>
+       </button>
             </form>
         </div>
     </div>
