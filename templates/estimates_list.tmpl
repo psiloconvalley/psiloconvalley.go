@@ -351,29 +351,32 @@
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                     </td>
                     <td class="right mono">{{money .TotalCents}}</td>
-				                        <td>
+		    <td>
                         <div class="row-actions">
                             {{if eq .Status "draft"}}
                             <a href="/estimates/{{.ID}}/send" class="small-btn">Send</a>
-                            <a href="/estimates/{{.ID}}" class="small-btn">Edit</a>
+                            <a href="/estimates/{{.ID}}/edit" class="small-btn">Edit</a>
                             <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
                             {{else if eq .Status "sent"}}
                             <a href="/estimates/{{.ID}}/send" class="small-btn">Resend</a>
+                            <a href="/estimates/{{.ID}}/edit" class="small-btn">Edit</a>
                             <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                             {{else if eq .Status "accepted"}}
                             <form method="POST" action="/estimates/{{.ID}}/convert" style="display:inline;">
                                 {{$.csrfField}}
                                 <button type="submit" class="small-btn success">Convert</button>
                             </form>
+                            <button type="button" class="small-btn" onclick="openEditAcceptedModal({{.ID}})">Edit</button>
                             <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                             {{else if or (eq .Status "rejected") (eq .Status "expired")}}
+                            <a href="/estimates/{{.ID}}/edit" class="small-btn">Edit</a>
                             <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                             {{else if eq .Status "converted"}}
                             <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                             {{end}}
                         </div>
                     </td>
-                                    </tr>
+				                                            </tr>
                 {{end}}
             </tbody>
         </table>
@@ -400,25 +403,30 @@
                     <div class="inv-card-total">{{money .TotalCents}}</div>
                 </div>
             </a>
-        <div class="inv-card-actions">
+		            <div class="inv-card-actions">
                 {{if eq .Status "draft"}}
                 <a href="/estimates/{{.ID}}/send" class="small-btn">Send</a>
-                <a href="/estimates/{{.ID}}" class="small-btn">Edit</a>
+                <a href="/estimates/{{.ID}}/edit" class="small-btn">Edit</a>
                 <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
                 {{else if eq .Status "sent"}}
                 <a href="/estimates/{{.ID}}/send" class="small-btn">Resend</a>
+                <a href="/estimates/{{.ID}}/edit" class="small-btn">Edit</a>
                 <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                 {{else if eq .Status "accepted"}}
                 <form method="POST" action="/estimates/{{.ID}}/convert" style="display:inline; flex:1;">
                     {{$.csrfField}}
                     <button type="submit" class="small-btn success" style="width:100%;">Convert</button>
                 </form>
+                <button type="button" class="small-btn" onclick="openEditAcceptedModal({{.ID}})">Edit</button>
+                <a href="/estimates/{{.ID}}" class="small-btn">View</a>
+                {{else if or (eq .Status "rejected") (eq .Status "expired")}}
+                <a href="/estimates/{{.ID}}/edit" class="small-btn">Edit</a>
                 <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                 {{else}}
                 <a href="/estimates/{{.ID}}" class="small-btn">View</a>
                 {{end}}
-            </div> 
-        </div>
+            </div>
+                </div>
         {{end}}
     </div>
 
@@ -485,6 +493,50 @@ function checkDeleteConfirm() {
 
 document.getElementById('delete-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeDeleteModal();
+});
+</script>
+
+<!-- ═══════════ EDIT ACCEPTED ESTIMATE MODAL ═══════════ -->
+<div id="edit-accepted-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:600;">
+    <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px; max-width:460px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+        <div style="font-size:32px; margin-bottom:12px;">⚠️</div>
+        <div style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">This estimate has been accepted</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:24px; line-height:1.6;">
+            The client has already approved this estimate. What would you like to do?
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+            <form id="convert-form" method="POST" action="">
+                {{.csrfField}}
+                <button type="submit" style="width:100%; padding:14px; background:#14532d; color:#86efac; border:1px solid rgba(134,239,172,0.3); border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; text-align:left;">
+                    <span style="font-size:16px;">🔄</span>&nbsp;&nbsp;Convert to Invoice
+                    <div style="font-size:11px; font-weight:400; color:rgba(134,239,172,0.7); margin-top:4px;">Recommended — create an invoice from this accepted estimate</div>
+                </button>
+            </form>
+
+            <a id="edit-accepted-link" href="" style="display:block; padding:14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:10px; font-size:14px; font-weight:700; color:#fff; text-decoration:none; font-family:inherit;">
+                <span style="font-size:16px;">✏️</span>&nbsp;&nbsp;Edit Anyway
+                <div style="font-size:11px; font-weight:400; color:rgba(255,255,255,0.4); margin-top:4px;">Status will revert to draft — client will need to re-accept</div>
+            </a>
+
+            <button type="button" onclick="closeEditAcceptedModal()" style="padding:14px; background:none; border:1px solid rgba(255,255,255,0.1); border-radius:10px; font-size:14px; font-weight:600; color:rgba(255,255,255,0.4); cursor:pointer; font-family:inherit;">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditAcceptedModal(estimateID) {
+    document.getElementById('convert-form').action = '/estimates/' + estimateID + '/convert';
+    document.getElementById('edit-accepted-link').href = '/estimates/' + estimateID + '/edit?revert=true';
+    document.getElementById('edit-accepted-overlay').style.display = 'block';
+}
+function closeEditAcceptedModal() {
+    document.getElementById('edit-accepted-overlay').style.display = 'none';
+}
+document.getElementById('edit-accepted-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeEditAcceptedModal();
 });
 </script>
 

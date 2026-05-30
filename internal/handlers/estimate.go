@@ -736,12 +736,21 @@ func (h *Handlers) EstimateEditGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if inv.DocumentType != "estimate" {
-		http.NotFound(w, r)
-		return
+	    http.NotFound(w, r)
+	    return
+	}
+
+	// If editing an accepted estimate, revert to draft so client must re-accept
+	if r.URL.Query().Get("revert") == "true" && inv.Status == "accepted" {
+		_, _ = h.App.DB().ExecContext(r.Context(),
+			`UPDATE invoices SET status = 'draft', updated_at = NOW() WHERE id = $1 AND user_id = $2`,
+			id, user.ID,
+		)
+		inv.Status = "draft"
+		log.Printf("[estimate] estimate %d reverted to draft for re-editing by user %d", id, user.ID)
 	}
 
 	invoiceView := views.MapInvoicePage(inv, items, "edit")
-
 	if invoiceView.LogoURL == "" {
 		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
 			invoiceView.LogoURL = template.URL(bp.LogoURL)
