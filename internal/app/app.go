@@ -94,6 +94,7 @@ func NewApp(db *sql.DB) *App {
 		SchedulerRepo: schedRepo,
 		Scheduler:     sched,
 		LogoStore:     newLogoStore(baseURL),
+		EstRespRepo:   repo.NewEstimateResponseRepo(db),
 	}
 }
 
