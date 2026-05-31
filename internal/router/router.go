@@ -46,7 +46,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
 	r.Get("/invoices/{id}/pay", h.InvoicePayGet)
 
-	// ── Public estimate response routes ───────────────────────────────
+	// ── Public estimate response routes ───────────────────────────
 	r.Get("/estimates/{id}/respond", h.EstimateRespondGet)
 	r.Post("/estimates/{id}/respond", h.EstimateRespondPost)
 
@@ -67,8 +67,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/clients/{id}/edit", h.ClientEditGet)
 		r.Post("/clients/{id}/edit", h.ClientEditPost)
 		r.Post("/clients/{id}/delete", h.ClientDelete)
-		
-		// Invoice management (requires login)
+
+		// Invoice management
 		r.Get("/dashboard", h.DashboardGet)
 		r.Get("/invoices", h.InvoicesList)
 		r.Get("/invoices/{id}/edit", h.InvoiceEditGet)
@@ -97,6 +97,9 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Post("/estimates/{id}/convert", h.EstimateConvertPost)
 		r.Get("/estimates/{id}/send", h.EstimateSendGet)
 		r.Post("/estimates/{id}/send", h.EstimateSendPost)
-		})
+
+		// Admin
+		r.Get("/admin/analytics", h.AdminAnalytics)
+	})
 	return r
 }

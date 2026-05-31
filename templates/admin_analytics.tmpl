@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Analytics | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{template "nav-styles" .}}
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0f1a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
+        }
+        .top h1 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        .top-subtitle {
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            margin-top: 6px;
+            font-family: monospace;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 12px;
+            font-family: monospace;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
+        }
+        .stat-value.green { color: #4ade80; }
+        .stat-value.yellow { color: #fbbf24; }
+        .stat-value.blue { color: #93c5fd; }
+        .stat-value.red { color: #f87171; }
+        .stat-sub {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 6px;
+            font-family: monospace;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-family: monospace;
+        }
+
+        .section { margin-bottom: 40px; }
+
+        .estimate-funnel {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        .funnel-step {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .funnel-step::after {
+            content: '→';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.15);
+            font-size: 18px;
+        }
+        .funnel-step:last-child::after { content: ''; }
+        .funnel-count {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .funnel-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .estimate-funnel { grid-template-columns: 1fr; }
+            .funnel-step::after { display: none; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="container">
+
+    <div class="top">
+        <div>
+            <h1>Analytics</h1>
+            <div class="top-subtitle">Platform-wide metrics · Admin only</div>
+        </div>
+    </div>
+
+    <!-- ═══════════ BUSINESS METRICS ═══════════ -->
+    <div class="section">
+        <div class="section-label">💰 Business</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">MRR</div>
+                <div class="stat-value green">${{.MRR}}</div>
+                <div class="stat-sub">{{.Stats.ProUsers}} pro users × $8</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Platform Revenue</div>
+                <div class="stat-value green">{{.Revenue}}</div>
+                <div class="stat-sub">Total paid invoices</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Outstanding</div>
+                <div class="stat-value yellow">{{.Outstanding}}</div>
+                <div class="stat-sub">Awaiting payment</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Conversion Rate</div>
+                <div class="stat-value blue">{{printf "%.0f" .ConversionRate}}%</div>
+                <div class="stat-sub">Estimates accepted</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ USERS ═══════════ -->
+    <div class="section">
+        <div class="section-label">👥 Users</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">{{.Stats.TotalUsers}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">New This Week</div>
+                <div class="stat-value green">{{.Stats.NewUsersThisWeek}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pro Users</div>
+                <div class="stat-value blue">{{.Stats.ProUsers}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Free Users</div>
+                <div class="stat-value">{{.Stats.TotalUsers | printf "%d"}}</div>
+                <div class="stat-sub">minus {{.Stats.ProUsers}} pro</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ DOCUMENTS ═══════════ -->
+    <div class="section">
+        <div class="section-label">📄 Documents</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Invoices</div>
+                <div class="stat-value">{{.Stats.TotalInvoices}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">This Month</div>
+                <div class="stat-value">{{.Stats.MonthlyInvoices}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Estimates</div>
+                <div class="stat-value">{{.Stats.TotalEstimates}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Converted</div>
+                <div class="stat-value green">{{.Stats.EstimatesConverted}}</div>
+                <div class="stat-sub">Estimate → Invoice</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ ESTIMATE FUNNEL ═══════════ -->
+    <div class="section">
+        <div class="section-label">📊 Estimate Funnel</div>
+        <div class="estimate-funnel">
+            <div class="funnel-step">
+                <div class="funnel-count">{{.Stats.TotalEstimates}}</div>
+                <div class="funnel-label">Created</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-count">{{.Stats.EstimatesSent}}</div>
+                <div class="funnel-label">Sent</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-count" style="color:#4ade80;">{{.Stats.EstimatesAccepted}}</div>
+                <div class="funnel-label">Accepted</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-count" style="color:#f87171;">{{.Stats.EstimatesDeclined}}</div>
+                <div class="funnel-label">Declined</div>
+            </div>
+            <div class="funnel-step">
+                <div class="funnel-count" style="color:#93c5fd;">{{.Stats.EstimatesConverted}}</div>
+                <div class="funnel-label">Converted</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

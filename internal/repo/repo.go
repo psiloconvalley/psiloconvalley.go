@@ -1567,3 +1567,44 @@ func (r *InvoiceRepo) GetDashboardStats(ctx context.Context, userID int64) (*Das
 	}
 	return &s, nil
 }
+// AdminStats holds platform-wide analytics for the admin dashboard.
+type AdminStats struct {
+	TotalUsers        int
+	NewUsersThisWeek  int
+	ProUsers          int
+	TotalInvoices     int
+	TotalEstimates    int
+	EstimatesSent     int
+	EstimatesAccepted int
+	EstimatesDeclined int
+	EstimatesConverted int
+	TotalRevenueCents int64
+	TotalOutstandingCents int64
+	MonthlyInvoices   int
+}
+
+func (r *InvoiceRepo) GetAdminStats(ctx context.Context, db *sql.DB) (*AdminStats, error) {
+	var s AdminStats
+
+	// User counts
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users`).Scan(&s.TotalUsers)
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '7 days'`).Scan(&s.NewUsersThisWeek)
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users WHERE plan = 'pro'`).Scan(&s.ProUsers)
+
+	// Invoice counts
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM invoices WHERE document_type = 'invoice'`).Scan(&s.TotalInvoices)
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM invoices WHERE document_type = 'invoice' AND created_at >= date_trunc('month', NOW())`).Scan(&s.MonthlyInvoices)
+
+	// Estimate counts
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM invoices WHERE document_type = 'estimate'`).Scan(&s.TotalEstimates)
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM invoices WHERE document_type = 'estimate' AND status = 'sent'`).Scan(&s.EstimatesSent)
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM invoices WHERE document_type = 'estimate' AND status = 'accepted'`).Scan(&s.EstimatesAccepted)
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM invoices WHERE document_type = 'estimate' AND status = 'declined'`).Scan(&s.EstimatesDeclined)
+	_ = db.QueryRowContext(ctx, `SELECT COUNT(*) FROM invoices WHERE document_type = 'estimate' AND status = 'converted'`).Scan(&s.EstimatesConverted)
+
+	// Revenue
+	_ = db.QueryRowContext(ctx, `SELECT COALESCE(SUM(total_cents), 0) FROM invoices WHERE document_type = 'invoice' AND status = 'paid'`).Scan(&s.TotalRevenueCents)
+	_ = db.QueryRowContext(ctx, `SELECT COALESCE(SUM(total_cents), 0) FROM invoices WHERE document_type = 'invoice' AND status IN ('sent', 'overdue')`).Scan(&s.TotalOutstandingCents)
+
+	return &s, nil
+}
