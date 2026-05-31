@@ -432,15 +432,14 @@
         <div class="top-accent"></div>
 
         {{if and .Invoice.LogoURL .Invoice.ShowLogo}}
-        <div style="padding: 24px 36px 0;">
+        <div style="padding: 24px 36px 0; text-align:{{if .Invoice.LogoPosition}}{{.Invoice.LogoPosition}}{{else}}left{{end}};">
             <img
                 src="{{.Invoice.LogoURL}}"
                 alt="{{.Invoice.CompanyName}}"
-                style="max-width:200px; max-height:80px; object-fit:contain; display:block;"
+                style="max-width:200px; max-height:80px; object-fit:contain; display:inline-block;"
             >
         </div>
-        {{end}}
-
+        {{end}} 
         <header class="header-top">
             <div class="header-title-block">
 		{{if .Invoice.ShowTitle}}<span class="doc-title">{{if .IsEstimate}}ESTIMATE{{else}}INVOICE{{end}}</span>{{end}}
