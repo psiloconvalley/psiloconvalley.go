@@ -94,6 +94,7 @@ type InvoicePage struct {
 	// Template customization (Pro feature)
 	TemplateID string // "classic", "minimal", "bold"
 	BrandColor string // "#RRGGBB" hex accent color
+	LogoPosition string // "left", "center", "right"
 
 	//Recurring	
 	IsRecurring        bool
@@ -228,6 +229,7 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		AutoReminders:          inv.AutoReminders,
 		TemplateID:		inv.TemplateID,
 		BrandColor:		inv.BrandColor,
+		LogoPosition:		inv.LogoPosition,
 
 		// Hints is zero-value (all false) by default.
 		// The handler sets fields on this after calling MapInvoicePage.

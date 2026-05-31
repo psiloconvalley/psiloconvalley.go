@@ -140,6 +140,7 @@ type Invoice struct {
 	AutoReminders       bool
 	TemplateID	    string // "classic", "minimal","bold"
 	BrandColor	    string // "#RRGGBB" hex accent color
+	LogoPosition        string // "left", "center", "right"
 	PublicToken         string // secure share token for client access
 }
 
@@ -972,12 +973,12 @@ func (r *InvoiceRepo) CreateInvoice(
 			tax_rate_bps, discount_amount_cents, notes, payment_details,
 			subtotal_cents, tax_amount_cents, total_cents,
 			currency, status, show_logo, show_title, auto_reminders,
-			template_id, brand_color, document_type
+			template_id, brand_color, logo_position, document_type
 		) VALUES (
 			$1,$2,$3,NULLIF($4,''),$5,$6,$7,$8,$9,$10,$11,
 			$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
 			$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,
-			$34,$35,$36
+			$34,$35,$36,$37
 		) RETURNING id, created_at`
 
 	var newID int64
@@ -997,7 +998,7 @@ func (r *InvoiceRepo) CreateInvoice(
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle, inv.AutoReminders,
-		inv.TemplateID, inv.BrandColor, inv.DocumentType,
+		inv.TemplateID, inv.BrandColor, inv.LogoPosition, inv.DocumentType,
 	).Scan(&newID, &createdAt)
 		if err != nil {
 		return 0, fmt.Errorf("insert invoice: %w", err)
@@ -1076,6 +1077,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			COALESCE(bp.logo_url, '') AS logo_url,
 			i.template_id,
 			i.brand_color,
+			COALESCE(i.logo_position, 'left') AS logo_position,
 			COALESCE(i.public_token, '') AS public_token
 		FROM invoices i
 		LEFT JOIN business_profiles bp ON bp.id = i.business_profile_id
@@ -1130,6 +1132,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.LogoURL,
 		&inv.TemplateID,
 		&inv.BrandColor,
+		&inv.LogoPosition,
 		&inv.PublicToken,
 	)
 	if err != nil {
@@ -1360,8 +1363,8 @@ func (r *InvoiceRepo) UpdateInvoice(
 			subtotal_cents=$23, tax_amount_cents=$24, total_cents=$25,
 			currency=$26, status=$27, show_logo=$28, show_title=$29,
 			auto_reminders=$30, template_id=$31, brand_color=$32,
-			document_type=$33, updated_at=NOW()
-		WHERE id=$34 AND user_id=$35`
+			logo_position=$33,document_type=$34, updated_at=NOW()
+			WHERE id=$35 AND user_id=$36`
 
 	res, err := tx.ExecContext(ctx, uq,
 		inv.ClientID, inv.ClientName, inv.ClientEmail, inv.ClientAddress,
@@ -1372,8 +1375,8 @@ func (r *InvoiceRepo) UpdateInvoice(
 		inv.TaxRateBps, inv.DiscountAmountCents, inv.Notes, inv.PaymentDetails,
 		inv.SubtotalCents, inv.TaxAmountCents, inv.TotalCents,
 		inv.Currency, inv.Status, inv.ShowLogo, inv.ShowTitle,
-		inv.AutoReminders, inv.TemplateID, inv.BrandColor,
-		inv.DocumentType, inv.ID, inv.UserID,
+		inv.AutoReminders, inv.TemplateID, inv.BrandColor,		
+		inv.LogoPosition, inv.DocumentType, inv.ID, inv.UserID,
 	)
 				if err != nil {
 

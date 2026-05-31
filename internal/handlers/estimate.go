@@ -63,6 +63,7 @@ func (h *Handlers) EstimateNewGet(w http.ResponseWriter, r *http.Request) {
 		ShowTitle:      true,
 		TemplateID:     catalog.DefaultTemplateID,
 		BrandColor:     catalog.DefaultBrandColor,
+		LogoPosition:   "left",
 	}
 	if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
 		invoiceData.LogoURL = template.URL(bp.LogoURL)
@@ -198,6 +199,10 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	showTitle := r.FormValue("show_title") == "on"
 	templateID := r.FormValue("template_id")
 	brandColor := r.FormValue("brand_color")
+	logoPosition := r.FormValue("logo_position")
+	if logoPosition == "" {
+		logoPosition = "left"
+	}
 
 	// Auto-generate estimate number
 	if invoiceNumber == "" {
@@ -242,6 +247,7 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 		ShowTitle:           showTitle,
 		TemplateID:          templateID,
 		BrandColor:          brandColor,
+		LogoPosition:        logoPosition,
 		Currency:            currency,
 		Notes:               strings.TrimSpace(r.FormValue("notes")),
 		PaymentDetails:      strings.TrimSpace(r.FormValue("payment_details")),
@@ -900,6 +906,10 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 	inv.ShowTitle = r.FormValue("show_title") == "on"
 	inv.TemplateID = r.FormValue("template_id")
 	inv.BrandColor = r.FormValue("brand_color")
+	inv.LogoPosition = r.FormValue("logo_position")
+	if inv.LogoPosition == "" {
+		inv.LogoPosition = "left"
+	}
 
 	isPro := user.Plan == "pro"
 	normalizeTemplateFields(inv, isPro)

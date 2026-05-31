@@ -53,6 +53,7 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 		ShowTitle:      true,
 		TemplateID:     catalog.DefaultTemplateID,
 		BrandColor:     catalog.DefaultBrandColor,
+		LogoPosition:   "left",
 	}
 	if user != nil {
 		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
@@ -217,6 +218,8 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				PaymentDetails: r.FormValue("payment_details"),
 				ShowLogo:       r.FormValue("show_logo") == "on",
 				ShowTitle:      r.FormValue("show_title") == "on",
+				LogoPosition:   r.FormValue("logo_position"),
+
 				AutoReminders:  r.FormValue("auto_reminders") == "on",
 				LogoURL: func() template.URL {
 					if user != nil {
@@ -263,11 +266,14 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	showLogo := r.FormValue("show_logo") == "on"
 	showTitle := r.FormValue("show_title") == "on"
 	autoReminders := r.FormValue("auto_reminders") == "on"
-	// ── Template customization ──────────────────────────────────────
+	logoPosition := r.FormValue("logo_position")
+	if logoPosition == "" {
+		logoPosition = "left"
+	}
 	templateID := r.FormValue("template_id")
 	brandColor := r.FormValue("brand_color")
 
-		// ── Auto-generate invoice number if blank ─────────────────────────
+	// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
 		if user != nil {
 			num, err := h.App.UserRepo.NextInvoiceNumber(r.Context(), user.ID)
@@ -321,6 +327,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		AutoReminders:       autoReminders,
 		TemplateID:	     templateID,
 		BrandColor:	     brandColor,
+		LogoPosition:        logoPosition,
 		Currency:            currency,
 		Notes:               strings.TrimSpace(r.FormValue("notes")),
 		PaymentDetails:      strings.TrimSpace(r.FormValue("payment_details")),
@@ -737,6 +744,10 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.ShowLogo = r.FormValue("show_logo") == "on"
 	inv.ShowTitle = r.FormValue("show_title") == "on"
 	inv.AutoReminders = r.FormValue("auto_reminders") == "on"
+	inv.LogoPosition = r.FormValue("logo_position")
+	if inv.LogoPosition == "" {
+		inv.LogoPosition = "left"
+	}
 	inv.TemplateID = r.FormValue("template_id")
 	inv.BrandColor = r.FormValue("brand_color")
 	inv.Currency = currency
