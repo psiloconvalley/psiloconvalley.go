@@ -1998,6 +1998,74 @@ if (demoEl) demoObserver.observe(demoEl);
         requestAnimationFrame(animate);
     }
     animate();
+// ── Flow Showcase ─────────────────────────────────────────────────
+(function() {
+    const TOTAL = 5;
+    const DELAY = 3500;
+    let current = 0;
+    let timer = null;
+
+    const cards  = document.querySelectorAll('.flow-card');
+    const pills  = document.querySelectorAll('.flow-pill');
+    const dots   = document.querySelectorAll('.flow-dot');
+    const prev   = document.getElementById('flow-prev');
+    const next   = document.getElementById('flow-next');
+
+    if (!cards.length) return;
+
+    function goTo(index) {
+        cards[current].classList.remove('active');
+        cards[current].classList.add('exit');
+        pills[current].classList.remove('active');
+        dots[current].classList.remove('active');
+
+        setTimeout(() => {
+            cards[current].classList.remove('exit');
+        }, 450);
+
+        current = (index + TOTAL) % TOTAL;
+
+        const card = cards[current];
+        card.querySelectorAll('.fc-animate-in').forEach(el => {
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = '';
+        });
+
+        card.classList.add('active');
+        pills[current].classList.add('active');
+        dots[current].classList.add('active');
+
+        const bar = card.querySelector('.fc-send-bar-fill');
+        if (bar) {
+            bar.style.transition = 'none';
+            bar.style.width = '0%';
+            bar.offsetHeight;
+            bar.style.transition = 'width 1.2s ease';
+            setTimeout(() => { bar.style.width = '100%'; }, 200);
+        }
+
+        resetTimer();
+    }
+
+    function resetTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => goTo(current + 1), DELAY);
+    }
+
+    pills.forEach((pill, i) => {
+        pill.addEventListener('click', () => goTo(i));
+    });
+
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => goTo(i));
+    });
+
+    if (prev) prev.addEventListener('click', () => goTo(current - 1));
+    if (next) next.addEventListener('click', () => goTo(current + 1));
+
+    resetTimer();
+})();
 </script>
 
 </body>
