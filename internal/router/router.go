@@ -46,10 +46,13 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
 	r.Get("/invoices/{id}/pay", h.InvoicePayGet)
 
+	// ── Freemium estimate routes (ownership enforced in handlers) ──
+	r.Get("/estimates/new", h.EstimateNewGet)
+	r.Post("/estimates/create", h.EstimateCreatePost)
+
 	// ── Public estimate response routes ───────────────────────────
 	r.Get("/estimates/{id}/respond", h.EstimateRespondGet)
 	r.Post("/estimates/{id}/respond", h.EstimateRespondPost)
-
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
