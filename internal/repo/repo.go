@@ -1608,3 +1608,89 @@ func (r *InvoiceRepo) GetAdminStats(ctx context.Context, db *sql.DB) (*AdminStat
 
 	return &s, nil
 }
+// =====================================================================
+// InvoiceStore — interface for all invoice operations.
+//
+// Why this exists:
+// *InvoiceRepo is a concrete type tied to a real PostgreSQL database.
+// Any handler that uses *InvoiceRepo directly cannot be tested without
+// a live database. By depending on this interface instead, handlers
+// become testable with a fake implementation — no database required.
+//
+// The real *InvoiceRepo satisfies this interface automatically.
+// Go interfaces are implicit — nothing in InvoiceRepo needs to change.
+// =====================================================================
+
+type InvoiceStore interface {
+	CreateWithToken(
+		ctx context.Context,
+		user *User,
+		anonymousToken string,
+		clientName string,
+		amount float64,
+		description string,
+	) (int64, error)
+
+	CreateInvoice(
+		ctx context.Context,
+		inv *Invoice,
+		items []InvoiceItem,
+		anonymousToken string,
+	) (int64, error)
+
+	GetInvoiceWithItems(
+		ctx context.Context,
+		id int64,
+	) (*Invoice, []InvoiceItem, error)
+
+	ListInvoices(
+		ctx context.Context,
+		limit, offset int,
+		userID *int64,
+	) ([]Invoice, error)
+
+	ListEstimates(
+		ctx context.Context,
+		limit, offset int,
+		userID int64,
+	) ([]Invoice, error)
+
+	InvoiceNumberExists(
+		ctx context.Context,
+		number string,
+	) (bool, error)
+
+	UpdateInvoice(
+		ctx context.Context,
+		inv *Invoice,
+		items []InvoiceItem,
+	) error
+
+	UpdateInvoiceStatus(
+		ctx context.Context,
+		id int64,
+		newStatus string,
+		userID int64,
+	) error
+
+	DeleteDraftInvoice(
+		ctx context.Context,
+		id int64,
+		userID int64,
+	) error
+
+	EnsurePublicToken(
+		ctx context.Context,
+		invoiceID int64,
+	) (string, error)
+
+	GetDashboardStats(
+		ctx context.Context,
+		userID int64,
+	) (*DashboardStats, error)
+
+	GetAdminStats(
+		ctx context.Context,
+		db *sql.DB,
+	) (*AdminStats, error)
+}

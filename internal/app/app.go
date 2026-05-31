@@ -24,7 +24,7 @@ import (
 type App struct {
 	db            *sql.DB
 	Templates     *template.Template
-	InvRepo       *repo.InvoiceRepo
+	InvRepo       repo.InvoiceStore
 	ClientRepo    *repo.ClientRepo
 	BizRepo       *repo.BusinessRepo
 	UserRepo      *repo.UserRepo
