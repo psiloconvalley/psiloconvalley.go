@@ -49,12 +49,16 @@ func (h *Handlers) EstimatesList(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) EstimateNewGet(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	if user == nil && auth.AnonLimitReached(r) {
+		http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
+		return
+	}
+	if user != nil && h.hasReachedLimit(r) {
+		http.Redirect(w, r, "/pricing?reason=invoice-limit", http.StatusSeeOther)
 		return
 	}
 
-	invoiceData := views.InvoicePage{
+		invoiceData := views.InvoicePage{
 		CompanyCountry: "United States",
 		CompanyState:   "California",
 		ClientCountry:  "United States",
