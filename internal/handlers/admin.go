@@ -9,15 +9,16 @@ import (
 )
 
 // Admin user ID — only this user can access /admin/*
+// Double lock: must match both ID and email.
 const adminUserID int64 = 1
+const adminEmail = "psiloconvalley408@gmail.com" // ← replace with your real email
 
 func (h *Handlers) AdminAnalytics(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
-	if user == nil || user.ID != adminUserID {
+	if user == nil || user.ID != adminUserID || user.Email != adminEmail {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
-
 	stats, err := h.App.InvRepo.GetAdminStats(r.Context(), h.App.DB())
 	if err != nil {
 		http.Error(w, "Failed to load analytics", http.StatusInternalServerError)

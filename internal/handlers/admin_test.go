@@ -66,3 +66,17 @@ func TestAdminAnalytics_UserIDZero(t *testing.T) {
 		t.Errorf("expected 404 for user ID 0, got %d", w.Code)
 	}
 }
+// TestAdminAnalytics_WrongEmail verifies that a user with the correct ID
+// but wrong email is still blocked. Both locks must pass.
+func TestAdminAnalytics_WrongEmail(t *testing.T) {
+	h := &Handlers{}
+
+	w := httptest.NewRecorder()
+	r := makeAdminRequest(&repo.User{ID: 1, Email: "notadmin@example.com"})
+
+	h.AdminAnalytics(w, r)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("expected 404 for wrong email, got %d", w.Code)
+	}
+}
