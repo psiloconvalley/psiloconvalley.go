@@ -90,8 +90,6 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 
 		// Estimate management
 		r.Get("/estimates", h.EstimatesList)
-		r.Get("/estimates/new", h.EstimateNewGet)
-		r.Post("/estimates/create", h.EstimateCreatePost)
 		r.Get("/estimates/{id}", h.EstimateDetail)
 		r.Get("/estimates/{id}/edit", h.EstimateEditGet)
 		r.Post("/estimates/{id}/edit", h.EstimateEditPost)
