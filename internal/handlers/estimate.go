@@ -20,18 +20,9 @@ import (
 	"psiloconvalley/internal/views"
 )
 
-// =====================================================================
-// ESTIMATE HANDLERS
 // Estimates reuse the Invoice model with document_type = "estimate".
-// =====================================================================
-
 func (h *Handlers) EstimatesList(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
 	estimates, err := h.App.InvRepo.ListEstimates(r.Context(), 50, 0, user.ID)
 	if err != nil {
 		http.Error(w, "Failed to load estimates", http.StatusInternalServerError)
@@ -49,11 +40,28 @@ func (h *Handlers) EstimatesList(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) EstimateNewGet(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
-	if user == nil && auth.AnonLimitReached(r) {
-		http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
-		return
+
+	// ── Anonymous token handling ─────────────────────────────────────
+	var anonymousToken string
+	if user == nil {
+		if auth.AnonLimitReached(r) {
+			http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
+			return
+		}
+		existingToken, hasToken := auth.GetAnonymousToken(r)
+		if hasToken && existingToken != "" {
+			anonymousToken = existingToken
+		} else {
+			token, err := auth.GenerateToken(32)
+			if err != nil {
+				http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+				return
+			}
+			anonymousToken = token
+			auth.SetAnonymousToken(w, anonymousToken)
+		}
 	}
-	if user != nil && h.hasReachedLimit(r) {
+		if user != nil && h.hasReachedLimit(r) {
 		http.Redirect(w, r, "/pricing?reason=invoice-limit", http.StatusSeeOther)
 		return
 	}
@@ -100,9 +108,26 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := auth.GetUser(r)
+
+	// ── Anonymous token handling ─────────────────────────────────────
+	var anonymousToken string
 	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+		if auth.AnonLimitReached(r) {
+			http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
+  			return
+		}
+		existingToken, hasToken := auth.GetAnonymousToken(r)
+		if hasToken && existingToken != "" {
+			anonymousToken = existingToken
+		} else {
+			token, err := auth.GenerateToken(32)
+			if err != nil {
+				http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+				return
+			}
+			anonymousToken = token
+			auth.SetAnonymousToken(w, anonymousToken)
+		}
 	}
 
 	clientName := strings.TrimSpace(r.FormValue("client_name"))
@@ -263,7 +288,7 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	isPro := user.Plan == "pro"
 	normalizeTemplateFields(inv, isPro)
 
-	estimateID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, "")
+	estimateID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {
 		log.Printf("[estimate] create error: %v", err)
 		http.Error(w, "Failed to create estimate", http.StatusInternalServerError)
