@@ -795,14 +795,14 @@
     <div style="height: 4px; background: #0d1422; border-radius: 2px; margin-bottom: 16px;"></div>
 
     {{/* Logo */}}
-    <div id="preview_logo" style="margin-bottom: 12px;">
+    <div id="preview_logo" style="margin-bottom: 12px; text-align:{{if .Invoice.LogoPosition}}{{.Invoice.LogoPosition}}{{else}}left{{end}};">
         {{if .Invoice.LogoURL}}
         <img
             src="{{.Invoice.LogoURL}}"
             alt="{{.Invoice.CompanyName}}"
-            style="max-width:200px; max-height:80px; object-fit:contain; display:block;"
+            style="max-width:200px; max-height:80px; object-fit:contain; display:inline-block;"
         >
-	          {{else}}
+   	          {{else}}
             {{if .User}}
             <a href="/profile" style="
                 display: flex;

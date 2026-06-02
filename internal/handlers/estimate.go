@@ -69,10 +69,11 @@ func (h *Handlers) EstimateNewGet(w http.ResponseWriter, r *http.Request) {
 		BrandColor:     catalog.DefaultBrandColor,
 		LogoPosition:   "left",
 	}
+	if user != nil {
 	if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
-		invoiceData.LogoURL = template.URL(bp.LogoURL)
-	}
-
+	    invoiceData.LogoURL = template.URL(bp.LogoURL)
+		}
+	}	
 	data := map[string]any{
 		"User":         user,
 		"IsLoggedIn":   true,
