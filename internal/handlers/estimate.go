@@ -93,9 +93,11 @@ func (h *Handlers) EstimateNewGet(w http.ResponseWriter, r *http.Request) {
 		"Templates":    catalog.InvoiceTemplates,
 	}
 
-	clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
-	if err == nil && len(clients) > 0 {
+	if user != nil {
+	    clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
+	    if err == nil && len(clients) > 0 {
 		data["Clients"] = clients
+		}
 	}
 
 	h.App.Render(w, r, "invoice_new.tmpl", data)
