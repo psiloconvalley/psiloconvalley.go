@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/util"
 )
 
@@ -24,15 +25,15 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── Recent invoices (last 5) ──────────────────────────────────────
-	recent, err := h.App.InvRepo.ListInvoices(r.Context(), 5, 0, &user.ID)
+	// ── Recent invoices (last 10 — we filter from these) ─────────────
+	recent, err := h.App.InvRepo.ListInvoices(r.Context(), 10, 0, &user.ID)
 	if err != nil {
 		log.Printf("[dashboard] recent invoices error: %v", err)
 		recent = nil
 	}
 
-	// ── Recent estimates (last 5) ─────────────────────────────────────
-	estimates, err := h.App.InvRepo.ListEstimates(r.Context(), 5, 0, user.ID)
+	// ── Recent estimates (last 10 — we filter from these) ────────────
+	estimates, err := h.App.InvRepo.ListEstimates(r.Context(), 10, 0, user.ID)
 	if err != nil {
 		log.Printf("[dashboard] recent estimates error: %v", err)
 		estimates = nil
@@ -52,30 +53,45 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// ── Estimate stats ────────────────────────────────────────────────
-	pendingEstimates := 0
-	acceptedEstimates := 0
-	for _, e := range estimates {
-		switch e.Status {
-		case "sent":
-			pendingEstimates++
-		case "accepted":
-			acceptedEstimates++
+	// ── Build "Needs Attention" list ─────────────────────────────────
+	var needsAttention []repo.Invoice
+
+	// Overdue and sent invoices need attention
+	for _, inv := range recent {
+		if inv.Status == "overdue" || inv.Status == "sent" {
+			needsAttention = append(needsAttention, inv)
 		}
 	}
 
+	// Pending estimates (sent but not accepted/declined) need attention
+	for _, est := range estimates {
+		if est.Status == "sent" || est.Status == "draft" {
+			needsAttention = append(needsAttention, est)
+		}
+	}
+
+	// Cap recent tables at 5 for display
+	displayInvoices := recent
+	if len(displayInvoices) > 5 {
+		displayInvoices = displayInvoices[:5]
+	}
+
+	displayEstimates := estimates
+	if len(displayEstimates) > 5 {
+		displayEstimates = displayEstimates[:5]
+	}
+
 	h.App.Render(w, r, "dashboard.tmpl", map[string]any{
-		"User":              user,
-		"Revenue":           util.Money(stats.RevenueCents),
-		"Outstanding":       util.Money(stats.OutstandingCents),
-		"Overdue":           util.Money(stats.OverdueCents),
-		"MonthlyCount":      stats.MonthlyCount,
-		"TotalCount":        stats.TotalCount,
-		"RecentInvoices":    recent,
-		"RecentEstimates":   estimates,
-		"PendingEstimates":  pendingEstimates,
-		"AcceptedEstimates": acceptedEstimates,
-		"ActiveRecurring":   activeRecurring,
-		"IsPro":             user.Plan == "pro",
+		"User":            user,
+		"Revenue":         util.Money(stats.RevenueCents),
+		"Outstanding":     util.Money(stats.OutstandingCents),
+		"Overdue":         util.Money(stats.OverdueCents),
+		"MonthlyCount":    stats.MonthlyCount,
+		"TotalCount":      stats.TotalCount,
+		"RecentInvoices":  displayInvoices,
+		"RecentEstimates": displayEstimates,
+		"NeedsAttention":  needsAttention,
+		"ActiveRecurring": activeRecurring,
+		"IsPro":           user.Plan == "pro",
 	})
 }

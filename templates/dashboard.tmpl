@@ -268,7 +268,6 @@
             <h1>Command Center</h1>
             <div class="top-sub">Welcome back{{if .User.Name}}, {{.User.Name}}{{end}}</div>
         </div>
-        <a href="/invoices/new" class="btn btn-white">+ New Invoice</a>
     </div>
 
     {{/* ── Upgrade banner for free users ── */}}
@@ -357,40 +356,51 @@
         </div>
     </div>
     {{end}}
-   
-      {{/* ── Quick actions ── */}}
-    <div class="quick-actions">
-        <a href="/invoices/new" class="action-card">
-            <span class="action-icon">✏️</span>
-            <div>
-                <div class="action-title">New Invoice</div>
-                <div class="action-sub">Create and send in seconds</div>
-            </div>
-        </a>
-        <a href="/estimates/new" class="action-card">
-            <span class="action-icon">📝</span>
-            <div>
-                <div class="action-title">New Estimate</div>
-                <div class="action-sub">{{.PendingEstimates}} pending · {{.AcceptedEstimates}} accepted</div>
-            </div>
-        </a>
-        <a href="/recurring" class="action-card">
-            <span class="action-icon">🔁</span>
-            <div>
-                <div class="action-title">Recurring</div>
-                <div class="action-sub">{{.ActiveRecurring}} active schedule{{if ne .ActiveRecurring 1}}s{{end}}</div>
-            </div>
-        </a>
-        <a href="/clients" class="action-card">
-            <span class="action-icon">👥</span>
-            <div>
-                <div class="action-title">Clients</div>
-                <div class="action-sub">Manage saved clients</div>
-            </div>
-        </a>
-    </div>
   
-    {{/* ── Recent invoices ── */}}
+      {{/* ── Needs attention ── */}}
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">Needs Attention</div>
+        </div>
+
+        {{if or .OverdueInvoices .PendingEstimates}}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Client</th>
+                        <th>Status</th>
+                        <th class="right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .NeedsAttention}}
+                    <tr>
+                        <td>
+                            <a href="/{{if eq .DocumentType "estimate"}}estimates{{else}}invoices{{end}}/{{.ID}}" class="inv-link">
+                                {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
+                            </a>
+                        </td>
+                        <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
+                        <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+                        <td class="right mono">{{money .TotalCents}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <div class="table-wrap">
+            <div class="empty">
+                <div class="empty-icon">✓</div>
+                <div class="empty-title">You're all caught up</div>
+                <div class="empty-sub">No overdue invoices or pending estimates.</div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+       {{/* ── Recent invoices ── */}}
     <div class="section">
         <div class="section-header">
             <div class="section-title">Recent Invoices</div>
