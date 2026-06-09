@@ -265,8 +265,8 @@
 
     <div class="top">
         <div>
-            <h1>Command Center</h1>
-            <div class="top-sub">Welcome back{{if .User.Name}}, {{.User.Name}}{{end}}</div>
+	<h1>{{.T.DashboardTitle}}</h1>
+	<div class="top-sub">{{.T.DashboardWelcome}}{{if .User.Name}}, {{.User.Name}}{{end}}</div>
         </div>
     </div>
 
@@ -284,22 +284,22 @@
     {{/* ── Stats ── */}}
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">💰 Total Revenue</div>
+	 <div class="stat-label">💰 {{.T.DashboardRevenue}}</div>
             <div class="stat-value green">{{.Revenue}}</div>
-            <div class="stat-sub">From paid invoices</div>
+		<div class="stat-sub">{{.T.FromPaidInvoices}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">📤 Outstanding</div>
+	    <div class="stat-label">📤 {{.T.DashboardOutstanding}}</div>
             <div class="stat-value yellow">{{.Outstanding}}</div>
-            <div class="stat-sub">Awaiting payment</div>
+	    <div class="stat-sub">{{.T.AwaitingPayment}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">⚠️ Overdue</div>
+	    <div class="stat-label">⚠️ {{.T.DashboardOverdue}}</div>
             <div class="stat-value red">{{.Overdue}}</div>
-            <div class="stat-sub">Past due date</div>
+	    <div class="stat-sub">{{.T.PastDueDate}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">📋 This Month</div>
+	     <div class="stat-label">📋 {{.T.DashboardThisMonth}}</div>
             <div class="stat-value">{{.MonthlyCount}}</div>
             <div class="stat-sub">{{.TotalCount}} invoices total</div>
         </div>
@@ -360,7 +360,7 @@
       {{/* ── Needs attention ── */}}
     <div class="section">
         <div class="section-header">
-            <div class="section-title">Needs Attention</div>
+	 <div class="section-title">{{.T.DashboardNeedsAttention}}</div>
         </div>
 
         {{if or .OverdueInvoices .PendingEstimates}}
@@ -394,8 +394,8 @@
         <div class="table-wrap">
             <div class="empty">
                 <div class="empty-icon">✓</div>
-                <div class="empty-title">You're all caught up</div>
-                <div class="empty-sub">No overdue invoices or pending estimates.</div>
+		 <div class="empty-title">{{.T.DashboardAllCaughtUp}}</div>
+	    <div class="empty-sub">{{.T.DashboardNoCaughtUpSub}}</div>
             </div>
         </div>
         {{end}}
@@ -403,8 +403,8 @@
        {{/* ── Recent invoices ── */}}
     <div class="section">
         <div class="section-header">
-            <div class="section-title">Recent Invoices</div>
-            <a href="/invoices" class="section-link">View all →</a>
+	    <div class="section-title">{{.T.DashboardRecentInvoices}}</div>
+	 <a href="/invoices" class="section-link">{{.T.DashboardViewAll}}</a>
         </div>
 
         {{if .RecentInvoices}}
@@ -440,8 +440,8 @@
 	    {{/* ── Recent estimates ── */}}
     <div class="section">
         <div class="section-header">
-            <div class="section-title">Recent Estimates</div>
-            <a href="/estimates" class="section-link">View all →</a>
+	    <div class="section-title">{{.T.DashboardRecentEstimates}}</div>
+	<a href="/estimates" class="section-link">{{.T.DashboardViewAll}}</a>
         </div>
 
         {{if .RecentEstimates}}
@@ -479,7 +479,7 @@
         <div class="table-wrap">
             <div class="empty">
                 <div class="empty-icon">📋</div>
-                <div class="empty-title">No estimates yet</div>
+		<div class="empty-title">{{.T.NoEstimatesYet}}</div>
                 <div class="empty-sub">Create your first estimate to start winning jobs.</div>
             </div>
         </div>
@@ -490,7 +490,7 @@
         <div class="table-wrap">
             <div class="empty">
                 <div class="empty-icon">📭</div>
-                <div class="empty-title">No invoices yet</div>
+		<div class="empty-title">{{.T.NoInvoicesYet}}</div>
                 <div class="empty-sub">Create your first invoice to get started.</div>
             </div>
         </div>

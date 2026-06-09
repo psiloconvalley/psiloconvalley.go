@@ -13,23 +13,22 @@
         </button>
         <div class="nav-links" id="nav-links">
             {{if .User}}
-		
-		<a href="/dashboard">Dashboard</a>
+            <a href="/dashboard">{{.T.NavDashboard}}</a>
                 <div class="nav-dropdown">
-                    <button type="button" class="nav-dropdown-btn" onclick="toggleNavDropdown()">Billing ▾</button>
+                    <button type="button" class="nav-dropdown-btn" onclick="toggleNavDropdown()">{{.T.NavBilling}} ▾</button>
                     <div class="nav-dropdown-menu" id="navDropdownMenu">
-                        <a href="/invoices">Invoices</a>
-                        <a href="/estimates">Estimates</a>
-                        <a href="/recurring">Recurring</a>
+                        <a href="/invoices">{{.T.NavInvoices}}</a>
+                        <a href="/estimates">{{.T.NavEstimates}}</a>
+                        <a href="/recurring">{{.T.NavRecurring}}</a>
                     </div>
                 </div>
-                <a href="/clients">Clients</a>
-                <a href="/pricing">Pricing</a>
-                <a href="/profile">Profile</a>
+                <a href="/clients">{{.T.NavClients}}</a>
+                <a href="/pricing">{{.T.NavPricing}}</a>
+                <a href="/profile">{{.T.NavProfile}}</a>
 
                 <form method="POST" action="/logout">
                     {{.csrfField}}
-                    <button type="submit" class="nav-logout">Logout</button>
+                    <button type="submit" class="nav-logout">{{.T.NavLogout}}</button>
                 </form>
             {{else}}
                 <a href="/tools">Tools</a>
@@ -60,3 +59,4 @@ document.addEventListener('click', function(e) {
 {{define "nav-styles"}}
 <link rel="stylesheet" href="/static/css/nav.css">
 {{end}}
+
