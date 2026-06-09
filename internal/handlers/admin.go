@@ -32,8 +32,9 @@ func (h *Handlers) AdminAnalytics(w http.ResponseWriter, r *http.Request) {
 		conversionRate = float64(stats.EstimatesAccepted) / float64(totalResponded) * 100
 	}
 
-	// Calculate MRR (Pro users * $8)
-	mrr := stats.ProUsers * 8
+	// Calculate MRR (Pro users * $18.88)
+	mrr := util.Money(int64(stats.ProUsers) * 1888)
+
 
 	h.App.Render(w, r, "admin_analytics.tmpl", map[string]any{
 		"Stats":          stats,
