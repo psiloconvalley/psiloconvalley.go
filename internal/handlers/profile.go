@@ -147,9 +147,17 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 			"Error":      "Could not save profile",
 			"Currencies": catalog.SupportedCurrencies,
 		})
-		
-          	return
+		return
+	}
+
+	// ── Save language preference ─────────────────────────────────────
+	lang := strings.TrimSpace(r.FormValue("language"))
+	if lang != "" {
+		if err := h.App.UserRepo.UpdateLanguage(r.Context(), user.ID, lang); err != nil {
+			log.Printf("language update error: %v", err)
+		}
 	}
 
 	http.Redirect(w, r, "/profile?saved=true", http.StatusSeeOther)
+
 }

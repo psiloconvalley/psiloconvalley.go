@@ -304,6 +304,16 @@
                     {{end}}
                                     </div>
 
+		                <div class="section">
+                    <div class="section-title">Language / Idioma</div>
+                    <div class="form-group">
+                        <label>Interface Language / Idioma de la Interfaz</label>
+                        <select name="language">
+                            <option value="en" {{if eq .User.Language "en"}}selected{{end}}>English</option>
+                            <option value="es" {{if eq .User.Language "es"}}selected{{end}}>Español</option>
+                        </select>
+                    </div>
+                </div>
                 <button type="submit" class="btn-primary">Save Profile</button>
             </form>
         </div>

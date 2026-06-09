@@ -13,6 +13,7 @@ import (
 	"github.com/justinas/nosurf"
 	"github.com/stripe/stripe-go/v81"
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/i18n"
 	"psiloconvalley/internal/logo"
 	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
@@ -47,7 +48,6 @@ func NewApp(db *sql.DB) *App {
 		"field":        field,
 		"mul":          func(a, b int) int { return a * b },
 	}
-
 	// Using ParseGlob during migration (easier than embed for now)
 	t, err := template.New("").Funcs(funcs).ParseGlob("templates/*.tmpl")
 	if err != nil {
@@ -149,12 +149,19 @@ func (a *App) Render(w http.ResponseWriter, r *http.Request, name string, data m
 		data = map[string]any{}
 	}
 
-	data["User"] = auth.GetUser(r)
+	user := auth.GetUser(r)
+	data["User"] = user
 	data["GoogleEnabled"] = auth.GoogleOAuthEnabled()
 	data["csrfField"] = template.HTML(
 		fmt.Sprintf(`<input type="hidden" name="csrf_token" value="%s">`, nosurf.Token(r)),
 	)
 
+	// ── Inject translations based on user language preference ─────────
+	lang := "en"
+	if user != nil && user.Language != "" {
+		lang = user.Language
+	}
+	data["T"] = i18n.Get(lang)
 	var buf bytes.Buffer
 	if err := a.Templates.ExecuteTemplate(&buf, name, data); err != nil {
 		log.Printf("template error [%s]: %v", name, err)

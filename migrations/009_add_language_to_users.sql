@@ -1,0 +1,2 @@
+-- Add language preference to users
+ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(5) NOT NULL DEFAULT 'en';

@@ -53,20 +53,21 @@ type Client struct {
 }
 
 type User struct {
-	ID           int64
-	Email        string
-	PasswordHash string
-	Plan         string
-	Provider     string
-	GoogleID     string
-	Name         string
-	AvatarURL    string
+	ID               int64
+	Email            string
+	PasswordHash     string
+	Plan             string
+	Provider         string
+	GoogleID         string
+	Name             string
+	AvatarURL        string
 	StripeCustomerID string
 	StripeConnectID  string
 	NextInvoiceSeq   int
 	NextEstimateSeq  int
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	Language         string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 func (u *User) CheckPassword(plain string) bool {
@@ -255,13 +256,13 @@ func (r *UserRepo) GetByEmail(email string) (*User, error) {
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-		name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, created_at, updated_at
+		name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, language, created_at, updated_at
 		FROM users WHERE email = $1
 	`, email).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.CreatedAt, &updatedAt,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language, &u.CreatedAt, &updatedAt,
 	)
-	if err != nil {
+		if err != nil {
 		return nil, err
 	}
 	if passwordHash.Valid {
@@ -298,13 +299,12 @@ func (r *UserRepo) GetByID(id int64) (*User, error) {
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, created_at, updated_at
+			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, language, created_at, updated_at
 		FROM users WHERE id = $1
 	`, id).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.CreatedAt, &updatedAt,
-			)
-
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language, &u.CreatedAt, &updatedAt,
+	)	
 		if err != nil {
 		return nil, err
 	}
@@ -343,12 +343,12 @@ func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
 
 	err := r.db.QueryRow(`
 		SELECT id, email, password_hash, provider, google_id,
-			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, created_at, updated_at
+			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, language, created_at, updated_at
 		FROM users WHERE google_id = $1
 	`, googleID).Scan(
 		&u.ID, &u.Email, &passwordHash, &provider, &googleIDVal,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.CreatedAt, &updatedAt,
-		)
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language, &u.CreatedAt, &updatedAt,
+	)
 		if err != nil {
 		return nil, err
 	}
@@ -530,9 +530,19 @@ func (r *UserRepo) SaveStripeConnectID(ctx context.Context, userID int64, connec
 	`, connectID, userID)
 	return err
 }
-// =====================================================================
+func (r *UserRepo) UpdateLanguage(ctx context.Context, userID int64, language string) error {
+	if language != "en" && language != "es" {
+		language = "en"
+	}
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET language = $1,
+		    updated_at = NOW()
+		WHERE id = $2
+	`, language, userID)
+	return err
+}
 // ClientRepo Methods
-// =====================================================================
 
 func (r *ClientRepo) ListByUserID(ctx context.Context, userID int64) ([]Client, error) {
 	rows, err := r.db.QueryContext(ctx, `
