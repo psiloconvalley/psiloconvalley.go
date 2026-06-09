@@ -167,6 +167,9 @@
         .badge-paid    { background: #14532d; color: #86efac; }
         .badge-void    { background: #450a0a; color: #fca5a5; }
         .badge-overdue { background: #431407; color: #fdba74; }
+	.badge-pending  { background: #1e3a5f; color: #93c5fd; }
+        .badge-accepted { background: #14532d; color: #86efac; }
+        .badge-declined { background: #450a0a; color: #fca5a5; }
 
         .right { text-align: right; }
         .mono { font-variant-numeric: tabular-nums; }
@@ -174,7 +177,7 @@
         /* ── Quick actions ── */
         .quick-actions {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 32px;
         }
@@ -355,13 +358,20 @@
     </div>
     {{end}}
    
-    {{/* ── Quick actions ── */}}
+      {{/* ── Quick actions ── */}}
     <div class="quick-actions">
         <a href="/invoices/new" class="action-card">
             <span class="action-icon">✏️</span>
             <div>
                 <div class="action-title">New Invoice</div>
                 <div class="action-sub">Create and send in seconds</div>
+            </div>
+        </a>
+        <a href="/estimates/new" class="action-card">
+            <span class="action-icon">📝</span>
+            <div>
+                <div class="action-title">New Estimate</div>
+                <div class="action-sub">{{.PendingEstimates}} pending · {{.AcceptedEstimates}} accepted</div>
             </div>
         </a>
         <a href="/recurring" class="action-card">
@@ -379,7 +389,7 @@
             </div>
         </a>
     </div>
-
+  
     {{/* ── Recent invoices ── */}}
     <div class="section">
         <div class="section-header">
@@ -417,6 +427,54 @@
                     {{end}}
                 </tbody>
             </table>
+	    {{/* ── Recent estimates ── */}}
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">Recent Estimates</div>
+            <a href="/estimates" class="section-link">View all →</a>
+        </div>
+
+        {{if .RecentEstimates}}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estimate</th>
+                        <th>Client</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th class="right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .RecentEstimates}}
+                    <tr>
+                        <td>
+                            <a href="/estimates/{{.ID}}" class="inv-link">
+                                {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
+                            </a>
+                        </td>
+                        <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
+                        <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+                        <td style="color: rgba(255,255,255,0.5);">
+                            {{.IssueDate.Format "Jan 2, 2006"}}
+                        </td>
+                        <td class="right mono">{{money .TotalCents}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <div class="table-wrap">
+            <div class="empty">
+                <div class="empty-icon">📋</div>
+                <div class="empty-title">No estimates yet</div>
+                <div class="empty-sub">Create your first estimate to start winning jobs.</div>
+            </div>
+        </div>
+        {{end}}
+    </div>
         </div>
         {{else}}
         <div class="table-wrap">

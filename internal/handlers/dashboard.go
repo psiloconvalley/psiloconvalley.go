@@ -9,16 +9,6 @@ import (
 	"psiloconvalley/internal/util"
 )
 
-type DashboardData struct {
-	Revenue     string
-	Outstanding string
-	Overdue     string
-	MonthlyCount int64
-	TotalCount   int64
-	RecentInvoices []any
-	IsPro       bool
-}
-
 func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
@@ -41,6 +31,13 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		recent = nil
 	}
 
+	// ── Recent estimates (last 5) ─────────────────────────────────────
+	estimates, err := h.App.InvRepo.ListEstimates(r.Context(), 5, 0, user.ID)
+	if err != nil {
+		log.Printf("[dashboard] recent estimates error: %v", err)
+		estimates = nil
+	}
+
 	// ── Active recurring schedules ────────────────────────────────────
 	schedules, err := h.App.SchedulerRepo.ListRecurringByUserID(r.Context(), user.ID)
 	if err != nil {
@@ -55,15 +52,30 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// ── Estimate stats ────────────────────────────────────────────────
+	pendingEstimates := 0
+	acceptedEstimates := 0
+	for _, e := range estimates {
+		switch e.Status {
+		case "sent":
+			pendingEstimates++
+		case "accepted":
+			acceptedEstimates++
+		}
+	}
+
 	h.App.Render(w, r, "dashboard.tmpl", map[string]any{
-		"User":            user,
-		"Revenue":         util.Money(stats.RevenueCents),
-		"Outstanding":     util.Money(stats.OutstandingCents),
-		"Overdue":         util.Money(stats.OverdueCents),
-		"MonthlyCount":    stats.MonthlyCount,
-		"TotalCount":      stats.TotalCount,
-		"RecentInvoices":  recent,
-		"ActiveRecurring": activeRecurring,
-		"IsPro":           user.Plan == "pro",
+		"User":              user,
+		"Revenue":           util.Money(stats.RevenueCents),
+		"Outstanding":       util.Money(stats.OutstandingCents),
+		"Overdue":           util.Money(stats.OverdueCents),
+		"MonthlyCount":      stats.MonthlyCount,
+		"TotalCount":        stats.TotalCount,
+		"RecentInvoices":    recent,
+		"RecentEstimates":   estimates,
+		"PendingEstimates":  pendingEstimates,
+		"AcceptedEstimates": acceptedEstimates,
+		"ActiveRecurring":   activeRecurring,
+		"IsPro":             user.Plan == "pro",
 	})
 }
