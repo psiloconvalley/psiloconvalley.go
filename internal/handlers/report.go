@@ -4,6 +4,7 @@ package handlers
 import (
 	"encoding/csv"
 	"fmt"
+	"strings"
 	"log"
 	"net/http"
 	"time"
@@ -76,7 +77,6 @@ func (h *Handlers) ReportGet(w http.ResponseWriter, r *http.Request) {
 }
 
 // ── CSV Export ────────────────────────────────────────────────────────────
-
 func (h *Handlers) ReportExportCSV(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
@@ -84,7 +84,7 @@ func (h *Handlers) ReportExportCSV(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start, end, _ := parseDateRange(r)
+	start, end, preset := parseDateRange(r)
 	status := r.URL.Query().Get("status")
 	if status == "" {
 		status = "all"
@@ -97,8 +97,13 @@ func (h *Handlers) ReportExportCSV(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-// ── Stream CSV ──────────────────────────────────────────────────
-	// Filename format: psiloconvalley-invoices-{status}-{preset}-{year}.csv
+	// ── Stream CSV ──────────────────────────────────────────────────
+	// Filename: {business}-invoices-{status}-{preset}.csv
+	bizName := "psiloconvalley"
+	if biz, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && biz != nil && biz.Name != "" {
+		bizName = slugify(biz.Name)
+	}
+
 	presetLabel := preset
 	if preset == "this_month" || preset == "last_month" {
 		presetLabel = preset + "-" + start.Format("Jan2006")
@@ -107,10 +112,8 @@ func (h *Handlers) ReportExportCSV(w http.ResponseWriter, r *http.Request) {
 	} else {
 		presetLabel = preset + "-" + start.Format("2006")
 	}
-	filename := fmt.Sprintf("psiloconvalley-invoices-%s-%s.csv", status, presetLabel)
+	filename := fmt.Sprintf("%s-invoices-%s-%s.csv", bizName, status, presetLabel)
 
-	w.Header().Set("Content-Type", "text/csv")
-	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 
@@ -151,6 +154,8 @@ func (h *Handlers) ReportExportCSV(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 }
+
+
 
 // ── Date Range Parser ────────────────────────────────────────────────────
 
@@ -203,7 +208,16 @@ func parseDateRange(r *http.Request) (start, end time.Time, preset string) {
 	}
 	return
 }
-
+// slugify converts a string to a URL/filename-safe slug.
+func slugify(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	s = strings.ReplaceAll(s, " ", "-")
+	s = strings.ReplaceAll(s, "'", "")
+	s = strings.ReplaceAll(s, ".", "")
+	s = strings.ReplaceAll(s, ",", "")
+	s = strings.ReplaceAll(s, "&", "and")
+	return s
+}
 // ── Client Scorecard ─────────────────────────────────────────────────────
 
 func (h *Handlers) ClientScorecardGet(w http.ResponseWriter, r *http.Request) {
