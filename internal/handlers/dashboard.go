@@ -81,6 +81,27 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		displayEstimates = displayEstimates[:5]
 	}
 
+	// ── Onboarding checklist ─────────────────────────────────────────
+	hasProfile := false
+	if biz, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && biz != nil && biz.Name != "" {
+		hasProfile = true
+	}
+
+	clientCount, _ := h.App.ClientRepo.CountByUserID(r.Context(), user.ID)
+	hasClient := clientCount > 0
+	hasInvoice := stats.TotalCount > 0
+	onboardingDone := hasProfile && hasClient && hasInvoice
+	onboardingSteps := 1 // account created = always 1
+	if hasProfile {
+		onboardingSteps++
+	}
+	if hasClient {
+		onboardingSteps++
+	}
+	if hasInvoice {
+		onboardingSteps++
+	}
+
 	h.App.Render(w, r, "dashboard.tmpl", map[string]any{
 		"User":            user,
 		"Revenue":         util.Money(stats.RevenueCents),
@@ -93,5 +114,10 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		"NeedsAttention":  needsAttention,
 		"ActiveRecurring": activeRecurring,
 		"IsPro":           user.Plan == "pro",
+		"HasProfile":      hasProfile,
+		"HasClient":       hasClient,
+		"HasInvoice":      hasInvoice,
+		"OnboardingDone":  onboardingDone,
+		"OnboardingSteps": onboardingSteps,
 	})
 }
