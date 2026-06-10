@@ -43,11 +43,25 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.App.StripePrice == "" {
+	// Determine which plan the user is buying
+	plan := r.FormValue("plan")
+	if plan == "" {
+		plan = "pro"
+	}
+
+	var priceID string
+	switch plan {
+	case "growth":
+		priceID = h.App.StripeGrowthPrice
+	default:
+		plan = "pro"
+		priceID = h.App.StripePrice
+	}
+
+	if priceID == "" {
 		http.Error(w, "Stripe price is not configured", http.StatusInternalServerError)
 		return
 	}
-
 	userID := strconv.FormatInt(user.ID, 10)
 
 	params := &stripe.CheckoutSessionParams{
@@ -58,19 +72,21 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 		CustomerEmail:     stripe.String(user.Email),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
-				Price:    stripe.String(h.App.StripePrice),
+				Price:    stripe.String(priceID),
 				Quantity: stripe.Int64(1),
 			},
 		},
 		Metadata: map[string]string{
 			"user_id": userID,
+			"plan":    plan,
 		},
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
 			Metadata: map[string]string{
 				"user_id": userID,
+				"plan":    plan,
 			},
 		},
-	}
+		}
 
 	s, err := checkoutsession.New(params)
 	if err != nil {
@@ -159,12 +175,19 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := h.App.UserRepo.UpdateUserPlan(r.Context(), userID, "pro"); err != nil {
-			log.Printf("[stripe] failed upgrading user %d to pro: %v", userID, err)
-			http.Error(w, "Failed to update user plan", http.StatusInternalServerError)
+		// Determine plan from metadata — default to "pro" for backwards compat
+		newPlan := cs.Metadata["plan"]
+		if newPlan != "growth" && newPlan != "pro" {
+			newPlan = "pro"
+		}
+	
+		if err := h.App.UserRepo.UpdateUserPlan(r.Context(), userID, newPlan); err != nil {
+		    log.Printf("[stripe] failed upgrading user %d to %s: %v", userID, newPlan, err)
+		    http.Error(w, "Failed to update user plan", http.StatusInternalServerError)
 			return
 		}
 
+		log.Printf("[stripe] upgraded user %d to %s", userID, newPlan)
 		if cs.Customer != nil {
 			if err := h.App.UserRepo.UpdateStripeCustomerID(r.Context(), userID, cs.Customer.ID); err != nil {
 				log.Printf("[stripe] failed saving stripe customer id for user %d: %v", userID, err)
