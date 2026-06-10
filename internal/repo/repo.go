@@ -1706,4 +1706,102 @@ type InvoiceStore interface {
 		ctx context.Context,
 		db *sql.DB,
 	) (*AdminStats, error)
+
+	ListInvoicesForReport(
+		ctx context.Context,
+		userID int64,
+		start, end time.Time,
+		status string,
+	) ([]InvoiceReportRow, error)
+}
+// ── Reports ──────────────────────────────────────────────────────────────
+
+// InvoiceReportRow is a flat, report-optimised view of an invoice.
+// Calculated fields (DaysToPayment) are computed here so handlers stay clean.
+type InvoiceReportRow struct {
+	InvoiceNumber string
+	ClientName    string
+	ClientEmail   string
+	IssueDate     time.Time
+	DueDate       *time.Time
+	Status        string
+	SubtotalCents int64
+	TaxCents      int64
+	TotalCents    int64
+	Currency      string
+	DaysToPayment *int // nil if not yet paid
+}
+
+// ListInvoicesForReport returns invoices for a user within a date range.
+// status = "all" returns every status. Any other value filters to that status.
+func (r *InvoiceRepo) ListInvoicesForReport(
+	ctx context.Context,
+	userID int64,
+	start, end time.Time,
+	status string,
+) ([]InvoiceReportRow, error) {
+	const q = `
+		SELECT
+			COALESCE(invoice_number, ''),
+			COALESCE(client_name, ''),
+			COALESCE(client_email, ''),
+			issue_date,
+			due_date,
+			status,
+			subtotal_cents,
+			COALESCE(tax_cents, 0),
+			total_cents,
+			COALESCE(currency, 'USD'),
+			updated_at
+		FROM invoices
+		WHERE user_id        = $1
+		  AND document_type  = 'invoice'
+		  AND issue_date    >= $2
+		  AND issue_date    <= $3
+		  AND ($4 = 'all' OR status = $4)
+		ORDER BY issue_date DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, q, userID, start, end, status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []InvoiceReportRow
+	for rows.Next() {
+		var row InvoiceReportRow
+		var dueDate  sql.NullTime
+		var updatedAt time.Time
+
+		if err := rows.Scan(
+			&row.InvoiceNumber,
+			&row.ClientName,
+			&row.ClientEmail,
+			&row.IssueDate,
+			&dueDate,
+			&row.Status,
+			&row.SubtotalCents,
+			&row.TaxCents,
+			&row.TotalCents,
+			&row.Currency,
+			&updatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		if dueDate.Valid {
+			row.DueDate = &dueDate.Time
+		}
+
+		// DaysToPayment: only meaningful for paid invoices.
+		// updatedAt is our best proxy for when payment was recorded.
+		if row.Status == "paid" {
+			days := int(updatedAt.Sub(row.IssueDate).Hours() / 24)
+			row.DaysToPayment = &days
+		}
+
+		results = append(results, row)
+	}
+	return results, rows.Err()
 }

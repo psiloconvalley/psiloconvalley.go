@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Reports | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "nav-styles" .}}
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0f1a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+        /* ── Header ── */
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
+        }
+        .top h1 {
+            font-size: 32px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        .top-sub {
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            margin-top: 6px;
+            font-family: monospace;
+        }
+
+        /* ── Filter bar ── */
+        .filter-bar {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .filter-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.4);
+        }
+        .filter-bar select,
+        .filter-bar input[type="date"] {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            min-height: 38px;
+        }
+        .filter-bar select option { background: #0a0f1a; }
+
+        .preset-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .preset-btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.03);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .preset-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .preset-btn.active {
+            background: #fff;
+            color: #0a0f1a;
+            border-color: #fff;
+        }
+
+        .btn-export {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            background: #4ade80;
+            color: #000;
+            white-space: nowrap;
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .btn-export:hover { background: #22c55e; }
+
+        /* ── Summary cards ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+        .stat-value.green  { color: #4ade80; }
+        .stat-value.yellow { color: #fbbf24; }
+        .stat-value.red    { color: #f87171; }
+        .stat-value.blue   { color: #93c5fd; }
+        .stat-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 4px;
+        }
+
+        /* ── Table ── */
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 14px;
+        }
+        .table-wrap {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.4);
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        td {
+            padding: 13px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-draft   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+        .badge-sent    { background: #1e3a5f; color: #93c5fd; }
+        .badge-paid    { background: #14532d; color: #86efac; }
+        .badge-void    { background: #450a0a; color: #fca5a5; }
+        .badge-overdue { background: #431407; color: #fdba74; }
+
+        .right { text-align: right; }
+        .mono  { font-variant-numeric: tabular-nums; }
+        .muted { color: rgba(255,255,255,0.4); }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255,255,255,0.3);
+        }
+        .empty-icon  { font-size: 36px; margin-bottom: 12px; }
+        .empty-title { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+        .empty-sub   { font-size: 13px; }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            .container { padding: 24px 16px 80px; }
+            .top h1 { font-size: 22px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .stat-value { font-size: 20px; }
+            .filter-bar { flex-direction: column; }
+            .btn-export { margin-left: 0; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="top">
+        <div>
+            <h1>Reports</h1>
+            <div class="top-sub">Invoice history · Export · Analysis</div>
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <div class="filter-label">Date Range</div>
+            <div class="preset-buttons">
+                <a href="/reports?preset=this_month&status={{.Status}}"
+                   class="preset-btn {{if eq .Preset "this_month"}}active{{end}}">This Month</a>
+                <a href="/reports?preset=last_month&status={{.Status}}"
+                   class="preset-btn {{if eq .Preset "last_month"}}active{{end}}">Last Month</a>
+                <a href="/reports?preset=q1&status={{.Status}}"
+                   class="preset-btn {{if eq .Preset "q1"}}active{{end}}">Q1</a>
+                <a href="/reports?preset=q2&status={{.Status}}"
+                   class="preset-btn {{if eq .Preset "q2"}}active{{end}}">Q2</a>
+                <a href="/reports?preset=q3&status={{.Status}}"
+                   class="preset-btn {{if eq .Preset "q3"}}active{{end}}">Q3</a>
+                <a href="/reports?preset=q4&status={{.Status}}"
+                   class="preset-btn {{if eq .Preset "q4"}}active{{end}}">Q4</a>
+                <a href="/reports?preset=ytd&status={{.Status}}"
+                   class="preset-btn {{if eq .Preset "ytd"}}active{{end}}">YTD</a>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <div class="filter-label">Status</div>
+            <select onchange="applyStatusFilter(this.value)">
+                <option value="all"     {{if eq .Status "all"}}selected{{end}}>All</option>
+                <option value="paid"    {{if eq .Status "paid"}}selected{{end}}>Paid</option>
+                <option value="sent"    {{if eq .Status "sent"}}selected{{end}}>Sent</option>
+                <option value="overdue" {{if eq .Status "overdue"}}selected{{end}}>Overdue</option>
+                <option value="draft"   {{if eq .Status "draft"}}selected{{end}}>Draft</option>
+            </select>
+        </div>
+
+        <a href="/reports/export.csv?preset={{.Preset}}&status={{.Status}}&start={{.StartDate}}&end={{.EndDate}}"
+           class="btn-export">
+            ↓ Export CSV
+        </a>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">💰 Collected</div>
+            <div class="stat-value green">{{.Collected}}</div>
+            <div class="stat-sub">Paid invoices</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">📤 Outstanding</div>
+            <div class="stat-value yellow">{{.Outstanding}}</div>
+            <div class="stat-sub">Sent + overdue</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">⚠️ Overdue</div>
+            <div class="stat-value red">{{.Overdue}}</div>
+            <div class="stat-sub">Past due date</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">📋 Invoices</div>
+            <div class="stat-value">{{.InvoiceCount}}</div>
+            <div class="stat-sub">In this period</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">⏱ Avg. Payment</div>
+            <div class="stat-value blue">{{if .AvgDays}}{{.AvgDays}}d{{else}}—{{end}}</div>
+            <div class="stat-sub">Days to get paid</div>
+        </div>
+    </div>
+
+    <!-- Invoice table -->
+    <div class="section-title">Invoice Detail</div>
+    <div class="table-wrap">
+        {{if .Rows}}
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Client</th>
+                    <th>Issued</th>
+                    <th>Due</th>
+                    <th>Status</th>
+                    <th>Days to Pay</th>
+                    <th class="right">Subtotal</th>
+                    <th class="right">Tax</th>
+                    <th class="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Rows}}
+                <tr>
+                    <td class="mono">{{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}</td>
+                    <td>{{if .ClientName}}{{.ClientName}}{{else}}<span class="muted">—</span>{{end}}</td>
+                    <td class="muted">{{.IssueDate.Format "Jan 2, 2006"}}</td>
+                    <td class="muted">{{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
+                    <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+                    <td class="muted mono">{{if .DaysToPayment}}{{.DaysToPayment}}d{{else}}—{{end}}</td>
+                    <td class="right mono">{{money .SubtotalCents}}</td>
+                    <td class="right mono">{{money .TaxCents}}</td>
+                    <td class="right mono"><strong>{{money .TotalCents}}</strong></td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <div class="empty">
+            <div class="empty-icon">📊</div>
+            <div class="empty-title">No invoices in this period</div>
+            <div class="empty-sub">Try a different date range or status filter.</div>
+        </div>
+        {{end}}
+    </div>
+
+</div>
+
+<script>
+function applyStatusFilter(status) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('status', status);
+    window.location.href = url.toString();
+}
+</script>
+
+</body>
+</html>

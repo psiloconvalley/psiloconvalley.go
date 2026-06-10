@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 
 	"psiloconvalley/internal/app"
@@ -82,6 +83,9 @@ func (f *fakeInvoiceStore) GetDashboardStats(ctx context.Context, userID int64) 
 }
 func (f *fakeInvoiceStore) GetAdminStats(ctx context.Context, db *sql.DB) (*repo.AdminStats, error) {
 	return &repo.AdminStats{}, nil
+}
+func (f *fakeInvoiceStore) ListInvoicesForReport(ctx context.Context, userID int64, start, end time.Time, status string) ([]repo.InvoiceReportRow, error) {
+	return nil, nil
 }
 
 // =====================================================================
