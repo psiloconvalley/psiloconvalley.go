@@ -55,6 +55,104 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+<!-- Help Widget -->
+<div id="helpWidget" style="
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+">
+    <button onclick="toggleHelp()" style="
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: #fff;
+        color: #0a0f1a;
+        border: none;
+        font-size: 22px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    ">?</button>
+
+    <div id="helpPanel" style="
+        display: none;
+        position: absolute;
+        bottom: 64px;
+        right: 0;
+        width: 300px;
+        background: #111827;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+        padding: 24px;
+        color: #fff;
+    ">
+        <div style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">Need Help?</div>
+        <div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 20px;">
+            We're here for you. Pick a topic or reach out.
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+            <a href="/invoices/new" style="
+                display: flex; align-items: center; gap: 10px;
+                padding: 10px 14px; border-radius: 8px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+                transition: background 0.15s;
+            ">📄 Create your first invoice</a>
+            <a href="/estimates/new" style="
+                display: flex; align-items: center; gap: 10px;
+                padding: 10px 14px; border-radius: 8px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+                transition: background 0.15s;
+            ">📋 Send an estimate</a>
+            <a href="/reports" style="
+                display: flex; align-items: center; gap: 10px;
+                padding: 10px 14px; border-radius: 8px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+                transition: background 0.15s;
+            ">📊 View your reports</a>
+            <a href="/profile" style="
+                display: flex; align-items: center; gap: 10px;
+                padding: 10px 14px; border-radius: 8px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+                transition: background 0.15s;
+            ">⚙️ Set up your profile</a>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px;">
+            <a href="mailto:support@psiloconvalley.com" style="
+                display: flex; align-items: center; gap: 10px;
+                color: rgba(255,255,255,0.6); text-decoration: none; font-size: 12px; font-weight: 600;
+            ">✉️ support@psiloconvalley.com</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleHelp() {
+    var panel = document.getElementById('helpPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+    var widget = document.getElementById('helpWidget');
+    if (widget && !widget.contains(e.target)) {
+        document.getElementById('helpPanel').style.display = 'none';
+    }
+});
+</script>
 {{end}}
 
 {{define "nav-styles"}}
