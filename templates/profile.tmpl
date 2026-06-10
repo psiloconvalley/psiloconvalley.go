@@ -180,6 +180,45 @@
         <h1 class="page-title">Business Profile</h1>
         <p class="page-subtitle">Design your invoice identity. Changes appear instantly in the preview.</p>
     </div>
+        {{if .Welcome}}
+    <div style="
+        background: linear-gradient(135deg, rgba(74,222,128,0.08) 0%, rgba(34,197,94,0.04) 100%);
+        border: 1px solid rgba(74,222,128,0.2);
+        border-radius: 14px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+    ">
+        <div style="
+            font-size: 32px;
+            line-height: 1;
+            flex-shrink: 0;
+        ">🎉</div>
+        <div>
+            <div style="font-size: 18px; font-weight: 800; color: #4ade80; margin-bottom: 6px;">
+                Welcome to PsiloConValley
+            </div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6;">
+                Your account is ready. Start by filling out your business profile below —
+                your name, logo, and contact info will appear on every invoice you send.
+                This takes about 30 seconds.
+            </div>
+            <div style="
+                margin-top: 14px;
+                display: flex;
+                gap: 16px;
+                font-size: 12px;
+                color: rgba(255,255,255,0.3);
+            ">
+                <span>✓ Step 1 of 4 complete</span>
+                <span>·</span>
+                <a href="/dashboard" style="color: rgba(255,255,255,0.4); text-decoration: none;">Skip to Dashboard →</a>
+            </div>
+        </div>
+    </div>
+    {{end}}
 
     {{if .Saved}}
     <div class="success-banner">✓ Profile saved successfully</div>
