@@ -1754,7 +1754,7 @@ func (r *InvoiceRepo) ListInvoicesForReport(
 			due_date,
 			status,
 			subtotal_cents,
-			COALESCE(tax_cents, 0),
+			COALESCE(tax_amount_cents, 0),
 			total_cents,
 			COALESCE(currency, 'USD'),
 			updated_at
