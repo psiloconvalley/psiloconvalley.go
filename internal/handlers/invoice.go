@@ -66,7 +66,9 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 		invoiceData.CompanyZip     = bp.Zip
 		invoiceData.CompanyCountry = bp.Country
 	}
-			data := map[string]any{
+
+}
+		data := map[string]any{
 		"User":       user,
 		"IsLoggedIn": user != nil,
 		"Invoice":    invoiceData,
