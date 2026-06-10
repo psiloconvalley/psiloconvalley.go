@@ -400,11 +400,11 @@
         </div>
         {{end}}
     </div>
-       {{/* ── Recent invoices ── */}}
+      {{/* ── Recent invoices ── */}}
     <div class="section">
         <div class="section-header">
-	    <div class="section-title">{{.T.DashboardRecentInvoices}}</div>
-	 <a href="/invoices" class="section-link">{{.T.DashboardViewAll}}</a>
+            <div class="section-title">{{.T.DashboardRecentInvoices}}</div>
+            <a href="/invoices" class="section-link">{{.T.DashboardViewAll}}</a>
         </div>
 
         {{if .RecentInvoices}}
@@ -430,18 +430,30 @@
                         <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
                         <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
                         <td style="color: rgba(255,255,255,0.5);">
-				{{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}
+                            {{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}
                         </td>
                         <td class="right mono">{{money .TotalCents}}</td>
                     </tr>
                     {{end}}
                 </tbody>
             </table>
-	    {{/* ── Recent estimates ── */}}
+        </div>
+        {{else}}
+        <div class="table-wrap">
+            <div class="empty">
+                <div class="empty-icon">📭</div>
+                <div class="empty-title">{{.T.NoInvoicesYet}}</div>
+                <div class="empty-sub">Create your first invoice to get started.</div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    {{/* ── Recent estimates ── */}}
     <div class="section">
         <div class="section-header">
-	    <div class="section-title">{{.T.DashboardRecentEstimates}}</div>
-	<a href="/estimates" class="section-link">{{.T.DashboardViewAll}}</a>
+            <div class="section-title">{{.T.DashboardRecentEstimates}}</div>
+            <a href="/estimates" class="section-link">{{.T.DashboardViewAll}}</a>
         </div>
 
         {{if .RecentEstimates}}
@@ -479,19 +491,8 @@
         <div class="table-wrap">
             <div class="empty">
                 <div class="empty-icon">📋</div>
-		<div class="empty-title">{{.T.NoEstimatesYet}}</div>
+                <div class="empty-title">{{.T.NoEstimatesYet}}</div>
                 <div class="empty-sub">Create your first estimate to start winning jobs.</div>
-            </div>
-        </div>
-        {{end}}
-    </div>
-        </div>
-        {{else}}
-        <div class="table-wrap">
-            <div class="empty">
-                <div class="empty-icon">📭</div>
-		<div class="empty-title">{{.T.NoInvoicesYet}}</div>
-                <div class="empty-sub">Create your first invoice to get started.</div>
             </div>
         </div>
         {{end}}
@@ -499,5 +500,7 @@
 
 </div>
 
+</body>
+</html> 
 </body>
 </html>
