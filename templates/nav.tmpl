@@ -55,6 +55,7 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+{{if .User}}
 <!-- Help Widget -->
 <div id="helpWidget" style="
     position: fixed;
@@ -153,6 +154,7 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+{{end}}
 {{end}}
 
 {{define "nav-styles"}}
