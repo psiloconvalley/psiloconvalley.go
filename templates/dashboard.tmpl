@@ -363,7 +363,7 @@
 	 <div class="section-title">{{.T.DashboardNeedsAttention}}</div>
         </div>
 
-        {{if or .OverdueInvoices .PendingEstimates}}
+	{{if .NeedsAttention}}
         <div class="table-wrap">
             <table>
                 <thead>
