@@ -12,6 +12,8 @@ import (
 
 func NewRouter(h *handlers.Handlers) http.Handler {
 	r := chi.NewRouter()
+	r.NotFound(h.NotFound)
+
 
 	r.Use(handlers.SecurityHeaders)
 	r.Use(auth.LoadUser(h.App.UserRepo))

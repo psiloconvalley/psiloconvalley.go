@@ -94,3 +94,7 @@ func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/tools?transmitted=true", http.StatusSeeOther)
 }
+func (h *Handlers) NotFound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	h.App.Render(w, r, "404.tmpl", nil)
+}
