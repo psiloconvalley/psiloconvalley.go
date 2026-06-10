@@ -42,6 +42,26 @@
             margin-top: 6px;
             font-family: monospace;
         }
+	        .top-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-secondary {
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #fff;
+            white-space: nowrap;
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
 
         /* ── Filter bar ── */
         .filter-bar {
@@ -241,13 +261,15 @@
 <div class="container">
 
     <!-- Header -->
-    <div class="top">
-        <div>
-            <h1>Reports</h1>
-            <div class="top-sub">Invoice history · Export · Analysis</div>
+<div class="top">
+    <div>
+        <h1>Reports</h1>
+        <div class="top-sub">Invoice history · Export · Analysis</div>
         </div>
-    </div>
-
+        <div class="top-actions">
+            <a href="/reports/clients" class="btn-secondary">Client Scorecards →</a>
+        </div>
+</div> 
     <!-- Filter bar -->
     <div class="filter-bar">
         <div class="filter-group">
