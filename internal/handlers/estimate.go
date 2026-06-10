@@ -79,9 +79,16 @@ func (h *Handlers) EstimateNewGet(w http.ResponseWriter, r *http.Request) {
 	}
 	if user != nil {
 	if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
-	    invoiceData.LogoURL = template.URL(bp.LogoURL)
-		}
-	}	
+		invoiceData.LogoURL       = template.URL(bp.LogoURL)
+		invoiceData.CompanyName    = bp.Name
+		invoiceData.CompanyEmail   = bp.Email
+		invoiceData.CompanyAddress = bp.Address
+		invoiceData.CompanyCity    = bp.City
+		invoiceData.CompanyState   = bp.State
+		invoiceData.CompanyZip     = bp.Zip
+		invoiceData.CompanyCountry = bp.Country
+	}
+		}	
 	data := map[string]any{
 		"User":         user,
 		"IsLoggedIn":   true,
