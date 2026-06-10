@@ -791,13 +791,52 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── Cancel pending reminders when invoice is paid or voided ──────
+		// ── Cancel pending reminders when invoice is paid or voided ──────
 	if newStatus == "paid" || newStatus == "void" {
 		cancelled, err := h.App.SchedulerRepo.CancelJobsForInvoice(r.Context(), id)
 		if err != nil {
 			log.Printf("[status] failed to cancel reminders for invoice %d: %v", id, err)
 		} else if cancelled > 0 {
 			log.Printf("[status] cancelled %d pending reminders for invoice %d", cancelled, id)
+		}
+	}
+
+	// ── Schedule reminders when invoice is marked sent ────────────────
+	// Requires: auto_reminders enabled on the invoice + a due date set.
+	// If no due date, we have nothing to anchor reminders to — skip silently.
+	if newStatus == "sent" && inv.AutoReminders && inv.DueDate != nil {
+		// Cancel any stale reminders first (e.g. re-sending a previously sent invoice)
+		_, _ = h.App.SchedulerRepo.CancelJobsForInvoice(r.Context(), id)
+
+		reminderSchedule := []struct {
+			offset       time.Duration
+			reminderType string
+		}{
+			{-3 * 24 * time.Hour, "due_soon"},
+			{0, "due_today"},
+			{3 * 24 * time.Hour, "overdue"},
+			{7 * 24 * time.Hour, "overdue"},
+			{14 * 24 * time.Hour, "overdue"},
+		}
+
+		for _, rem := range reminderSchedule {
+			runAt := inv.DueDate.Add(rem.offset)
+			if runAt.Before(time.Now()) {
+				// Don't schedule reminders that are already in the past
+				continue
+			}
+			payload := map[string]any{
+				"invoice_id":    id,
+				"reminder_type": rem.reminderType,
+			}
+			_, err := h.App.SchedulerRepo.CreateJob(r.Context(), "send_reminder", payload, runAt)
+			if err != nil {
+				log.Printf("[status] failed to schedule %s reminder for invoice %d: %v",
+					rem.reminderType, id, err)
+			} else {
+				log.Printf("[status] scheduled %s reminder for invoice %d at %s",
+					rem.reminderType, id, runAt.Format("2006-01-02 15:04"))
+			}
 		}
 	}
 
