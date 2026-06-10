@@ -87,11 +87,11 @@ func (f *fakeInvoiceStore) GetAdminStats(ctx context.Context, db *sql.DB) (*repo
 func (f *fakeInvoiceStore) ListInvoicesForReport(ctx context.Context, userID int64, start, end time.Time, status string) ([]repo.InvoiceReportRow, error) {
 	return nil, nil
 }
+func (f *fakeInvoiceStore) GetClientScorecards(ctx context.Context, userID int64) ([]repo.ClientScorecard, error) {
+	return nil, nil
+}
 
-// =====================================================================
 // Helpers
-// =====================================================================
-
 // makeDeleteRequest builds a fake POST to /invoices/{id}/delete
 // with a logged-in user injected into the context.
 func makeDeleteRequest(user *repo.User, invoiceID string) *http.Request {

@@ -1713,6 +1713,11 @@ type InvoiceStore interface {
 		start, end time.Time,
 		status string,
 	) ([]InvoiceReportRow, error)
+
+	GetClientScorecards(
+		ctx context.Context,
+		userID int64,
+	) ([]ClientScorecard, error)
 }
 // ── Reports ──────────────────────────────────────────────────────────────
 
@@ -1802,6 +1807,126 @@ func (r *InvoiceRepo) ListInvoicesForReport(
 		}
 
 		results = append(results, row)
+	}
+	return results, rows.Err()
+}
+
+// ── Client Scorecard ──────────────────────────────────────────────────────
+
+// ClientScorecard aggregates invoice history per client for a user.
+type ClientScorecard struct {
+	ClientName     string
+	TotalBilled    int64 // cents
+	TotalPaid      int64 // cents
+	Outstanding    int64 // cents
+	Overdue        int64 // cents
+	InvoiceCount   int
+	PaidCount      int
+	OverdueCount   int
+	AvgDaysToPayment int
+	OnTimeRate     int   // percentage 0-100
+	Score          int   // 1-10
+}
+
+// GetClientScorecards returns payment reliability data per client.
+func (r *InvoiceRepo) GetClientScorecards(ctx context.Context, userID int64) ([]ClientScorecard, error) {
+	const q = `
+		SELECT
+			COALESCE(client_name, 'Unknown'),
+			COUNT(*),
+			COALESCE(SUM(total_cents), 0),
+			COALESCE(SUM(CASE WHEN status = 'paid' THEN total_cents ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN status IN ('sent','overdue') THEN total_cents ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN status = 'overdue' THEN total_cents ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN status = 'overdue' THEN 1 ELSE 0 END), 0),
+			COALESCE(
+				AVG(
+					CASE WHEN status = 'paid' AND due_date IS NOT NULL
+					THEN EXTRACT(EPOCH FROM (updated_at - issue_date)) / 86400
+					ELSE NULL END
+				), 0
+			),
+			CASE
+				WHEN COUNT(*) FILTER (WHERE status IN ('paid','overdue')) = 0 THEN 0
+				ELSE ROUND(
+					100.0 * COUNT(*) FILTER (WHERE status = 'paid' AND due_date IS NOT NULL AND updated_at <= due_date)
+					/ NULLIF(COUNT(*) FILTER (WHERE status IN ('paid','overdue')), 1)
+				)
+			END
+		FROM invoices
+		WHERE user_id = $1
+		  AND document_type = 'invoice'
+		  AND client_name IS NOT NULL
+		  AND client_name != ''
+		GROUP BY client_name
+		ORDER BY SUM(total_cents) DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, q, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []ClientScorecard
+	for rows.Next() {
+		var cs ClientScorecard
+		var avgDays float64
+		var onTimeRate sql.NullFloat64
+
+		if err := rows.Scan(
+			&cs.ClientName,
+			&cs.InvoiceCount,
+			&cs.TotalBilled,
+			&cs.TotalPaid,
+			&cs.Outstanding,
+			&cs.Overdue,
+			&cs.PaidCount,
+			&cs.OverdueCount,
+			&avgDays,
+			&onTimeRate,
+		); err != nil {
+			return nil, err
+		}
+
+		cs.AvgDaysToPayment = int(avgDays)
+		if onTimeRate.Valid {
+			cs.OnTimeRate = int(onTimeRate.Float64)
+		}
+
+		// ── Score algorithm (1-10) ──────────────────────────────
+		// Weighted: on-time rate (50%), avg payment speed (30%), overdue ratio (20%)
+		score := 5.0 // baseline
+
+		// On-time component: 0-100% → 0-5 points
+		score += float64(cs.OnTimeRate) / 100.0 * 5.0
+
+		// Speed penalty: >30 days avg → lose points
+		if cs.AvgDaysToPayment > 30 {
+			score -= 2.0
+		} else if cs.AvgDaysToPayment > 14 {
+			score -= 1.0
+		} else if cs.AvgDaysToPayment <= 7 && cs.PaidCount > 0 {
+			score += 1.0
+		}
+
+		// Overdue penalty
+		if cs.OverdueCount > 0 {
+			ratio := float64(cs.OverdueCount) / float64(cs.InvoiceCount)
+			score -= ratio * 3.0
+		}
+
+		// Clamp 1-10
+		if score > 10 {
+			score = 10
+		}
+		if score < 1 {
+			score = 1
+		}
+		cs.Score = int(score)
+
+		results = append(results, cs)
 	}
 	return results, rows.Err()
 }

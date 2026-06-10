@@ -93,6 +93,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		// Reports
 		r.Get("/reports", h.ReportGet)
 		r.Get("/reports/export.csv", h.ReportExportCSV)
+		r.Get("/reports/clients", h.ClientScorecardGet)
 
 		// Estimate management
 		r.Get("/estimates", h.EstimatesList)

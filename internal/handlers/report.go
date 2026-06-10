@@ -193,3 +193,25 @@ func parseDateRange(r *http.Request) (start, end time.Time, preset string) {
 	}
 	return
 }
+
+// ── Client Scorecard ─────────────────────────────────────────────────────
+
+func (h *Handlers) ClientScorecardGet(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	cards, err := h.App.InvRepo.GetClientScorecards(r.Context(), user.ID)
+	if err != nil {
+		log.Printf("[scorecard] query error: %v", err)
+		http.Error(w, "Failed to load scorecards", http.StatusInternalServerError)
+		return
+	}
+
+	h.App.Render(w, r, "scorecard.tmpl", map[string]any{
+		"User":  user,
+		"Cards": cards,
+	})
+}
