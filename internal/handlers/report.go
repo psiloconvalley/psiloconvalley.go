@@ -97,10 +97,20 @@ func (h *Handlers) ReportExportCSV(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── Stream CSV ──────────────────────────────────────────────────
-	filename := fmt.Sprintf("psiloconvalley-invoices-%s-to-%s.csv",
-		start.Format("2006-01-02"), end.Format("2006-01-02"))
+// ── Stream CSV ──────────────────────────────────────────────────
+	// Filename format: psiloconvalley-invoices-{status}-{preset}-{year}.csv
+	presetLabel := preset
+	if preset == "this_month" || preset == "last_month" {
+		presetLabel = preset + "-" + start.Format("Jan2006")
+	} else if preset == "custom" {
+		presetLabel = start.Format("Jan02") + "-to-" + end.Format("Jan02-2006")
+	} else {
+		presetLabel = preset + "-" + start.Format("2006")
+	}
+	filename := fmt.Sprintf("psiloconvalley-invoices-%s-%s.csv", status, presetLabel)
 
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
 
