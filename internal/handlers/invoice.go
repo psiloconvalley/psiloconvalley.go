@@ -477,7 +477,17 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 		
-		accessToken := r.URL.Query().Get("access")
+	accessToken := r.URL.Query().Get("access")
+
+	// Determine if branding footer should show (free tier only)
+	showBranding := true
+	if inv.UserID != nil {
+		if owner, err := h.App.UserRepo.GetByID(*inv.UserID); err == nil && owner != nil {
+			if owner.Plan == "pro" || owner.Plan == "growth" {
+				showBranding = false
+			}
+		}
+	}
 
 	h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
 		"Invoice":       invoiceView,
@@ -487,8 +497,9 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		"Paid":          r.URL.Query().Get("paid") == "1",
 		"PayNowEnabled": payNowEnabled,
 		"AccessToken":   accessToken,
+		"ShowBranding":  showBranding,
 	})
-	}
+		}
 
 func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
@@ -549,10 +560,21 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 	}
 	var buf bytes.Buffer
 
+	// Determine if branding footer should show (free tier only)
+	showBranding := true
+	if inv.UserID != nil {
+		if owner, err := h.App.UserRepo.GetByID(*inv.UserID); err == nil && owner != nil {
+			if owner.Plan == "pro" || owner.Plan == "growth" {
+				showBranding = false
+			}
+		}
+	}
+
 	templateData := map[string]any{
-		"Invoice":   invoiceView,
-		"User":      user,
-		"csrfField": "",
+		"Invoice":      invoiceView,
+		"User":         user,
+		"csrfField":    "",
+		"ShowBranding": showBranding,
 	}
 
 		if err := h.App.Templates.ExecuteTemplate(&buf, invoiceTemplateName(invoiceView.TemplateID), templateData); err != nil {
