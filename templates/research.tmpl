@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Research & Experiments | PsiloConValley</title>
+    <title>Roadmap & Changelog | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
     {{template "nav-styles" .}}
 
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: #0a0f1a;
+            background: #060a12;
             color: #fff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             min-height: 100vh;
@@ -26,10 +24,11 @@
 
         .label {
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.3);
+            color: #39ff8a;
+            text-shadow: 0 0 10px rgba(57,255,138,0.3);
             margin-bottom: 12px;
         }
 
@@ -43,37 +42,57 @@
 
         .sub {
             font-size: 15px;
-            color: rgba(255,255,255,0.45);
+            color: rgba(255,255,255,0.5);
             margin-bottom: 48px;
-            line-height: 1.6;
+            line-height: 1.7;
             font-weight: 300;
             max-width: 600px;
         }
+
         .sub strong {
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.8);
             font-weight: 600;
         }
 
+        /* ── Section Headers ── */
+        .section-head {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin: 48px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* ── Cards ── */
         .card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
             padding: 28px;
             border-radius: 10px;
-            margin-bottom: 16px;
-            transition: border-color 0.2s;
+            margin-bottom: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+
         .card:hover {
-            border-color: rgba(255,255,255,0.15);
+            border-color: rgba(57,255,138,0.15);
+            box-shadow: 0 0 20px rgba(57,255,138,0.04);
         }
 
         .card .tag {
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.25);
             margin-bottom: 10px;
         }
+
+        .tag-live { color: #39ff8a; text-shadow: 0 0 8px rgba(57,255,138,0.3); }
+        .tag-building { color: #fbbf24; }
+        .tag-planned { color: rgba(255,255,255,0.35); }
+        .tag-shipped { color: #39ff8a; }
 
         .card h2 {
             font-size: 18px;
@@ -86,33 +105,52 @@
         .card p {
             font-size: 13px;
             color: rgba(255,255,255,0.5);
-            line-height: 1.65;
-            margin-bottom: 12px;
+            line-height: 1.7;
             font-weight: 300;
         }
 
-        .card em {
-            color: rgba(255,255,255,0.6);
-            font-style: italic;
+        .card p strong {
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
         }
 
         .card .meta {
             font-size: 10px;
             font-weight: 600;
-            color: rgba(255,255,255,0.25);
+            color: rgba(255,255,255,0.2);
             letter-spacing: 0.5px;
+            margin-top: 12px;
         }
 
-        .disclaimer {
-            margin-top: 40px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.02);
-            color: rgba(255,255,255,0.35);
-            font-size: 11px;
-            line-height: 1.6;
-            font-weight: 400;
+        /* ── Origin ── */
+        .origin {
+            background: rgba(57,255,138,0.03);
+            border: 1px solid rgba(57,255,138,0.1);
+            border-radius: 10px;
+            padding: 32px;
+            margin-top: 48px;
+        }
+
+        .origin h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .origin p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.75;
+            font-weight: 300;
+            margin-bottom: 12px;
+        }
+
+        .origin p:last-child { margin-bottom: 0; }
+
+        .origin p strong {
+            color: #39ff8a;
+            font-weight: 600;
         }
 
         @media (max-width: 600px) {
@@ -129,55 +167,140 @@
 {{template "nav" .}}
 
 <div class="wrap">
-    <div class="label">PsiloConValley Lab</div>
-    <h1>Research & Experiments</h1>
+    <div class="label">The Network · Live</div>
+    <h1>Roadmap & Changelog</h1>
     <div class="sub">
-        This is a living notebook of ideas, prototypes, and hypotheses we're exploring.
-        <strong>Nothing here is a shipped feature, a promise, or an endorsement of any asset or network.</strong>
+        Everything we've built, what we're building now, and where the network is growing next.
+        <strong>This is a living document. Updated with every release.</strong>
     </div>
 
+    {{/* ── Recently Shipped ── */}}
+    <div class="section-head">Recently Shipped</div>
+
     <div class="card">
-        <div class="tag">Hypothesis // 001</div>
-        <h2>Borderless Invoicing Payment Instructions</h2>
+        <div class="tag tag-shipped">Shipped · June 2026</div>
+        <h2>Bilingual Interface — English & Spanish</h2>
         <p>
-            Many independent operators invoice internationally and rely on Wise, ACH, and SWIFT.
-            We're exploring better defaults for payment instructions, multi-currency presentation,
-            and clearer due date and late policy language on the PDF and hosted page.
+            Full interface translation toggle. Dashboard, navigation, and labels
+            render in English or Spanish based on user preference.
+            <strong>Built for the 41 million Spanish speakers in America who run businesses.</strong>
         </p>
-        <div class="meta">Status: Discovery · Next: 10 customer interviews</div>
+        <div class="meta">v3.8 · Language saved to user profile</div>
     </div>
 
     <div class="card">
-        <div class="tag">Hypothesis // 002</div>
+        <div class="tag tag-shipped">Shipped · June 2026</div>
+        <h2>Command Center Dashboard</h2>
+        <p>
+            Redesigned dashboard with "Needs Attention" section — shows overdue invoices
+            and pending estimates at a glance. No more digging through tables to find what matters.
+        </p>
+        <div class="meta">v3.8 · Action-first design</div>
+    </div>
+
+    <div class="card">
+        <div class="tag tag-shipped">Shipped · May 2026</div>
+        <h2>Estimates with Client Approval Flow</h2>
+        <p>
+            Full estimate creation, client response flow (Accept / Decline / Suggest Changes),
+            and one-click conversion from accepted estimate to draft invoice.
+            <strong>The complete quote-to-cash pipeline.</strong>
+        </p>
+        <div class="meta">v3.5 · Public client response route · No login required</div>
+    </div>
+
+    <div class="card">
+        <div class="tag tag-shipped">Shipped · May 2026</div>
+        <h2>Stripe Connect — Client Card Payments</h2>
+        <p>
+            Business owners connect their Stripe account and clients pay invoices
+            directly by card. Money goes straight to the business owner.
+        </p>
+        <div class="meta">v3.3 · OAuth flow · Direct payouts</div>
+    </div>
+
+    <div class="card">
+        <div class="tag tag-shipped">Shipped · May 2026</div>
+        <h2>Recurring Invoice Automation</h2>
+        <p>
+            Set up recurring schedules — weekly, monthly, or custom intervals.
+            The system generates and optionally emails invoices automatically.
+            <strong>Set it once. Get paid forever.</strong>
+        </p>
+        <div class="meta">v3.1 · Background scheduler engine</div>
+    </div>
+
+    {{/* ── In Progress ── */}}
+    <div class="section-head">Building Now</div>
+
+    <div class="card">
+        <div class="tag tag-building">In Progress</div>
+        <h2>Smart Dashboard Actions</h2>
+        <p>
+            The dashboard will tell you exactly what to do next — "Smith Family approved
+            the quote, send the invoice" or "Pool World is 3 days late, send a reminder."
+            <strong>Your business brain, automated.</strong>
+        </p>
+        <div class="meta">Target: v3.9</div>
+    </div>
+
+    <div class="card">
+        <div class="tag tag-building">In Progress</div>
+        <h2>Additional Languages</h2>
+        <p>
+            Hindi, Punjabi, Mandarin, Cantonese, and Vietnamese translations
+            are in development. The engine is built — we are expanding the vocabulary.
+        </p>
+        <div class="meta">Target: v4.0</div>
+    </div>
+
+    {{/* ── Planned ── */}}
+    <div class="section-head">On The Horizon</div>
+
+    <div class="card">
+        <div class="tag tag-planned">Planned</div>
+        <h2>Borderless Payment Instructions</h2>
+        <p>
+            Better defaults for international invoicing — Wise, ACH, SWIFT instructions
+            with multi-currency presentation and clearer payment terms on PDFs.
+        </p>
+        <div class="meta">Discovery phase</div>
+    </div>
+
+    <div class="card">
+        <div class="tag tag-planned">Planned</div>
+        <h2>Estimate Expiry Dates</h2>
+        <p>
+            Set a validity period on estimates. After expiry, the client sees
+            "This estimate has expired" and must request a new one.
+        </p>
+        <div class="meta">Design phase</div>
+    </div>
+
+    <div class="card">
+        <div class="tag tag-planned">Planned</div>
         <h2>Stablecoin Payment References</h2>
         <p>
-            We're researching how service providers request payment in stablecoins (e.g., USDC)
-            without turning PsiloConValley into a custody, wallet, or payment processor.
-            Current approach: <em>manual payment instructions + reference/memo + optional
-            tx hash confirmation by the invoice owner</em>. No automated on-chain settlement.
-            No wallet integrations planned yet.
+            Manual crypto payment instructions on invoices — wallet address,
+            memo/reference, and optional tx hash confirmation. No custody. No wallets.
+            Just instructions.
         </p>
-        <div class="meta">Status: Research · Networks under consideration: Polygon, Solana · Not implemented</div>
+        <div class="meta">Research phase</div>
     </div>
 
-    <div class="card">
-        <div class="tag">Origin // Note</div>
-        <h2>Where the Name Comes From</h2>
+    {{/* ── Origin ── */}}
+    <div class="origin">
+        <h2>Why "PsiloConValley"?</h2>
         <p>
-            PsiloConValley is a name inspired by the intersection of nature, consciousness,
-            and technology. The growing global conversation around psilocybin research — from
-            Johns Hopkins to Imperial College London — sparked a curiosity about how organic
-            systems (mycelial networks, decentralized growth patterns, adaptive intelligence)
-            might inform how we build software and think about independent infrastructure.
-            The name stuck. Today it is simply the umbrella for building practical, borderless tools.
+            Mycelium is the underground network of fungal threads that connects trees,
+            moves nutrients across a forest, and enables life above the surface.
+            It does invisible work that makes everything else possible.
         </p>
-        <div class="meta">Context only · No product tie-in</div>
-    </div>
-
-    <div class="disclaimer">
-        Research & Experiments is for learning and ideation. It does not constitute financial,
-        legal, tax, or investment advice. Any references to blockchains or tokens are strictly
-        educational hypotheses and are not live features, integrations, or endorsements.
+        <p>
+            <strong>That is exactly what blue collar business owners do.</strong>
+            They are the underground network of the American economy.
+            The name is not an accident. It is the thesis.
+        </p>
     </div>
 </div>
 
