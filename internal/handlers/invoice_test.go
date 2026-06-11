@@ -66,7 +66,7 @@ func (f *fakeInvoiceStore) ListInvoices(ctx context.Context, limit, offset int, 
 func (f *fakeInvoiceStore) ListEstimates(ctx context.Context, limit, offset int, userID int64) ([]repo.Invoice, error) {
 	return nil, nil
 }
-func (f *fakeInvoiceStore) InvoiceNumberExists(ctx context.Context, number string) (bool, error) {
+func (f *fakeInvoiceStore) InvoiceNumberExists(ctx context.Context, number string, userID int64) (bool, error) {
 	return false, nil
 }
 func (f *fakeInvoiceStore) UpdateInvoice(ctx context.Context, inv *repo.Invoice, items []repo.InvoiceItem) error {

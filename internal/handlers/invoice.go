@@ -192,7 +192,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		errs = append(errs, FormError{Field: "items", Message: "At least one line item with a description is required"})
 	}
 	if invoiceNumber != "" {
-		exists, err := h.App.InvRepo.InvoiceNumberExists(r.Context(), invoiceNumber)
+	exists, err := h.App.InvRepo.InvoiceNumberExists(r.Context(), invoiceNumber, user.ID)
 		if err != nil {
 			log.Printf("[invoice] invoice number exists check error: %v", err)
 			http.Error(w, "Failed to validate invoice number", http.StatusInternalServerError)

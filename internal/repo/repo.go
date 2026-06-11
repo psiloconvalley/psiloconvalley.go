@@ -1336,11 +1336,16 @@ func (r *InvoiceRepo) ListEstimates(
 func (r *InvoiceRepo) InvoiceNumberExists(
 	ctx context.Context,
 	number string,
+	userID int64,
 ) (bool, error) {
 	var exists bool
 	err := r.db.QueryRowContext(ctx,
-		`SELECT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = $1)`,
-		number,
+		`SELECT EXISTS (
+			SELECT 1 FROM invoices 
+			WHERE invoice_number = $1 
+			AND user_id = $2
+		)`,
+		number, userID,
 	).Scan(&exists)
 	return exists, err
 }
@@ -1671,6 +1676,7 @@ type InvoiceStore interface {
 	InvoiceNumberExists(
 		ctx context.Context,
 		number string,
+		userID int64,
 	) (bool, error)
 
 	UpdateInvoice(
