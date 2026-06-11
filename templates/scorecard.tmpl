@@ -270,75 +270,136 @@
         </div>
     </div>
 
-    <div class="cards-grid">
-        {{range .Cards}}
+           <div class="cards-grid">
+        {{range $i, $card := .Cards}}
         {{$scoreClass := "score-red"}}
-        {{if ge .Score 8}}{{$scoreClass = "score-green"}}{{else if ge .Score 5}}{{$scoreClass = "score-yellow"}}{{end}}
+        {{if ge $card.Score 8}}{{$scoreClass = "score-green"}}{{else if ge $card.Score 5}}{{$scoreClass = "score-yellow"}}{{end}}
 
+        {{if and (not $.HasPaidPlan) (ge $i 2)}}
+        {{/* ── Paywall card — blurred for free users ── */}}
+        <div class="scorecard {{$scoreClass}}" style="position:relative;">
+            <div style="filter: blur(4px); pointer-events: none; user-select: none;">
+                <div class="card-header">
+                    <div class="client-name">{{$card.ClientName}}</div>
+                    <div class="score-badge">
+                        <div class="score-number">{{$card.Score}}</div>
+                        <div class="score-label">/ 10</div>
+                    </div>
+                </div>
+                <div class="score-bar-wrap">
+                    <div class="score-bar-track">
+                        <div class="score-bar-fill" style="width: {{mul $card.Score 10}}%"></div>
+                    </div>
+                </div>
+                <div class="stat-rows">
+                    <div class="stat-row">
+                        <div class="stat-row-label">Total Billed</div>
+                        <div class="stat-row-value">{{money $card.TotalBilled}}</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-row-label">On-Time Rate</div>
+                        <div class="stat-row-value">{{$card.OnTimeRate}}%</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-row-label">Avg. Days to Pay</div>
+                        <div class="stat-row-value">{{$card.AvgDaysToPayment}} days</div>
+                    </div>
+                </div>
+                <div class="insight insight-green">
+                    ✓ Insight hidden. Upgrade to unlock.
+                </div>
+            </div>
+            {{/* Upgrade overlay */}}
+            <div style="
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: rgba(10,15,26,0.7);
+                border-radius: 14px;
+                padding: 24px;
+                text-align: center;
+                gap: 12px;
+            ">
+                <div style="font-size: 20px;">🔒</div>
+                <div style="font-size: 14px; font-weight: 800; color: #fff;">
+                    Unlock All Client Scores
+                </div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5;">
+                    See reliability scores, payment patterns,<br>and plain English insights for every client.
+                </div>
+                <a href="/pricing" style="
+                    margin-top: 4px;
+                    padding: 10px 20px;
+                    background: #4ade80;
+                    color: #0a0f1a;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    font-weight: 800;
+                    text-decoration: none;
+                ">Upgrade to Growth — $8.88/mo →</a>
+            </div>
+        </div>
+        {{else}}
+        {{/* ── Full card — always visible ── */}}
         <div class="scorecard {{$scoreClass}}">
-
-            <!-- Header: name + score -->
             <div class="card-header">
-                <div class="client-name">{{.ClientName}}</div>
+                <div class="client-name">{{$card.ClientName}}</div>
                 <div class="score-badge">
-                    <div class="score-number">{{.Score}}</div>
+                    <div class="score-number">{{$card.Score}}</div>
                     <div class="score-label">/ 10</div>
                 </div>
             </div>
-
-            <!-- Score bar -->
             <div class="score-bar-wrap">
                 <div class="score-bar-track">
-                    <div class="score-bar-fill" style="width: {{mul .Score 10}}%"></div>
+                    <div class="score-bar-fill" style="width: {{mul $card.Score 10}}%"></div>
                 </div>
             </div>
-
-            <!-- Stats -->
             <div class="stat-rows">
                 <div class="stat-row">
                     <div class="stat-row-label">Total Billed</div>
-                    <div class="stat-row-value">{{money .TotalBilled}}</div>
+                    <div class="stat-row-value">{{money $card.TotalBilled}}</div>
                 </div>
                 <div class="stat-row">
                     <div class="stat-row-label">Total Collected</div>
-                    <div class="stat-row-value val-green">{{money .TotalPaid}}</div>
+                    <div class="stat-row-value val-green">{{money $card.TotalPaid}}</div>
                 </div>
-                {{if .Outstanding}}
+                {{if $card.Outstanding}}
                 <div class="stat-row">
                     <div class="stat-row-label">Outstanding</div>
-                    <div class="stat-row-value val-yellow">{{money .Outstanding}}</div>
+                    <div class="stat-row-value val-yellow">{{money $card.Outstanding}}</div>
                 </div>
                 {{end}}
-                {{if .Overdue}}
+                {{if $card.Overdue}}
                 <div class="stat-row">
                     <div class="stat-row-label">Overdue</div>
-                    <div class="stat-row-value val-red">{{money .Overdue}}</div>
+                    <div class="stat-row-value val-red">{{money $card.Overdue}}</div>
                 </div>
                 {{end}}
                 <div class="stat-row">
                     <div class="stat-row-label">Invoices Sent</div>
-                    <div class="stat-row-value">{{.InvoiceCount}}</div>
+                    <div class="stat-row-value">{{$card.InvoiceCount}}</div>
                 </div>
                 <div class="stat-row">
                     <div class="stat-row-label">On-Time Rate</div>
-                    <div class="stat-row-value {{if ge .OnTimeRate 80}}val-green{{else if ge .OnTimeRate 50}}val-yellow{{else}}val-red{{end}}">
-                        {{.OnTimeRate}}%
+                    <div class="stat-row-value {{if ge $card.OnTimeRate 80}}val-green{{else if ge $card.OnTimeRate 50}}val-yellow{{else}}val-red{{end}}">
+                        {{$card.OnTimeRate}}%
                     </div>
                 </div>
                 <div class="stat-row">
                     <div class="stat-row-label">Avg. Days to Pay</div>
-                    <div class="stat-row-value {{if le .AvgDaysToPayment 7}}val-green{{else if le .AvgDaysToPayment 21}}val-yellow{{else}}val-red{{end}}">
-                        {{if .AvgDaysToPayment}}{{.AvgDaysToPayment}} days{{else}}—{{end}}
+                    <div class="stat-row-value {{if le $card.AvgDaysToPayment 7}}val-green{{else if le $card.AvgDaysToPayment 21}}val-yellow{{else}}val-red{{end}}">
+                        {{if $card.AvgDaysToPayment}}{{$card.AvgDaysToPayment}} days{{else}}—{{end}}
                     </div>
                 </div>
             </div>
-
-            <!-- Plain English Insight -->
-            {{if ge .Score 8}}
+            {{if ge $card.Score 8}}
             <div class="insight insight-green">
                 ✓ Reliable payer. Safe to extend net-30 terms.
             </div>
-            {{else if ge .Score 5}}
+            {{else if ge $card.Score 5}}
             <div class="insight insight-yellow">
                 ⚠ Pays but slow. Consider requesting a deposit on large jobs.
             </div>
@@ -347,13 +408,12 @@
                 ✗ High risk. Require upfront deposit. Follow up immediately on outstanding invoices.
             </div>
             {{end}}
-
         </div>
         {{end}}
+        {{end}}
     </div>
-
     {{else}}
-    <div class="empty">
+       <div class="empty">
         <div class="empty-icon">📊</div>
         <div class="empty-title">No client data yet</div>
         <div class="empty-sub">

@@ -234,8 +234,11 @@ func (h *Handlers) ClientScorecardGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hasPaidPlan := user.Plan == "growth" || user.Plan == "pro"
+
 	h.App.Render(w, r, "scorecard.tmpl", map[string]any{
-		"User":  user,
-		"Cards": cards,
+		"User":        user,
+		"Cards":       cards,
+		"HasPaidPlan": hasPaidPlan,
 	})
 }
