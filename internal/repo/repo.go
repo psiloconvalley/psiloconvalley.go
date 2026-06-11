@@ -851,15 +851,7 @@ func (r *BusinessRepo) Upsert(ctx context.Context, p *BusinessProfile) error {
 	)
 	return err
 }
-
-func (r *BusinessRepo) GetDefault() (*BusinessProfile, error) {
-	return nil, errors.New("not implemented")
-}
-
-// =====================================================================
 // Invoice Math
-// =====================================================================
-
 func calculateTotals(inv *Invoice, items []InvoiceItem) []InvoiceItem {
 	var subtotalCents int64
 	for i := range items {
