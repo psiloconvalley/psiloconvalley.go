@@ -361,7 +361,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		log.Printf("[invoice] create error: %v", err)
 
 		// Catch duplicate invoice number from DB constraint
-		if strings.Contains(err.Error(), "invoices_invoice_number_key") {
+	if strings.Contains(err.Error(), "invoices_invoice_number_key") || strings.Contains(err.Error(), "idx_invoices_user_invoice_number") {
 			dupErrs := []struct {
 				Field   string
 				Message string
