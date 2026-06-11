@@ -65,7 +65,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		Email:   strings.TrimSpace(r.FormValue("email")),
 		Address: strings.TrimSpace(r.FormValue("address")),
 		City:    strings.TrimSpace(r.FormValue("city")),
-		State:   strings.TrimSpace(r.FormValue("state")),
+		State:   catalog.NormalizeState(r.FormValue("state")),
 		Zip:     strings.TrimSpace(r.FormValue("zip")),
 		Country: strings.TrimSpace(r.FormValue("country")),
 		TaxID:   strings.TrimSpace(r.FormValue("tax_id")),

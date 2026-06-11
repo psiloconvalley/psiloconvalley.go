@@ -71,7 +71,7 @@ func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
 			invoiceData.CompanyCity = bp.City
 		}
 		if bp.State != "" {
-			invoiceData.CompanyState = bp.State
+			invoiceData.CompanyState = catalog.NormalizeState(bp.State)
 		}
 		if bp.Zip != "" {
 			invoiceData.CompanyZip = bp.Zip
@@ -681,6 +681,8 @@ func (h *Handlers) InvoiceEditGet(w http.ResponseWriter, r *http.Request) {
 	h.App.Render(w, r, "invoice_new.tmpl", map[string]any{
 		"Invoice":    invoiceView,
 		"IsEdit":     true,
+		"Mode":         "edit",
+    		"DocumentType": inv.DocumentType,
 		"User":       user,
 		"USStates":   catalog.USStates,
 		"Currencies": catalog.SupportedCurrencies,
