@@ -10,10 +10,6 @@ import (
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/util"
 )
-
-// Admin user ID — only this user can access /admin/*
-// Double lock: must match both ID and email.
-
 func (h *Handlers) AdminAnalytics(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	adminID, err := strconv.ParseInt(os.Getenv("ADMIN_USER_ID"), 10, 64)
