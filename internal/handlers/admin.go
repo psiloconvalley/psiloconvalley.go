@@ -3,6 +3,9 @@ package handlers
 
 import (
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
 
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/util"
@@ -10,12 +13,12 @@ import (
 
 // Admin user ID — only this user can access /admin/*
 // Double lock: must match both ID and email.
-const adminUserID int64 = 1
-const adminEmail = "psiloconvalley408@gmail.com" // ← replace with your real email
 
 func (h *Handlers) AdminAnalytics(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
-	if user == nil || user.ID != adminUserID || user.Email != adminEmail {
+	adminID, err := strconv.ParseInt(os.Getenv("ADMIN_USER_ID"), 10, 64)
+	adminEmail := strings.ToLower(strings.TrimSpace(os.Getenv("ADMIN_EMAIL")))
+	if err != nil || user == nil || user.ID != adminID || strings.ToLower(strings.TrimSpace(user.Email)) != adminEmail {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
