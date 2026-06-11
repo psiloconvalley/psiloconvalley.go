@@ -1658,6 +1658,7 @@ function addRow() {
 
     attachListeners();
     calculateLiveTotals();
+    syncItemInputs();
 }
 
 // ── Remove row ────────────────────────────────────────────────────
@@ -1672,6 +1673,7 @@ function removeRow(btn, layout) {
         btn.closest('tr').remove();
     }
     calculateLiveTotals();
+    syncItemInputs();
 }
 
 // ── Client auto-fill ──────────────────────────────────────────────
@@ -1883,6 +1885,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ── Sync responsive item inputs ───────────────────────────────────
+// CSS hides desktop table at <=639px and shows mobile cards.
+// But CSS display:none does NOT stop inputs from submitting.
+// We disable inputs in the hidden layout so only the visible
+// layout's values are posted to the server.
+const MOBILE_BREAKPOINT = 639;
+
+function syncItemInputs() {
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
+    // Disable the hidden layout's inputs, enable the visible one
+    document.querySelectorAll('#items_body_desktop input').forEach(el => {
+        el.disabled = isMobile;
+    });
+    document.querySelectorAll('#items_body_mobile input').forEach(el => {
+        el.disabled = !isMobile;
+    });
+}
+
+// Run on load and on every resize
+syncItemInputs();
+window.addEventListener('resize', syncItemInputs);
+
+// Re-run after form submit fires (safety net)
+const _invoiceForm = document.getElementById('invoice-form');
+if (_invoiceForm) {
+    _invoiceForm.addEventListener('submit', () => {
+        syncItemInputs();
+    });
+}
 
 // ── Logo Position Selector ────────────────────────────────────────
 function setLogoPos(pos) {
