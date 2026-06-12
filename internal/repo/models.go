@@ -1,9 +1,14 @@
 package repo
 
 import (
+	"crypto/rand"
+	"crypto/subtle"
+	"encoding/base64"
+	"fmt"
 	"strings"
 	"time"
 
+	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -54,18 +59,75 @@ type User struct {
 	NextInvoiceSeq   int
 	NextEstimateSeq  int
 	Language         string
+	PasswordAlgo        string
+	MagicToken          string
+	MagicTokenExpiresAt *time.Time
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
 
+// Argon2id parameters — OWASP recommended minimum
+const (
+	argonTime    = 3
+	argonMemory  = 64 * 1024 // 64 MB
+	argonThreads = 4
+	argonKeyLen  = 32
+	argonSaltLen = 16
+)
+
+// HashPassword creates an Argon2id hash. All new passwords use this.
+func HashPassword(plain string) (string, error) {
+	salt := make([]byte, argonSaltLen)
+	if _, err := rand.Read(salt); err != nil {
+		return "", fmt.Errorf("generate salt: %w", err)
+	}
+	key := argon2.IDKey([]byte(plain), salt, argonTime, argonMemory, argonThreads, argonKeyLen)
+	return fmt.Sprintf(
+		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
+		argon2.Version,
+		argonMemory, argonTime, argonThreads,
+		base64.RawStdEncoding.EncodeToString(salt),
+		base64.RawStdEncoding.EncodeToString(key),
+	), nil
+}
+
+// CheckPassword verifies a password against the stored hash.
+// Supports both bcrypt (legacy) and Argon2id (current).
 func (u *User) CheckPassword(plain string) bool {
 	if u.PasswordHash == "" {
 		return false
 	}
-	return bcrypt.CompareHashAndPassword(
-		[]byte(u.PasswordHash),
-		[]byte(plain),
-	) == nil
+	if u.PasswordAlgo == "argon2id" || strings.HasPrefix(u.PasswordHash, "$argon2id$") {
+		return verifyArgon2id(plain, u.PasswordHash)
+	}
+	return bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(plain)) == nil
+}
+
+// NeedsRehash returns true if the password is still using bcrypt.
+func (u *User) NeedsRehash() bool {
+	return u.PasswordAlgo != "argon2id"
+}
+
+func verifyArgon2id(plain, encoded string) bool {
+	parts := strings.Split(encoded, "$")
+	if len(parts) != 6 {
+		return false
+	}
+	var version int
+	var memory, time uint32
+	var threads uint8
+	_, _ = fmt.Sscanf(parts[2], "v=%d", &version)
+	_, _ = fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &time, &threads)
+	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
+	if err != nil {
+		return false
+	}
+	expectedKey, err := base64.RawStdEncoding.DecodeString(parts[5])
+	if err != nil {
+		return false
+	}
+	key := argon2.IDKey([]byte(plain), salt, time, memory, threads, uint32(len(expectedKey)))
+	return subtle.ConstantTimeCompare(key, expectedKey) == 1
 }
 
 func (u *User) IsGoogleUser() bool {

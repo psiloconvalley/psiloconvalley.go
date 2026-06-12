@@ -28,15 +28,23 @@ func (h *Handlers) ProfileGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.App.Render(w, r, "profile.tmpl", map[string]any{
-	   "Profile":         profile,
-	   "Saved":           r.URL.Query().Get("saved") == "true",
-	   "Welcome":         r.URL.Query().Get("welcome") == "true",
-	   "Currencies":      catalog.SupportedCurrencies,
-	   "StripeConnected": r.URL.Query().Get("stripe_connected") == "1",
-	   "StripeError":     r.URL.Query().Get("stripe_error") == "1",
-	})
-	}
+u, _ := h.App.UserRepo.GetByID(user.ID)
+isMagicLogin := r.URL.Query().Get("magic") == "true"
+
+h.App.Render(w, r, "profile.tmpl", map[string]any{
+   "Profile":         profile,
+   "Saved":           r.URL.Query().Get("saved") == "true",
+   "Welcome":         r.URL.Query().Get("welcome") == "true",
+   "Currencies":      catalog.SupportedCurrencies,
+   "StripeConnected": r.URL.Query().Get("stripe_connected") == "1",
+   "StripeError":     r.URL.Query().Get("stripe_error") == "1",
+   "MagicLogin":      isMagicLogin,
+   "IsGoogleUser":    u != nil && u.IsGoogleUser(),
+   "HasPassword":     u != nil && u.PasswordHash != "",
+   "PasswordSaved":   r.URL.Query().Get("pw_saved") == "true",
+   "PasswordError":   r.URL.Query().Get("pw_error"),
+})
+}
 
 func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
@@ -160,4 +168,56 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/profile?saved=true", http.StatusSeeOther)
 
+}
+
+func (h *Handlers) ChangePasswordPost(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form", http.StatusBadRequest)
+		return
+	}
+
+	current := r.FormValue("current_password")
+	newPass := r.FormValue("new_password")
+	confirm := r.FormValue("confirm_password")
+
+	// Reload user to get current password hash
+	u, err := h.App.UserRepo.GetByID(user.ID)
+	if err != nil {
+		http.Error(w, "Could not load account", http.StatusInternalServerError)
+		return
+	}
+
+	// If the user has no password yet (magic link / Google OAuth arrival),
+	// skip current-password check — there is nothing to verify against.
+	hasPassword := u.PasswordHash != ""
+
+	if hasPassword {
+		if !u.CheckPassword(current) {
+			http.Redirect(w, r, "/profile?pw_error=current", http.StatusSeeOther)
+			return
+		}
+	}
+
+	if len(newPass) < 8 {
+		http.Redirect(w, r, "/profile?pw_error=short", http.StatusSeeOther)
+		return
+	}
+	if newPass != confirm {
+		http.Redirect(w, r, "/profile?pw_error=mismatch", http.StatusSeeOther)
+		return
+	}
+
+	if err := h.App.UserRepo.UpdatePassword(r.Context(), user.ID, newPass); err != nil {
+		log.Printf("[profile] password update error: %v", err)
+		http.Redirect(w, r, "/profile?pw_error=failed", http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, "/profile?pw_saved=true", http.StatusSeeOther)
 }

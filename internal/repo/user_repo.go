@@ -2,11 +2,13 @@ package repo
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
-
-	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 type UserRepo struct{ db *sql.DB }
@@ -17,96 +19,167 @@ func (r *UserRepo) Create(email, plainPassword string) (int64, error) {
 	if email == "" || len(plainPassword) < 8 {
 		return 0, errors.New("invalid credentials")
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(plainPassword), 12)
+	hash, err := HashPassword(plainPassword)
 	if err != nil {
 		return 0, err
 	}
 	var id int64
 	err = r.db.QueryRow(
-		`INSERT INTO users (email, password_hash, provider, plan)
-		 VALUES ($1, $2, 'email', 'free')
+		`INSERT INTO users (email, password_hash, password_algo, provider, plan)
+		 VALUES ($1, $2, 'argon2id', 'email', 'free')
 		 RETURNING id`,
-		email, string(hash),
+		email, hash,
 	).Scan(&id)
 	return id, err
 }
 
-func (r *UserRepo) GetByEmail(email string) (*User, error) {
+// scanUser is a shared helper that scans all user columns consistently.
+func scanUser(row interface {
+	Scan(...any) error
+}) (*User, error) {
 	var u User
-	var passwordHash, provider, googleID, name, avatarURL, stripeCustomerID, stripeConnectID sql.NullString
-	var updatedAt sql.NullTime
-	err := r.db.QueryRow(`
-		SELECT id, email, password_hash, provider, google_id,
-		name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, language, created_at, updated_at
-		FROM users WHERE email = $1
-	`, email).Scan(
-		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language, &u.CreatedAt, &updatedAt,
+	var passwordHash, passwordAlgo, provider, googleID, name, avatarURL,
+		stripeCustomerID, stripeConnectID, magicToken sql.NullString
+	var updatedAt, magicTokenExpiresAt sql.NullTime
+
+	err := row.Scan(
+		&u.ID, &u.Email, &passwordHash, &passwordAlgo, &provider, &googleID,
+		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID,
+		&u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language,
+		&magicToken, &magicTokenExpiresAt,
+		&u.CreatedAt, &updatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
+	if passwordAlgo.Valid { u.PasswordAlgo = passwordAlgo.String }
 	if provider.Valid { u.Provider = provider.String }
 	if googleID.Valid { u.GoogleID = googleID.String }
 	if name.Valid { u.Name = name.String }
 	if avatarURL.Valid { u.AvatarURL = avatarURL.String }
 	if stripeCustomerID.Valid { u.StripeCustomerID = stripeCustomerID.String }
 	if stripeConnectID.Valid { u.StripeConnectID = stripeConnectID.String }
+	if magicToken.Valid { u.MagicToken = magicToken.String }
+	if magicTokenExpiresAt.Valid {
+		t := magicTokenExpiresAt.Time
+		u.MagicTokenExpiresAt = &t
+	}
 	if updatedAt.Valid { u.UpdatedAt = updatedAt.Time }
 	return &u, nil
+}
+
+const userSelectCols = `
+	SELECT id, email, password_hash, password_algo, provider, google_id,
+		name, avatar_url, plan, stripe_customer_id, stripe_connect_id,
+		next_invoice_seq, next_estimate_seq, language,
+		magic_token, magic_token_expires_at,
+		created_at, updated_at
+	FROM users`
+
+func (r *UserRepo) GetByEmail(email string) (*User, error) {
+	row := r.db.QueryRow(userSelectCols+` WHERE email = $1`, email)
+	return scanUser(row)
 }
 
 func (r *UserRepo) GetByID(id int64) (*User, error) {
-	var u User
-	var passwordHash, provider, googleID, name, avatarURL, stripeCustomerID, stripeConnectID sql.NullString
-	var updatedAt sql.NullTime
-	err := r.db.QueryRow(`
-		SELECT id, email, password_hash, provider, google_id,
-			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, language, created_at, updated_at
-		FROM users WHERE id = $1
-	`, id).Scan(
-		&u.ID, &u.Email, &passwordHash, &provider, &googleID,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language, &u.CreatedAt, &updatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
-	if provider.Valid { u.Provider = provider.String }
-	if googleID.Valid { u.GoogleID = googleID.String }
-	if name.Valid { u.Name = name.String }
-	if avatarURL.Valid { u.AvatarURL = avatarURL.String }
-	if stripeCustomerID.Valid { u.StripeCustomerID = stripeCustomerID.String }
-	if stripeConnectID.Valid { u.StripeConnectID = stripeConnectID.String }
-	if updatedAt.Valid { u.UpdatedAt = updatedAt.Time }
-	return &u, nil
+	row := r.db.QueryRow(userSelectCols+` WHERE id = $1`, id)
+	return scanUser(row)
 }
 
 func (r *UserRepo) GetByGoogleID(googleID string) (*User, error) {
-	var u User
-	var passwordHash, provider, googleIDVal, name, avatarURL, stripeCustomerID, stripeConnectID sql.NullString
-	var updatedAt sql.NullTime
-	err := r.db.QueryRow(`
-		SELECT id, email, password_hash, provider, google_id,
-			name, avatar_url, plan, stripe_customer_id, stripe_connect_id, next_invoice_seq, next_estimate_seq, language, created_at, updated_at
-		FROM users WHERE google_id = $1
-	`, googleID).Scan(
-		&u.ID, &u.Email, &passwordHash, &provider, &googleIDVal,
-		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID, &u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language, &u.CreatedAt, &updatedAt,
-	)
+	row := r.db.QueryRow(userSelectCols+` WHERE google_id = $1`, googleID)
+	return scanUser(row)
+}
+
+// RehashPassword upgrades a bcrypt hash to Argon2id transparently on login.
+func (r *UserRepo) RehashPassword(ctx context.Context, userID int64, plain string) error {
+	hash, err := HashPassword(plain)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if passwordHash.Valid { u.PasswordHash = passwordHash.String }
-	if provider.Valid { u.Provider = provider.String }
-	if googleIDVal.Valid { u.GoogleID = googleIDVal.String }
-	if name.Valid { u.Name = name.String }
-	if avatarURL.Valid { u.AvatarURL = avatarURL.String }
-	if stripeConnectID.Valid { u.StripeConnectID = stripeConnectID.String }
-	if stripeCustomerID.Valid { u.StripeCustomerID = stripeCustomerID.String }
-	if updatedAt.Valid { u.UpdatedAt = updatedAt.Time }
-	return &u, nil
+	_, err = r.db.ExecContext(ctx, `
+		UPDATE users
+		SET password_hash = $1, password_algo = 'argon2id', updated_at = NOW()
+		WHERE id = $2
+	`, hash, userID)
+	return err
+}
+
+// UpdatePassword sets a new Argon2id password. Requires current password.
+func (r *UserRepo) UpdatePassword(ctx context.Context, userID int64, plain string) error {
+	hash, err := HashPassword(plain)
+	if err != nil {
+		return err
+	}
+	_, err = r.db.ExecContext(ctx, `
+		UPDATE users
+		SET password_hash = $1, password_algo = 'argon2id', updated_at = NOW()
+		WHERE id = $2
+	`, hash, userID)
+	return err
+}
+
+// SetMagicToken generates a secure token, stores its SHA-256 hash in DB,
+// and returns the raw token to be sent in the email.
+// The raw token never touches the DB — only the hash does.
+func (r *UserRepo) SetMagicToken(ctx context.Context, email string) (string, error) {
+	// Generate 32 bytes of cryptographic randomness
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "", fmt.Errorf("generate token: %w", err)
+	}
+	rawHex := hex.EncodeToString(raw)
+
+	// Store SHA-256 hash of token — not the raw token
+	hash := sha256.Sum256([]byte(rawHex))
+	hashHex := hex.EncodeToString(hash[:])
+
+	expires := time.Now().Add(15 * time.Minute)
+
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET magic_token = $1,
+		    magic_token_expires_at = $2,
+		    updated_at = NOW()
+		WHERE LOWER(TRIM(email)) = LOWER(TRIM($3))
+	`, hashHex, expires, email)
+	if err != nil {
+		return "", fmt.Errorf("set magic token: %w", err)
+	}
+
+	return rawHex, nil
+}
+
+// ConsumeMagicToken validates a raw token, logs the user in if valid,
+// and clears the token atomically. Returns the user or an error.
+// Generic error message prevents token enumeration.
+func (r *UserRepo) ConsumeMagicToken(ctx context.Context, rawToken string) (*User, error) {
+	hash := sha256.Sum256([]byte(rawToken))
+	hashHex := hex.EncodeToString(hash[:])
+
+	row := r.db.QueryRow(
+		userSelectCols+` WHERE magic_token = $1 AND magic_token_expires_at > NOW()`,
+		hashHex,
+	)
+	u, err := scanUser(row)
+	if err != nil {
+		return nil, errors.New("invalid or expired link")
+	}
+
+	// Clear token immediately — single use
+	_, err = r.db.ExecContext(ctx, `
+		UPDATE users
+		SET magic_token = NULL,
+		    magic_token_expires_at = NULL,
+		    updated_at = NOW()
+		WHERE id = $1
+	`, u.ID)
+	if err != nil {
+		return nil, fmt.Errorf("clear token: %w", err)
+	}
+
+	return u, nil
 }
 
 func (r *UserRepo) NextInvoiceNumber(ctx context.Context, userID int64) (string, error) {
@@ -170,11 +243,8 @@ func (r *UserRepo) CreateGoogleUser(email, googleID, name, avatarURL string) (in
 func (r *UserRepo) LinkGoogleToExisting(userID int64, googleID string) error {
 	_, err := r.db.Exec(`
 		UPDATE users
-		SET google_id  = $1,
-		    provider   = 'google',
-		    updated_at = NOW()
-		WHERE id = $2
-		AND (google_id IS NULL OR google_id = $1)
+		SET google_id = $1, provider = 'google', updated_at = NOW()
+		WHERE id = $2 AND (google_id IS NULL OR google_id = $1)
 	`, googleID, userID)
 	return err
 }

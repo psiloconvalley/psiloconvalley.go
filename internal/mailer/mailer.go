@@ -760,3 +760,140 @@ func (m *Mailer) SendEstimate(toEmail string, data EstimateEmailData) error {
 	return nil
 }
 
+
+// SendMagicLink sends a one-time login link to the user's email.
+func (m *Mailer) SendMagicLink(toEmail, link string) error {
+	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
+		log.Printf("[mailer] skipping magic link — no API key (would have sent to %s)", toEmail)
+		return nil
+	}
+
+	body := `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in to PsiloConValley</title>
+</head>
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+          <!-- Brand -->
+          <tr>
+            <td style="padding:0 0 24px 0;text-align:center;">
+              <p style="margin:0;font-size:14px;font-weight:700;letter-spacing:1px;color:#1f2937;">
+                PSILOCONVALLEY
+              </p>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+
+              <!-- Top accent -->
+              <div style="height:4px;background:linear-gradient(90deg,#4ade80,#22d3ee,#818cf8);"></div>
+
+              <!-- Body -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:40px 40px 32px;">
+
+                    <p style="margin:0 0 6px 0;font-size:11px;letter-spacing:2px;
+                               text-transform:uppercase;color:#9ca3af;font-weight:600;">
+                      SECURE SIGN-IN
+                    </p>
+                    <p style="margin:0 0 24px 0;font-size:26px;font-weight:800;
+                               color:#111827;letter-spacing:-0.5px;">
+                      Your sign-in link
+                    </p>
+
+                    <p style="margin:0 0 28px 0;font-size:15px;color:#374151;line-height:1.6;">
+                      Click the button below to sign in to your PsiloConValley account.
+                      This link expires in <strong>15 minutes</strong> and can only be used once.
+                    </p>
+
+                    <!-- CTA -->
+                    <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;" width="100%">
+                      <tr>
+                        <td align="center">
+                          <a href="` + link + `"
+                             style="display:inline-block;padding:14px 40px;
+                                    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+                                    font-size:14px;font-weight:700;
+                                    color:#ffffff;text-decoration:none;
+                                    background:#111827;border-radius:8px;
+                                    letter-spacing:0.3px;">
+                            Sign In to PsiloConValley →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Security notes -->
+                    <table width="100%" cellpadding="0" cellspacing="0"
+                           style="background:#f9fafb;border:1px solid #e5e7eb;
+                                  border-radius:10px;margin-bottom:24px;">
+                      <tr>
+                        <td style="padding:18px 22px;">
+                          <p style="margin:0 0 6px 0;font-size:10px;letter-spacing:2px;
+                                     text-transform:uppercase;color:#9ca3af;font-weight:600;">
+                            SECURITY INFO
+                          </p>
+                          <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.7;">
+                            ✓ &nbsp;Expires in 15 minutes<br>
+                            ✓ &nbsp;Single-use — link is invalidated after clicking<br>
+                            ✓ &nbsp;If you didn't request this, you can safely ignore it
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;text-align:center;">
+                      Or copy this link into your browser:<br>
+                      <span style="color:#6b7280;word-break:break-all;">` + link + `</span>
+                    </p>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Footer -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:20px 40px;border-top:1px solid #f3f4f6;">
+                    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;">
+                      Sent via <a href="https://psiloconvalley.com" style="color:#6b7280;text-decoration:none;font-weight:600;">PsiloConValley</a>
+                       — Professional invoicing for modern operators.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+
+	_, err := m.client.Emails.Send(&resend.SendEmailRequest{
+		From:    m.from,
+		To:      []string{toEmail},
+		Subject: "Your PsiloConValley sign-in link",
+		Html:    body,
+	})
+	if err != nil {
+		log.Printf("[mailer] magic link send error: %v", err)
+		return err
+	}
+
+	log.Printf("[mailer] magic link sent to %s", toEmail)
+	return nil
+}

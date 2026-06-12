@@ -19,8 +19,6 @@ func (h *Handlers) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	pass := r.FormValue("password")
 	confirm := r.FormValue("confirm_password")
 
-	log.Printf("REGISTER ATTEMPT: %s from %s", email, r.RemoteAddr)
-
 	if email == "" || !strings.Contains(email, "@") {
 		h.App.Render(w, r, "register.tmpl", map[string]any{"Error": "Please enter a valid email address", "Email": email})
 		return
@@ -61,8 +59,6 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(strings.ToLower(r.FormValue("email")))
 	pass := r.FormValue("password")
 
-	log.Printf("LOGIN ATTEMPT: %s from %s", email, r.RemoteAddr)
-
 	user, err := h.App.UserRepo.GetByEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -73,12 +69,22 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Auth service unavailable", http.StatusInternalServerError)
 		return
 	}
+
 	if !user.CheckPassword(pass) {
 		h.App.Render(w, r, "login.tmpl", map[string]any{"Error": "Invalid credentials", "Email": email})
 		return
 	}
+
+	// Transparent rehash — upgrade bcrypt to Argon2id on next login
+	if user.NeedsRehash() {
+		if err := h.App.UserRepo.RehashPassword(r.Context(), user.ID, pass); err != nil {
+			log.Printf("[auth] rehash failed for user %d: %v", user.ID, err)
+			// Non-fatal — user is still logged in
+		}
+	}
+
 	auth.SetSessionCookie(w, user.ID)
-	http.Redirect(w, r, "/tools", http.StatusSeeOther)
+	http.Redirect(w, r, "/invoices", http.StatusSeeOther)
 }
 
 func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +97,6 @@ func (h *Handlers) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("google oauth callback error: %v", err)
 		if strings.Contains(err.Error(), "invalid oauth state") {
-			log.Printf("OAuth state mismatch — redirecting to retry")
 			http.Redirect(w, r, "/auth/google", http.StatusTemporaryRedirect)
 			return
 		}
@@ -113,11 +118,69 @@ func (h *Handlers) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	auth.SetSessionCookie(w, user.ID)
-	log.Printf("GOOGLE AUTH: %s (id=%d, new=%v)", user.Email, user.ID, isNew)
 
 	if isNew {
 		http.Redirect(w, r, "/profile?welcome=true", http.StatusSeeOther)
 		return
 	}
 	http.Redirect(w, r, "/invoices", http.StatusSeeOther)
+}
+
+// ForgotPasswordGet shows the forgot password form.
+func (h *Handlers) ForgotPasswordGet(w http.ResponseWriter, r *http.Request) {
+	h.App.Render(w, r, "forgot_password.tmpl", nil)
+}
+
+// ForgotPasswordPost sends a magic link to the email if it exists.
+// Always shows the same success message — never reveals if email exists.
+func (h *Handlers) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
+	email := strings.TrimSpace(strings.ToLower(r.FormValue("email")))
+
+	const successMsg = "If that email is registered, you'll receive a login link shortly."
+
+	if email == "" || !strings.Contains(email, "@") {
+		h.App.Render(w, r, "forgot_password.tmpl", map[string]any{
+			"Error": "Please enter a valid email address.",
+		})
+		return
+	}
+
+	// Generate and store token — silently ignore if email not found
+	token, err := h.App.UserRepo.SetMagicToken(r.Context(), email)
+	if err != nil {
+		// Do not reveal the error — log it and show generic success
+		log.Printf("[auth] magic token error for %s: %v", email, err)
+		h.App.Render(w, r, "forgot_password.tmpl", map[string]any{"Success": successMsg})
+		return
+	}
+
+	// Send the email
+	link := h.App.BaseURL + "/auth/magic?token=" + token
+	if err := h.App.Mailer.SendMagicLink(email, link); err != nil {
+		log.Printf("[auth] magic link email failed for %s: %v", email, err)
+	}
+
+	h.App.Render(w, r, "forgot_password.tmpl", map[string]any{"Success": successMsg})
+}
+
+// MagicLinkGet consumes a magic link token, logs the user in,
+// and redirects to profile so they can set a new password.
+func (h *Handlers) MagicLinkGet(w http.ResponseWriter, r *http.Request) {
+	token := strings.TrimSpace(r.URL.Query().Get("token"))
+	if token == "" {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	user, err := h.App.UserRepo.ConsumeMagicToken(r.Context(), token)
+	if err != nil {
+		log.Printf("[auth] invalid magic token attempt: %v", err)
+		h.App.Render(w, r, "forgot_password.tmpl", map[string]any{
+			"Error": "This link is invalid or has expired. Please request a new one.",
+		})
+		return
+	}
+
+	auth.SetSessionCookie(w, user.ID)
+	http.Redirect(w, r, "/profile?magic=true", http.StatusSeeOther)
 }
