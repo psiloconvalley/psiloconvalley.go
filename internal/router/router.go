@@ -31,19 +31,19 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Post("/feedback", h.Feedback)
 
 	r.Get("/register", h.RegisterGet)
-	r.Post("/register", h.RegisterPost)
+	r.With(auth.RateLimitRegister).Post("/register", h.RegisterPost)
 
 	r.Get("/login", h.LoginGet)
-	r.Post("/login", h.LoginPost)
+	r.With(auth.RateLimitLogin).Post("/login", h.LoginPost)
 
 	r.Post("/logout", h.Logout)
 
 	r.Get("/auth/google", auth.GoogleLoginHandler)
 	r.Get("/auth/google/callback", h.GoogleCallback)
 	r.Get("/forgot-password", h.ForgotPasswordGet)
-	r.Post("/forgot-password", h.ForgotPasswordPost)
+	r.With(auth.RateLimitForgotPassword).Post("/forgot-password", h.ForgotPasswordPost)
 	r.Get("/auth/magic", h.MagicLinkGet)
-	r.Post("/auth/magic", h.MagicLinkPost)
+	r.With(auth.RateLimitMagicLink).Post("/auth/magic", h.MagicLinkPost)
 
 	// ── Freemium invoice routes (ownership enforced in handlers) ───
 	r.Get("/invoices/new", h.InvoiceNewGet)
