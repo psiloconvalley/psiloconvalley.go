@@ -42,6 +42,8 @@ type App struct {
 func (a *App) DB() *sql.DB { return a.db }
 
 func NewApp(db *sql.DB) *App {
+	auth.InitSessionSecret()
+	
 	funcs := template.FuncMap{
 		"money":        util.Money,
 		"formatCents":  util.FormatCentsForInput,
