@@ -162,13 +162,26 @@ func (h *Handlers) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 
 	h.App.Render(w, r, "forgot_password.tmpl", map[string]any{"Success": successMsg})
 }
-
-// MagicLinkGet consumes a magic link token, logs the user in,
-// and redirects to profile so they can set a new password.
+// MagicLinkGet shows a confirmation page before consuming the token.
+// This prevents email scanners/prefetchers from burning one-time links.
 func (h *Handlers) MagicLinkGet(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimSpace(r.URL.Query().Get("token"))
 	if token == "" {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/forgot-password", http.StatusSeeOther)
+		return
+	}
+
+	h.App.Render(w, r, "magic_confirm.tmpl", map[string]any{
+		"Token": token,
+	})
+}
+
+// MagicLinkPost consumes the token, clears the old password,
+// logs the user in, and sends them to set a new password.
+func (h *Handlers) MagicLinkPost(w http.ResponseWriter, r *http.Request) {
+	token := strings.TrimSpace(r.FormValue("token"))
+	if token == "" {
+		http.Redirect(w, r, "/forgot-password", http.StatusSeeOther)
 		return
 	}
 

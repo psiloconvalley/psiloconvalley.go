@@ -151,35 +151,35 @@ func (r *UserRepo) SetMagicToken(ctx context.Context, email string) (string, err
 	return rawHex, nil
 }
 
-// ConsumeMagicToken validates a raw token, logs the user in if valid,
-// and clears the token atomically. Returns the user or an error.
+// ConsumeMagicToken validates a raw token, clears it atomically,
+// clears the existing password hash, and returns the user.
 // Generic error message prevents token enumeration.
 func (r *UserRepo) ConsumeMagicToken(ctx context.Context, rawToken string) (*User, error) {
 	hash := sha256.Sum256([]byte(rawToken))
 	hashHex := hex.EncodeToString(hash[:])
 
-	row := r.db.QueryRow(
-		userSelectCols+` WHERE magic_token = $1 AND magic_token_expires_at > NOW()`,
-		hashHex,
-	)
-	u, err := scanUser(row)
-	if err != nil {
-		return nil, errors.New("invalid or expired link")
-	}
-
-	// Clear token and password — magic link is a password reset
-	// User will set a new password on the profile page
-	_, err = r.db.ExecContext(ctx, `
+	row := r.db.QueryRowContext(ctx, `
 		UPDATE users
 		SET magic_token = NULL,
 		    magic_token_expires_at = NULL,
 		    password_hash = NULL,
 		    password_algo = NULL,
 		    updated_at = NOW()
-		WHERE id = $1
-	`, u.ID)
+		WHERE magic_token = $1
+		  AND magic_token_expires_at > NOW()
+		RETURNING id, email, password_hash, password_algo, provider, google_id,
+			name, avatar_url, plan, stripe_customer_id, stripe_connect_id,
+			next_invoice_seq, next_estimate_seq, language,
+			magic_token, magic_token_expires_at,
+			created_at, updated_at
+	`, hashHex)
+
+	u, err := scanUser(row)
 	if err != nil {
-		return nil, fmt.Errorf("clear token: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("invalid or expired link")
+		}
+		return nil, fmt.Errorf("consume magic token: %w", err)
 	}
 
 	return u, nil

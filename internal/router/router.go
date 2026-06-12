@@ -43,7 +43,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/forgot-password", h.ForgotPasswordGet)
 	r.Post("/forgot-password", h.ForgotPasswordPost)
 	r.Get("/auth/magic", h.MagicLinkGet)
-	
+	r.Post("/auth/magic", h.MagicLinkPost)
+
 	// ── Freemium invoice routes (ownership enforced in handlers) ───
 	r.Get("/invoices/new", h.InvoiceNewGet)
 	r.Post("/invoices/create", h.InvoiceCreatePost)
