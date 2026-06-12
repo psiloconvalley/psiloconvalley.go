@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{if eq .Mode "edit"}}Edit{{else}}New{{end}} Expense | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{template "nav-styles" .}}
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0f1a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+        .top {
+            margin-bottom: 32px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
+        }
+        .top h1 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        .top-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            font-family: monospace;
+            margin-top: 4px;
+        }
+
+        .error-banner {
+            background: rgba(220,38,38,0.1);
+            border: 1px solid rgba(220,38,38,0.2);
+            color: #fca5a5;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .form-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .section { margin-bottom: 32px; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 8px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.08);
+        }
+        .form-group select option {
+            background: #1e293b;
+            color: #fff;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .hint {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 6px;
+        }
+
+        .receipt-preview {
+            margin-top: 10px;
+        }
+        .receipt-preview img {
+            max-width: 200px;
+            max-height: 120px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .receipt-preview a {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #0a0f1a;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .btn-primary:hover { background: #e5e5e5; }
+
+        .btn-delete {
+            background: none;
+            border: 1px solid rgba(220,38,38,0.3);
+            color: #fca5a5;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .btn-delete:hover {
+            background: rgba(220,38,38,0.1);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+        }
+        .back-link:hover { color: #fff; }
+
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .form-card { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="container">
+    <div class="top">
+        <h1>{{if eq .Mode "edit"}}Edit Expense{{else}}New Expense{{end}}</h1>
+        <p class="top-subtitle">{{if eq .Mode "edit"}}Update expense details{{else}}Track a business expense{{end}}</p>
+    </div>
+
+    {{if .Error}}
+    <div class="error-banner">{{.Error}}</div>
+    {{end}}
+
+    <div class="form-card">
+        <form method="POST"
+              action="{{if eq .Mode "edit"}}/expenses/{{.Expense.ID}}/edit{{else}}/expenses/create{{end}}"
+              enctype="multipart/form-data">
+            {{.csrfField}}
+
+            <div class="section">
+                <div class="section-title">Expense Details</div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Amount *</label>
+                        <input type="number" name="amount" step="0.01" min="0.01"
+                               value="{{if .Expense}}{{if .Expense.AmountCents}}{{formatCents .Expense.AmountCents}}{{end}}{{end}}"
+                               placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <select name="currency">
+                            <option value="USD" {{if eq .Currency "USD"}}selected{{end}}>USD</option>
+                            <option value="CAD" {{if eq .Currency "CAD"}}selected{{end}}>CAD</option>
+                            <option value="GBP" {{if eq .Currency "GBP"}}selected{{end}}>GBP</option>
+                            <option value="EUR" {{if eq .Currency "EUR"}}selected{{end}}>EUR</option>
+                            <option value="MXN" {{if eq .Currency "MXN"}}selected{{end}}>MXN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select name="category" required>
+                            <option value="">Select category...</option>
+                            {{range .Categories}}
+                            <option value="{{.}}" {{if $.Expense}}{{if eq $.Expense.Category .}}selected{{end}}{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" name="expense_date"
+                               value="{{if .Expense}}{{.Expense.ExpenseDate.Format "2006-01-02"}}{{else}}{{.Today}}{{end}}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Vendor / Paid To</label>
+                    <input type="text" name="vendor"
+                           value="{{if .Expense}}{{.Expense.Vendor}}{{end}}"
+                           placeholder="e.g. AWS, Home Depot, Delta Airlines">
+                </div>
+
+                <div class="form-group">
+                    <label>Description / Notes</label>
+                    <textarea name="description" placeholder="What was this expense for?">{{if .Expense}}{{.Expense.Description}}{{end}}</textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Optional</div>
+
+                <div class="form-group">
+                    <label>Link to Client</label>
+                    <select name="client_id">
+                        <option value="">None — general expense</option>
+                        {{range .Clients}}
+			<option value="{{.ID}}" {{if eq $.SelectedClientID .ID}}selected{{end}}>{{.Name}}</option>
+                        {{end}}
+                    </select>
+                    <div class="hint">Link this expense to a specific client or project.</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Receipt Upload</label>
+                    <input type="file" name="receipt" accept=".jpg,.jpeg,.png,.webp,.pdf">
+                    <div class="hint">Image or PDF. Max 5MB.</div>
+                    {{if .Expense}}{{if .Expense.ReceiptURL}}
+                    <div class="receipt-preview">
+                        <a href="{{.Expense.ReceiptURL}}" target="_blank">📎 View current receipt →</a>
+                    </div>
+                    {{end}}{{end}}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                {{if eq .Mode "edit"}}Update Expense{{else}}Save Expense{{end}}
+            </button>
+        </form>
+
+        {{if eq .Mode "edit"}}
+        <form method="POST" action="/expenses/{{.Expense.ID}}/delete"
+              onsubmit="return confirm('Delete this expense? This cannot be undone.')">
+            {{.csrfField}}
+            <button type="submit" class="btn-delete">Delete Expense</button>
+        </form>
+        {{end}}
+    </div>
+
+    <a href="/expenses" class="back-link">← Back to Expenses</a>
+</div>
+
+</body>
+</html>
