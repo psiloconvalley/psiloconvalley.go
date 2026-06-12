@@ -251,6 +251,11 @@
         You've reached the free plan limit of 5 clients. Upgrade to Pro for unlimited clients.
     </div>
     {{end}}
+     {{if eq .Reason "expenses"}}
+    <div class="notice">
+        Expense tracking is available on Growth and above. Upgrade to track spending, upload receipts, and see your real net profit.
+    </div>
+    {{end}}
     {{if .CheckoutSuccess}}
     <div class="notice success">
         Payment received. Your plan has been upgraded. Welcome to the next level.
