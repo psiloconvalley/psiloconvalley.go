@@ -154,10 +154,12 @@ func (h *Handlers) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send the email
-	link := h.App.BaseURL + "/auth/magic?token=" + token
-	if err := h.App.Mailer.SendMagicLink(email, link); err != nil {
-		log.Printf("[auth] magic link email failed for %s: %v", email, err)
+	// Only send email if token was created (email exists + not in cooldown)
+	if token != "" {
+		link := h.App.BaseURL + "/auth/magic?token=" + token
+		if err := h.App.Mailer.SendMagicLink(email, link); err != nil {
+			log.Printf("[auth] magic link email failed for %s: %v", email, err)
+		}
 	}
 
 	h.App.Render(w, r, "forgot_password.tmpl", map[string]any{"Success": successMsg})

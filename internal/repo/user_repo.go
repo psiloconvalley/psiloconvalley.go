@@ -119,10 +119,13 @@ func (r *UserRepo) UpdatePassword(ctx context.Context, userID int64, plain strin
 	`, hash, userID)
 	return err
 }
-
 // SetMagicToken generates a secure token, stores its SHA-256 hash in DB,
 // and returns the raw token to be sent in the email.
 // The raw token never touches the DB — only the hash does.
+//
+// If the email does not exist, or if that email is still within the resend
+// cooldown window, this returns an empty token and no error.
+// The caller should treat both cases as a generic success and send no email.
 func (r *UserRepo) SetMagicToken(ctx context.Context, email string) (string, error) {
 	// Generate 32 bytes of cryptographic randomness
 	raw := make([]byte, 32)
@@ -135,17 +138,30 @@ func (r *UserRepo) SetMagicToken(ctx context.Context, email string) (string, err
 	hash := sha256.Sum256([]byte(rawHex))
 	hashHex := hex.EncodeToString(hash[:])
 
-	expires := time.Now().Add(15 * time.Minute)
+	now := time.Now()
+	expires := now.Add(15 * time.Minute)
+	cooldownCutoff := now.Add(14 * time.Minute) // 60-second resend cooldown
 
-	_, err := r.db.ExecContext(ctx, `
+	result, err := r.db.ExecContext(ctx, `
 		UPDATE users
 		SET magic_token = $1,
 		    magic_token_expires_at = $2,
 		    updated_at = NOW()
 		WHERE LOWER(TRIM(email)) = LOWER(TRIM($3))
-	`, hashHex, expires, email)
+		  AND (magic_token_expires_at IS NULL OR magic_token_expires_at <= $4)
+	`, hashHex, expires, email, cooldownCutoff)
 	if err != nil {
 		return "", fmt.Errorf("set magic token: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return "", fmt.Errorf("magic token rows affected: %w", err)
+	}
+
+	// Unknown email or still within cooldown — intentionally silent
+	if rows == 0 {
+		return "", nil
 	}
 
 	return rawHex, nil
