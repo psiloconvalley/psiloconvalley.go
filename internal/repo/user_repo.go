@@ -167,11 +167,14 @@ func (r *UserRepo) ConsumeMagicToken(ctx context.Context, rawToken string) (*Use
 		return nil, errors.New("invalid or expired link")
 	}
 
-	// Clear token immediately — single use
+	// Clear token and password — magic link is a password reset
+	// User will set a new password on the profile page
 	_, err = r.db.ExecContext(ctx, `
 		UPDATE users
 		SET magic_token = NULL,
 		    magic_token_expires_at = NULL,
+		    password_hash = NULL,
+		    password_algo = NULL,
 		    updated_at = NOW()
 		WHERE id = $1
 	`, u.ID)
