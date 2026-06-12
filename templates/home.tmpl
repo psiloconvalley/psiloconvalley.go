@@ -352,15 +352,17 @@
             margin-left: auto;
             margin-right: auto;
         }
-
-        .pricing-cta .pricing-grid {
+	.pricing-cta .pricing-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
-            max-width: 700px;
+            max-width: 960px;
             margin: 0 auto 40px;
         }
-
+	 .pricing-cta .plan-card.growth {
+            border-color: rgba(74,222,128,0.3);
+            background: rgba(74,222,128,0.04);
+        }
         .pricing-cta .plan-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
@@ -1219,12 +1221,11 @@
                 Create Invoice
             </a>
         </div>
-
-        <p class="hero-note">
-            <strong>Free forever:</strong> 10 invoices/estimates, PDF downloads, no watermarks.
-            <span>Pro includes recurring invoices, payment reminders, and Stripe payments.</span>
+	 <p class="hero-note">
+            <strong>Free to start:</strong> 10 invoices/month, 5 estimates, PDF downloads.
+            <span>Growth &amp; Pro unlock unlimited invoices, branding removal, recurring billing, and more.</span>
         </p>
-    </section> 
+        </section> 
     <!-- TRUST BAR -->
     <div class="trust-bar reveal">
         <div class="trust-inner reveal-stagger">
@@ -1723,9 +1724,9 @@
         </div>
     </section>
         <!-- PRICING CTA -->
-    <section class="pricing-cta">
+      <section class="pricing-cta">
         <div class="section-label">Simple Pricing</div>
-        <h2>Free to start. $18.88/mo when you're ready.</h2>
+        <h2>Free to start. Upgrade when you're ready.</h2>
         <p class="pricing-sub">
             No trial. No credit card. Use the free tier as long as you want.
         </p>
@@ -1737,8 +1738,22 @@
                 <div class="plan-unit">forever</div>
                 <ul class="plan-features">
                     <li>10 invoices / month</li>
-                    <li>5 clients</li>
+                    <li>5 estimates / month</li>
+                    <li>5 saved clients</li>
                     <li>PDF export</li>
+                    <li>3 invoice templates</li>
+                </ul>
+            </div>
+            <div class="plan-card growth">
+                <div class="plan-label">Growth</div>
+                <div class="plan-price">$8.88</div>
+                <div class="plan-unit">/ month</div>
+                <ul class="plan-features">
+                    <li>Unlimited invoices &amp; estimates</li>
+                    <li>Unlimited clients</li>
+                    <li>Client scorecard</li>
+                    <li>Reports &amp; CSV export</li>
+                    <li>Remove PsiloConValley branding</li>
                 </ul>
             </div>
             <div class="plan-card pro">
@@ -1746,21 +1761,20 @@
                 <div class="plan-price">$18.88</div>
                 <div class="plan-unit">/ month</div>
                 <ul class="plan-features">
-                    <li>Unlimited invoices</li>
-                    <li>Unlimited clients</li>
-		    <li>Email delivery</li>
-                    <li>Recurring invoices</li>
-		    <li>Automatic payment reminders</li>
-                    <li>Auto-send recurring</li>
+                    <li>Everything in Growth</li>
+                    <li>Recurring invoice automation</li>
+                    <li>Auto payment reminders</li>
+                    <li>Client payment portal</li>
+                    <li>Professional email delivery</li>
                 </ul>
             </div>
         </div>
 
         <a href="/pricing" class="btn-primary">
-            View Pricing →
+            View Full Pricing →
         </a>
-    </section>
-{{end}}
+    </section> 
+    {{end}}
 
     <footer>
         <p>
