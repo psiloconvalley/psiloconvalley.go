@@ -15,6 +15,7 @@ import (
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/i18n"
 	"psiloconvalley/internal/logo"
+	"psiloconvalley/internal/receipt"
 	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/scheduler"
@@ -36,7 +37,9 @@ type App struct {
 	SchedulerRepo *repo.SchedulerRepo
 	Scheduler     *scheduler.Scheduler
 	LogoStore     logo.Store
+	ReceiptStore  receipt.Store
 	EstRespRepo   *repo.EstimateResponseRepo
+	ExpenseRepo   *repo.ExpenseRepo
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
@@ -99,13 +102,14 @@ func NewApp(db *sql.DB) *App {
 		SchedulerRepo: schedRepo,
 		Scheduler:     sched,
 		LogoStore:     newLogoStore(baseURL),
+		ReceiptStore:  newReceiptStore(baseURL),
 		EstRespRepo:   repo.NewEstimateResponseRepo(db),
+		ExpenseRepo:   repo.NewExpenseRepo(db),
 	}
 }
 
 // newLogoStore selects the logo backend based on LOGO_STORAGE env var.
 // LOGO_STORAGE=supabase → SupabaseStore (production)
-// anything else         → LocalStore    (default / development)
 func newLogoStore(baseURL string) logo.Store {
 	if os.Getenv("LOGO_STORAGE") == "supabase" {
 		store, err := logo.NewSupabaseStore()
@@ -117,6 +121,18 @@ func newLogoStore(baseURL string) logo.Store {
 	return logo.NewLocalStore("static/uploads/logos", baseURL)
 }
 
+// newReceiptStore selects the receipt backend based on LOGO_STORAGE env var.
+// Uses the same env var as logos — both go to Supabase in production.
+func newReceiptStore(baseURL string) receipt.Store {
+	if os.Getenv("LOGO_STORAGE") == "supabase" {
+		store, err := receipt.NewSupabaseStore()
+		if err != nil {
+			log.Fatalf("supabase receipt store init: %v", err)
+		}
+		return store
+	}
+	return receipt.NewLocalStore("static/uploads/receipts", baseURL)
+}
 func field(v any) string {
 	if v == nil {
 		return ""

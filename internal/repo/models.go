@@ -276,3 +276,29 @@ type ClientScorecard struct {
 	OnTimeRate       int
 	Score            int
 }
+type Expense struct {
+	ID           int64
+	UserID       int64
+	AmountCents  int64
+	Currency     string
+	Category     string
+	Description  string
+	Vendor       string
+	ExpenseDate  time.Time
+	ReceiptURL   string
+	ClientID     *int64
+	ClientName   string // populated by JOIN, not stored
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type ExpenseSummary struct {
+	TotalCents       int64
+	CategoryTotals   []CategoryTotal
+	MonthlyNetCents  int64 // paid invoice revenue minus expenses
+}
+
+type CategoryTotal struct {
+	Category   string
+	TotalCents int64
+}
