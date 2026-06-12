@@ -220,14 +220,18 @@
     </div>
     {{end}}
 
+    
     {{if .Saved}}
     <div class="success-banner">✓ Profile saved successfully</div>
+    {{end}}
+     {{if .PasswordSaved}}
+    <div class="success-banner">✓ Password updated successfully. You can now sign in with your new password.</div>
     {{end}}
 
     {{if .Error}}
     <div class="error-banner">{{.Error}}</div>
     {{end}}
-      {{if .MagicLogin}}
+    {{if .MagicLogin}}
     <div style="
         background: linear-gradient(135deg, rgba(129,140,248,0.08) 0%, rgba(99,102,241,0.04) 100%);
         border: 1px solid rgba(129,140,248,0.2);
@@ -392,10 +396,6 @@
                 <div class="error-banner">Passwords do not match.</div>
                 {{else if eq .PasswordError "failed"}}
                 <div class="error-banner">Could not update password. Please try again.</div>
-                {{end}}
-
-                {{if .PasswordSaved}}
-                <div class="success-banner">✓ Password updated successfully.</div>
                 {{end}}
 
                 <form method="POST" action="/profile/password" autocomplete="off">
