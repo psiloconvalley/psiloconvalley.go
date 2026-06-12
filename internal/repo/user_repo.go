@@ -163,7 +163,7 @@ func (r *UserRepo) ConsumeMagicToken(ctx context.Context, rawToken string) (*Use
 		SET magic_token = NULL,
 		    magic_token_expires_at = NULL,
 		    password_hash = NULL,
-		    password_algo = NULL,
+		    password_algo = 'argon2id',
 		    updated_at = NOW()
 		WHERE magic_token = $1
 		  AND magic_token_expires_at > NOW()
