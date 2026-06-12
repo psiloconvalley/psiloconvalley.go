@@ -40,13 +40,14 @@ func scanUser(row interface {
 	var u User
 	var passwordHash, passwordAlgo, provider, googleID, name, avatarURL,
 		stripeCustomerID, stripeConnectID, magicToken sql.NullString
-	var updatedAt, magicTokenExpiresAt sql.NullTime
+	var updatedAt, magicTokenExpiresAt, lockedUntil sql.NullTime
 
 	err := row.Scan(
 		&u.ID, &u.Email, &passwordHash, &passwordAlgo, &provider, &googleID,
 		&name, &avatarURL, &u.Plan, &stripeCustomerID, &stripeConnectID,
 		&u.NextInvoiceSeq, &u.NextEstimateSeq, &u.Language,
 		&magicToken, &magicTokenExpiresAt,
+		&u.FailedLoginAttempts, &lockedUntil,
 		&u.CreatedAt, &updatedAt,
 	)
 	if err != nil {
@@ -66,6 +67,10 @@ func scanUser(row interface {
 		u.MagicTokenExpiresAt = &t
 	}
 	if updatedAt.Valid { u.UpdatedAt = updatedAt.Time }
+		if lockedUntil.Valid {
+		t := lockedUntil.Time
+		u.LockedUntil = &t
+	}
 	return &u, nil
 }
 
@@ -74,6 +79,7 @@ const userSelectCols = `
 		name, avatar_url, plan, stripe_customer_id, stripe_connect_id,
 		next_invoice_seq, next_estimate_seq, language,
 		magic_token, magic_token_expires_at,
+		failed_login_attempts, locked_until,
 		created_at, updated_at
 	FROM users`
 
@@ -337,5 +343,33 @@ func (r *UserRepo) UpdateLanguage(ctx context.Context, userID int64, language st
 	_, err := r.db.ExecContext(ctx, `
 		UPDATE users SET language = $1, updated_at = NOW() WHERE id = $2
 	`, language, userID)
+	return err
+}
+// RecordFailedLogin increments the failed attempt counter.
+// After 10 failures, locks the account for 15 minutes.
+func (r *UserRepo) RecordFailedLogin(ctx context.Context, userID int64) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET failed_login_attempts = failed_login_attempts + 1,
+		    locked_until = CASE
+		        WHEN failed_login_attempts + 1 >= 10
+		        THEN NOW() + INTERVAL '15 minutes'
+		        ELSE locked_until
+		    END,
+		    updated_at = NOW()
+		WHERE id = $1
+	`, userID)
+	return err
+}
+
+// ResetFailedLogins clears the counter and lock on successful login.
+func (r *UserRepo) ResetFailedLogins(ctx context.Context, userID int64) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET failed_login_attempts = 0,
+		    locked_until = NULL,
+		    updated_at = NOW()
+		WHERE id = $1
+	`, userID)
 	return err
 }

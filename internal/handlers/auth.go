@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -54,7 +55,6 @@ func (h *Handlers) LoginGet(w http.ResponseWriter, r *http.Request) {
 	}
 	h.App.Render(w, r, "login.tmpl", data)
 }
-
 func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(strings.ToLower(r.FormValue("email")))
 	pass := r.FormValue("password")
@@ -69,24 +69,50 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Auth service unavailable", http.StatusInternalServerError)
 		return
 	}
+	// If a previous lockout has expired, clear it so the user gets
+	// a fresh set of attempts instead of being re-locked immediately.
+	if user.LockedUntil != nil && !user.IsLocked() {
+		if err := h.App.UserRepo.ResetFailedLogins(r.Context(), user.ID); err != nil {
+			log.Printf("[auth] reset expired lockout error for user %d: %v", user.ID, err)
+		} else {
+			user.FailedLoginAttempts = 0
+			user.LockedUntil = nil
+		}
+	}
+
+	// Check account lockout before attempting password verification.
+	if user.IsLocked() {
+		h.App.Render(w, r, "login.tmpl", map[string]any{
+			"Error": fmt.Sprintf("Account temporarily locked. Try again in %d minutes.", user.LockoutRemaining()),
+			"Email": email,
+		})
+		return
+	}
 
 	if !user.CheckPassword(pass) {
+		// Record failed attempt — may trigger lockout.
+		if err := h.App.UserRepo.RecordFailedLogin(r.Context(), user.ID); err != nil {
+			log.Printf("[auth] record failed login error for user %d: %v", user.ID, err)
+		}
 		h.App.Render(w, r, "login.tmpl", map[string]any{"Error": "Invalid credentials", "Email": email})
 		return
 	}
 
-	// Transparent rehash — upgrade bcrypt to Argon2id on next login
+	// Successful login — reset failed attempts.
+	if err := h.App.UserRepo.ResetFailedLogins(r.Context(), user.ID); err != nil {
+		log.Printf("[auth] reset failed logins error for user %d: %v", user.ID, err)
+	}
+
+	// Transparent rehash — upgrade bcrypt to Argon2id on next login.
 	if user.NeedsRehash() {
 		if err := h.App.UserRepo.RehashPassword(r.Context(), user.ID, pass); err != nil {
 			log.Printf("[auth] rehash failed for user %d: %v", user.ID, err)
-			// Non-fatal — user is still logged in
 		}
 	}
 
 	auth.SetSessionCookie(w, user.ID)
 	http.Redirect(w, r, "/invoices", http.StatusSeeOther)
 }
-
 func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	auth.ClearSessionCookie(w)
 	http.Redirect(w, r, "/", http.StatusSeeOther)

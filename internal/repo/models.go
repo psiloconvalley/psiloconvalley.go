@@ -64,6 +64,8 @@ type User struct {
 	MagicTokenExpiresAt *time.Time
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
+	FailedLoginAttempts int
+	LockedUntil         *time.Time
 }
 
 // Argon2id parameters — OWASP recommended minimum
@@ -107,7 +109,25 @@ func (u *User) CheckPassword(plain string) bool {
 func (u *User) NeedsRehash() bool {
 	return u.PasswordAlgo != "argon2id"
 }
+// IsLocked returns true if the account is currently locked out.
+func (u *User) IsLocked() bool {
+	if u.LockedUntil == nil {
+		return false
+	}
+	return time.Now().Before(*u.LockedUntil)
+}
 
+// LockoutRemaining returns how many minutes until the lockout expires.
+func (u *User) LockoutRemaining() int {
+	if u.LockedUntil == nil {
+		return 0
+	}
+	remaining := time.Until(*u.LockedUntil)
+	if remaining <= 0 {
+		return 0
+	}
+	return int(remaining.Minutes()) + 1
+}
 func verifyArgon2id(plain, encoded string) bool {
 	parts := strings.Split(encoded, "$")
 	if len(parts) != 6 {
