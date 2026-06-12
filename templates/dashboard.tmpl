@@ -65,6 +65,10 @@
             gap: 16px;
             margin-bottom: 32px;
         }
+	.stats-grid-two {
+            grid-template-columns: repeat(2, 1fr);
+            margin-top: 0;
+        }
         .stat-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
@@ -251,10 +255,12 @@
             .stat-value { font-size: 22px; }
             .quick-actions { grid-template-columns: 1fr; }
         }
+	.stats-grid-two { grid-template-columns: 1fr 1fr; }
 
         @media (max-width: 400px) {
             .stats-grid { grid-template-columns: 1fr; }
         }
+	.stats-grid-two { grid-template-columns: 1fr; }
     </style>
 </head>
 <body>
@@ -304,6 +310,20 @@
             <div class="stat-sub">{{.TotalCount}} invoices total</div>
         </div>
     </div>
+     {{if .HasExpenses}}
+	<div class="stats-grid stats-grid-two">
+        <div class="stat-card">
+            <div class="stat-label">💸 Expenses This Month</div>
+            <div class="stat-value red">{{.MonthlyExpenses}}</div>
+            <div class="stat-sub"><a href="/expenses" style="color:rgba(255,255,255,0.4);text-decoration:none;">View all expenses →</a></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">📊 Net Profit This Month</div>
+            <div class="stat-value {{if gt .NetProfitCents 0}}green{{else}}red{{end}}">{{.NetProfit}}</div>
+            <div class="stat-sub">Revenue minus expenses</div>
+        </div>
+    </div>
+    {{end}}
         {{else if not .OnboardingDone}}
     {{/* ── Onboarding Progress Tracker ── */}}
     <div style="

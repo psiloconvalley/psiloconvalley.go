@@ -89,6 +89,13 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 
 	clientCount, _ := h.App.ClientRepo.CountByUserID(r.Context(), user.ID)
 	hasClient := clientCount > 0
+	// ── Expense stats (Growth/Pro only) ──────────────────────────────
+	var monthlyExpenses int64
+	var netProfitCents int64
+	if canAccessExpenses(user) {
+		monthlyExpenses, _ = h.App.ExpenseRepo.MonthlyTotal(r.Context(), user.ID)
+	}
+	netProfitCents = stats.RevenueCents - monthlyExpenses
 	hasInvoice := stats.TotalCount > 0
 	onboardingDone := hasProfile && hasClient && hasInvoice
 	onboardingSteps := 1 // account created = always 1
@@ -112,6 +119,10 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		"RecentInvoices":  displayInvoices,
 		"RecentEstimates": displayEstimates,
 		"NeedsAttention":  needsAttention,
+		"MonthlyExpenses": util.Money(monthlyExpenses),
+		"NetProfit":       util.Money(netProfitCents),
+		"NetProfitCents":  netProfitCents,
+		"HasExpenses":     canAccessExpenses(user),
 		"ActiveRecurring": activeRecurring,
 		"IsPro":           user.Plan == "pro",
 		"HasProfile":      hasProfile,
