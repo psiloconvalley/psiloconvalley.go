@@ -1,0 +1,80 @@
+{{define "home-security"}}
+    <!-- SECURITY SECTION -->
+    <section class="security-section reveal">
+        <div class="security-inner">
+            <p class="section-title">Security</p>
+            <h2 class="section-headline">Built to protect your business<br>and your clients</h2>
+            <p class="security-sub">
+                Every invoice you send contains sensitive data — client names, amounts, service details.
+                We treat that data like it's our own.
+            </p>
+
+            <div class="security-grid reveal-stagger">
+
+                <div class="security-card">
+                    <div class="security-icon">🔐</div>
+                    <h4>Argon2id Password Hashing</h4>
+                    <p>Your password is hashed with Argon2id — the strongest algorithm available.
+                       Even if our database were stolen, your password cannot be recovered.</p>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-icon">🛡️</div>
+                    <h4>CSRF Protection on Every Form</h4>
+                    <p>Every form submission is protected with a cryptographic token.
+                       Cross-site request forgery attacks are blocked at the framework level.</p>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-icon">✍️</div>
+                    <h4>Signed Sessions</h4>
+                    <p>Sessions are signed with HMAC-SHA256. Tampered or forged session cookies
+                       are rejected before they ever reach your account.</p>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-icon">⏱️</div>
+                    <h4>Rate Limiting &amp; Account Lockout</h4>
+                    <p>Brute force attacks are blocked with IP-based rate limiting.
+                       After 10 failed login attempts, accounts are temporarily locked.</p>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-icon">🏦</div>
+                    <h4>Stripe-Powered Payments</h4>
+                    <p>We never see or store your card number. All payments are processed
+                       directly by Stripe — the same infrastructure used by Amazon and Google.</p>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-icon">🚫</div>
+                    <h4>Zero Third-Party Trackers</h4>
+                    <p>No Google Analytics. No Facebook Pixel. No ad tracking of any kind.
+                       Your data and your clients' data belongs to you — full stop.</p>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-icon">🔒</div>
+                    <h4>HTTPS Everywhere</h4>
+                    <p>All traffic is encrypted in transit with TLS. HSTS headers force
+                       HTTPS for every connection — no exceptions, no downgrades.</p>
+                </div>
+
+                <div class="security-card">
+                    <div class="security-icon">🧱</div>
+                    <h4>Hardened HTTP Headers</h4>
+                    <p>Content Security Policy, X-Frame-Options, and Permissions-Policy
+                       headers protect every page from clickjacking, injection, and
+                       unauthorized resource loading.</p>
+                </div>
+
+            </div>
+
+            <div class="security-footer">
+                <a href="/security" class="btn-secondary">
+                    Read our full security overview →
+                </a>
+            </div>
+        </div>
+    </section>
+{{end}}
