@@ -4,6 +4,7 @@
     <title>404 — Not Found | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "nav-styles" .}}
+    {{template "base-styles" .}}
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -123,6 +124,15 @@
 
     <div class="error-network">PSILOCONVALLEY · NODE NOT FOUND · THE NETWORK IS ALIVE</div>
 </div>
+
+<footer>
+    <p>
+        Built with Go + PostgreSQL —
+        <a href="/research">Research</a> ·
+        <a href="/tools">Tools</a> ·
+        <a href="/security">Security</a>
+    </p>
+</footer>
 
 </body>
 </html>

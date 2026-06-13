@@ -4,18 +4,8 @@
     <title>Roadmap & Changelog | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "nav-styles" .}}
-
+     {{template "base-styles" .}}
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: #060a12;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
         .wrap {
             max-width: 800px;
             margin: 0 auto;
@@ -28,140 +18,104 @@
             letter-spacing: 3px;
             text-transform: uppercase;
             color: #39ff8a;
-            text-shadow: 0 0 10px rgba(57,255,138,0.3);
             margin-bottom: 12px;
         }
 
         h1 {
-            font-size: 36px;
+            font-size: clamp(28px, 5vw, 48px);
             font-weight: 800;
             letter-spacing: -1.5px;
-            margin-bottom: 12px;
-            line-height: 1.1;
+            margin-bottom: 16px;
         }
 
         .sub {
             font-size: 15px;
             color: rgba(255,255,255,0.5);
-            margin-bottom: 48px;
             line-height: 1.7;
-            font-weight: 300;
-            max-width: 600px;
+            max-width: 580px;
+            margin-bottom: 56px;
         }
 
-        .sub strong {
-            color: rgba(255,255,255,0.8);
-            font-weight: 600;
-        }
-
-        /* ── Section Headers ── */
-        .section-head {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.3);
-            margin: 48px 0 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-
-        /* ── Cards ── */
         .card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
             padding: 28px;
-            border-radius: 10px;
-            margin-bottom: 14px;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            margin-bottom: 16px;
         }
 
-        .card:hover {
-            border-color: rgba(57,255,138,0.15);
-            box-shadow: 0 0 20px rgba(57,255,138,0.04);
-        }
-
-        .card .tag {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-
-        .tag-live { color: #39ff8a; text-shadow: 0 0 8px rgba(57,255,138,0.3); }
-        .tag-building { color: #fbbf24; }
-        .tag-planned { color: rgba(255,255,255,0.35); }
-        .tag-shipped { color: #39ff8a; }
 
         .card h2 {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
-            margin-bottom: 10px;
             letter-spacing: -0.3px;
-            color: #fff;
         }
+
+        .badge {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .badge-live    { background: rgba(57,255,138,0.12); color: #39ff8a; border: 1px solid rgba(57,255,138,0.25); }
+        .badge-soon    { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
+        .badge-planned { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
 
         .card p {
             font-size: 13px;
             color: rgba(255,255,255,0.5);
-            line-height: 1.7;
-            font-weight: 300;
+            line-height: 1.65;
         }
 
-        .card p strong {
-            color: rgba(255,255,255,0.8);
-            font-weight: 600;
+        .section-head {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            margin: 40px 0 16px;
         }
 
-        .card .meta {
-            font-size: 10px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.2);
-            letter-spacing: 0.5px;
-            margin-top: 12px;
-        }
-
-        /* ── Origin ── */
-        .origin {
-            background: rgba(57,255,138,0.03);
-            border: 1px solid rgba(57,255,138,0.1);
-            border-radius: 10px;
+        .thesis {
+            margin-top: 56px;
             padding: 32px;
-            margin-top: 48px;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.02);
         }
 
-        .origin h2 {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 12px;
+        .thesis h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 14px;
             letter-spacing: -0.3px;
         }
 
-        .origin p {
+        .thesis p {
             font-size: 14px;
             color: rgba(255,255,255,0.5);
             line-height: 1.75;
-            font-weight: 300;
             margin-bottom: 12px;
         }
 
-        .origin p:last-child { margin-bottom: 0; }
-
-        .origin p strong {
-            color: #39ff8a;
-            font-weight: 600;
-        }
-
         @media (max-width: 600px) {
-            .wrap { padding: 32px 16px 60px; }
-            h1 { font-size: 28px; }
-            .sub { font-size: 14px; }
             .card { padding: 20px; }
             .card h2 { font-size: 16px; }
         }
     </style>
-</head>
+
+    </head>
 <body>
 
 {{template "nav" .}}
@@ -303,6 +257,15 @@
         </p>
     </div>
 </div>
+
+<footer>
+    <p>
+        Built with Go + PostgreSQL —
+        <a href="/research">Research</a> ·
+        <a href="/tools">Tools</a> ·
+        <a href="/security">Security</a>
+    </p>
+</footer>
 
 </body>
 </html>
