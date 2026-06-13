@@ -1,0 +1,111 @@
+{{define "home-styles-cta"}}
+<style>
+        /* ═══════════════════════════════════════════════════════════════
+           FINAL CTA
+           ═══════════════════════════════════════════════════════════════ */
+        .final-cta {
+            text-align: center;
+            padding: 100px 24px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.02) 100%);
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .final-cta h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .final-cta p {
+            font-size: 16px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 32px;
+        }
+	        /* ═══════════════════════════════════════════════════════════════
+           PRICING CTA
+           ═══════════════════════════════════════════════════════════════ */
+        .pricing-cta {
+            text-align: center;
+            padding: 80px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .pricing-cta .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 16px;
+        }
+
+        .pricing-cta h2 {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .pricing-cta .pricing-sub {
+            font-size: 16px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+	.pricing-cta .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            max-width: 960px;
+            margin: 0 auto 40px;
+        }
+	 .pricing-cta .plan-card.growth {
+            border-color: rgba(74,222,128,0.3);
+            background: rgba(74,222,128,0.04);
+        }
+        .pricing-cta .plan-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .pricing-cta .plan-card.pro {
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .pricing-cta .plan-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 12px;
+        }
+
+        .pricing-cta .plan-price {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .pricing-cta .plan-unit {
+            font-size: 14px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 16px;
+        }
+
+        .pricing-cta .plan-features {
+            list-style: none;
+            font-size: 14px;
+            color: rgba(255,255,255,0.65);
+            line-height: 2;
+        }
+		
+</style>
+{{end}}

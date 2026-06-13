@@ -1,0 +1,450 @@
+{{define "home-styles-flow"}}
+<style>
+	        /* ═══════════════════════════════════════════════════════════════
+           ANIMATED FLOW SHOWCASE
+           ═══════════════════════════════════════════════════════════════ */
+        .flow-section {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 80px 24px 60px;
+            text-align: center;
+        }
+
+        /* Pills */
+        .flow-pills {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 36px;
+        }
+        .flow-pill {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .flow-pill:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.8);
+        }
+        .flow-pill.active {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+            color: #ffffff;
+        }
+
+        /* Stage */
+        .flow-stage {
+            position: relative;
+            min-height: 380px;
+            margin-bottom: 24px;
+        }
+
+        /* Cards */
+        .flow-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+            pointer-events: none;
+            text-align: left;
+        }
+        .flow-card.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+            position: relative;
+        }
+        .flow-card.exit {
+            opacity: 0;
+            transform: translateX(-40px);
+        }
+
+        /* Chrome bar */
+        .fc-chrome {
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .fc-chrome-dots {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        .fc-chrome-dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            display: block;
+        }
+        .fc-chrome-dots span:nth-child(1) { background: rgba(255,95,87,0.6); }
+        .fc-chrome-dots span:nth-child(2) { background: rgba(255,189,68,0.6); }
+        .fc-chrome-dots span:nth-child(3) { background: rgba(40,201,64,0.6); }
+        .fc-chrome-url {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            font-family: monospace;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Body */
+        .fc-body {
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .fc-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .fc-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3);
+            width: 80px;
+            flex-shrink: 0;
+        }
+        .fc-val {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .fc-tag {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .fc-tag-est {
+            background: rgba(139,92,246,0.2);
+            border: 1px solid rgba(139,92,246,0.4);
+            color: #c4b5fd;
+        }
+        .fc-tag-inv {
+            background: rgba(59,130,246,0.2);
+            border: 1px solid rgba(59,130,246,0.4);
+            color: #93c5fd;
+        }
+        .fc-tag-accepted {
+            background: rgba(74,222,128,0.15);
+            border: 1px solid rgba(74,222,128,0.35);
+            color: #86efac;
+        }
+        .fc-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+            margin: 4px 0;
+        }
+        .fc-items-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3);
+        }
+        .fc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .fc-amount {
+            font-weight: 700;
+            color: #ffffff;
+            font-variant-numeric: tabular-nums;
+        }
+        .fc-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fc-total-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3);
+        }
+        .fc-total-val {
+            font-size: 20px;
+            font-weight: 800;
+            color: #4ade80;
+        }
+
+        /* Send step */
+        .fc-send-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+        .fc-send-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        .fc-send-meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            font-family: monospace;
+            margin-bottom: 16px;
+        }
+        .fc-send-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 280px;
+        }
+        .fc-send-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .fc-send-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            border-radius: 4px;
+            transition: width 1.2s ease;
+        }
+        .flow-card[data-card="1"].active .fc-send-bar-fill {
+            width: 100%;
+        }
+        .fc-send-bar-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #4ade80;
+        }
+        .fc-send-note {
+            font-size: 12px;
+            color: rgba(255,255,255,0.35);
+            max-width: 320px;
+            text-align: center;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        /* Respond step */
+        .fc-respond-header { margin-bottom: 4px; }
+        .fc-respond-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
+        }
+        .fc-respond-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .fc-btn-accept, .fc-btn-suggest, .fc-btn-decline {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: default;
+            border: 1px solid;
+            font-family: inherit;
+            text-align: left;
+        }
+        .fc-btn-accept {
+            background: rgba(74,222,128,0.15);
+            border-color: rgba(74,222,128,0.4);
+            color: #86efac;
+        }
+        .fc-btn-suggest {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+        }
+        .fc-btn-decline {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.3);
+        }
+        .fc-pulse {
+            animation: fc-pulse-glow 1.5s ease-in-out infinite;
+        }
+        @keyframes fc-pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.3); }
+            50% { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+        }
+        .fc-accepted-banner {
+            background: rgba(74,222,128,0.12);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* Convert step */
+        .fc-convert-area {
+            display: flex;
+            justify-content: center;
+            padding: 8px 0;
+        }
+        .fc-convert-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: default;
+            transition: all 0.3s;
+        }
+        .flow-card[data-card="3"].active .fc-convert-btn {
+            animation: fc-convert-press 0.4s ease 0.9s forwards;
+        }
+        @keyframes fc-convert-press {
+            0% { transform: scale(1); background: rgba(255,255,255,0.08); }
+            50% { transform: scale(0.96); background: rgba(255,255,255,0.15); }
+            100% { transform: scale(1); background: rgba(59,130,246,0.25); border-color: rgba(59,130,246,0.5); }
+        }
+        .fc-convert-result {
+            text-align: center;
+        }
+
+        /* Pay step */
+        .fc-pay-amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: -1px;
+            margin: 4px 0 16px;
+        }
+        .fc-stripe-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .fc-stripe-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 6px;
+        }
+        .fc-stripe-input {
+            font-size: 14px;
+            font-family: monospace;
+            color: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+        .fc-stripe-pay-btn {
+            background: #635bff;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .fc-paid-banner {
+            background: rgba(74,222,128,0.12);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* Animate-in utility */
+        .fc-animate-in {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        .flow-card.active .fc-animate-in {
+            animation: fc-fade-up 0.4s ease forwards;
+        }
+        @keyframes fc-fade-up {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dots + arrows */
+        .flow-dots {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .flow-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .flow-dot.active {
+            background: #ffffff;
+            width: 20px;
+            border-radius: 4px;
+        }
+        .flow-arrow {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .flow-arrow:hover {
+            border-color: rgba(255,255,255,0.4);
+            color: #ffffff;
+        }
+
+        @media (max-width: 639px) {
+            .flow-pills { gap: 6px; }
+            .flow-pill { font-size: 11px; padding: 6px 12px; }
+            .fc-body { padding: 18px 16px; }
+        }
+</style>
+{{end}}

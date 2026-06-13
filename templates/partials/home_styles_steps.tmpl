@@ -1,0 +1,75 @@
+{{define "home-styles-steps"}}
+<style>
+        /* ═══════════════════════════════════════════════════════════════
+           HOW IT WORKS — 3 steps
+           ═══════════════════════════════════════════════════════════════ */
+        .steps-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 100px 24px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 16px;
+        }
+
+        .section-headline {
+            text-align: center;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 64px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .step-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 36px;
+            transition: all 0.3s;
+        }
+        .step-card:hover {
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-4px);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.5);
+        }
+
+</style>
+{{end}}
