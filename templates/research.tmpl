@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "nav-styles" .}}
      {{template "base-styles" .}}
-    <style>
+      <style>
         .wrap {
             max-width: 800px;
             margin: 0 auto;
             padding: 60px 20px 80px;
         }
 
-        .label {
+        .wrap .label {
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 3px;
@@ -21,14 +21,14 @@
             margin-bottom: 12px;
         }
 
-        h1 {
+        .wrap h1 {
             font-size: clamp(28px, 5vw, 48px);
             font-weight: 800;
             letter-spacing: -1.5px;
             margin-bottom: 16px;
         }
 
-        .sub {
+        .wrap .sub {
             font-size: 15px;
             color: rgba(255,255,255,0.5);
             line-height: 1.7;
@@ -36,15 +36,19 @@
             margin-bottom: 56px;
         }
 
-        .card {
+        .wrap .card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px;
             padding: 28px;
             margin-bottom: 16px;
+            transform: none;
+        }
+        .wrap .card:hover {
+            transform: none;
         }
 
-        .card-top {
+        .wrap .card-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -53,13 +57,13 @@
             gap: 8px;
         }
 
-        .card h2 {
+        .wrap .card h2 {
             font-size: 17px;
             font-weight: 700;
             letter-spacing: -0.3px;
         }
 
-        .badge {
+        .wrap .badge {
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 1.5px;
@@ -71,14 +75,53 @@
         .badge-live    { background: rgba(57,255,138,0.12); color: #39ff8a; border: 1px solid rgba(57,255,138,0.25); }
         .badge-soon    { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
         .badge-planned { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+	        /* ── Tags ── */
+        .wrap .tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
 
-        .card p {
+        .tag-shipped {
+            background: rgba(57,255,138,0.12);
+            color: #39ff8a;
+            border: 1px solid rgba(57,255,138,0.25);
+        }
+
+        .tag-building {
+            background: rgba(251,191,36,0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.25);
+        }
+
+        .tag-planned {
+            background: rgba(96,165,250,0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(96,165,250,0.25);
+        }
+
+        /* ── Meta ── */
+        .wrap .meta {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.25);
+            margin-top: 12px;
+            font-family: monospace;
+        }
+
+        .wrap .card p {
             font-size: 13px;
             color: rgba(255,255,255,0.5);
             line-height: 1.65;
         }
 
-        .section-head {
+        .wrap .section-head {
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2.5px;
@@ -87,7 +130,7 @@
             margin: 40px 0 16px;
         }
 
-        .thesis {
+        .wrap .thesis {
             margin-top: 56px;
             padding: 32px;
             border: 1px solid rgba(255,255,255,0.06);
@@ -95,14 +138,14 @@
             background: rgba(255,255,255,0.02);
         }
 
-        .thesis h2 {
+        .wrap .thesis h2 {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 14px;
             letter-spacing: -0.3px;
         }
 
-        .thesis p {
+        .wrap .thesis p {
             font-size: 14px;
             color: rgba(255,255,255,0.5);
             line-height: 1.75;
@@ -110,11 +153,10 @@
         }
 
         @media (max-width: 600px) {
-            .card { padding: 20px; }
-            .card h2 { font-size: 16px; }
+            .wrap .card { padding: 20px; }
+            .wrap .card h2 { font-size: 16px; }
         }
-    </style>
-
+    </style> 
     </head>
 <body>
 
