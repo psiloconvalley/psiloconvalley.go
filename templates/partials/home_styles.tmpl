@@ -1169,72 +1169,124 @@
         }
     </style>
 {{end}}
-
         /* ═══════════════════════════════════════════════════════════════
-           SECURITY SECTION
+           SECURITY SECTION — homepage
            ═══════════════════════════════════════════════════════════════ */
-        .security-section {
+        .sec-home {
             max-width: 1100px;
             margin: 0 auto;
             padding: 100px 24px;
         }
 
-        .security-inner {
+        .sec-home-header {
             text-align: center;
+            margin-bottom: 64px;
         }
 
-        .security-sub {
+        .sec-home-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(74,222,128,0.8);
+            margin-bottom: 20px;
+        }
+
+        .sec-home-title {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        .sec-home-title em {
+            font-style: normal;
+            background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sec-home-sub {
             font-size: 16px;
-            color: rgba(255,255,255,0.5);
-            max-width: 560px;
-            margin: 0 auto 64px;
+            color: rgba(255,255,255,0.45);
+            max-width: 520px;
+            margin: 0 auto;
             line-height: 1.7;
         }
 
-        .security-grid {
+        .sec-home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
             margin-bottom: 48px;
-            text-align: left;
         }
 
-        .security-card {
+        .sec-home-card {
             background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
-            padding: 28px 24px;
-            transition: all 0.3s;
+            border-radius: 12px;
+            padding: 24px 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
         }
-        .security-card:hover {
-            border-color: rgba(74,222,128,0.25);
+
+        .sec-home-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, #4ade80, #22d3ee);
+            border-radius: 3px 0 0 3px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .sec-home-card:hover {
+            border-color: rgba(74,222,128,0.2);
             background: rgba(74,222,128,0.03);
-            transform: translateY(-3px);
         }
 
-        .security-icon {
-            font-size: 28px;
-            margin-bottom: 14px;
+        .sec-home-card:hover::before {
+            opacity: 1;
         }
 
-        .security-card h4 {
-            font-size: 15px;
+        .sec-home-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .sec-home-card h4 {
+            font-size: 14px;
             font-weight: 700;
             margin-bottom: 8px;
             color: #ffffff;
+            letter-spacing: -0.3px;
         }
 
-        .security-card p {
+        .sec-home-card p {
             font-size: 13px;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.45);
             line-height: 1.6;
         }
 
-        .security-footer {
-            margin-top: 16px;
+        .sec-home-cta {
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .sec-home-grid { grid-template-columns: 1fr 1fr; }
         }
 
         @media (max-width: 640px) {
-            .security-section { padding: 60px 20px; }
-            .security-grid { grid-template-columns: 1fr; }
+            .sec-home { padding: 60px 20px; }
+            .sec-home-grid { grid-template-columns: 1fr; }
         }
