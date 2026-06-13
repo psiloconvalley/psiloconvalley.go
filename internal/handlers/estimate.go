@@ -17,6 +17,7 @@ import (
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
+	"psiloconvalley/internal/service"
 	"psiloconvalley/internal/views"
 )
 
@@ -311,7 +312,7 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	isPro := user.Plan == "pro"
-	normalizeTemplateFields(inv, isPro)
+	service.NormalizeTemplateFields(inv, isPro)
 
 	estimateID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {
@@ -349,7 +350,7 @@ func (h *Handlers) EstimateDetail(w http.ResponseWriter, r *http.Request) {
 	invoiceView := views.MapInvoicePage(inv, items, "view")
 	accessToken := r.URL.Query().Get("access")
 
-	h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
+	h.App.Render(w, r, service.InvoiceTemplateName(invoiceView.TemplateID), map[string]any{
 		"Invoice":       invoiceView,
 		"IsLoggedIn":    auth.GetUser(r) != nil,
 		"IsEstimate":    true,
@@ -967,7 +968,7 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	isPro := user.Plan == "pro"
-	normalizeTemplateFields(inv, isPro)
+	service.NormalizeTemplateFields(inv, isPro)
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		log.Printf("[estimate] update error: %v", err)

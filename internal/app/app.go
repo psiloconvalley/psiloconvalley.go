@@ -22,12 +22,14 @@ import (
 	"psiloconvalley/internal/scheduler"
 	schedulerhandlers "psiloconvalley/internal/scheduler/handlers"
 	"psiloconvalley/internal/util"
+	"psiloconvalley/internal/service"
 )
 
 type App struct {
 	db            *sql.DB
 	Templates     *template.Template
 	InvRepo       repo.InvoiceStore
+	InvService     *service.InvoiceService
 	ClientRepo    *repo.ClientRepo
 	BizRepo       *repo.BusinessRepo
 	UserRepo      *repo.UserRepo
@@ -88,6 +90,12 @@ func NewApp(db *sql.DB) *App {
 	// ── Register Job Handlers ─────────────────────────────────────────
 	// Add new job types here. The engine never changes.
 	invRepo := repo.NewInvoiceRepo(db)
+	
+	invService := service.NewInvoiceService(
+    		invRepo,
+    		repo.NewUserRepo(db),
+    		schedRepo,
+)
 	sched.Register("send_reminder", schedulerhandlers.NewReminderHandler(
 		invRepo,
 		mailer.New(),
@@ -101,26 +109,28 @@ func NewApp(db *sql.DB) *App {
 		baseURL,
 	))
 
+
 	return &App{
-		db:            db,
-		Templates:     t,
-		InvRepo:       repo.NewInvoiceRepo(db),
-		ClientRepo:    repo.NewClientRepo(db),
-		BizRepo:       repo.NewBusinessRepo(db),
-		UserRepo:      repo.NewUserRepo(db),
-		Mailer:        mailer.New(),
-		BaseURL:       baseURL,
-		StripePrice:   stripePrice,
+		db:                db,
+		Templates:         t,
+		InvRepo:           invRepo,
+		InvService:        invService,
+		ClientRepo:        repo.NewClientRepo(db),
+		BizRepo:           repo.NewBusinessRepo(db),
+		UserRepo:          repo.NewUserRepo(db),
+		Mailer:            mailer.New(),
+		BaseURL:           baseURL,
+		StripePrice:       stripePrice,
 		StripeGrowthPrice: stripeGrowthPrice,
-		SchedulerRepo: schedRepo,
-		Scheduler:     sched,
-		LogoStore:     newLogoStore(baseURL),
-		ReceiptStore:  newReceiptStore(baseURL),
-		EstRespRepo:   repo.NewEstimateResponseRepo(db),
-		ExpenseRepo:   repo.NewExpenseRepo(db),
+		SchedulerRepo:     schedRepo,
+		Scheduler:         sched,
+		LogoStore:         newLogoStore(baseURL),
+		ReceiptStore:      newReceiptStore(baseURL),
+		EstRespRepo:       repo.NewEstimateResponseRepo(db),
+		ExpenseRepo:       repo.NewExpenseRepo(db),
 	}
 }
-
+	
 // newLogoStore selects the logo backend based on LOGO_STORAGE env var.
 // LOGO_STORAGE=supabase → SupabaseStore (production)
 func newLogoStore(baseURL string) logo.Store {

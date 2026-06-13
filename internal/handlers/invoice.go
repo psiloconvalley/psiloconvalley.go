@@ -22,6 +22,7 @@ import (
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/pdf"
 	"psiloconvalley/internal/repo"
+	"psiloconvalley/internal/service"
 	"psiloconvalley/internal/views"
 )
 
@@ -32,74 +33,6 @@ import (
 // Logged-in users may view ONLY invoices matching their user_id.
 // =====================================================================
 
-func (h *Handlers) InvoiceNewGet(w http.ResponseWriter, r *http.Request) {
-	user := auth.GetUser(r)
-
-	if user == nil && auth.AnonLimitReached(r) {
-		http.Redirect(w, r, "/register?reason=limit", http.StatusSeeOther)
-		return
-	}
-	if user != nil && h.hasReachedLimit(r) {
-		http.Redirect(w, r, "/pricing?reason=invoice-limit", http.StatusSeeOther)
-		return
-	}
-
-	invoiceData := views.InvoicePage{
-		CompanyCountry: "United States",
-		CompanyState:   "California",
-		ClientCountry:  "United States",
-		ClientState:    "California",
-		ShowLogo:       true,
-		ShowTitle:      true,
-		TemplateID:     catalog.DefaultTemplateID,
-		BrandColor:     catalog.DefaultBrandColor,
-		LogoPosition:   "left",
-	}
-	if user != nil {
-		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
-		invoiceData.LogoURL = template.URL(bp.LogoURL)
-		if bp.Name != "" {
-			invoiceData.CompanyName = bp.Name
-		}
-		if bp.Email != "" {
-			invoiceData.CompanyEmail = bp.Email
-		}
-		if bp.Address != "" {
-			invoiceData.CompanyAddress = bp.Address
-		}
-		if bp.City != "" {
-			invoiceData.CompanyCity = bp.City
-		}
-		if bp.State != "" {
-			invoiceData.CompanyState = catalog.NormalizeState(bp.State)
-		}
-		if bp.Zip != "" {
-			invoiceData.CompanyZip = bp.Zip
-		}
-		if bp.Country != "" {
-			invoiceData.CompanyCountry = bp.Country
-		}
-	}
-}
-		data := map[string]any{
-		"User":       user,
-		"IsLoggedIn": user != nil,
-		"Invoice":    invoiceData,
-		"Mode":       "create",
-		"Currencies": catalog.SupportedCurrencies,
-		"USStates":   catalog.USStates,
-		"Templates":  catalog.InvoiceTemplates,
-	}
-	// Logged-in users get their client dropdown populated
-	if user != nil {
-		clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
-		if err == nil && len(clients) > 0 {
-			data["Clients"] = clients
-		}
-	}
-
-	h.App.Render(w, r, "invoice_new.tmpl", data)
-}
 func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
@@ -139,41 +72,13 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	invoiceNumber := strings.TrimSpace(r.FormValue("invoice_number"))
 	currency := catalog.NormalizeCurrency(r.FormValue("currency"))
 
-	descriptions := r.Form["description[]"]
-	details := r.Form["details[]"]
-	quantities := r.Form["quantity[]"]
-	unitPrices := r.Form["unit_price[]"]
-
-	// ── Build line items ─────────────────────────────────────────────
-	var items []repo.InvoiceItem
-	for i, desc := range descriptions {
-		desc = strings.TrimSpace(desc)
-		if desc == "" {
-			continue
-		}
-		qty := float64(1)
-		if i < len(quantities) {
-			qty, _ = strconv.ParseFloat(quantities[i], 64)
-		}
-		if qty <= 0 {
-			qty = 1
-		}
-		var unitPrice float64
-		if i < len(unitPrices) {
-			unitPrice, _ = strconv.ParseFloat(unitPrices[i], 64)
-		}
-		detail := ""
-		if i < len(details) {
-			detail = strings.TrimSpace(details[i])
-		}
-		unitPriceCents := int64(math.Round(unitPrice * 100))
-		items = append(items, repo.InvoiceItem{
-			Description:    desc,
-			Details:        detail,
-			Quantity:       qty,
-			UnitPriceCents: unitPriceCents,
-		})
-	}
+	// ── Build line items via service ─────────────────────────────────
+	items := service.ParseLineItems(service.LineItemInput{
+		Descriptions: r.Form["description[]"],
+		Details:      r.Form["details[]"],
+		Quantities:   r.Form["quantity[]"],
+		UnitPrices:   r.Form["unit_price[]"],
+	})
 
 	// ── Validation ───────────────────────────────────────────────────
 	type FormError struct {
@@ -192,7 +97,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		errs = append(errs, FormError{Field: "items", Message: "At least one line item with a description is required"})
 	}
 	if invoiceNumber != "" {
-	exists, err := h.App.InvRepo.InvoiceNumberExists(r.Context(), invoiceNumber, user.ID)
+		exists, err := h.App.InvRepo.InvoiceNumberExists(r.Context(), invoiceNumber, user.ID)
 		if err != nil {
 			log.Printf("[invoice] invoice number exists check error: %v", err)
 			http.Error(w, "Failed to validate invoice number", http.StatusInternalServerError)
@@ -207,13 +112,11 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(errs) > 0 {
-
-
-		
-					data := map[string]any{
+		data := map[string]any{
 			"User":       user,
 			"IsLoggedIn": user != nil,
 			"Mode":       "create",
+			"DocumentType": "invoice",
 			"Currencies": catalog.SupportedCurrencies,
 			"USStates":   catalog.USStates,
 			"Templates":  catalog.InvoiceTemplates,
@@ -240,7 +143,6 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				ShowLogo:       r.FormValue("show_logo") == "on",
 				ShowTitle:      r.FormValue("show_title") == "on",
 				LogoPosition:   r.FormValue("logo_position"),
-
 				AutoReminders:  r.FormValue("auto_reminders") == "on",
 				LogoURL: func() template.URL {
 					if user != nil {
@@ -346,22 +248,25 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		ShowLogo:            showLogo,
 		ShowTitle:           showTitle,
 		AutoReminders:       autoReminders,
-		TemplateID:	     templateID,
-		BrandColor:	     brandColor,
+		TemplateID:          templateID,
+		BrandColor:          brandColor,
 		LogoPosition:        logoPosition,
 		Currency:            currency,
 		Notes:               strings.TrimSpace(r.FormValue("notes")),
 		PaymentDetails:      strings.TrimSpace(r.FormValue("payment_details")),
 		Status:              "draft",
 	}
+
 	isPro := user != nil && user.Plan == "pro"
-	normalizeTemplateFields(inv, isPro)
+	service.NormalizeTemplateFields(inv, isPro)
+
 	invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {
 		log.Printf("[invoice] create error: %v", err)
 
 		// Catch duplicate invoice number from DB constraint
-	if strings.Contains(err.Error(), "invoices_invoice_number_key") || strings.Contains(err.Error(), "idx_invoices_user_invoice_number") {
+		if strings.Contains(err.Error(), "invoices_invoice_number_key") ||
+			strings.Contains(err.Error(), "idx_invoices_user_invoice_number") {
 			dupErrs := []struct {
 				Field   string
 				Message string
@@ -369,13 +274,14 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 				{Field: "invoice_number", Message: "Invoice number already exists. Please choose a different one or leave it blank to auto-generate."},
 			}
 			data := map[string]any{
-				"User":       user,
-				"IsLoggedIn": user != nil,
-				"Mode":       "create",
-				"Currencies": catalog.SupportedCurrencies,
-				"USStates":   catalog.USStates,
-				"Templates":  catalog.InvoiceTemplates,
-				"Errors":     dupErrs,
+				"User":         user,
+				"IsLoggedIn":   user != nil,
+				"Mode":         "create",
+				"DocumentType": "invoice",
+				"Currencies":   catalog.SupportedCurrencies,
+				"USStates":     catalog.USStates,
+				"Templates":    catalog.InvoiceTemplates,
+				"Errors":       dupErrs,
 				"Invoice": views.InvoicePage{
 					CompanyName:    inv.CompanyName,
 					CompanyEmail:   inv.CompanyEmail,
@@ -421,8 +327,8 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create invoice", http.StatusInternalServerError)
 		return
 	}
-	// Increment anon counter after successful save
-	// Increment anon counter after successful save
+
+	// ── Increment anon counter after successful save ──────────────────
 	if user == nil {
 		count := auth.GetAnonInvoiceCount(r)
 		auth.SetAnonInvoiceCount(w, count+1)
@@ -430,97 +336,19 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	// ── Create recurring schedule if enabled ─────────────────────────
 	if user != nil && r.FormValue("is_recurring") == "on" {
-		frequency := r.FormValue("recurring_frequency")
-		if frequency == "" {
-			frequency = "monthly"
-		}
-		autoSend := r.FormValue("recurring_auto_send") == "on"
-
-		nextRun := calculateNextRun(frequency, time.Now())
-
-		sched := &repo.RecurringSchedule{
-			UserID:            user.ID,
-			TemplateInvoiceID: invoiceID,
-			Frequency:         frequency,
-			SendAutomatically: autoSend,
-			Active:            true,
-			NextRunAt:         nextRun,
-		}
-
-		schedID, err := h.App.SchedulerRepo.CreateRecurringSchedule(r.Context(), sched)
+		err := h.App.InvService.CreateRecurringSchedule(r.Context(), service.ScheduleRecurringParams{
+			UserID:    user.ID,
+			InvoiceID: invoiceID,
+			Frequency: r.FormValue("recurring_frequency"),
+			AutoSend:  r.FormValue("recurring_auto_send") == "on",
+		})
 		if err != nil {
 			log.Printf("[invoice] failed to create recurring schedule: %v", err)
-		} else {
-			// Schedule the first job
-			payload := map[string]any{"schedule_id": schedID}
-			jobID, err := h.App.SchedulerRepo.CreateJob(r.Context(), "generate_recurring_invoice", payload, nextRun)
-			if err != nil {
-				log.Printf("[invoice] failed to schedule first recurring job: %v", err)
-			} else {
-				log.Printf("[invoice] recurring schedule %d created for invoice %d (first run job %d at %s)",
-					schedID, invoiceID, jobID, nextRun.Format("2006-01-02"))
-			}
 		}
 	}
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10), http.StatusSeeOther)
 }
-func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
-	if err != nil || inv == nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	if !h.canViewInvoice(r, inv) {
-		http.Error(w, "Unauthorized - You can only view your own invoices", http.StatusForbidden)
-		return
-	}
-
-		invoiceView := views.MapInvoicePage(inv, items, "view")
-	
-	// Check if the invoice owner has Stripe Connect enabled.
-	// Only show Pay Now to non-owners (clients viewing via access token).
-	// The owner uses "Mark as Paid" instead.
-	payNowEnabled := false
-	user := auth.GetUser(r)
-	isOwner := user != nil && inv.UserID != nil && user.ID == *inv.UserID
-	if !isOwner && inv.UserID != nil && inv.Status != "paid" && inv.Status != "void" {
-		owner, err := h.App.UserRepo.GetByID(*inv.UserID)
-		if err == nil && owner.StripeConnectID != "" {
-			payNowEnabled = true
-		}
-	}
-		
-	accessToken := r.URL.Query().Get("access")
-
-	// Determine if branding footer should show (free tier only)
-	showBranding := true
-	if inv.UserID != nil {
-		if owner, err := h.App.UserRepo.GetByID(*inv.UserID); err == nil && owner != nil {
-			if owner.Plan == "pro" || owner.Plan == "growth" {
-				showBranding = false
-			}
-		}
-	}
-
-	h.App.Render(w, r, invoiceTemplateName(invoiceView.TemplateID), map[string]any{
-		"Invoice":       invoiceView,
-		"IsLoggedIn":    auth.GetUser(r) != nil,
-		"Sent":          r.URL.Query().Get("sent") == "true",
-		"SentTo":        r.URL.Query().Get("to"),
-		"Paid":          r.URL.Query().Get("paid") == "1",
-		"PayNowEnabled": payNowEnabled,
-		"AccessToken":   accessToken,
-		"ShowBranding":  showBranding,
-	})
-		}
 
 func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
@@ -543,12 +371,10 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	invoiceView := views.MapInvoicePage(inv, items, "view")
 
-	// PDF mode: headless Chromium cannot reliably fetch external images.
-	// Fetch the logo here in Go and inject it as a base64 data URI instead.
+	// PDF mode: inline logo as base64 — headless Chrome cannot fetch external images.
 	logoStr := string(invoiceView.LogoURL)
 	if logoStr != "" {
 		if strings.HasPrefix(logoStr, "/static/") {
-			// Local disk (LocalStore)
 			filePath := "." + logoStr
 			if b, err := os.ReadFile(filePath); err == nil {
 				mime := http.DetectContentType(b)
@@ -557,7 +383,6 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 				log.Printf("[pdf] logo read from disk error for invoice %d: %v", id, err)
 			}
 		} else if strings.HasPrefix(logoStr, "http") {
-			// Remote (SupabaseStore) — fetch and inline so Chrome needs no outbound network.
 			client := &http.Client{Timeout: 10 * time.Second}
 			resp, err := client.Get(logoStr)
 			if err != nil {
@@ -579,9 +404,8 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	var buf bytes.Buffer
 
-	// Determine if branding footer should show (free tier only)
+	// Branding footer: hidden for Growth and Pro plans.
 	showBranding := true
 	if inv.UserID != nil {
 		if owner, err := h.App.UserRepo.GetByID(*inv.UserID); err == nil && owner != nil {
@@ -591,6 +415,7 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var buf bytes.Buffer
 	templateData := map[string]any{
 		"Invoice":      invoiceView,
 		"User":         user,
@@ -598,7 +423,7 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 		"ShowBranding": showBranding,
 	}
 
-		if err := h.App.Templates.ExecuteTemplate(&buf, invoiceTemplateName(invoiceView.TemplateID), templateData); err != nil {
+	if err := h.App.Templates.ExecuteTemplate(&buf, service.InvoiceTemplateName(invoiceView.TemplateID), templateData); err != nil {
 		http.Error(w, "Could not render invoice", http.StatusInternalServerError)
 		return
 	}
@@ -614,7 +439,6 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/pdf")
 	w.Header().Set("Content-Disposition", "inline; filename=invoice-"+strconv.FormatInt(id, 10)+".pdf")
-
 	_, _ = w.Write(pdfBytes)
 }
 
@@ -623,72 +447,6 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 // All routes below require auth.RequireAuth (enforced in router.go).
 // canAccessInvoice provides a secondary user_id ownership check.
 // =====================================================================
-
-func (h *Handlers) InvoicesList(w http.ResponseWriter, r *http.Request) {
-	user := auth.GetUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	invoices, err := h.App.InvRepo.ListInvoices(r.Context(), 50, 0, &user.ID)
-	if err != nil {
-		http.Error(w, "Failed to load invoices", http.StatusInternalServerError)
-		return
-	}
-
-	monthlyCount, _ := h.App.UserRepo.GetMonthlyInvoiceCount(r.Context(), user.ID)
-
-	h.App.Render(w, r, "invoices_list.tmpl", map[string]any{
-		"Invoices":     invoices,
-		"User":         user,
-		"MonthlyCount": monthlyCount,
-		"MonthlyLimit": freePlanMonthlyLimit,
-		"IsPro":        user.Plan == "pro",
-		"Deleted":      r.URL.Query().Get("deleted") == "true",
-	})
-}
-
-func (h *Handlers) InvoiceEditGet(w http.ResponseWriter, r *http.Request) {
-	user := auth.GetUser(r)
-	if user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
-	if err != nil || inv == nil || !h.canAccessInvoice(r, inv) {
-		http.NotFound(w, r)
-		return
-	}
-
-	invoiceView := views.MapInvoicePage(inv, items, "edit")
-
-	// Pull logo from business profile if not already on invoice
-	if invoiceView.LogoURL == "" {
-		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil && bp != nil {
-			invoiceView.LogoURL = template.URL(bp.LogoURL)
-
-		}
-	}
-
-	h.App.Render(w, r, "invoice_new.tmpl", map[string]any{
-		"Invoice":    invoiceView,
-		"IsEdit":     true,
-		"Mode":         "edit",
-    		"DocumentType": inv.DocumentType,
-		"User":       user,
-		"USStates":   catalog.USStates,
-		"Currencies": catalog.SupportedCurrencies,
-		"Templates":  catalog.InvoiceTemplates,
-	})
-}
 
 func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
@@ -721,41 +479,13 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
 	discountCents := int64(math.Round(discountAmt * 100))
 
-	// ── Parse line items ──────────────────────────────────────────────
-	descriptions := r.Form["description[]"]
-	details := r.Form["details[]"]
-	quantities := r.Form["quantity[]"]
-	unitPrices := r.Form["unit_price[]"]
-
-	var items []repo.InvoiceItem
-	for i, desc := range descriptions {
-		desc = strings.TrimSpace(desc)
-		if desc == "" {
-			continue
-		}
-		qty := float64(1)
-		if i < len(quantities) {
-			qty, _ = strconv.ParseFloat(quantities[i], 64)
-		}
-		if qty <= 0 {
-			qty = 1
-		}
-		var unitPrice float64
-		if i < len(unitPrices) {
-			unitPrice, _ = strconv.ParseFloat(unitPrices[i], 64)
-		}
-		detail := ""
-		if i < len(details) {
-			detail = strings.TrimSpace(details[i])
-		}
-		unitPriceCents := int64(math.Round(unitPrice * 100))
-		items = append(items, repo.InvoiceItem{
-			Description:    desc,
-			Details:        detail,
-			Quantity:       qty,
-			UnitPriceCents: unitPriceCents,
-		})
-	}
+	// ── Parse line items via service ──────────────────────────────────
+	items := service.ParseLineItems(service.LineItemInput{
+		Descriptions: r.Form["description[]"],
+		Details:      r.Form["details[]"],
+		Quantities:   r.Form["quantity[]"],
+		UnitPrices:   r.Form["unit_price[]"],
+	})
 
 	// ── Parse dates ───────────────────────────────────────────────────
 	if d := r.FormValue("issue_date"); d != "" {
@@ -800,8 +530,9 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.DiscountAmountCents = discountCents
 	inv.Notes = strings.TrimSpace(r.FormValue("notes"))
 	inv.PaymentDetails = strings.TrimSpace(r.FormValue("payment_details"))
+
 	isPro := user != nil && user.Plan == "pro"
-	normalizeTemplateFields(inv, isPro)
+	service.NormalizeTemplateFields(inv, isPro)
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		http.Error(w, "Update failed", http.StatusInternalServerError)
@@ -810,6 +541,7 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
 }
+
 func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
@@ -836,52 +568,15 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-		// ── Cancel pending reminders when invoice is paid or voided ──────
+	// ── Cancel reminders when paid or voided ─────────────────────────
 	if newStatus == "paid" || newStatus == "void" {
-		cancelled, err := h.App.SchedulerRepo.CancelJobsForInvoice(r.Context(), id)
-		if err != nil {
-			log.Printf("[status] failed to cancel reminders for invoice %d: %v", id, err)
-		} else if cancelled > 0 {
-			log.Printf("[status] cancelled %d pending reminders for invoice %d", cancelled, id)
-		}
+		h.App.InvService.CancelReminders(r.Context(), id)
 	}
 
-	// ── Schedule reminders when invoice is marked sent ────────────────
-	// Requires: auto_reminders enabled on the invoice + a due date set.
-	// If no due date, we have nothing to anchor reminders to — skip silently.
+	// ── Schedule reminders when marked sent ──────────────────────────
 	if newStatus == "sent" && inv.AutoReminders && inv.DueDate != nil {
-		// Cancel any stale reminders first (e.g. re-sending a previously sent invoice)
-		_, _ = h.App.SchedulerRepo.CancelJobsForInvoice(r.Context(), id)
-
-		reminderSchedule := []struct {
-			offset       time.Duration
-			reminderType string
-		}{
-			{-3 * 24 * time.Hour, "due_soon"},
-			{0, "due_today"},
-			{3 * 24 * time.Hour, "overdue"},
-			{7 * 24 * time.Hour, "overdue"},
-			{14 * 24 * time.Hour, "overdue"},
-		}
-
-		for _, rem := range reminderSchedule {
-			runAt := inv.DueDate.Add(rem.offset)
-			if runAt.Before(time.Now()) {
-				// Don't schedule reminders that are already in the past
-				continue
-			}
-			payload := map[string]any{
-				"invoice_id":    id,
-				"reminder_type": rem.reminderType,
-			}
-			_, err := h.App.SchedulerRepo.CreateJob(r.Context(), "send_reminder", payload, runAt)
-			if err != nil {
-				log.Printf("[status] failed to schedule %s reminder for invoice %d: %v",
-					rem.reminderType, id, err)
-			} else {
-				log.Printf("[status] scheduled %s reminder for invoice %d at %s",
-					rem.reminderType, id, runAt.Format("2006-01-02 15:04"))
-			}
+		if err := h.App.InvService.ScheduleReminders(r.Context(), id, *inv.DueDate); err != nil {
+			log.Printf("[invoice] failed to schedule reminders for invoice %d: %v", id, err)
 		}
 	}
 
@@ -921,45 +616,7 @@ func (h *Handlers) InvoiceDuplicateGet(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(newID, 10)+"/edit", http.StatusSeeOther)
 }
-// invoiceTemplateName returns the detail template filename for the given
-// template ID. Falls back to classic if the template file would not exist.
-func invoiceTemplateName(templateID string) string {
-	switch templateID {
-	case "minimal", "bold":
-		return "invoice_" + templateID + ".tmpl"
-	default:
-		return "invoice_detail.tmpl"
-	}
-}
 
-// calculateNextRun returns the next run time based on frequency.
-func calculateNextRun(frequency string, from time.Time) time.Time {
-	switch frequency {
-	case "weekly":
-		return from.AddDate(0, 0, 7)
-	case "monthly":
-		return from.AddDate(0, 1, 0)
-	case "quarterly":
-		return from.AddDate(0, 3, 0)
-	case "yearly":
-		return from.AddDate(1, 0, 0)
-	default:
-		return from.AddDate(0, 1, 0)
-	}
-}
-
-// isValidHexColor returns true if s is a valid #RRGGBB hex color.
-func isValidHexColor(s string) bool {
-	if len(s) != 7 || s[0] != '#' {
-		return false
-	}
-	for _, c := range s[1:] {
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-			return false
-		}
-	}
-	return true
-}
 // InvoiceDeletePost permanently deletes a draft invoice.
 // Only draft invoices can be deleted — sent/paid/overdue invoices must be voided.
 // Requires the user to confirm by typing the invoice number exactly.
@@ -1001,20 +658,4 @@ func (h *Handlers) InvoiceDeletePost(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[invoice] draft invoice %d deleted by user %d", id, user.ID)
 	http.Redirect(w, r, "/invoices?deleted=true", http.StatusSeeOther)
-}
-
-// normalizeTemplateFields validates and applies Pro gating to
-// template_id and brand_color. Free users are silently reset
-// to defaults regardless of what the form submitted.
-func normalizeTemplateFields(inv *repo.Invoice, isPro bool) {
-	if !catalog.ValidTemplateID(inv.TemplateID) {
-		inv.TemplateID = catalog.DefaultTemplateID
-	}
-	if !isValidHexColor(inv.BrandColor) {
-		inv.BrandColor = catalog.DefaultBrandColor
-	}
-	if !isPro {
-		inv.TemplateID = catalog.DefaultTemplateID
-		inv.BrandColor = catalog.DefaultBrandColor
-	}
 }
