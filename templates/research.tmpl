@@ -1,181 +1,337 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Roadmap & Changelog | PsiloConValley</title>
+    <title>Roadmap & Changelog | Psilocon Valley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     {{template "nav-styles" .}}
-     {{template "base-styles" .}}
-      <style>
-        .wrap {
-            max-width: 800px;
+    {{template "base-styles" .}}
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+        .research-wrap {
+            max-width: 860px;
             margin: 0 auto;
-            padding: 60px 20px 80px;
+            padding: 80px 24px 120px;
         }
 
-        .wrap .label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #39ff8a;
-            margin-bottom: 12px;
+        /* ── Thesis Hero — top of page ── */
+        .thesis-hero {
+            margin-bottom: 80px;
+            padding-bottom: 80px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        .wrap h1 {
-            font-size: clamp(28px, 5vw, 48px);
-            font-weight: 800;
-            letter-spacing: -1.5px;
-            margin-bottom: 16px;
-        }
-
-        .wrap .sub {
-            font-size: 15px;
-            color: rgba(255,255,255,0.5);
-            line-height: 1.7;
-            max-width: 580px;
-            margin-bottom: 56px;
-        }
-
-        .wrap .card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
-            padding: 28px;
-            margin-bottom: 16px;
-            transform: none;
-        }
-        .wrap .card:hover {
-            transform: none;
-        }
-
-        .wrap .card-top {
-            display: flex;
+        .thesis-eyebrow {
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
             gap: 8px;
-        }
-
-        .wrap .card h2 {
-            font-size: 17px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-
-        .wrap .badge {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-
-        .badge-live    { background: rgba(57,255,138,0.12); color: #39ff8a; border: 1px solid rgba(57,255,138,0.25); }
-        .badge-soon    { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
-        .badge-planned { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
-	        /* ── Tags ── */
-        .wrap .tag {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            padding: 4px 10px;
-            border-radius: 20px;
-            margin-bottom: 10px;
-        }
-
-        .tag-shipped {
-            background: rgba(57,255,138,0.12);
-            color: #39ff8a;
-            border: 1px solid rgba(57,255,138,0.25);
-        }
-
-        .tag-building {
-            background: rgba(251,191,36,0.12);
-            color: #fbbf24;
-            border: 1px solid rgba(251,191,36,0.25);
-        }
-
-        .tag-planned {
-            background: rgba(96,165,250,0.12);
-            color: #60a5fa;
-            border: 1px solid rgba(96,165,250,0.25);
-        }
-
-        /* ── Meta ── */
-        .wrap .meta {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: rgba(255,255,255,0.25);
-            margin-top: 12px;
-            font-family: monospace;
-        }
-
-        .wrap .card p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.5);
-            line-height: 1.65;
-        }
-
-        .wrap .section-head {
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.25);
-            margin: 40px 0 16px;
+            color: rgba(74,222,128,0.8);
+            margin-bottom: 28px;
         }
 
-        .wrap .thesis {
-            margin-top: 56px;
-            padding: 32px;
-            border: 1px solid rgba(255,255,255,0.06);
+        .thesis-eyebrow::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #4ade80;
+            border-radius: 2px;
+        }
+
+        .thesis-hero h1 {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 900;
+            letter-spacing: -3px;
+            line-height: 1.0;
+            margin-bottom: 32px;
+            color: #ffffff;
+        }
+
+        .thesis-hero h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .thesis-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .thesis-block {
+            padding: 28px;
+            border: 1px solid rgba(255,255,255,0.07);
             border-radius: 14px;
             background: rgba(255,255,255,0.02);
+            position: relative;
+            overflow: hidden;
         }
 
-        .wrap .thesis h2 {
-            font-size: 18px;
+        .thesis-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, #4ade80, #22d3ee);
+            border-radius: 3px 0 0 3px;
+        }
+
+        .thesis-block-label {
+            font-size: 10px;
             font-weight: 700;
-            margin-bottom: 14px;
-            letter-spacing: -0.3px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(74,222,128,0.6);
+            margin-bottom: 10px;
         }
 
-        .wrap .thesis p {
+        .thesis-block p {
             font-size: 14px;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.6);
             line-height: 1.75;
+        }
+
+        .thesis-block p strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* ── Roadmap Header ── */
+        .roadmap-header {
+            margin-bottom: 48px;
+        }
+
+        .roadmap-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
             margin-bottom: 12px;
         }
 
-        @media (max-width: 600px) {
-            .wrap .card { padding: 20px; }
-            .wrap .card h2 { font-size: 16px; }
+        .roadmap-header h2 {
+            font-size: clamp(24px, 4vw, 36px);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            color: #ffffff;
+            margin-bottom: 12px;
         }
-    </style> 
-    </head>
+
+        .roadmap-header p {
+            font-size: 15px;
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+            max-width: 520px;
+        }
+
+        .roadmap-header p strong {
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* ── Section heads ── */
+        .section-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin: 48px 0 20px;
+        }
+
+        .section-head::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.03);
+        }
+
+        /* Left accent bar per status */
+        .card-shipped::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 3px; height: 100%;
+            background: #4ade80;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .card-building::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 3px; height: 100%;
+            background: #fbbf24;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .card-planned::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 3px; height: 100%;
+            background: #60a5fa;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+
+        .card p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.7;
+        }
+
+        .card p strong {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* ── Tags ── */
+        .tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tag-shipped {
+            background: rgba(74,222,128,0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74,222,128,0.2);
+        }
+
+        .tag-building {
+            background: rgba(251,191,36,0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.2);
+        }
+
+        .tag-planned {
+            background: rgba(96,165,250,0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(96,165,250,0.2);
+        }
+
+        /* ── Meta ── */
+        .meta {
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.2);
+            margin-top: 10px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            letter-spacing: 0.3px;
+        }
+
+        @media (max-width: 640px) {
+            .research-wrap { padding: 60px 20px 80px; }
+            .thesis-body { grid-template-columns: 1fr; gap: 16px; }
+            .thesis-hero h1 { letter-spacing: -2px; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
 <body>
 
 {{template "nav" .}}
 
-<div class="wrap">
-    <div class="label">The Network · Live</div>
-    <h1>Roadmap & Changelog</h1>
-    <div class="sub">
-        Everything we've built, what we're building now, and where the network is growing next.
-        <strong>This is a living document. Updated with every release.</strong>
+<div class="research-wrap">
+
+    <!-- ── Thesis Hero ── -->
+    <div class="thesis-hero">
+        <div class="thesis-eyebrow">The Thesis</div>
+        <h1>The underground<br>network of<br><em>American business.</em></h1>
+
+        <div class="thesis-body">
+            <div class="thesis-block">
+                <div class="thesis-block-label">The Name</div>
+                <p>
+                    Mycelium is the underground network of fungal threads that connects trees,
+                    moves nutrients across a forest, and enables life above the surface.
+                    It does <strong>invisible work that makes everything else possible.</strong>
+                </p>
+            </div>
+            <div class="thesis-block">
+                <div class="thesis-block-label">The Mission</div>
+                <p>
+                    <strong>That is exactly what blue collar business owners do.</strong>
+                    Contractors, doctors, attorneys, landscapers — they are the underground network
+                    of the American economy. The name is not an accident.
+                    <strong>It is the thesis.</strong>
+                </p>
+            </div>
+        </div>
     </div>
 
-    {{/* ── Recently Shipped ── */}}
+    <!-- ── Roadmap ── -->
+    <div class="roadmap-header">
+        <div class="roadmap-eyebrow">Roadmap & Changelog</div>
+        <h2>Everything we've built.<br>Everything we're building.</h2>
+        <p>
+            A living document. Updated with every release.
+            <strong>No marketing. Just the work.</strong>
+        </p>
+    </div>
+
+    <!-- ── Recently Shipped ── -->
     <div class="section-head">Recently Shipped</div>
 
-    <div class="card">
-        <div class="tag tag-shipped">Shipped · June 2026</div>
-        <h2>Bilingual Interface — English & Spanish</h2>
+    <div class="card card-shipped">
+        <div class="card-top">
+            <h2>Bilingual Interface — English &amp; Spanish</h2>
+            <span class="tag tag-shipped">Shipped · Jun 2026</span>
+        </div>
         <p>
             Full interface translation toggle. Dashboard, navigation, and labels
             render in English or Spanish based on user preference.
@@ -184,9 +340,11 @@
         <div class="meta">v3.8 · Language saved to user profile</div>
     </div>
 
-    <div class="card">
-        <div class="tag tag-shipped">Shipped · June 2026</div>
-        <h2>Command Center Dashboard</h2>
+    <div class="card card-shipped">
+        <div class="card-top">
+            <h2>Command Center Dashboard</h2>
+            <span class="tag tag-shipped">Shipped · Jun 2026</span>
+        </div>
         <p>
             Redesigned dashboard with "Needs Attention" section — shows overdue invoices
             and pending estimates at a glance. No more digging through tables to find what matters.
@@ -194,9 +352,24 @@
         <div class="meta">v3.8 · Action-first design</div>
     </div>
 
-    <div class="card">
-        <div class="tag tag-shipped">Shipped · May 2026</div>
-        <h2>Estimates with Client Approval Flow</h2>
+    <div class="card card-shipped">
+        <div class="card-top">
+            <h2>Expense Tracker</h2>
+            <span class="tag tag-shipped">Shipped · Jun 2026</span>
+        </div>
+        <p>
+            Track business expenses by category. Dashboard shows total expenses,
+            revenue, and net profit side by side.
+            <strong>Know your numbers. Own your business.</strong>
+        </p>
+        <div class="meta">v3.9 · Integrated with dashboard P&amp;L</div>
+    </div>
+
+    <div class="card card-shipped">
+        <div class="card-top">
+            <h2>Estimates with Client Approval Flow</h2>
+            <span class="tag tag-shipped">Shipped · May 2026</span>
+        </div>
         <p>
             Full estimate creation, client response flow (Accept / Decline / Suggest Changes),
             and one-click conversion from accepted estimate to draft invoice.
@@ -205,9 +378,11 @@
         <div class="meta">v3.5 · Public client response route · No login required</div>
     </div>
 
-    <div class="card">
-        <div class="tag tag-shipped">Shipped · May 2026</div>
-        <h2>Stripe Connect — Client Card Payments</h2>
+    <div class="card card-shipped">
+        <div class="card-top">
+            <h2>Stripe Connect — Client Card Payments</h2>
+            <span class="tag tag-shipped">Shipped · May 2026</span>
+        </div>
         <p>
             Business owners connect their Stripe account and clients pay invoices
             directly by card. Money goes straight to the business owner.
@@ -215,9 +390,11 @@
         <div class="meta">v3.3 · OAuth flow · Direct payouts</div>
     </div>
 
-    <div class="card">
-        <div class="tag tag-shipped">Shipped · May 2026</div>
-        <h2>Recurring Invoice Automation</h2>
+    <div class="card card-shipped">
+        <div class="card-top">
+            <h2>Recurring Invoice Automation</h2>
+            <span class="tag tag-shipped">Shipped · May 2026</span>
+        </div>
         <p>
             Set up recurring schedules — weekly, monthly, or custom intervals.
             The system generates and optionally emails invoices automatically.
@@ -226,23 +403,40 @@
         <div class="meta">v3.1 · Background scheduler engine</div>
     </div>
 
-    {{/* ── In Progress ── */}}
-    <div class="section-head">Building Now</div>
-
-    <div class="card">
-        <div class="tag tag-building">In Progress</div>
-        <h2>Smart Dashboard Actions</h2>
+    <div class="card card-shipped">
+        <div class="card-top">
+            <h2>Enterprise-Grade Security</h2>
+            <span class="tag tag-shipped">Shipped · Jun 2026</span>
+        </div>
         <p>
-            The dashboard will tell you exactly what to do next — "Smith Family approved
-            the quote, send the invoice" or "Pool World is 3 days late, send a reminder."
-            <strong>Your business brain, automated.</strong>
+            Argon2id password hashing, HMAC-SHA256 signed sessions, HSTS preloading,
+            Content Security Policy, rate limiting, and account lockout.
+            <strong>Built for businesses that handle sensitive client data.</strong>
         </p>
-        <div class="meta">Target: v3.9</div>
+        <div class="meta">v3.9 · See /security for full overview</div>
     </div>
 
-    <div class="card">
-        <div class="tag tag-building">In Progress</div>
-        <h2>Additional Languages</h2>
+    <!-- ── Building Now ── -->
+    <div class="section-head">Building Now</div>
+
+    <div class="card card-building">
+        <div class="card-top">
+            <h2>Audit Logging</h2>
+            <span class="tag tag-building">In Progress</span>
+        </div>
+        <p>
+            Every action logged — who accessed what, when, from where.
+            Foundation for HIPAA compliance and enterprise trust.
+            <strong>Required for medical offices and law firms.</strong>
+        </p>
+        <div class="meta">Target: v4.0 · Migration 011</div>
+    </div>
+
+    <div class="card card-building">
+        <div class="card-top">
+            <h2>Additional Languages</h2>
+            <span class="tag tag-building">In Progress</span>
+        </div>
         <p>
             Hindi, Punjabi, Mandarin, Cantonese, and Vietnamese translations
             are in development. The engine is built — we are expanding the vocabulary.
@@ -250,12 +444,38 @@
         <div class="meta">Target: v4.0</div>
     </div>
 
-    {{/* ── Planned ── */}}
+    <!-- ── On The Horizon ── -->
     <div class="section-head">On The Horizon</div>
 
-    <div class="card">
-        <div class="tag tag-planned">Planned</div>
-        <h2>Borderless Payment Instructions</h2>
+    <div class="card card-planned">
+        <div class="card-top">
+            <h2>Team Seats &amp; Role-Based Access</h2>
+            <span class="tag tag-planned">Planned</span>
+        </div>
+        <p>
+            Multi-user accounts for small teams — office managers, doctors, associates.
+            Role controls so the right people see the right data.
+        </p>
+        <div class="meta">Studio tier · Enterprise unlock</div>
+    </div>
+
+    <div class="card card-planned">
+        <div class="card-top">
+            <h2>HIPAA Business Associate Agreement</h2>
+            <span class="tag tag-planned">Planned</span>
+        </div>
+        <p>
+            Formal BAA for medical practices. Combined with audit logging, session timeout,
+            and encryption at rest — full HIPAA compliance for patient billing.
+        </p>
+        <div class="meta">Enterprise tier · Legal review required</div>
+    </div>
+
+    <div class="card card-planned">
+        <div class="card-top">
+            <h2>Borderless Payment Instructions</h2>
+            <span class="tag tag-planned">Planned</span>
+        </div>
         <p>
             Better defaults for international invoicing — Wise, ACH, SWIFT instructions
             with multi-currency presentation and clearer payment terms on PDFs.
@@ -263,9 +483,11 @@
         <div class="meta">Discovery phase</div>
     </div>
 
-    <div class="card">
-        <div class="tag tag-planned">Planned</div>
-        <h2>Estimate Expiry Dates</h2>
+    <div class="card card-planned">
+        <div class="card-top">
+            <h2>Estimate Expiry Dates</h2>
+            <span class="tag tag-planned">Planned</span>
+        </div>
         <p>
             Set a validity period on estimates. After expiry, the client sees
             "This estimate has expired" and must request a new one.
@@ -273,31 +495,19 @@
         <div class="meta">Design phase</div>
     </div>
 
-    <div class="card">
-        <div class="tag tag-planned">Planned</div>
-        <h2>Stablecoin Payment References</h2>
+    <div class="card card-planned">
+        <div class="card-top">
+            <h2>Stablecoin Payment References</h2>
+            <span class="tag tag-planned">Planned</span>
+        </div>
         <p>
             Manual crypto payment instructions on invoices — wallet address,
-            memo/reference, and optional tx hash confirmation. No custody. No wallets.
-            Just instructions.
+            memo/reference, and optional tx hash confirmation.
+            No custody. No wallets. Just instructions.
         </p>
         <div class="meta">Research phase</div>
     </div>
 
-    {{/* ── Origin ── */}}
-    <div class="origin">
-        <h2>Why "PsiloConValley"?</h2>
-        <p>
-            Mycelium is the underground network of fungal threads that connects trees,
-            moves nutrients across a forest, and enables life above the surface.
-            It does invisible work that makes everything else possible.
-        </p>
-        <p>
-            <strong>That is exactly what blue collar business owners do.</strong>
-            They are the underground network of the American economy.
-            The name is not an accident. It is the thesis.
-        </p>
-    </div>
 </div>
 
 <footer>
