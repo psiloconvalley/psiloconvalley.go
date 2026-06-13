@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	"path/filepath"
 	"html/template"
 	"log"
 	"net/http"
@@ -54,10 +55,22 @@ func NewApp(db *sql.DB) *App {
 		"field":        field,
 		"mul":          func(a, b int) int { return a * b },
 	}
-	// Using ParseGlob during migration (easier than embed for now)
+	// Two-pass parse: root templates + partials subdirectory.
+	// Add additional ParseGlob calls here for new subdirectories.
 	t, err := template.New("").Funcs(funcs).ParseGlob("templates/*.tmpl")
 	if err != nil {
 		log.Fatal("template parse error:", err)
+	}
+
+	partialMatches, err := filepath.Glob("templates/partials/*.tmpl")
+	if err != nil {
+		log.Fatal("template glob error (partials):", err)
+	}
+	if len(partialMatches) > 0 {
+		t, err = t.ParseGlob("templates/partials/*.tmpl")
+		if err != nil {
+			log.Fatal("template parse error (partials):", err)
+		}
 	}
 
 	baseURL := os.Getenv("APP_BASE_URL")
