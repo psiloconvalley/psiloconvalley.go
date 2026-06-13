@@ -1,7 +1,7 @@
 {{define "home-security"}}
     <!-- SECURITY SECTION -->
     <section class="sec-home">
-        <div class="sec-home-shell">
+        <div class="sec-home-inner">
 
             <div class="sec-home-header">
                 <div class="sec-home-eyebrow">Security</div>
@@ -13,13 +13,15 @@
             </div>
 
             <div class="sec-home-grid">
-
                 <div class="sec-home-card">
                     <div class="sec-home-card-top">
                         <div class="sec-home-icon">🔐</div>
                         <h4>Argon2id Password Hashing</h4>
                     </div>
-                    <p>The strongest password hashing algorithm available. Even if our database were stolen, your password cannot be recovered.</p>
+                    <p>
+                        The strongest password hashing algorithm available.
+                        Even if our database were stolen, your password cannot be recovered.
+                    </p>
                 </div>
 
                 <div class="sec-home-card">
@@ -27,7 +29,10 @@
                         <div class="sec-home-icon">🛡️</div>
                         <h4>CSRF Protection</h4>
                     </div>
-                    <p>Cryptographic tokens protect every form submission. Cross-site request forgery attacks are blocked at the framework level.</p>
+                    <p>
+                        Cryptographic tokens protect every form submission.
+                        Cross-site request forgery attacks are blocked at the framework level.
+                    </p>
                 </div>
 
                 <div class="sec-home-card">
@@ -35,7 +40,10 @@
                         <div class="sec-home-icon">✍️</div>
                         <h4>Signed Sessions</h4>
                     </div>
-                    <p>HMAC-SHA256 signed session cookies. Tampered or forged tokens are rejected before they ever reach your account.</p>
+                    <p>
+                        HMAC-SHA256 signed session cookies.
+                        Tampered or forged tokens are rejected before they ever reach your account.
+                    </p>
                 </div>
 
                 <div class="sec-home-card">
@@ -43,7 +51,10 @@
                         <div class="sec-home-icon">⏱️</div>
                         <h4>Rate Limiting &amp; Lockout</h4>
                     </div>
-                    <p>Brute force attempts are blocked with IP-based rate limiting. After repeated failures, accounts are temporarily locked.</p>
+                    <p>
+                        Brute force attempts are blocked with IP-based rate limiting.
+                        After repeated failures, accounts are temporarily locked.
+                    </p>
                 </div>
 
                 <div class="sec-home-card">
@@ -51,7 +62,10 @@
                         <div class="sec-home-icon">🏦</div>
                         <h4>Stripe-Powered Payments</h4>
                     </div>
-                    <p>We never see or store card numbers. Payments are processed directly by Stripe, which is PCI DSS Level 1 certified.</p>
+                    <p>
+                        We never see or store card numbers.
+                        Payments are processed directly by Stripe, which is PCI DSS Level 1 certified.
+                    </p>
                 </div>
 
                 <div class="sec-home-card">
@@ -59,9 +73,11 @@
                         <div class="sec-home-icon">🚫</div>
                         <h4>Zero Third-Party Trackers</h4>
                     </div>
-                    <p>No Google Analytics. No Facebook Pixel. No ad tracking. Your business data and your clients' data belongs to you.</p>
+                    <p>
+                        No Google Analytics. No Facebook Pixel. No ad tracking.
+                        Your business data and your clients' data belongs to you.
+                    </p>
                 </div>
-
             </div>
 
             <div class="sec-home-proof">
@@ -73,9 +89,7 @@
             </div>
 
             <div class="sec-home-cta">
-                <a href="/security" class="btn-secondary">
-                    Read our full security overview →
-                </a>
+                <a href="/security" class="btn-secondary">Read our full security overview →</a>
             </div>
 
         </div>
