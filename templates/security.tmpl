@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Security — Psilocon Valley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How Psilocon Valley protects your business data, client information, and payments. Security practices, encryption, and privacy policy.">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://psiloconvalley.com/security">
+    {{template "nav-styles" .}}
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0a0f1a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        .page-wrapper {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 80px 24px 120px;
+        }
+
+        /* ── Header ── */
+        .sec-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 28px;
+        }
+
+        .sec-title {
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .sec-title span {
+            background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sec-intro {
+            font-size: 17px;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.7;
+            max-width: 640px;
+            margin-bottom: 72px;
+        }
+
+        /* ── Sections ── */
+        .sec-section {
+            margin-bottom: 64px;
+            padding-bottom: 64px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sec-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .sec-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(74,222,128,0.7);
+            margin-bottom: 12px;
+        }
+
+        .sec-section h2 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+        }
+
+        /* ── Cards ── */
+        .sec-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sec-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 22px 20px;
+        }
+
+        .sec-card-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .sec-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #ffffff;
+        }
+
+        .sec-card p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+            line-height: 1.6;
+        }
+
+        /* ── Prose ── */
+        .sec-prose {
+            font-size: 15px;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.8;
+        }
+
+        .sec-prose + .sec-prose {
+            margin-top: 16px;
+        }
+
+        /* ── Status table ── */
+        .sec-status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sec-status-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+        }
+
+        .sec-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .sec-status-dot.green { background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.5); }
+        .sec-status-dot.yellow { background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.5); }
+
+        .sec-status-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            min-width: 220px;
+        }
+
+        .sec-status-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* ── CTA ── */
+        .sec-cta {
+            margin-top: 72px;
+            text-align: center;
+            padding: 48px 32px;
+            background: rgba(74,222,128,0.04);
+            border: 1px solid rgba(74,222,128,0.15);
+            border-radius: 16px;
+        }
+
+        .sec-cta h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .sec-cta p {
+            font-size: 15px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 28px;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #0a0f1a;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+        footer a:hover { color: #fff; }
+
+        @media (max-width: 640px) {
+            .page-wrapper { padding: 60px 20px 80px; }
+            .sec-status-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .sec-status-name { min-width: unset; }
+        }
+    </style>
+</head>
+
+<body>
+{{template "nav" .}}
+
+<div class="page-wrapper">
+
+    <div class="sec-badge">🔒 Security Overview</div>
+
+    <h1 class="sec-title">Your data is safe.<br><span>We built it that way.</span></h1>
+
+    <p class="sec-intro">
+        Psilocon Valley handles invoices, client data, and payments for independent businesses.
+        Security is not a feature we added — it is the foundation we built on.
+        Here is exactly what we do to protect you and your clients.
+    </p>
+
+    <!-- ── Authentication ── -->
+    <div class="sec-section">
+        <p class="sec-section-label">Authentication</p>
+        <h2>How we protect your account</h2>
+        <div class="sec-cards">
+            <div class="sec-card">
+                <div class="sec-card-icon">🔐</div>
+                <h4>Argon2id Password Hashing</h4>
+                <p>The strongest password hashing algorithm available. Your password is never stored — only an irreversible hash. Even we cannot read it.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">✍️</div>
+                <h4>HMAC-SHA256 Signed Sessions</h4>
+                <p>Every session cookie is cryptographically signed. Forged or tampered cookies are rejected before they reach your account.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">⏱️</div>
+                <h4>Rate Limiting</h4>
+                <p>IP-based sliding window rate limiting blocks brute force attempts on login, registration, and password reset endpoints.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">🔑</div>
+                <h4>Account Lockout</h4>
+                <p>After 10 consecutive failed login attempts, the account is temporarily locked to prevent automated attacks.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">📧</div>
+                <h4>Magic Link Reset</h4>
+                <p>Password resets use single-use, time-limited magic links with cooldown periods to prevent abuse.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">🌐</div>
+                <h4>Google OAuth</h4>
+                <p>Sign in with Google delegates authentication to Google's infrastructure — no password stored on our side at all.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Transport & Infrastructure ── -->
+    <div class="sec-section">
+        <p class="sec-section-label">Transport &amp; Infrastructure</p>
+        <h2>How we protect data in transit</h2>
+        <div class="sec-cards">
+            <div class="sec-card">
+                <div class="sec-card-icon">🔒</div>
+                <h4>HTTPS Everywhere</h4>
+                <p>All traffic is encrypted with TLS. There is no HTTP fallback — ever.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">📌</div>
+                <h4>HSTS Preloading</h4>
+                <p>HTTP Strict Transport Security is enforced for 2 years, including subdomains, and submitted to browser preload lists.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">🧱</div>
+                <h4>Hardened HTTP Headers</h4>
+                <p>Content Security Policy, X-Frame-Options, Permissions-Policy, and Cross-Origin headers are set on every response.</p>
+            </div>
+            <div class="sec-card">
+                <div class="sec-card-icon">🛡️</div>
+                <h4>CSRF Protection</h4>
+                <p>Every form is protected with a cryptographic CSRF token. Cross-site request forgery attacks cannot succeed.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Payments ── -->
+    <div class="sec-section">
+        <p class="sec-section-label">Payments</p>
+        <h2>How we protect your money</h2>
+        <p class="sec-prose">
+            All payments are processed by Stripe — the same infrastructure trusted by Amazon, Google, and millions of businesses worldwide.
+            We never see, handle, or store card numbers, bank account details, or CVCs.
+            Payment data goes directly from your client's browser to Stripe's servers.
+        </p>
+        <p class="sec-prose">
+            Stripe is PCI DSS Level 1 certified — the highest level of payment security certification available.
+            Our integration uses Stripe Connect, meaning your earnings are held and transferred
+            directly by Stripe, not routed through our accounts.
+        </p>
+    </div>
+
+    <!-- ── Privacy ── -->
+    <div class="sec-section">
+        <p class="sec-section-label">Privacy</p>
+        <h2>What we do not do</h2>
+        <p class="sec-prose">
+            We do not sell your data. We do not share your client list with anyone.
+            We do not run Google Analytics, Facebook Pixel, or any third-party advertising trackers.
+            We do not use your invoice data to train AI models or for any purpose other than running the product you signed up for.
+        </p>
+        <p class="sec-prose">
+            Your clients' names, emails, addresses, and payment history are yours.
+            We hold them in trust. We protect them. We never monetize them.
+        </p>
+    </div>
+
+    <!-- ── Security Status ── -->
+    <div class="sec-section">
+        <p class="sec-section-label">Current Status</p>
+        <h2>What is implemented today</h2>
+        <div class="sec-status-list">
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">Argon2id password hashing</div>
+                <div class="sec-status-desc">Active on all accounts</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">HMAC-SHA256 signed sessions</div>
+                <div class="sec-status-desc">Active on all sessions</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">CSRF protection</div>
+                <div class="sec-status-desc">Every form, every request</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">Rate limiting &amp; account lockout</div>
+                <div class="sec-status-desc">All auth endpoints</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">HTTPS + HSTS</div>
+                <div class="sec-status-desc">2 year enforcement, preload submitted</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">Hardened HTTP headers</div>
+                <div class="sec-status-desc">CSP, X-Frame-Options, Permissions-Policy, COOP, CORP</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">Zero third-party trackers</div>
+                <div class="sec-status-desc">No analytics, no ad pixels</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">Stripe payment processing</div>
+                <div class="sec-status-desc">PCI DSS Level 1 — we never see card data</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot yellow"></div>
+                <div class="sec-status-name">Audit logging</div>
+                <div class="sec-status-desc">In progress — every action will be logged with timestamp and IP</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot yellow"></div>
+                <div class="sec-status-name">Two-factor authentication</div>
+                <div class="sec-status-desc">Planned — TOTP + SMS options</div>
+            </div>
+            <div class="sec-status-row">
+                <div class="sec-status-dot yellow"></div>
+                <div class="sec-status-name">Encryption at rest</div>
+                <div class="sec-status-desc">Planned — PII field-level encryption</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Contact ── -->
+    <div class="sec-section">
+        <p class="sec-section-label">Contact</p>
+        <h2>Found a vulnerability?</h2>
+        <p class="sec-prose">
+            If you discover a security issue, please report it responsibly.
+            Email us directly at <a href="mailto:security@psiloconvalley.com" style="color: #4ade80;">security@psiloconvalley.com</a>.
+            We take every report seriously and respond within 48 hours.
+            We do not pursue legal action against good-faith security researchers.
+        </p>
+    </div>
+
+    <!-- ── CTA ── -->
+    <div class="sec-cta">
+        <h2>Ready to get started?</h2>
+        <p>Professional invoicing, built on a secure foundation. Free to start.</p>
+        <a href="/register" class="btn-primary">Create Free Account →</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>
+        Built with Go + PostgreSQL —
+        <a href="/research">Research</a> ·
+        <a href="/tools">Tools</a> ·
+        <a href="/security">Security</a>
+    </p>
+</footer>
+
+</body>
+</html>
