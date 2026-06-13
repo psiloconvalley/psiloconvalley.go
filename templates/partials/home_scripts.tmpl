@@ -1,0 +1,304 @@
+{{define "home-scripts"}}
+<script>
+// ── Scroll Reveal Observer ────────────────────────────────────────
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
+    revealObserver.observe(el);
+});
+// ── Live Invoice Demo ─────────────────────────────────────────────
+const demoItems = [
+    { desc: 'Website Redesign', qty: 1, price: 3500 },
+    { desc: 'SEO Optimization', qty: 1, price: 1200 },
+    { desc: 'Monthly Hosting', qty: 12, price: 49 },
+];
+
+function runInvoiceDemo() {
+    const tbody = document.getElementById('demo-items-body');
+    const status = document.getElementById('demo-status');
+    if (!tbody || !status) return;
+
+    tbody.innerHTML = '';
+    status.textContent = 'GENERATING...';
+    status.style.background = '#fef3c7';
+    status.style.color = '#854d0e';
+
+    document.getElementById('demo-subtotal').textContent = '$0.00';
+    document.getElementById('demo-tax').textContent = '$0.00';
+    document.getElementById('demo-total').textContent = '$0.00';
+
+    let runningTotal = 0;
+    const taxRate = 0.085;
+
+    demoItems.forEach((item, i) => {
+        setTimeout(() => {
+            const amount = item.qty * item.price;
+            runningTotal += amount;
+            const tax = runningTotal * taxRate;
+            const total = runningTotal + tax;
+
+            const tr = document.createElement('tr');
+            tr.className = 'demo-row-animate';
+            tr.innerHTML = `
+                <td><span class="demo-item-desc">${item.desc}</span></td>
+                <td class="right">${item.qty}</td>
+                <td class="right">$${item.price.toLocaleString()}</td>
+                <td class="right">$${amount.toLocaleString()}</td>
+            `;
+            tbody.appendChild(tr);
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    tr.classList.add('show');
+                });
+            });
+
+            document.getElementById('demo-subtotal').textContent = '$' + runningTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('demo-tax').textContent = '$' + tax.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('demo-total').textContent = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
+		            if (i === demoItems.length - 1) {
+                setTimeout(() => {
+                    status.textContent = 'READY';
+                    status.style.background = '#dcfce7';
+                    status.style.color = '#15803d';
+
+                    // Beat 2: Send animation
+                    setTimeout(() => {
+                        const sendArea = document.getElementById('demo-send-area');
+                        const sendBar = document.getElementById('demo-send-bar');
+                        const sendIcon = document.getElementById('demo-send-icon');
+                        const sendTitle = document.getElementById('demo-send-title');
+                        const sendSub = document.getElementById('demo-send-sub');
+
+                        if (sendArea) {
+                            sendArea.style.opacity = '1';
+                            sendArea.style.transform = 'translateY(0)';
+                        }
+
+                        // Progress bar fills
+                        setTimeout(() => {
+                            if (sendBar) sendBar.style.width = '100%';
+                        }, 100);
+
+                        // Sent confirmation
+                        setTimeout(() => {
+                            status.textContent = 'SENT';
+                            status.style.background = '#dbeafe';
+                            status.style.color = '#1d4ed8';
+
+                            if (sendIcon) {
+                                sendIcon.textContent = '✅';
+                                sendIcon.style.background = '#dcfce7';
+                            }
+                            if (sendTitle) {
+                                sendTitle.textContent = 'Delivered successfully';
+                                sendTitle.style.color = '#15803d';
+                            }
+                            if (sendSub) {
+                                sendSub.textContent = 'Invoice emailed with PDF attached';
+                            }
+
+                            // Beat 3: CTA appears
+                            setTimeout(() => {
+                                const cta = document.getElementById('demo-cta');
+                                if (cta) {
+                                    cta.style.opacity = '1';
+                                    cta.style.transform = 'translateY(0)';
+                                }
+                            }, 600);
+                        }, 1400);
+                    }, 800);
+                }, 400);
+            }
+
+                    }, 800 * (i + 1));
+    });
+}
+
+// Run demo when it scrolls into view
+const demoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.dataset.played) {
+            entry.target.dataset.played = 'true';
+            setTimeout(runInvoiceDemo, 300);
+        }
+    });
+}, { threshold: 0.3 });
+
+const demoEl = document.getElementById('demo-invoice');
+if (demoEl) demoObserver.observe(demoEl);
+    const canvas = document.getElementById("mycelium-canvas");
+    const ctx = canvas.getContext("2d");
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+    
+    window.addEventListener("resize", () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+    
+    const mouse = { x: null, y: null, radius: 180 };
+    window.addEventListener("mousemove", (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    class Hypha {
+        constructor(x, y, angle, depth) {
+            this.x = x; this.y = y; this.px = x; this.py = y;
+            this.angle = angle;
+            this.speed = Math.random() * 1.5 + 0.5;
+            this.depth = depth;
+            this.age = 0;
+            this.maxAge = Math.random() * 100 + 50 / (depth + 1);
+            this.dead = false;
+        }
+        update() {
+            if (this.dead) return;
+            this.px = this.x; this.py = this.y;
+            this.angle += (Math.random() - 0.5) * 0.4;
+            if (mouse.x !== null && mouse.y !== null) {
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < mouse.radius) {
+                    const targetAngle = Math.atan2(dy, dx);
+                    this.angle += (targetAngle - this.angle) * 0.08;
+                }
+            }
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed;
+            this.age++;
+            if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.age >= this.maxAge) {
+                this.dead = true;
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.moveTo(this.px, this.py);
+            ctx.lineTo(this.x, this.y);
+            ctx.strokeStyle = `rgba(255, 255, 246, ${0.12 / (this.depth + 1)})`;
+            ctx.lineWidth = Math.max(0.5, 2 / (this.depth + 1));
+            ctx.stroke();
+        }
+    }
+
+    let hyphae = [];
+    
+    function seedNetwork(x, y) {
+        const numBranches = Math.floor(Math.random() * 4) + 3;
+        for (let i = 0; i < numBranches; i++) {
+            hyphae.push(new Hypha(x, y, (Math.PI * 2 * i) / numBranches, 0));
+        }
+    }
+
+    for (let i = 0; i < 5; i++) {
+        seedNetwork(Math.random() * width, Math.random() * height);
+    }
+
+    window.addEventListener("click", (e) => {
+        if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+            seedNetwork(e.clientX, e.clientY);
+        }
+    });
+
+    function animate() {
+        ctx.fillStyle = "rgba(10, 15, 26, 0.04)";
+        ctx.fillRect(0, 0, width, height);
+
+        let newHyphae = [];
+        hyphae.forEach((h) => {
+            h.update();
+            h.draw();
+            if (!h.dead) {
+                newHyphae.push(h);
+                if (Math.random() < 0.02 && h.depth < 4 && h.age > 15) {
+                    const branchAngle = h.angle + (Math.random() - 0.5) * 1.2;
+                    newHyphae.push(new Hypha(h.x, h.y, branchAngle, h.depth + 1));
+                }
+            }
+        });
+        hyphae = newHyphae;
+
+        if (hyphae.length < 15 && Math.random() < 0.05) {
+            seedNetwork(Math.random() * width, Math.random() * height);
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+// ── Flow Showcase ─────────────────────────────────────────────────
+(function() {
+    const TOTAL = 5;
+    const DELAY = 3500;
+    let current = 0;
+    let timer = null;
+
+    const cards  = document.querySelectorAll('.flow-card');
+    const pills  = document.querySelectorAll('.flow-pill');
+    const dots   = document.querySelectorAll('.flow-dot');
+    const prev   = document.getElementById('flow-prev');
+    const next   = document.getElementById('flow-next');
+
+    if (!cards.length) return;
+
+    function goTo(index) {
+        cards[current].classList.remove('active');
+        cards[current].classList.add('exit');
+        pills[current].classList.remove('active');
+        dots[current].classList.remove('active');
+
+        setTimeout(() => {
+            cards[current].classList.remove('exit');
+        }, 450);
+
+        current = (index + TOTAL) % TOTAL;
+
+        const card = cards[current];
+        card.querySelectorAll('.fc-animate-in').forEach(el => {
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = '';
+        });
+
+        card.classList.add('active');
+        pills[current].classList.add('active');
+        dots[current].classList.add('active');
+
+        const bar = card.querySelector('.fc-send-bar-fill');
+        if (bar) {
+            bar.style.transition = 'none';
+            bar.style.width = '0%';
+            bar.offsetHeight;
+            bar.style.transition = 'width 1.2s ease';
+            setTimeout(() => { bar.style.width = '100%'; }, 200);
+        }
+
+        resetTimer();
+    }
+
+    function resetTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => goTo(current + 1), DELAY);
+    }
+
+    pills.forEach((pill, i) => {
+        pill.addEventListener('click', () => goTo(i));
+    });
+
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => goTo(i));
+    });
+
+    if (prev) prev.addEventListener('click', () => goTo(current - 1));
+    if (next) next.addEventListener('click', () => goTo(current + 1));
+
+    resetTimer();
+})();
+</script>
+{{end}}

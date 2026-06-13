@@ -1,0 +1,152 @@
+{{define "home-demo"}}
+       <!-- LIVE DEMO -->
+    <section class="demo-section reveal">
+        <p class="section-title">See it in action</p>
+           <h2 class="section-headline">Your invoice, generated instantly</h2>
+
+        <div class="demo-card" id="demo-invoice">
+            <div class="demo-accent"></div>
+            <div class="demo-header">
+                <div>
+                    <div class="demo-title">INVOICE</div>
+                    <div class="demo-number">#INV-2026-001</div>
+                </div>
+                <div class="demo-badge" id="demo-status">GENERATING...</div>
+            </div>
+            <div class="demo-addresses">
+                <div>
+                    <div class="demo-addr-label">From</div>
+                    <div class="demo-addr-name">Your Company</div>
+                    <div class="demo-addr-line">123 Innovation Way<br>San Francisco, CA 94103</div>
+                </div>
+                <div>
+                    <div class="demo-addr-label">Bill To</div>
+                    <div class="demo-addr-name">Client Name</div>
+                    <div class="demo-addr-line">456 Enterprise Dr<br>Austin, TX 73301</div>
+                </div>
+            </div>
+            <div class="demo-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="right">Qty</th>
+                            <th class="right">Price</th>
+                            <th class="right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="demo-items-body">
+                    </tbody>
+                </table>
+            </div>
+            <div class="demo-total-row">
+                <div class="demo-total-box">
+                    <div class="demo-total-line">
+                        <span>Subtotal</span>
+                        <span id="demo-subtotal">$0.00</span>
+                    </div>
+                    <div class="demo-total-line">
+                        <span>Tax (8.5%)</span>
+                        <span id="demo-tax">$0.00</span>
+                    </div>
+                    <div class="demo-total-line grand">
+                        <span>Total</span>
+                        <span id="demo-total">$0.00</span>
+                    </div>
+                </div>
+		
+	            </div>
+
+            <!-- Send animation area -->
+            <div id="demo-send-area" style="
+                padding: 0 32px 24px;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.6s ease, transform 0.6s ease;
+            ">
+                <div style="
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    padding: 16px 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                ">
+                    <div id="demo-send-icon" style="
+                        font-size: 20px;
+                        width: 40px;
+                        height: 40px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: #dbeafe;
+                        border-radius: 10px;
+                        transition: all 0.4s ease;
+                    ">📨</div>
+                    <div>
+                        <div id="demo-send-title" style="
+                            font-size: 13px;
+                            font-weight: 700;
+                            color: #0d1422;
+                            transition: all 0.3s ease;
+                        ">Sending to client...</div>
+                        <div id="demo-send-sub" style="
+                            font-size: 11px;
+                            color: #64748b;
+                            margin-top: 2px;
+                        ">client@globexcorp.com</div>
+                    </div>
+                    <div id="demo-send-progress" style="
+                        margin-left: auto;
+                        width: 80px;
+                        height: 4px;
+                        background: #e2e8f0;
+                        border-radius: 4px;
+                        overflow: hidden;
+                    ">
+                        <div id="demo-send-bar" style="
+                            width: 0%;
+                            height: 100%;
+                            background: linear-gradient(90deg, #3b82f6, #22d3ee);
+                            border-radius: 4px;
+                            transition: width 1.2s ease;
+                        "></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA after demo -->
+            <div id="demo-cta" style="
+                padding: 0 32px 32px;
+                text-align: center;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.6s ease, transform 0.6s ease;
+            ">
+                <a href="/invoices/new" style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #0d1422;
+                    color: #ffffff;
+                    padding: 14px 32px;
+                    border-radius: 10px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    text-decoration: none;
+                    letter-spacing: -0.3px;
+                    transition: all 0.25s ease;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'"
+                   onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'">
+                    Create yours free →
+                </a>
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 10px;">
+                    No signup required · Takes 30 seconds
+                </div>
+            </div>
+        </div>
+    </section>	
+</section>
+{{end}}

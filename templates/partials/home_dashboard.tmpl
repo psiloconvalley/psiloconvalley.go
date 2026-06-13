@@ -1,0 +1,57 @@
+{{define "home-dashboard"}}
+    <!-- ═══════════════════════════════════════════════════════════════
+         LOGGED-IN USER: DASHBOARD VIEW
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="dashboard">
+        <div class="dash-header">
+            <p class="dash-greeting">Welcome back,</p>
+            <h1 class="dash-title">{{.User.DisplayName}}</h1>
+        </div>
+
+        <div class="dash-grid">
+            <div class="stat-card">
+                <div class="stat-label">Plan</div>
+                <div class="stat-value">{{if eq .User.Plan "pro"}}Pro{{else}}Free{{end}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">This Month</div>
+                <div class="stat-value">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Status</div>
+                <div class="stat-value" style="color: #4ade80;">Active</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="/invoices/new" class="action-card">
+                <span class="action-icon">📄</span>
+                <div class="action-text">
+                    <h3>New Invoice</h3>
+                    <p>Create and send a professional invoice</p>
+                </div>
+            </a>
+            <a href="/invoices" class="action-card">
+                <span class="action-icon">📊</span>
+                <div class="action-text">
+                    <h3>View Invoices</h3>
+                    <p>Manage your invoice history</p>
+                </div>
+            </a>
+            <a href="/clients" class="action-card">
+                <span class="action-icon">👥</span>
+                <div class="action-text">
+                    <h3>Clients</h3>
+                    <p>Manage your client directory</p>
+                </div>
+            </a>
+            <a href="/profile" class="action-card">
+                <span class="action-icon">⚙️</span>
+                <div class="action-text">
+                    <h3>Settings</h3>
+                    <p>Business profile and preferences</p>
+                </div>
+            </a>
+        </div>
+    </div>
+{{end}}

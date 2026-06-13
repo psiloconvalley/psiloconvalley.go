@@ -1,0 +1,200 @@
+{{define "home-flow"}}
+    <!-- ANIMATED FLOW SHOWCASE -->
+    <section class="flow-section reveal">
+        <p class="section-title">The complete deal flow</p>
+        <h2 class="section-headline">From estimate to paid — watch it happen</h2>
+
+        <!-- Step Pills -->
+        <div class="flow-pills">
+            <button class="flow-pill active" data-step="0">📝 Create</button>
+            <button class="flow-pill" data-step="1">📨 Send</button>
+            <button class="flow-pill" data-step="2">✅ Accept</button>
+            <button class="flow-pill" data-step="3">🔄 Convert</button>
+            <button class="flow-pill" data-step="4">💰 Pay</button>
+        </div>
+
+        <!-- Card Stage -->
+        <div class="flow-stage">
+
+            <!-- Step 0: Create Estimate -->
+            <div class="flow-card active" data-card="0">
+                <div class="fc-chrome">
+                    <div class="fc-chrome-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="fc-chrome-url">psiloconvalley.com/estimates/new</div>
+                </div>
+                <div class="fc-body">
+                    <div class="fc-row">
+                        <div class="fc-label">DOCUMENT</div>
+                        <div class="fc-val fc-tag fc-tag-est">ESTIMATE — EST-0001</div>
+                    </div>
+                    <div class="fc-row">
+                        <div class="fc-label">CLIENT</div>
+                        <div class="fc-val fc-type" id="fc-client-name">Globex Corporation</div>
+                    </div>
+                    <div class="fc-divider"></div>
+                    <div class="fc-items-label">LINE ITEMS</div>
+                    <div class="fc-item fc-animate-in" style="animation-delay:0.2s">
+                        <span>Brand Identity Package</span>
+                        <span class="fc-amount">$4,500</span>
+                    </div>
+                    <div class="fc-item fc-animate-in" style="animation-delay:0.5s">
+                        <span>Website Design (5 pages)</span>
+                        <span class="fc-amount">$3,200</span>
+                    </div>
+                    <div class="fc-item fc-animate-in" style="animation-delay:0.8s">
+                        <span>Monthly Retainer × 3</span>
+                        <span class="fc-amount">$2,400</span>
+                    </div>
+                    <div class="fc-divider"></div>
+                    <div class="fc-total-row fc-animate-in" style="animation-delay:1.1s">
+                        <span class="fc-total-label">TOTAL</span>
+                        <span class="fc-total-val">$10,100.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Send -->
+            <div class="flow-card" data-card="1">
+                <div class="fc-chrome">
+                    <div class="fc-chrome-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="fc-chrome-url">psiloconvalley.com/estimates/42/send</div>
+                </div>
+                <div class="fc-body" style="align-items:center; justify-content:center; min-height:260px;">
+                    <div class="fc-send-icon fc-animate-in">📨</div>
+                    <div class="fc-send-title fc-animate-in" style="animation-delay:0.3s">
+                        Estimate sent successfully
+                    </div>
+                    <div class="fc-send-meta fc-animate-in" style="animation-delay:0.5s">
+                        EST-0001 → sarah@globexcorp.com
+                    </div>
+                    <div class="fc-send-bar-wrap fc-animate-in" style="animation-delay:0.7s">
+                        <div class="fc-send-bar">
+                            <div class="fc-send-bar-fill"></div>
+                        </div>
+                        <span class="fc-send-bar-label">Delivered</span>
+                    </div>
+                    <div class="fc-send-note fc-animate-in" style="animation-delay:1s">
+                        Client receives a secure link to review &amp; respond — no login required
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Client Accepts -->
+            <div class="flow-card" data-card="2">
+                <div class="fc-chrome">
+                    <div class="fc-chrome-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="fc-chrome-url">psiloconvalley.com/estimates/42/respond?access=••••</div>
+                </div>
+                <div class="fc-body">
+                    <div class="fc-respond-header fc-animate-in">
+                        <div class="fc-tag fc-tag-est" style="margin-bottom:8px;">EST-0001 — $10,100.00</div>
+                        <div style="font-size:13px; color:rgba(255,255,255,0.5);">From: Your Company · To: Globex Corporation</div>
+                    </div>
+                    <div class="fc-divider"></div>
+                    <div class="fc-respond-label fc-animate-in" style="animation-delay:0.3s">
+                        How would you like to respond?
+                    </div>
+                    <div class="fc-respond-btns fc-animate-in" style="animation-delay:0.5s">
+                        <button class="fc-btn-accept fc-pulse">✅ Accept Estimate</button>
+                        <button class="fc-btn-suggest">💬 Suggest Changes</button>
+                        <button class="fc-btn-decline">❌ Decline</button>
+                    </div>
+                    <div class="fc-accepted-banner fc-animate-in" style="animation-delay:1.2s">
+                        🎉 Estimate accepted — owner notified
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Convert to Invoice -->
+            <div class="flow-card" data-card="3">
+                <div class="fc-chrome">
+                    <div class="fc-chrome-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="fc-chrome-url">psiloconvalley.com/estimates/42</div>
+                </div>
+                <div class="fc-body">
+                    <div class="fc-row fc-animate-in">
+                        <div class="fc-label">STATUS</div>
+                        <div class="fc-tag fc-tag-accepted">✅ ACCEPTED</div>
+                    </div>
+                    <div class="fc-row fc-animate-in" style="animation-delay:0.2s">
+                        <div class="fc-label">ESTIMATE</div>
+                        <div class="fc-val">EST-0001 · $10,100.00</div>
+                    </div>
+                    <div class="fc-divider"></div>
+                    <div class="fc-convert-area fc-animate-in" style="animation-delay:0.5s">
+                        <div class="fc-convert-btn" id="fc-convert-btn">
+                            🔄 Convert to Invoice
+                        </div>
+                    </div>
+                    <div class="fc-convert-result fc-animate-in" style="animation-delay:1.3s">
+                        <div class="fc-tag fc-tag-inv">INV-0001 CREATED</div>
+                        <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-top:6px;">
+                            Draft invoice ready — no data re-entry
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Pay -->
+            <div class="flow-card" data-card="4">
+                <div class="fc-chrome">
+                    <div class="fc-chrome-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="fc-chrome-url">psiloconvalley.com/invoices/88/pay</div>
+                </div>
+                <div class="fc-body">
+                    <div class="fc-row fc-animate-in">
+                        <div class="fc-label">INVOICE</div>
+                        <div class="fc-val">INV-0001 · Globex Corporation</div>
+                    </div>
+                    <div class="fc-pay-amount fc-animate-in" style="animation-delay:0.2s">
+                        $10,100.00
+                    </div>
+                    <div class="fc-stripe-card fc-animate-in" style="animation-delay:0.5s">
+                        <div class="fc-stripe-label">Card number</div>
+                        <div class="fc-stripe-input">•••• •••• •••• 4242</div>
+                        <div style="display:flex; gap:12px; margin-top:10px;">
+                            <div style="flex:1">
+                                <div class="fc-stripe-label">Expiry</div>
+                                <div class="fc-stripe-input">12 / 28</div>
+                            </div>
+                            <div style="flex:1">
+                                <div class="fc-stripe-label">CVC</div>
+                                <div class="fc-stripe-input">•••</div>
+                            </div>
+                        </div>
+                        <div class="fc-stripe-pay-btn fc-animate-in" style="animation-delay:0.8s">
+                            Pay $10,100.00 via Stripe
+                        </div>
+                    </div>
+                    <div class="fc-paid-banner fc-animate-in" style="animation-delay:1.5s">
+                        ✅ Payment received · Invoice marked PAID
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.flow-stage -->
+
+        <!-- Dot Nav -->
+        <div class="flow-dots">
+            <button class="flow-arrow" id="flow-prev">←</button>
+            <span class="flow-dot active" data-dot="0"></span>
+            <span class="flow-dot" data-dot="1"></span>
+            <span class="flow-dot" data-dot="2"></span>
+            <span class="flow-dot" data-dot="3"></span>
+            <span class="flow-dot" data-dot="4"></span>
+            <button class="flow-arrow" id="flow-next">→</button>
+        </div>
+
+    </section>
+    <!-- END ANIMATED FLOW SHOWCASE --> 
+{{end}}
