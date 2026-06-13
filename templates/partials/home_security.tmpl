@@ -1,59 +1,83 @@
 {{define "home-security"}}
     <!-- SECURITY SECTION -->
     <section class="sec-home">
-        <div class="sec-home-header">
-            <div class="sec-home-eyebrow">Security</div>
-            <h2 class="sec-home-title">Built to protect your business<br><em>and your clients.</em></h2>
-            <p class="sec-home-sub">
-                Every invoice you send contains sensitive data — client names, amounts, service details.
-                We treat that data like it's our own.
-            </p>
-        </div>
+        <div class="sec-home-shell">
 
-        <div class="sec-home-grid">
-
-            <div class="sec-home-card">
-                <div class="sec-home-icon">🔐</div>
-                <h4>Argon2id Passwords</h4>
-                <p>The strongest hashing algorithm available. Even if our database were stolen, your password cannot be recovered.</p>
+            <div class="sec-home-header">
+                <div class="sec-home-eyebrow">Security</div>
+                <h2 class="sec-home-title">Built to protect your business.<br><em>And your clients.</em></h2>
+                <p class="sec-home-sub">
+                    Every invoice you send contains sensitive data — client names, amounts, service details.
+                    We treat that data like it's our own.
+                </p>
             </div>
 
-            <div class="sec-home-card">
-                <div class="sec-home-icon">🛡️</div>
-                <h4>CSRF on Every Form</h4>
-                <p>Cryptographic tokens protect every form submission. Cross-site request forgery attacks are blocked at the framework level.</p>
+            <div class="sec-home-grid">
+
+                <div class="sec-home-card">
+                    <div class="sec-home-card-top">
+                        <div class="sec-home-icon">🔐</div>
+                        <h4>Argon2id Password Hashing</h4>
+                    </div>
+                    <p>The strongest password hashing algorithm available. Even if our database were stolen, your password cannot be recovered.</p>
+                </div>
+
+                <div class="sec-home-card">
+                    <div class="sec-home-card-top">
+                        <div class="sec-home-icon">🛡️</div>
+                        <h4>CSRF Protection</h4>
+                    </div>
+                    <p>Cryptographic tokens protect every form submission. Cross-site request forgery attacks are blocked at the framework level.</p>
+                </div>
+
+                <div class="sec-home-card">
+                    <div class="sec-home-card-top">
+                        <div class="sec-home-icon">✍️</div>
+                        <h4>Signed Sessions</h4>
+                    </div>
+                    <p>HMAC-SHA256 signed session cookies. Tampered or forged tokens are rejected before they ever reach your account.</p>
+                </div>
+
+                <div class="sec-home-card">
+                    <div class="sec-home-card-top">
+                        <div class="sec-home-icon">⏱️</div>
+                        <h4>Rate Limiting &amp; Lockout</h4>
+                    </div>
+                    <p>Brute force attempts are blocked with IP-based rate limiting. After repeated failures, accounts are temporarily locked.</p>
+                </div>
+
+                <div class="sec-home-card">
+                    <div class="sec-home-card-top">
+                        <div class="sec-home-icon">🏦</div>
+                        <h4>Stripe-Powered Payments</h4>
+                    </div>
+                    <p>We never see or store card numbers. Payments are processed directly by Stripe, which is PCI DSS Level 1 certified.</p>
+                </div>
+
+                <div class="sec-home-card">
+                    <div class="sec-home-card-top">
+                        <div class="sec-home-icon">🚫</div>
+                        <h4>Zero Third-Party Trackers</h4>
+                    </div>
+                    <p>No Google Analytics. No Facebook Pixel. No ad tracking. Your business data and your clients' data belongs to you.</p>
+                </div>
+
             </div>
 
-            <div class="sec-home-card">
-                <div class="sec-home-icon">✍️</div>
-                <h4>Signed Sessions</h4>
-                <p>HMAC-SHA256 signed cookies. Tampered or forged session tokens are rejected before they reach your account.</p>
+            <div class="sec-home-proof">
+                <div class="sec-home-proof-label">What protects every account</div>
+                <p>
+                    Argon2id passwords, signed sessions, CSRF protection, rate limiting,
+                    Stripe-powered payments, hardened HTTP headers, and zero third-party trackers.
+                </p>
             </div>
 
-            <div class="sec-home-card">
-                <div class="sec-home-icon">⏱️</div>
-                <h4>Rate Limiting</h4>
-                <p>IP-based sliding window rate limiting. After 10 failed login attempts, accounts are temporarily locked.</p>
+            <div class="sec-home-cta">
+                <a href="/security" class="btn-secondary">
+                    Read our full security overview →
+                </a>
             </div>
 
-            <div class="sec-home-card">
-                <div class="sec-home-icon">🏦</div>
-                <h4>Stripe Payments</h4>
-                <p>We never see or store card numbers. All payments processed directly by Stripe — PCI DSS Level 1 certified.</p>
-            </div>
-
-            <div class="sec-home-card">
-                <div class="sec-home-icon">🚫</div>
-                <h4>Zero Trackers</h4>
-                <p>No Google Analytics. No Facebook Pixel. No ad tracking. Your data and your clients' data belongs to you.</p>
-            </div>
-
-        </div>
-
-        <div class="sec-home-cta">
-            <a href="/security" class="btn-secondary">
-                Read our full security overview →
-            </a>
         </div>
     </section>
 {{end}}
