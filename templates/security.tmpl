@@ -70,12 +70,12 @@
             margin-bottom: 12px;
         }
 
-        .sec-section h2 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 24px;
-        }
+       .sec-section h2 {
+       font-size: clamp(24px, 3vw, 36px);
+           font-weight: 700;
+       letter-spacing: -0.5px;
+       margin-bottom: 24px; 
+    } 
 
         /* ── Cards ── */
         .sec-cards {
@@ -346,14 +346,14 @@
                 <div class="sec-status-desc">PCI DSS Level 1 — we never see card data</div>
             </div>
             <div class="sec-status-row">
-                <div class="sec-status-dot yellow"></div>
+                <div class="sec-status-dot green"></div>
                 <div class="sec-status-name">Audit logging</div>
-                <div class="sec-status-desc">In progress — every action will be logged with timestamp and IP</div>
+                <div class="sec-status-desc">Active — invoice, estimate, and auth events are recorded with timestamp and IP</div>
             </div>
             <div class="sec-status-row">
                 <div class="sec-status-dot yellow"></div>
                 <div class="sec-status-name">Two-factor authentication</div>
-                <div class="sec-status-desc">Planned — TOTP + SMS options</div>
+        <div class="sec-status-desc">Planned — TOTP authenticator app support</div>
             </div>
             <div class="sec-status-row">
                 <div class="sec-status-dot yellow"></div>

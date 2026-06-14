@@ -10,26 +10,6 @@
     {{template "base-styles" .}}
 
     <style>
-        :root {
-            --bg: #0a0f1a;
-            --card: rgba(255,255,255,0.04);
-            --border: rgba(255,255,255,0.08);
-            --text: #ffffff;
-            --muted: rgba(255,255,255,0.65);
-            --accent: #ffffff;
-            --success: #22c55e;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
         .page {
             max-width: 960px;
             margin: 0 auto;
@@ -41,26 +21,27 @@
             margin-bottom: 48px;
         }
 
-        .eyebrow {
+        .hero .eyebrow {
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.45);
+            color: rgba(74,222,128,0.7);
             margin-bottom: 14px;
         }
 
-        h1 {
-            font-size: 42px;
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 52px);
             font-weight: 800;
-            letter-spacing: -1.5px;
+            letter-spacing: -2px;
+            line-height: 1.1;
             margin-bottom: 12px;
         }
 
         .hero p {
             max-width: 620px;
             margin: 0 auto;
-            color: var(--muted);
+            color: rgba(255,255,255,0.55);
             line-height: 1.7;
             font-size: 16px;
         }
@@ -72,13 +53,13 @@
             border-radius: 10px;
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.12);
-            color: var(--text);
+            color: #ffffff;
             font-size: 14px;
         }
 
         .notice.success {
-            border-color: rgba(34,197,94,0.35);
-            background: rgba(34,197,94,0.12);
+            border-color: rgba(74,222,128,0.35);
+            background: rgba(74,222,128,0.12);
             color: #dcfce7;
         }
 
@@ -91,8 +72,8 @@
         }
 
         .pricing-card {
-            background: var(--card);
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 18px;
             padding: 36px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.25);
@@ -160,12 +141,12 @@
 
         .price .unit {
             font-size: 16px;
-            color: var(--muted);
+            color: rgba(255,255,255,0.55);
             margin-bottom: 8px;
         }
 
         .subtext {
-            color: var(--muted);
+            color: rgba(255,255,255,0.55);
             margin-bottom: 28px;
             line-height: 1.7;
             font-size: 14px;
@@ -188,7 +169,7 @@
 
         .cta-form, .cta-actions { margin-top: 8px; }
 
-        .btn {
+        .page .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -203,11 +184,27 @@
             font-family: inherit;
             transition: transform 0.15s ease, opacity 0.15s ease;
         }
-        .btn:hover { transform: translateY(-1px); opacity: 0.95; }
-        .btn-primary { background: #ffffff; color: #0a0f1a; }
-        .btn-growth { background: #4ade80; color: #0a0f1a; }
-        .btn-growth:hover { background: #22c55e; }
-        .btn-secondary {
+
+        .page .btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+
+        .page .btn-primary {
+            background: #ffffff;
+            color: #0a0f1a;
+        }
+
+        .page .btn-growth {
+            background: #4ade80;
+            color: #0a0f1a;
+        }
+
+        .page .btn-growth:hover {
+            background: #22c55e;
+        }
+
+        .page .btn-secondary {
             background: transparent;
             color: #ffffff;
             border: 1px solid rgba(255,255,255,0.16);
@@ -223,13 +220,14 @@
         @media (max-width: 900px) {
             .pricing-grid { grid-template-columns: 1fr; max-width: 480px; }
         }
+
         @media (max-width: 640px) {
             .page { padding: 40px 16px 64px; }
-            h1 { font-size: 34px; }
+            .hero h1 { font-size: 34px; }
             .pricing-card { padding: 24px; }
             .price .amount { font-size: 44px; }
         }
-        </style>
+    </style>
 </head>
 <body>
 
@@ -397,7 +395,7 @@
             {{end}}
         </div>
 
-    i </div>
+ </div>
 </div>
 
 <footer>
