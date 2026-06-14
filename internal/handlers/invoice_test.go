@@ -4,6 +4,7 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -90,7 +91,35 @@ func (f *fakeInvoiceStore) ListInvoicesForReport(ctx context.Context, userID int
 func (f *fakeInvoiceStore) GetClientScorecards(ctx context.Context, userID int64) ([]repo.ClientScorecard, error) {
 	return nil, nil
 }
+func (f *fakeInvoiceStore) UpdateEstimateStatus(ctx context.Context, id int64, userID int64, newStatus string) error {
+	validStatuses := map[string]bool{
+		"draft": true, "sent": true, "accepted": true,
+		"rejected": true, "expired": true, "converted": true,
+	}
+	if !validStatuses[newStatus] {
+		return fmt.Errorf("invalid estimate status: %s", newStatus)
+	}
 
+	if f.invoice == nil {
+		return fmt.Errorf("estimate not found")
+	}
+
+	validTransitions := map[string]map[string]bool{
+		"draft":     {"sent": true},
+		"sent":      {"accepted": true, "rejected": true, "expired": true},
+		"accepted":  {"converted": true},
+		"rejected":  {},
+		"expired":   {},
+		"converted": {},
+	}
+
+	allowed, ok := validTransitions[f.invoice.Status]
+	if !ok || !allowed[newStatus] {
+		return fmt.Errorf("cannot transition estimate from %s to %s", f.invoice.Status, newStatus)
+	}
+
+	return nil
+}
 // Helpers
 // makeDeleteRequest builds a fake POST to /invoices/{id}/delete
 // with a logged-in user injected into the context.

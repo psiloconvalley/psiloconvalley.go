@@ -109,6 +109,12 @@ type InvoiceStore interface {
 		newStatus string,
 		userID int64,
 	) error
+	UpdateEstimateStatus(
+		ctx context.Context,
+		id int64,
+		userID int64,
+		newStatus string,
+	) error
 
 	DeleteDraftInvoice(
 		ctx context.Context,

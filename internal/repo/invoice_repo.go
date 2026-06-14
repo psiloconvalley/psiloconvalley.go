@@ -672,3 +672,51 @@ func generatePublicToken() (string, error) {
 	}
 	return hex.EncodeToString(b), nil
 }
+// UpdateEstimateStatus validates the transition and updates the estimate status.
+// Estimate statuses and transitions are distinct from invoice statuses.
+// This is the single source of truth for estimate lifecycle rules.
+func (r *InvoiceRepo) UpdateEstimateStatus(
+	ctx context.Context,
+	id int64,
+	userID int64,
+	newStatus string,
+) error {
+	validStatuses := map[string]bool{
+		"draft": true, "sent": true, "accepted": true,
+		"rejected": true, "expired": true, "converted": true,
+	}
+	if !validStatuses[newStatus] {
+		return fmt.Errorf("invalid estimate status: %s", newStatus)
+	}
+
+	var currentStatus string
+	err := r.db.QueryRowContext(ctx,
+		`SELECT status FROM invoices
+		 WHERE id = $1 AND user_id = $2 AND document_type = 'estimate'`,
+		id, userID,
+	).Scan(&currentStatus)
+	if err != nil {
+		return fmt.Errorf("estimate not found: %w", err)
+	}
+
+	validTransitions := map[string]map[string]bool{
+		"draft":     {"sent": true},
+		"sent":      {"accepted": true, "rejected": true, "expired": true},
+		"accepted":  {"converted": true},
+		"rejected":  {},
+		"expired":   {},
+		"converted": {},
+	}
+
+	allowed, ok := validTransitions[currentStatus]
+	if !ok || !allowed[newStatus] {
+		return fmt.Errorf("cannot transition estimate from %s to %s", currentStatus, newStatus)
+	}
+
+	_, err = r.db.ExecContext(ctx,
+		`UPDATE invoices SET status = $1, updated_at = NOW()
+		 WHERE id = $2 AND user_id = $3`,
+		newStatus, id, userID,
+	)
+	return err
+}

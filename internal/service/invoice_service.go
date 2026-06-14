@@ -312,3 +312,55 @@ func CalculateNextRun(frequency string, from time.Time) time.Time {
 		return from.AddDate(0, 1, 0)
 	}
 }
+// =====================================================================
+// ESTIMATE → INVOICE CONVERSION
+// Orchestration logic — generates invoice number, copies fields,
+// creates the new invoice, marks the estimate converted.
+// =====================================================================
+
+// ConvertEstimateParams holds the inputs for estimate-to-invoice conversion.
+type ConvertEstimateParams struct {
+	UserID   int64
+	Estimate *repo.Invoice
+	Items    []repo.InvoiceItem
+}
+
+// ConvertEstimateToInvoice creates a new invoice from an accepted estimate
+// and marks the original estimate as converted.
+func (s *InvoiceService) ConvertEstimateToInvoice(
+	ctx context.Context,
+	p ConvertEstimateParams,
+) (int64, error) {
+	if p.Estimate.Status != "accepted" {
+		return 0, fmt.Errorf("only accepted estimates can be converted, current status: %s", p.Estimate.Status)
+	}
+
+	invoiceNumber, err := s.GenerateInvoiceNumber(ctx, &p.UserID)
+	if err != nil {
+		return 0, fmt.Errorf("generate invoice number: %w", err)
+	}
+
+	newInv := *p.Estimate
+	newInv.ID = 0
+	newInv.InvoiceNumber = invoiceNumber
+	newInv.Status = "draft"
+	newInv.DocumentType = "invoice"
+	newInv.IssueDate = time.Now()
+	newInv.CreatedAt = time.Now()
+	newInv.UpdatedAt = time.Now()
+	newInv.PublicToken = ""
+
+	newID, err := s.InvRepo.CreateInvoice(ctx, &newInv, p.Items, "")
+	if err != nil {
+		return 0, fmt.Errorf("create invoice from estimate: %w", err)
+	}
+
+	if err := s.InvRepo.UpdateEstimateStatus(ctx, p.Estimate.ID, p.UserID, "converted"); err != nil {
+		log.Printf("[invoice_service] failed to mark estimate %d as converted: %v", p.Estimate.ID, err)
+	}
+
+	log.Printf("[invoice_service] estimate %d converted to invoice %d by user %d",
+		p.Estimate.ID, newID, p.UserID)
+
+	return newID, nil
+}

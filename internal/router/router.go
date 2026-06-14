@@ -53,9 +53,6 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
 	r.Get("/invoices/{id}/pay", h.InvoicePayGet)
 
-	// ── Freemium estimate routes (ownership enforced in handlers) ──
-	r.Get("/estimates/new", h.EstimateNewGet)
-	r.Post("/estimates/create", h.EstimateCreatePost)
 
 	// ── Public estimate response routes ───────────────────────────
 	r.Get("/estimates/{id}/respond", h.EstimateRespondGet)
@@ -110,6 +107,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 
 		// Estimate management
 		r.Get("/estimates", h.EstimatesList)
+		r.Get("/estimates/new", h.EstimateNewGet)
+		r.Post("/estimates/create", h.EstimateCreatePost)
 		r.Get("/estimates/{id}", h.EstimateDetail)
 		r.Get("/estimates/{id}/edit", h.EstimateEditGet)
 		r.Post("/estimates/{id}/edit", h.EstimateEditPost)
