@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"psiloconvalley/internal/audit"
 	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/views"
@@ -140,6 +141,17 @@ func (h *Handlers) EstimateRespondPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("[estimate] client responded to estimate %d: action=%s", id, action)
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     nil, // public action — no logged-in user
+		Action:     audit.ActionEstimateResponded,
+		EntityType: audit.EntityEstimate,
+		EntityID:   audit.EntityIDPtr(id),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata: map[string]any{
+			"action":      action,
+			"client_name": clientName,
+		},
+	})
 
 	h.App.Render(w, r, "estimate_responded.tmpl", map[string]any{
 		"Action":       action,

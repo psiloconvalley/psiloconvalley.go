@@ -302,3 +302,16 @@ type CategoryTotal struct {
 	Category   string
 	TotalCents int64
 }
+// AuditLog records every action that touches financial or personal data.
+// This table is append-only — rows are never updated or deleted.
+// Required for HIPAA compliance and enterprise security audits.
+type AuditLog struct {
+	ID         int64
+	UserID     *int64
+	Action     string
+	EntityType string
+	EntityID   *int64
+	IPAddress  string
+	Metadata   map[string]any
+	CreatedAt  time.Time
+}

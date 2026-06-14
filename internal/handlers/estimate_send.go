@@ -8,7 +8,8 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-
+	
+	"psiloconvalley/internal/audit"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/mailer"
 	"psiloconvalley/internal/views"
@@ -126,6 +127,14 @@ func (h *Handlers) EstimateSendPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("[estimate] estimate %s sent to %s by user %d", inv.InvoiceNumber, toEmail, user.ID)
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionEstimateSent,
+		EntityType: audit.EntityEstimate,
+		EntityID:   audit.EntityIDPtr(id),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"to_email": toEmail},
+	})
 	http.Redirect(w, r,
 		fmt.Sprintf("/estimates/%d?sent=true&to=%s", id, toEmail),
 		http.StatusSeeOther,

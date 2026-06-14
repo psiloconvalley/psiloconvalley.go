@@ -11,11 +11,13 @@ import (
 	"strings"
 	"time"
 
+	"psiloconvalley/internal/audit"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/service"
 	"psiloconvalley/internal/views"
+
 )
 
 // InvoiceCreatePost handles invoice creation for both anonymous and
@@ -340,6 +342,23 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 			log.Printf("[invoice] failed to create recurring schedule: %v", err)
 		}
 	}
-
+		// ── Audit log ─────────────────────────────────────────────────────
+	var auditUserID *int64
+	if user != nil {
+		auditUserID = audit.UserIDPtr(user.ID)
+	}
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     auditUserID,
+		Action:     audit.ActionInvoiceCreated,
+		EntityType: audit.EntityInvoice,
+		EntityID:   audit.EntityIDPtr(invoiceID),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata: map[string]any{
+			"invoice_number": inv.InvoiceNumber,
+			"total_cents":    inv.TotalCents,
+			"currency":       inv.Currency,
+			"anonymous":      user == nil,
+		},
+	})
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10), http.StatusSeeOther)
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"psiloconvalley/internal/audit"
 	"psiloconvalley/internal/auth"
 )
 
@@ -39,6 +40,14 @@ func (h *Handlers) RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	auth.SetSessionCookie(w, id)
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:    audit.UserIDPtr(id),
+		Action:    audit.ActionAuthRegister,
+		EntityType: audit.EntityUser,
+		EntityID:  audit.EntityIDPtr(id),
+		IPAddress: audit.IPFromRequest(r),
+		Metadata:  map[string]any{"email": email},
+	})
 	http.Redirect(w, r, "/profile?welcome=true", http.StatusSeeOther)
 }
 
@@ -94,6 +103,14 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 		if err := h.App.UserRepo.RecordFailedLogin(r.Context(), user.ID); err != nil {
 			log.Printf("[auth] record failed login error for user %d: %v", user.ID, err)
 		}
+		audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionAuthLoginFailed,
+		EntityType: audit.EntityUser,
+		EntityID:   audit.EntityIDPtr(user.ID),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"email": email},
+	})
 		h.App.Render(w, r, "login.tmpl", map[string]any{"Error": "Invalid credentials", "Email": email})
 		return
 	}
@@ -111,10 +128,28 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	auth.SetSessionCookie(w, user.ID)
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionAuthLogin,
+		EntityType: audit.EntityUser,
+		EntityID:   audit.EntityIDPtr(user.ID),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"email": email},
+	})
 	http.Redirect(w, r, "/invoices", http.StatusSeeOther)
 }
 func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	auth.ClearSessionCookie(w)
+	user := auth.GetUser(r)
+	if user != nil {
+		audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+			UserID:     audit.UserIDPtr(user.ID),
+			Action:     audit.ActionAuthLogout,
+			EntityType: audit.EntityUser,
+			EntityID:   audit.EntityIDPtr(user.ID),
+			IPAddress:  audit.IPFromRequest(r),
+		})
+	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -144,6 +179,14 @@ func (h *Handlers) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	auth.SetSessionCookie(w, user.ID)
+		audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionAuthLogin,
+		EntityType: audit.EntityUser,
+		EntityID:   audit.EntityIDPtr(user.ID),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"method": "google", "is_new": isNew},
+	})
 
 	if isNew {
 		http.Redirect(w, r, "/profile?welcome=true", http.StatusSeeOther)

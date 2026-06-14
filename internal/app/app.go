@@ -43,6 +43,7 @@ type App struct {
 	ReceiptStore  receipt.Store
 	EstRespRepo   *repo.EstimateResponseRepo
 	ExpenseRepo   *repo.ExpenseRepo
+	AuditRepo  *repo.AuditRepo
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
@@ -128,6 +129,7 @@ func NewApp(db *sql.DB) *App {
 		ReceiptStore:      newReceiptStore(baseURL),
 		EstRespRepo:       repo.NewEstimateResponseRepo(db),
 		ExpenseRepo:       repo.NewExpenseRepo(db),
+		AuditRepo:  repo.NewAuditRepo(db),
 	}
 }
 	

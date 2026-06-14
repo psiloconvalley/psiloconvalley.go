@@ -158,9 +158,9 @@ func withChiID(r *http.Request, key, val string) *http.Request {
 func makeHandlers(store *fakeInvoiceStore) *Handlers {
 	a := &app.App{}
 	a.InvRepo = store
+	a.AuditRepo = repo.NewAuditRepo(nil) // nil db — Log() will fail silently, which is fine for tests
 	return &Handlers{App: a}
 }
-
 // =====================================================================
 // Tests — InvoiceDeletePost
 // =====================================================================

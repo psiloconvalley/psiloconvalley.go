@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-
+	"psiloconvalley/internal/audit"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
@@ -164,6 +164,14 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create estimate", http.StatusInternalServerError)
 		return
 	}
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionEstimateCreated,
+		EntityType: audit.EntityEstimate,
+		EntityID:   audit.EntityIDPtr(estimateID),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"estimate_number": inv.InvoiceNumber},
+	})
 
 	http.Redirect(w, r, "/estimates/"+strconv.FormatInt(estimateID, 10), http.StatusSeeOther)
 }
@@ -267,7 +275,13 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to update estimate", http.StatusInternalServerError)
 		return
 	}
-
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionEstimateUpdated,
+		EntityType: audit.EntityEstimate,
+		EntityID:   audit.EntityIDPtr(id),
+		IPAddress:  audit.IPFromRequest(r),
+	})
 	http.Redirect(w, r, fmt.Sprintf("/estimates/%d", id), http.StatusSeeOther)
 }
 
@@ -302,7 +316,14 @@ func (h *Handlers) EstimateStatusPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionEstimateStatusChanged,
+		EntityType: audit.EntityEstimate,
+		EntityID:   audit.EntityIDPtr(id),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"new_status": newStatus},
+	})
 	http.Redirect(w, r, fmt.Sprintf("/estimates/%d", id), http.StatusSeeOther)
 }
 
@@ -349,6 +370,14 @@ func (h *Handlers) EstimateDeletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("[estimate] draft estimate %d deleted by user %d", id, user.ID)
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionEstimateDeleted,
+		EntityType: audit.EntityEstimate,
+		EntityID:   audit.EntityIDPtr(id),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"estimate_number": inv.InvoiceNumber},
+	})
 	http.Redirect(w, r, "/estimates?deleted=true", http.StatusSeeOther)
 }
 
@@ -387,7 +416,14 @@ func (h *Handlers) EstimateConvertPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+		audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionEstimateConverted,
+		EntityType: audit.EntityEstimate,
+		EntityID:   audit.EntityIDPtr(id),
+		IPAddress:  audit.IPFromRequest(r),
+		Metadata:   map[string]any{"new_invoice_id": newID},
+	})
 	http.Redirect(w, r, fmt.Sprintf("/invoices/%d", newID), http.StatusSeeOther)
 }
 
