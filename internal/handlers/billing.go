@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +12,6 @@ import (
 	"github.com/stripe/stripe-go/v81"
 	billingportalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	checkoutsession "github.com/stripe/stripe-go/v81/checkout/session"
-	"github.com/stripe/stripe-go/v81/webhook"
 
 	"psiloconvalley/internal/auth"
 )
@@ -98,135 +96,6 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, s.URL, http.StatusSeeOther)
 }
 
-func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
-	secret := os.Getenv("STRIPE_WEBHOOK_SECRET")
-	if secret == "" {
-		http.Error(w, "Webhook secret not configured", http.StatusInternalServerError)
-		return
-	}
-
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Could not read request body", http.StatusBadRequest)
-		return
-	}
-
-	event, err := webhook.ConstructEventWithOptions(
-		body,
-		r.Header.Get("Stripe-Signature"),
-		secret,
-		webhook.ConstructEventOptions{
-			IgnoreAPIVersionMismatch: true,
-		},
-	)
-	if err != nil {
-		log.Printf("[stripe] webhook signature error: %v", err)
-		http.Error(w, "Invalid webhook signature", http.StatusBadRequest)
-		return
-	}
-
-	log.Printf("[stripe] webhook event received: %s", event.Type)
-
-	switch event.Type {
-	case "checkout.session.completed":
-		var cs stripe.CheckoutSession
-		if err := json.Unmarshal(event.Data.Raw, &cs); err != nil {
-			http.Error(w, "Invalid checkout session payload", http.StatusBadRequest)
-			return
-		}
-
-		// ── Invoice payment (Stripe Connect) ────────────────────────
-		if invoiceIDStr := cs.Metadata["invoice_id"]; invoiceIDStr != "" {
-			invoiceID, err := strconv.ParseInt(invoiceIDStr, 10, 64)
-			if err != nil {
-				log.Printf("[stripe-connect] invalid invoice_id in metadata: %s", invoiceIDStr)
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-
-			userIDStr := cs.Metadata["user_id"]
-			userID, _ := strconv.ParseInt(userIDStr, 10, 64)
-
-			if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), invoiceID, "paid", userID); err != nil {
-				log.Printf("[stripe-connect] failed to mark invoice %d as paid: %v", invoiceID, err)
-				http.Error(w, "Failed to update invoice status", http.StatusInternalServerError)
-				return
-			}
-
-			log.Printf("[stripe-connect] invoice %d marked as paid via Stripe Connect", invoiceID)
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		// ── Pro subscription upgrade ─────────────────────────────────
-		userIDStr := cs.ClientReferenceID
-		if userIDStr == "" {
-			userIDStr = cs.Metadata["user_id"]
-		}
-		if userIDStr == "" {
-			log.Printf("[stripe] checkout.session.completed missing user_id")
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		userID, err := strconv.ParseInt(userIDStr, 10, 64)
-		if err != nil {
-			http.Error(w, "Invalid user id", http.StatusBadRequest)
-			return
-		}
-
-		// Determine plan from metadata — default to "pro" for backwards compat
-		newPlan := cs.Metadata["plan"]
-		if newPlan != "growth" && newPlan != "pro" {
-			newPlan = "pro"
-		}
-	
-		if err := h.App.UserRepo.UpdateUserPlan(r.Context(), userID, newPlan); err != nil {
-		    log.Printf("[stripe] failed upgrading user %d to %s: %v", userID, newPlan, err)
-		    http.Error(w, "Failed to update user plan", http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("[stripe] upgraded user %d to %s", userID, newPlan)
-		if cs.Customer != nil {
-			if err := h.App.UserRepo.UpdateStripeCustomerID(r.Context(), userID, cs.Customer.ID); err != nil {
-				log.Printf("[stripe] failed saving stripe customer id for user %d: %v", userID, err)
-			}
-		}
-
-		log.Printf("[stripe] upgraded user %d to pro", userID)
-
-	case "customer.subscription.deleted":
-		var sub stripe.Subscription
-		if err := json.Unmarshal(event.Data.Raw, &sub); err != nil {
-			http.Error(w, "Invalid subscription payload", http.StatusBadRequest)
-			return
-		}
-
-		userIDStr := sub.Metadata["user_id"]
-		if userIDStr == "" {
-			log.Printf("[stripe] customer.subscription.deleted missing user_id")
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		userID, err := strconv.ParseInt(userIDStr, 10, 64)
-		if err != nil {
-			http.Error(w, "Invalid user id", http.StatusBadRequest)
-			return
-		}
-
-		if err := h.App.UserRepo.UpdateUserPlan(r.Context(), userID, "free"); err != nil {
-			log.Printf("[stripe] failed downgrading user %d to free: %v", userID, err)
-			http.Error(w, "Failed to update user plan", http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("[stripe] downgraded user %d to free", userID)
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
 func (h *Handlers) BillingPortalPost(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
@@ -421,6 +290,10 @@ func (h *Handlers) InvoicePayGet(w http.ResponseWriter, r *http.Request) {
 		},
 		PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
 			ApplicationFeeAmount: stripe.Int64(0), // No platform fee for now
+			Metadata: map[string]string{
+				"invoice_id": strconv.FormatInt(id, 10),
+				"user_id":    strconv.FormatInt(*inv.UserID, 10),
+			},
 		},
 		Metadata: map[string]string{
 			"invoice_id": strconv.FormatInt(id, 10),
