@@ -1,0 +1,96 @@
+{{define "profile-scripts"}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('field-name');
+    const previewCompany = document.getElementById('preview-company');
+    const previewCompanyMobile = document.getElementById('preview-company-mobile');
+
+    if (nameInput) {
+        nameInput.addEventListener('input', function() {
+            const val = this.value || 'Your Company';
+            if (previewCompany) previewCompany.textContent = val;
+            if (previewCompanyMobile) previewCompanyMobile.textContent = val;
+        });
+    }
+
+    const logoInput = document.querySelector('input[name="logo"]');
+    if (logoInput) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const src = ev.target.result;
+
+                // Update desktop preview
+                updatePreviewLogo('preview-logo', 'preview-logo-placeholder', src);
+                // Update mobile preview
+                updatePreviewLogo('preview-logo-mobile', 'preview-logo-placeholder-mobile', src);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function updatePreviewLogo(imgId, placeholderId, src) {
+        let img = document.getElementById(imgId);
+        let placeholder = document.getElementById(placeholderId);
+
+        if (img) {
+            img.src = src;
+        } else if (placeholder) {
+            const newImg = document.createElement('img');
+            newImg.id = imgId;
+            newImg.className = 'preview-logo-img';
+            newImg.src = src;
+            newImg.alt = 'Logo preview';
+            placeholder.replaceWith(newImg);
+        }
+    }
+});
+
+function openPreviewSheet() {
+    document.getElementById('previewOverlay').style.display = 'block';
+    const sheet = document.getElementById('previewSheet');
+    sheet.style.display = 'block';
+    requestAnimationFrame(() => sheet.classList.add('open'));
+}
+
+function closePreviewSheet() {
+    document.getElementById('previewOverlay').style.display = 'none';
+    const sheet = document.getElementById('previewSheet');
+    sheet.classList.remove('open');
+    setTimeout(() => sheet.style.display = 'none', 300);
+}
+// Password match indicator
+(function() {
+    const np = document.getElementById('new-password');
+    const cp = document.getElementById('confirm-password');
+    const hint = document.getElementById('pw-match-hint');
+    const btn = document.getElementById('pw-submit-btn');
+
+    if (!np || !cp || !hint) return;
+
+    function check() {
+        if (cp.value === '') {
+            hint.textContent = '';
+            hint.style.color = 'rgba(255,255,255,0.3)';
+            if (btn) btn.disabled = false;
+            return;
+        }
+        if (np.value === cp.value) {
+            hint.textContent = '✓ Passwords match';
+            hint.style.color = '#6ee7b7';
+            if (btn) btn.disabled = false;
+        } else {
+            hint.textContent = '✗ Passwords do not match';
+            hint.style.color = '#fca5a5';
+            if (btn) btn.disabled = true;
+        }
+    }
+
+    np.addEventListener('input', check);
+    cp.addEventListener('input', check);
+})();
+</script>
+{{end}}
