@@ -3,10 +3,10 @@
 <head>
     <title>Business Profile | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "nav-styles" .}}
+    {{template "app-styles" .}}
 <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #0a0f1a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-	.page { max-width: 1200px; margin: 48px auto; padding: 0 24px; }
+       	.page { max-width: 1200px; margin: 48px auto; padding: 0 24px; }
         .page-header { margin-bottom: 32px; border-left: 2px solid #fff; padding-left: 25px; }
         .page-title { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; text-transform: uppercase; }
         .page-subtitle { font-size: 13px; color: rgba(255,255,255,0.4); font-family: monospace; }
@@ -172,7 +172,6 @@
 </head>
 <body>
 
-{{template "nav-styles" .}}
 {{template "nav" .}}
 
 <div class="page">
