@@ -76,6 +76,7 @@ func LoadUser(userRepo *repo.UserRepo) func(http.Handler) http.Handler {
 
 			// User found — store in context
 			r = SetUser(r, user)
+			RefreshSessionCookie(w, user.ID)
 			next.ServeHTTP(w, r)
 		})
 	}

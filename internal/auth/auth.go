@@ -21,6 +21,7 @@ import (
 const (
 	SessionCookieName    = "__pscv_session"
 	SessionDuration      = 7 * 24 * time.Hour
+	IdleTimeout          = 30 * time.Minute
 	AnonymousCookieName  = "__pscv_anon_count"
 	AnonymousTokenCookie = "__pscv_anon_token"
 	MaxFreeInvoices      = 3
@@ -113,13 +114,20 @@ func GetSessionUserID(r *http.Request) (int64, bool) {
 		return 0, false
 	}
 	issued := time.Unix(ts, 0)
-	if time.Since(issued) > SessionDuration {
+	if time.Since(issued) > IdleTimeout {
 		return 0, false
 	}
 
 	return id, true
 }
 
+
+// RefreshSessionCookie re-issues the session cookie with a fresh timestamp.
+// Called on every authenticated request to implement idle timeout —
+// active users stay logged in, idle users are eventually logged out.
+func RefreshSessionCookie(w http.ResponseWriter, userID int64) {
+	SetSessionCookie(w, userID)
+}
 func ClearSessionCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     SessionCookieName,
