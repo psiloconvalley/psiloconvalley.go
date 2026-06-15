@@ -5,16 +5,9 @@
         {{if eq .Mode "edit"}}Edit Client{{else}}New Client{{end}} | PsiloConValley
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "nav-styles" .}}
+    {{template "app-styles" .}}
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: #0a0f1a;
-            color: #fff;
-    	    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100vh;
-        }
-
         .page {
             max-width: 720px;
             margin: 48px auto;
@@ -172,7 +165,6 @@
 </head>
 <body>
 
-{{template "nav-styles" .}}
 {{template "nav" .}}
 
 <div class="page">
