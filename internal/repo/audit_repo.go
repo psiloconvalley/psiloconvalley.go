@@ -152,3 +152,59 @@ func scanAuditLogs(rows *sql.Rows) ([]AuditLog, error) {
 
 	return logs, rows.Err()
 }
+// ListRecentFiltered returns paginated audit entries with optional action filter.
+// Used by the admin audit viewer at /admin/audit.
+// Pass action="" to return all actions.
+func (r *AuditRepo) ListRecentFiltered(ctx context.Context, action string, limit, offset int) ([]AuditLog, error) {
+	var rows *sql.Rows
+	var err error
+
+	if action == "" {
+		rows, err = r.db.QueryContext(ctx,
+			`SELECT id, user_id, action, entity_type, entity_id,
+			        ip_address, metadata, created_at
+			 FROM audit_logs
+			 ORDER BY created_at DESC
+			 LIMIT $1 OFFSET $2`,
+			limit, offset,
+		)
+	} else {
+		rows, err = r.db.QueryContext(ctx,
+			`SELECT id, user_id, action, entity_type, entity_id,
+			        ip_address, metadata, created_at
+			 FROM audit_logs
+			 WHERE action = $1
+			 ORDER BY created_at DESC
+			 LIMIT $2 OFFSET $3`,
+			action, limit, offset,
+		)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanAuditLogs(rows)
+}
+
+// CountFiltered returns the total count of audit entries for pagination math.
+// Pass action="" to count all entries.
+func (r *AuditRepo) CountFiltered(ctx context.Context, action string) (int, error) {
+	var count int
+	var err error
+
+	if action == "" {
+		err = r.db.QueryRowContext(ctx,
+			`SELECT COUNT(*) FROM audit_logs`,
+		).Scan(&count)
+	} else {
+		err = r.db.QueryRowContext(ctx,
+			`SELECT COUNT(*) FROM audit_logs WHERE action = $1`,
+			action,
+		).Scan(&count)
+	}
+
+	return count, err
+}
+

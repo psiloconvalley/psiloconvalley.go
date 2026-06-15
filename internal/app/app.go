@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	"strings"
 	"path/filepath"
 	"html/template"
 	"log"
@@ -57,6 +58,8 @@ func NewApp(db *sql.DB) *App {
 		"bpsToPercent": util.BpsToPercent,
 		"field":        field,
 		"mul":          func(a, b int) int { return a * b },
+		"hasPrefix":    strings.HasPrefix,
+		"hasSuffix":    strings.HasSuffix,
 	}
 	// Two-pass parse: root templates + partials subdirectory.
 	// Add additional ParseGlob calls here for new subdirectories.

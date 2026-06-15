@@ -120,6 +120,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 
 		// Admin
 		r.Get("/admin/analytics", h.AdminAnalytics)
+		r.Get("/admin/audit", h.AdminAuditLog)
 	})
 	return r
 }
