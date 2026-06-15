@@ -1,0 +1,111 @@
+{{define "profile-preview"}}
+        <!-- ═══════════ RIGHT: PREVIEW RAIL ═══════════ -->
+        <div class="preview-rail">
+            <div class="preview-label">Invoice Preview</div>
+            <div class="preview-card">
+                <div class="preview-accent"></div>
+                <div class="preview-body">
+                    <div class="preview-logo-area">
+                        {{if .Profile}}
+                            {{if .Profile.LogoURL}}
+                            <img id="preview-logo" class="preview-logo-img" src="{{.Profile.LogoURL}}" alt="Logo preview">
+                            {{else}}
+                            <div id="preview-logo-placeholder" class="preview-logo-placeholder">YOUR LOGO</div>
+                            {{end}}
+                        {{else}}
+                        <div id="preview-logo-placeholder" class="preview-logo-placeholder">YOUR LOGO</div>
+                        {{end}}
+                    </div>
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">INVOICE</div>
+                            <div id="preview-company" class="preview-company-name">
+                                {{if .Profile}}{{if .Profile.Name}}{{.Profile.Name}}{{else}}Your Company{{end}}{{else}}Your Company{{end}}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="preview-inv-label">Invoice</div>
+                            <div class="preview-inv-number">#INV-001</div>
+                        </div>
+                    </div>
+                    <div class="preview-items">
+                        <div class="preview-item">
+                            <span class="preview-item-name">Web Design</span>
+                            <span class="preview-item-amount">$1,200.00</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-item-name">Brand Strategy</span>
+                            <span class="preview-item-amount">$800.00</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-item-name">Consulting</span>
+                            <span class="preview-item-amount">$500.00</span>
+                        </div>
+                    </div>
+                    <div class="preview-total">
+                        <span>Total</span>
+                        <span class="preview-total-amount">$2,500.00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-hint">Updates live as you type</div>
+        </div>
+
+<!-- ═══════════ MOBILE: FLOATING PREVIEW BUTTON + SHEET ═══════════ -->
+<button class="mobile-preview-btn" onclick="openPreviewSheet()">
+    👁 Preview Invoice
+</button>
+
+<div class="preview-overlay" id="previewOverlay" onclick="closePreviewSheet()"></div>
+<div class="preview-sheet" id="previewSheet">
+    <div class="preview-sheet-handle"></div>
+    <button class="preview-sheet-close" onclick="closePreviewSheet()">✕</button>
+    <div class="preview-label" style="margin-bottom: 16px;">Invoice Preview</div>
+    <div class="preview-card">
+        <div class="preview-accent"></div>
+        <div class="preview-body">
+            <div class="preview-logo-area">
+                {{if .Profile}}
+                    {{if .Profile.LogoURL}}
+                    <img id="preview-logo-mobile" class="preview-logo-img" src="{{.Profile.LogoURL}}" alt="Logo preview">
+                    {{else}}
+                    <div id="preview-logo-placeholder-mobile" class="preview-logo-placeholder">YOUR LOGO</div>
+                    {{end}}
+                {{else}}
+                <div id="preview-logo-placeholder-mobile" class="preview-logo-placeholder">YOUR LOGO</div>
+                {{end}}
+            </div>
+            <div class="preview-header">
+                <div>
+                    <div class="preview-title">INVOICE</div>
+                    <div id="preview-company-mobile" class="preview-company-name">
+                        {{if .Profile}}{{if .Profile.Name}}{{.Profile.Name}}{{else}}Your Company{{end}}{{else}}Your Company{{end}}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="preview-inv-label">Invoice</div>
+                    <div class="preview-inv-number">#INV-001</div>
+                </div>
+            </div>
+            <div class="preview-items">
+                <div class="preview-item">
+                    <span class="preview-item-name">Web Design</span>
+                    <span class="preview-item-amount">$1,200.00</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-item-name">Brand Strategy</span>
+                    <span class="preview-item-amount">$800.00</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-item-name">Consulting</span>
+                    <span class="preview-item-amount">$500.00</span>
+                </div>
+            </div>
+            <div class="preview-total">
+                <span>Total</span>
+                <span class="preview-total-amount">$2,500.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
