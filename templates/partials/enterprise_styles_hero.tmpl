@@ -1,0 +1,107 @@
+{{define "enterprise-styles-hero"}}
+<style>
+    .ent-wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 80px 24px 120px;
+    }
+
+    /* ── Hero ── */
+    .ent-hero {
+        margin-bottom: 80px;
+        padding-bottom: 80px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .ent-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(74,222,128,0.8);
+        margin-bottom: 28px;
+    }
+
+    .ent-eyebrow::before {
+        content: '';
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: #4ade80;
+        border-radius: 2px;
+    }
+
+    .ent-hero h1 {
+        font-size: clamp(36px, 6vw, 64px);
+        font-weight: 900;
+        letter-spacing: -3px;
+        line-height: 1.0;
+        margin-bottom: 28px;
+        color: #ffffff;
+    }
+
+    .ent-hero h1 em {
+        font-style: normal;
+        background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .ent-hero-sub {
+        font-size: 17px;
+        color: rgba(255,255,255,0.55);
+        line-height: 1.7;
+        max-width: 580px;
+        margin-bottom: 40px;
+    }
+
+    .ent-hero-cta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .ent-btn-primary {
+        background: #ffffff;
+        color: #0a0f1a;
+        padding: 16px 32px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ent-btn-primary:hover {
+        background: #e2e8f0;
+        transform: translateY(-2px);
+    }
+
+    .ent-btn-secondary {
+        background: transparent;
+        color: #ffffff;
+        padding: 16px 32px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ent-btn-secondary:hover {
+        border-color: rgba(255,255,255,0.5);
+        background: rgba(255,255,255,0.05);
+    }
+</style>
+{{end}}

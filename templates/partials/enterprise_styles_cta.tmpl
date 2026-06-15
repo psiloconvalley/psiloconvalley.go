@@ -1,0 +1,51 @@
+{{define "enterprise-styles-cta"}}
+<style>
+    /* ── CTA ── */
+    .ent-cta {
+        text-align: center;
+        padding: 64px 32px;
+        background: rgba(74,222,128,0.04);
+        border: 1px solid rgba(74,222,128,0.15);
+        border-radius: 16px;
+        margin-top: 80px;
+    }
+
+    .ent-cta h2 {
+        font-size: clamp(24px, 3vw, 36px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 16px;
+    }
+
+    .ent-cta p {
+        font-size: 15px;
+        color: rgba(255,255,255,0.5);
+        margin-bottom: 32px;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.7;
+    }
+
+    .ent-cta-email {
+        font-size: 13px;
+        color: rgba(255,255,255,0.3);
+        margin-top: 16px;
+    }
+
+    .ent-cta-email a {
+        color: #4ade80;
+        text-decoration: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+        .ent-wrap { padding: 60px 20px 80px; }
+        .ent-hero h1 { letter-spacing: -2px; }
+        .ent-pricing { grid-template-columns: 1fr; }
+        .ent-proof { padding: 28px; }
+        .ent-cta { padding: 40px 20px; }
+        .ent-hero-cta { flex-direction: column; }
+    }
+</style>
+{{end}}

@@ -1,0 +1,193 @@
+{{define "enterprise-styles-layout"}}
+<style>
+    /* ── Section ── */
+    .ent-section {
+        margin-bottom: 72px;
+        padding-bottom: 72px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .ent-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .ent-section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(74,222,128,0.7);
+        margin-bottom: 12px;
+    }
+
+    .ent-section h2 {
+        font-size: clamp(24px, 3vw, 36px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 16px;
+        color: #ffffff;
+    }
+
+    .ent-section-sub {
+        font-size: 15px;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.7;
+        max-width: 600px;
+        margin-bottom: 40px;
+    }
+
+    /* ── Feature grid ── */
+    .ent-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .ent-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .ent-card:hover {
+        border-color: rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+    }
+
+    .ent-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: linear-gradient(180deg, #4ade80, #22d3ee);
+        border-radius: 3px 0 0 3px;
+    }
+
+    .ent-card-icon {
+        font-size: 22px;
+        margin-bottom: 12px;
+    }
+
+    .ent-card h4 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 8px;
+    }
+
+    .ent-card p {
+        font-size: 13px;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.65;
+    }
+
+    /* ── Proof block ── */
+    .ent-proof {
+        background: rgba(74,222,128,0.04);
+        border: 1px solid rgba(74,222,128,0.15);
+        border-radius: 16px;
+        padding: 40px;
+        margin-bottom: 72px;
+    }
+
+    .ent-proof-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(74,222,128,0.7);
+        margin-bottom: 16px;
+    }
+
+    .ent-proof h3 {
+        font-size: clamp(18px, 2.5vw, 24px);
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+    }
+
+    .ent-proof p {
+        font-size: 15px;
+        color: rgba(255,255,255,0.55);
+        line-height: 1.7;
+        max-width: 620px;
+    }
+
+    /* ── Pricing callout ── */
+    .ent-pricing {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 32px;
+    }
+
+    .ent-price-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 32px;
+    }
+
+    .ent-price-card.featured {
+        border-color: rgba(74,222,128,0.25);
+        background: rgba(74,222,128,0.03);
+    }
+
+    .ent-price-name {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 16px;
+    }
+
+    .ent-price-card.featured .ent-price-name {
+        color: #4ade80;
+    }
+
+    .ent-price-amount {
+        font-size: 48px;
+        font-weight: 800;
+        letter-spacing: -2px;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .ent-price-period {
+        font-size: 14px;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 24px;
+    }
+
+    .ent-price-features {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ent-price-features li {
+        font-size: 13px;
+        color: rgba(255,255,255,0.65);
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .ent-price-features li::before {
+        content: '✓';
+        color: #4ade80;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+</style>
+{{end}}

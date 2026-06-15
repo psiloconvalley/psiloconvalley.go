@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Enterprise Invoicing for Medical & Legal | Psilocon Valley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure, audit-logged invoicing for medical offices, law firms, and agencies. HIPAA-ready foundation with professional deal flow.">
+    {{template "nav-styles" .}}
+    {{template "base-styles" .}}
+    {{template "enterprise-styles-hero" .}}
+    {{template "enterprise-styles-layout" .}}
+    {{template "enterprise-styles-cta" .}}
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="ent-wrap">
+
+    <!-- ── Hero ── -->
+    <section class="ent-hero">
+        <div class="ent-eyebrow">Enterprise</div>
+        <h1>Invoicing built for<br><em>high-trust professions.</em></h1>
+        <p class="ent-hero-sub">
+            Secure, audit-logged financial infrastructure for medical practices, 
+            law firms, and professional agencies. Built on a foundation of 
+            privacy and permanent accountability.
+        </p>
+        <div class="ent-hero-cta">
+            <a href="mailto:enterprise@psiloconvalley.com" class="ent-btn-primary">Contact Sales →</a>
+            <a href="/security" class="ent-btn-secondary">Security Overview</a>
+        </div>
+    </section>
+
+    <!-- ── Security Section ── -->
+    <section class="ent-section">
+        <p class="ent-section-label">Trust & Compliance</p>
+        <h2>Compliance is not a feature.<br>It is the foundation.</h2>
+        <p class="ent-section-sub">
+            We understand that for medical and legal professionals, data integrity is 
+            non-negotiable. Psilocon Valley is built with the technical controls required 
+            for sensitive environments.
+        </p>
+
+        <div class="ent-grid">
+            <div class="ent-card">
+                <div class="ent-card-icon">📜</div>
+                <h4>Permanent Audit Logs</h4>
+                <p>Every action—from login attempts to invoice edits—is logged with a timestamp and IP address. Immutable and append-only.</p>
+            </div>
+            <div class="ent-card">
+                <div class="ent-card-icon">⏱️</div>
+                <h4>Idle Session Timeout</h4>
+                <p>Automatic inactivity logout ensures that sensitive data is never left exposed on shared terminal screens.</p>
+            </div>
+            <div class="ent-card">
+                <div class="ent-card-icon">🔐</div>
+                <h4>Argon2id Security</h4>
+                <p>Enterprise-grade hashing and hardened security headers protect your practice against modern threat vectors.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Proof Block ── -->
+    <div class="ent-proof">
+        <div class="ent-proof-label">Roadmap</div>
+        <h3>The path to HIPAA readiness.</h3>
+        <p>
+            We are currently rolling out the final technical controls required for full HIPAA 
+            Business Associate Agreement (BAA) eligibility, including encryption-at-rest 
+            and 2FA (TOTP) enforcement.
+        </p>
+    </div>
+
+    <!-- ── Pricing Tier ── -->
+    <section class="ent-section">
+        <p class="ent-section-label">Investment</p>
+        <h2>Enterprise Tier</h2>
+        <p class="ent-section-sub">
+            Designed for practices that require high-touch support and 
+            robust compliance documentation.
+        </p>
+
+        <div class="ent-pricing">
+            <div class="ent-price-card featured">
+                <div class="ent-price-name">Enterprise</div>
+                <div class="ent-price-amount">$288.00</div>
+                <div class="ent-price-period">per month, billed annually</div>
+                <ul class="ent-price-features">
+                    <li>Full Audit Log Access</li>
+                    <li>Custom Session Policies</li>
+                    <li>Priority Engineering Support</li>
+                    <li>White-label PDF Engine</li>
+                    <li>Early Access to BAA Eligibility</li>
+                </ul>
+            </div>
+            <div class="ent-price-card">
+                <div class="ent-price-name">Studio</div>
+                <div class="ent-price-amount">$88.88</div>
+                <div class="ent-price-period">per month</div>
+                <ul class="ent-price-features">
+                    <li>Unlimited Users (up to 5)</li>
+                    <li>Advanced Role Permissions</li>
+                    <li>Client Scorecard Logic</li>
+                    <li>Recurring Automation</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Final CTA ── -->
+    <div class="ent-cta">
+        <h2>Start the conversation.</h2>
+        <p>
+            Speak directly with our founding engineering team to discuss your 
+            practice's specific security and workflow requirements.
+        </p>
+        <a href="mailto:enterprise@psiloconvalley.com" class="ent-btn-primary">enterprise@psiloconvalley.com</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>
+        Built with Go + PostgreSQL —
+        <a href="/research">Research</a> ·
+        <a href="/tools">Tools</a> ·
+        <a href="/security">Security</a>
+    </p>
+</footer>
+
+</body>
+</html>

@@ -35,6 +35,9 @@ func (h *Handlers) SecurityPage(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) ToolsHub(w http.ResponseWriter, r *http.Request) {
 	h.App.Render(w, r, "tools_hub.tmpl", nil)
 }
+func (h *Handlers) EnterprisePage(w http.ResponseWriter, r *http.Request) {
+	h.App.Render(w, r, "enterprise.tmpl", nil)
+}
 
 func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "ok")

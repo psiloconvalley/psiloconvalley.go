@@ -27,6 +27,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/research", h.Research)
 	r.Get("/security", h.SecurityPage)
 	r.Get("/tools", h.ToolsHub)
+	r.Get("/enterprise", h.EnterprisePage)
 	r.Get("/pricing", h.PricingGet)
 	r.Post("/stripe/webhook", h.StripeWebhook)
 	r.Post("/feedback", h.Feedback)
