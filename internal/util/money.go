@@ -48,3 +48,15 @@ func ParseBps(val string) int64 {
 	}
 	return int64(math.Round(f * 100))
 }
+
+
+// DollarsToCents converts a dollar float to cents using correct rounding.
+// Always use this — never write int64(x * 100) inline.
+func DollarsToCents(d float64) int64 {
+	return int64(math.Round(d * 100))
+}
+
+// CentsToDollars converts cents to a dollar float.
+func CentsToDollars(c int64) float64 {
+	return float64(c) / 100.0
+}
