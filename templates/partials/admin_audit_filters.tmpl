@@ -1,0 +1,34 @@
+{{define "admin-audit-filters"}}
+<form method="GET" action="/admin/audit" class="audit-filters">
+    <select name="action" onchange="this.form.submit()">
+        <option value="" {{if eq .Action ""}}selected{{end}}>All Actions</option>
+        <optgroup label="Invoice">
+            <option value="invoice.created"        {{if eq .Action "invoice.created"}}selected{{end}}>invoice.created</option>
+            <option value="invoice.updated"        {{if eq .Action "invoice.updated"}}selected{{end}}>invoice.updated</option>
+            <option value="invoice.deleted"        {{if eq .Action "invoice.deleted"}}selected{{end}}>invoice.deleted</option>
+            <option value="invoice.status_changed" {{if eq .Action "invoice.status_changed"}}selected{{end}}>invoice.status_changed</option>
+            <option value="invoice.sent"           {{if eq .Action "invoice.sent"}}selected{{end}}>invoice.sent</option>
+            <option value="invoice.duplicated"     {{if eq .Action "invoice.duplicated"}}selected{{end}}>invoice.duplicated</option>
+        </optgroup>
+        <optgroup label="Estimate">
+            <option value="estimate.created"       {{if eq .Action "estimate.created"}}selected{{end}}>estimate.created</option>
+            <option value="estimate.updated"       {{if eq .Action "estimate.updated"}}selected{{end}}>estimate.updated</option>
+            <option value="estimate.deleted"       {{if eq .Action "estimate.deleted"}}selected{{end}}>estimate.deleted</option>
+            <option value="estimate.sent"          {{if eq .Action "estimate.sent"}}selected{{end}}>estimate.sent</option>
+            <option value="estimate.converted"     {{if eq .Action "estimate.converted"}}selected{{end}}>estimate.converted</option>
+            <option value="estimate.responded"     {{if eq .Action "estimate.responded"}}selected{{end}}>estimate.responded</option>
+        </optgroup>
+        <optgroup label="Auth">
+            <option value="auth.login"             {{if eq .Action "auth.login"}}selected{{end}}>auth.login</option>
+            <option value="auth.login_failed"      {{if eq .Action "auth.login_failed"}}selected{{end}}>auth.login_failed</option>
+            <option value="auth.logout"            {{if eq .Action "auth.logout"}}selected{{end}}>auth.logout</option>
+            <option value="auth.register"          {{if eq .Action "auth.register"}}selected{{end}}>auth.register</option>
+        </optgroup>
+        <optgroup label="Payment">
+            <option value="payment.received"       {{if eq .Action "payment.received"}}selected{{end}}>payment.received</option>
+            <option value="payment.failed"         {{if eq .Action "payment.failed"}}selected{{end}}>payment.failed</option>
+        </optgroup>
+    </select>
+    <span class="audit-count">{{.Total}} entries</span>
+</form>
+{{end}}

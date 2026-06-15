@@ -1,0 +1,55 @@
+{{define "admin-audit-table"}}
+{{if .Logs}}
+<table class="audit-table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>User ID</th>
+            <th>IP Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Logs}}
+        <tr>
+            <td class="audit-time">{{.CreatedAt.Format "Jan 02 15:04:05"}}</td>
+            <td>
+                <span class="audit-action{{if hasPrefix .Action "auth"}} auth{{end}}{{if hasPrefix .Action "payment"}} payment{{end}}{{if hasSuffix .Action "failed"}} failed{{end}}">
+                    {{.Action}}
+                </span>
+            </td>
+            <td class="audit-entity">
+                {{if .EntityID}}
+                    {{.EntityType}} #{{.EntityID}}
+                {{else}}
+                    {{.EntityType}}
+                {{end}}
+            </td>
+            <td class="audit-user">
+                {{if .UserID}}#{{.UserID}}{{else}}—{{end}}
+            </td>
+            <td class="audit-ip">{{if .IPAddress}}{{.IPAddress}}{{else}}—{{end}}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+
+{{if gt .TotalPages 1}}
+<div class="audit-pagination">
+    {{if .HasPrev}}
+        <a href="/admin/audit?page={{.PrevPage}}&action={{.Action}}">← Prev</a>
+    {{end}}
+    <span class="current">Page {{.Page}} of {{.TotalPages}}</span>
+    {{if .HasNext}}
+        <a href="/admin/audit?page={{.NextPage}}&action={{.Action}}">Next →</a>
+    {{end}}
+</div>
+{{end}}
+
+{{else}}
+<div class="audit-empty">
+    No audit entries found{{if .Action}} for action <strong>{{.Action}}</strong>{{end}}.
+</div>
+{{end}}
+{{end}}
