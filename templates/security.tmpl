@@ -315,6 +315,11 @@
                 <div class="sec-status-name">HMAC-SHA256 signed sessions</div>
                 <div class="sec-status-desc">Active on all sessions</div>
             </div>
+	        <div class="sec-status-row">
+                <div class="sec-status-dot green"></div>
+                <div class="sec-status-name">Idle session timeout</div>
+                <div class="sec-status-desc">Active — 30 minute inactivity logout for authenticated sessions</div>
+            </div>
             <div class="sec-status-row">
                 <div class="sec-status-dot green"></div>
                 <div class="sec-status-name">CSRF protection</div>
@@ -346,14 +351,14 @@
                 <div class="sec-status-desc">PCI DSS Level 1 — we never see card data</div>
             </div>
             <div class="sec-status-row">
-                <div class="sec-status-dot yellow"></div>
+                <div class="sec-status-dot green"></div>
                 <div class="sec-status-name">Audit logging</div>
-                <div class="sec-status-desc">In progress — every action will be logged with timestamp and IP</div>
+                <div class="sec-status-desc">Active — invoice, estimate, auth, and payment events are recorded with timestamp and IP</div>
             </div>
             <div class="sec-status-row">
                 <div class="sec-status-dot yellow"></div>
                 <div class="sec-status-name">Two-factor authentication</div>
-                <div class="sec-status-desc">Planned — TOTP + SMS options</div>
+                <div class="sec-status-desc">Planned — TOTP authenticator app support</div>
             </div>
             <div class="sec-status-row">
                 <div class="sec-status-dot yellow"></div>
