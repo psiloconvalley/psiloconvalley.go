@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clients | PsiloConValley</title>
+    <title>{{.T.ClientsTitle}} | PsiloConValley</title>
 
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
@@ -18,38 +18,37 @@
 
     <div class="top">
         <div>
-            <h1>Clients</h1>
+            <h1>{{.T.ClientsTitle}}</h1>
             <div class="top-subtitle">
-                {{.ClientCount}} saved
+                {{.ClientCount}} {{.T.ClientsSaved}}
                 {{if .User}}
                     {{if eq .User.Plan "pro"}}
-                    · <span class="plan-badge pro">Pro — Unlimited</span>
+                    · <span class="plan-badge pro">{{.T.ClientsProUnlimited}}</span>
                     {{else}}
-                    · {{.ClientCount}}/5 free slots used
+                    · {{.ClientCount}}/5 {{.T.ClientsFreeSlotsUsed}}
                     {{end}}
                 {{end}}
             </div>
         </div>
         <div class="top-right">
             {{if .CanAddClient}}
-            <a class="btn" href="/clients/new">+ New Client</a>
+            <a class="btn" href="/clients/new">{{.T.ClientsNewClient}}</a>
             {{else}}
-            <span class="btn-disabled">+ New Client</span>
+            <span class="btn-disabled">{{.T.ClientsNewClient}}</span>
             {{end}}
         </div>
     </div>
 
     {{if .AtLimit}}
     <div class="limit-banner">
-        ⚡ You've used all <strong>5 free client slots</strong>.
-        Upgrade to <strong>Pro</strong> for unlimited clients, invoice history per client, and revenue analytics.
+        ⚡ {{.T.ClientsLimitBanner}}
         <br><br>
-        <a href="/pricing">Upgrade to Pro →</a>
+        <a href="/pricing">{{.T.ClientsLimitUpgrade}}</a>
     </div>
     {{end}}
 
     {{if eq (index . "saved") true}}
-    <div class="success-banner">✓ Client saved successfully</div>
+    <div class="success-banner">{{.T.ClientsSavedSuccess}}</div>
     {{end}}
 
     {{if .Clients}}
@@ -57,10 +56,10 @@
         <table>
             <thead>
                 <tr>
-                    <th>Client</th>
-                    <th>Location</th>
-                    <th>Phone</th>
-                    <th style="text-align:right;">Operations</th>
+                    <th>{{.T.ClientsThClient}}</th>
+                    <th>{{.T.ClientsThLocation}}</th>
+                    <th>{{.T.ClientsThPhone}}</th>
+                    <th style="text-align:right;">{{.T.ClientsThOperations}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -83,13 +82,13 @@
                     </td>
                     <td>
                         <div class="actions-cell">
-                            <a class="small-btn" href="/clients/{{.ID}}/edit">Edit</a>
-                            <a class="small-btn" href="/invoices/new?client_id={{.ID}}">Invoice</a>
+                            <a class="small-btn" href="/clients/{{.ID}}/edit">{{$.T.ClientsEdit}}</a>
+                            <a class="small-btn" href="/invoices/new?client_id={{.ID}}">{{$.T.ClientsInvoice}}</a>
                             <form method="POST" action="/clients/{{.ID}}/delete"
                                   style="display:inline;"
-                                  onsubmit="return confirm('Delete {{.Name}}? This cannot be undone.');">
+                                  onsubmit="return confirm('{{$.T.ClientsDeleteConfirm}}');">
                                 {{$.csrfField}}
-                                <button type="submit" class="small-btn danger">Delete</button>
+                                <button type="submit" class="small-btn danger">{{$.T.ClientsDelete}}</button>
                             </form>
                         </div>
                     </td>
@@ -102,13 +101,10 @@
     {{else}}
     <div class="empty-state">
         <div class="empty-icon">👤</div>
-        <h2>No Clients Saved</h2>
-        <p>
-            Save your first client and their info will auto-fill every future invoice.
-            No more retyping addresses.
-        </p>
+        <h2>{{.T.ClientsEmptyTitle}}</h2>
+        <p>{{.T.ClientsEmptyBody}}</p>
         {{if .CanAddClient}}
-        <a href="/clients/new" class="btn">Add First Client</a>
+        <a href="/clients/new" class="btn">{{.T.ClientsAddFirst}}</a>
         {{end}}
     </div>
     {{end}}

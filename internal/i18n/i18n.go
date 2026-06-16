@@ -81,7 +81,7 @@ type T struct {
 	RevenueMinusExpenses  string
 	CreateFirstInvoice    string
 	CreateFirstEstimate   string
-		// Profile page
+	// Profile page
 	ProfileTitle            string
 	ProfileSubtitle         string
 	ProfileWelcomeTitle     string
@@ -139,6 +139,26 @@ type T struct {
 	ProfilePreviewTotal     string
 	ProfilePreviewHint      string
 	ProfilePreviewMobile    string
+	// Clients page
+	ClientsTitle          string
+	ClientsSaved          string
+	ClientsProUnlimited   string
+	ClientsFreeSlotsUsed  string
+	ClientsNewClient      string
+	ClientsLimitBanner    string
+	ClientsLimitUpgrade   string
+	ClientsSavedSuccess   string
+	ClientsThClient       string
+	ClientsThLocation     string
+	ClientsThPhone        string
+	ClientsThOperations   string
+	ClientsEdit           string
+	ClientsInvoice        string
+	ClientsDelete         string
+	ClientsDeleteConfirm  string
+	ClientsEmptyTitle     string
+	ClientsEmptyBody      string
+	ClientsAddFirst       string
 }
 
 var en = T{
@@ -267,6 +287,25 @@ var en = T{
 	ProfilePreviewTotal:     "Total",
 	ProfilePreviewHint:      "Updates live as you type",
 	ProfilePreviewMobile:    "👁 Preview Invoice",
+	ClientsTitle:          "Clients",
+	ClientsSaved:          "saved",
+	ClientsProUnlimited:   "Pro — Unlimited",
+	ClientsFreeSlotsUsed:  "free slots used",
+	ClientsNewClient:      "+ New Client",
+	ClientsLimitBanner:    "You've used all 5 free client slots. Upgrade to Pro for unlimited clients, invoice history per client, and revenue analytics.",
+	ClientsLimitUpgrade:   "Upgrade to Pro →",
+	ClientsSavedSuccess:   "✓ Client saved successfully",
+	ClientsThClient:       "Client",
+	ClientsThLocation:     "Location",
+	ClientsThPhone:        "Phone",
+	ClientsThOperations:   "Operations",
+	ClientsEdit:           "Edit",
+	ClientsInvoice:        "Invoice",
+	ClientsDelete:         "Delete",
+	ClientsDeleteConfirm:  "Delete this client? This cannot be undone.",
+	ClientsEmptyTitle:     "No Clients Saved",
+	ClientsEmptyBody:      "Save your first client and their info will auto-fill every future invoice. No more retyping addresses.",
+	ClientsAddFirst:       "Add First Client",
 }
 
 var es = T{
@@ -395,6 +434,25 @@ var es = T{
 	ProfilePreviewTotal:     "Total",
 	ProfilePreviewHint:      "Se actualiza mientras escribes",
 	ProfilePreviewMobile:    "👁 Vista Previa",
+	ClientsTitle:          "Clientes",
+	ClientsSaved:          "guardados",
+	ClientsProUnlimited:   "Pro — Ilimitado",
+	ClientsFreeSlotsUsed:  "espacios gratis usados",
+	ClientsNewClient:      "+ Nuevo Cliente",
+	ClientsLimitBanner:    "Has usado los 5 espacios gratis. Actualiza a Pro para clientes ilimitados, historial de facturas por cliente y análisis de ingresos.",
+	ClientsLimitUpgrade:   "Actualizar a Pro →",
+	ClientsSavedSuccess:   "✓ Cliente guardado exitosamente",
+	ClientsThClient:       "Cliente",
+	ClientsThLocation:     "Ubicación",
+	ClientsThPhone:        "Teléfono",
+	ClientsThOperations:   "Acciones",
+	ClientsEdit:           "Editar",
+	ClientsInvoice:        "Factura",
+	ClientsDelete:         "Eliminar",
+	ClientsDeleteConfirm:  "¿Eliminar este cliente? Esta acción no se puede deshacer.",
+	ClientsEmptyTitle:     "No Hay Clientes Guardados",
+	ClientsEmptyBody:      "Guarda tu primer cliente y su información se llenará automáticamente en cada factura. No más escribir direcciones.",
+	ClientsAddFirst:       "Agregar Primer Cliente",
 }
 
 // Get returns the translation set for the given language code.
