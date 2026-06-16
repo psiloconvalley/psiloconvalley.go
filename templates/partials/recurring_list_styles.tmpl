@@ -1,0 +1,183 @@
+{{define "recurring-list-styles"}}
+<style>
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+	.top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
+        }
+        .top h1 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        .top-subtitle {
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            margin-top: 6px;
+            font-family: monospace;
+        }
+        .btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-white { background: #fff; color: #000; }
+        .btn-white:hover { opacity: 0.85; }
+        .btn-danger { background: #450a0a; color: #fca5a5; }
+        .btn-danger:hover { background: #7f1d1d; }
+        .btn-muted {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-muted:hover { background: rgba(255,255,255,0.1); }
+        .btn-success { background: #14532d; color: #86efac; }
+        .btn-success:hover { background: #166534; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-active  { background: #14532d; color: #86efac; }
+        .badge-paused  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+
+        .freq-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ── Table ── */
+        .table-wrap {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.4);
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .inv-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .inv-link:hover { text-decoration: underline; }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ── Empty state ── */
+        .empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: rgba(255,255,255,0.3);
+        }
+        .empty-icon { font-size: 40px; margin-bottom: 16px; }
+        .empty-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.5);
+        }
+        .empty-sub { font-size: 14px; margin-bottom: 24px; }
+
+        /* ── Info banner ── */
+        .info-banner {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #93c5fd;
+            line-height: 1.5;
+        }
+
+        /* ── Mobile cards ── */
+        .card-list { display: none; }
+
+        @media (max-width: 639px) {
+            .container { padding: 24px 16px 80px; }
+	    .top { padding-left: 16px; }
+            .top h1 { font-size: 22px; }
+            .table-wrap { display: none; }
+            .card-list { display: flex; flex-direction: column; gap: 10px; }
+
+            .rec-card {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 10px;
+                padding: 16px;
+            }
+            .rec-card-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 8px;
+            }
+            .rec-card-number { font-size: 15px; font-weight: 700; }
+            .rec-card-client {
+                font-size: 13px;
+                color: rgba(255,255,255,0.55);
+                margin-bottom: 12px;
+            }
+            .rec-card-meta {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 12px;
+            }
+            .rec-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+            .rec-card-actions .btn { font-size: 12px; padding: 8px 14px; }
+        }
+</style>
+{{end}}
