@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Business Profile | PsiloConValley</title>
+    <title>{{.T.ProfileTitle}} | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
@@ -13,10 +13,10 @@
 
 <div class="page">
     <div class="page-header">
-        <h1 class="page-title">Business Profile</h1>
-        <p class="page-subtitle">Design your invoice identity. Changes appear instantly in the preview.</p>
+        <h1 class="page-title">{{.T.ProfileTitle}}</h1>
+        <p class="page-subtitle">{{.T.ProfileSubtitle}}</p>
     </div>
-        {{if .Welcome}}
+    {{if .Welcome}}
     <div style="
         background: linear-gradient(135deg, rgba(74,222,128,0.08) 0%, rgba(34,197,94,0.04) 100%);
         border: 1px solid rgba(74,222,128,0.2);
@@ -34,12 +34,10 @@
         ">🎉</div>
         <div>
             <div style="font-size: 18px; font-weight: 800; color: #4ade80; margin-bottom: 6px;">
-                Welcome to PsiloConValley
+                {{.T.ProfileWelcomeTitle}}
             </div>
             <div style="font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6;">
-                Your account is ready. Start by filling out your business profile below —
-                your name, logo, and contact info will appear on every invoice you send.
-                This takes about 30 seconds.
+                {{.T.ProfileWelcomeBody}}
             </div>
             <div style="
                 margin-top: 14px;
@@ -48,20 +46,19 @@
                 font-size: 12px;
                 color: rgba(255,255,255,0.3);
             ">
-                <span>✓ Step 1 of 4 complete</span>
+                <span>{{.T.ProfileWelcomeStep}}</span>
                 <span>·</span>
-                <a href="/dashboard" style="color: rgba(255,255,255,0.4); text-decoration: none;">Skip to Dashboard →</a>
+                <a href="/dashboard" style="color: rgba(255,255,255,0.4); text-decoration: none;">{{.T.ProfileWelcomeSkip}}</a>
             </div>
         </div>
     </div>
     {{end}}
 
-    
     {{if .Saved}}
-    <div class="success-banner">✓ Profile saved successfully</div>
+    <div class="success-banner">{{.T.ProfileSaved}}</div>
     {{end}}
-     {{if .PasswordSaved}}
-    <div class="success-banner">✓ Password updated successfully. You can now sign in with your new password.</div>
+    {{if .PasswordSaved}}
+    <div class="success-banner">{{.T.ProfilePasswordSaved}}</div>
     {{end}}
 
     {{if .Error}}
@@ -81,11 +78,10 @@
         <div style="font-size: 28px; flex-shrink: 0; line-height: 1;">🔐</div>
         <div>
             <div style="font-size: 15px; font-weight: 800; color: #a5b4fc; margin-bottom: 6px;">
-                You're signed in via magic link
+                {{.T.ProfileMagicTitle}}
             </div>
             <div style="font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6;">
-                Set a password below so you can sign in with email next time.
-                This is optional — you can always request another sign-in link.
+                {{.T.ProfileMagicBody}}
             </div>
         </div>
     </div>
@@ -98,74 +94,74 @@
                 {{.csrfField}}
 
                 <div class="section">
-                    <div class="section-title">Logo</div>
+                    <div class="section-title">{{.T.ProfileSectionLogo}}</div>
                     <div class="form-group" style="margin-bottom: 0;">
                         {{if .Profile}}
                             {{if .Profile.LogoURL}}
                             <div style="margin-bottom: 12px;">
                                 <img
                                     src="{{.Profile.LogoURL}}"
-                                    alt="Company Logo"
+                                    alt="Logo"
                                     style="max-width:140px; max-height:60px; object-fit:contain; background:#fff; border:1px solid #eee; border-radius:8px; padding:10px;"
                                 >
                             </div>
                             {{end}}
                         {{end}}
                         <input type="file" name="logo" accept=".png,.jpg,.jpeg,.webp,.svg">
-                        <div class="hint">PNG recommended. Max 2MB.</div>
+                        <div class="hint">{{.T.ProfileLogoHint}}</div>
                     </div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">Company Information</div>
+                    <div class="section-title">{{.T.ProfileSectionCompany}}</div>
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Company Name *</label>
+                            <label>{{.T.ProfileCompanyName}}</label>
                             <input type="text" name="name" id="field-name" value="{{if .Profile}}{{.Profile.Name}}{{end}}" required>
                         </div>
                         <div class="form-group">
-                            <label>Email Address</label>
+                            <label>{{.T.ProfileEmail}}</label>
                             <input type="email" name="email" id="field-email" value="{{if .Profile}}{{.Profile.Email}}{{end}}">
                         </div>
                     </div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">Address</div>
+                    <div class="section-title">{{.T.ProfileSectionAddress}}</div>
                     <div class="form-group">
-                        <label>Street Address</label>
+                        <label>{{.T.ProfileStreetAddress}}</label>
                         <input type="text" name="address" value="{{if .Profile}}{{.Profile.Address}}{{end}}">
                     </div>
                     <div class="grid-3">
                         <div class="form-group">
-                            <label>City</label>
+                            <label>{{.T.ProfileCity}}</label>
                             <input type="text" name="city" value="{{if .Profile}}{{.Profile.City}}{{end}}">
                         </div>
                         <div class="form-group">
-                            <label>State / Region</label>
+                            <label>{{.T.ProfileStateRegion}}</label>
                             <input type="text" name="state" value="{{if .Profile}}{{.Profile.State}}{{end}}">
                         </div>
                         <div class="form-group">
-                            <label>Zip / Postal Code</label>
+                            <label>{{.T.ProfileZipPostal}}</label>
                             <input type="text" name="zip" value="{{if .Profile}}{{.Profile.Zip}}{{end}}">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Country</label>
+                        <label>{{.T.ProfileCountry}}</label>
                         <input type="text" name="country" value="{{if .Profile}}{{.Profile.Country}}{{end}}">
                     </div>
                 </div>
 
                 <div class="section">
-                    <div class="section-title">Financial Settings</div>
+                    <div class="section-title">{{.T.ProfileSectionFinancial}}</div>
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Tax ID / EIN</label>
+                            <label>{{.T.ProfileTaxID}}</label>
                             <input type="text" name="tax_id" value="{{if .Profile}}{{.Profile.TaxID}}{{end}}">
-                            <div class="hint">Optional. Appears on invoices if provided.</div>
+                            <div class="hint">{{.T.ProfileTaxIDHint}}</div>
                         </div>
                         <div class="form-group">
-                            <label>Default Currency</label>
+                            <label>{{.T.ProfileCurrency}}</label>
                             <select name="currency">
                                 <option value="USD" {{if .Profile}}{{if eq .Profile.Currency "USD"}}selected{{end}}{{else}}selected{{end}}>USD — US Dollar</option>
                                 <option value="CAD" {{if .Profile}}{{if eq .Profile.Currency "CAD"}}selected{{end}}{{end}}>CAD — Canadian Dollar</option>
@@ -178,60 +174,61 @@
                 </div>
 
                 <div class="section">
-                    <div class="section-title">Payment Processing</div>
+                    <div class="section-title">{{.T.ProfileSectionPayment}}</div>
                     {{if .StripeConnected}}
-                    <div class="success-banner">✅ Stripe account connected successfully!</div>
+                    <div class="success-banner">✅ {{.T.ProfileStripeConnected}}</div>
                     {{end}}
                     {{if .StripeError}}
-                    <div class="error-banner">❌ Could not connect Stripe account. Please try again.</div>
+                    <div class="error-banner">❌ {{.T.ProfileStripeError}}</div>
                     {{end}}
 
-		   {{if .User.StripeConnectID}}
+                    {{if .User.StripeConnectID}}
                     <div style="display: flex; align-items: center; gap: 12px; padding: 14px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px;">
                         <span style="font-size: 20px;">✅</span>
                         <div>
-                            <div style="font-weight: 700; font-size: 13px; color: #6ee7b7;">Stripe Connected</div>
-                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">Clients can pay by card. Account: {{.User.StripeConnectID}}</div>
+                            <div style="font-weight: 700; font-size: 13px; color: #6ee7b7;">{{.T.ProfileStripeConnected}}</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">{{.T.ProfileStripeConnectedSub}} Account: {{.User.StripeConnectID}}</div>
                         </div>
                     </div>
                     {{else}}
                     <div style="display: flex; align-items: center; gap: 14px; padding: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;">
                         <span style="font-size: 24px;">💳</span>
                         <div style="flex: 1;">
-                            <div style="font-weight: 700; font-size: 13px; color: #fff;">Accept Card Payments</div>
-                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">Connect Stripe so clients can pay invoices directly.</div>
+                            <div style="font-weight: 700; font-size: 13px; color: #fff;">{{.T.ProfileStripeAcceptCards}}</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">{{.T.ProfileStripeAcceptCardsSub}}</div>
                         </div>
-                        <a href="/auth/stripe/connect" style="background: #635bff; color: white; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap;">Connect Stripe</a>
+                        <a href="/auth/stripe/connect" style="background: #635bff; color: white; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap;">{{.T.ProfileStripeConnect}}</a>
                     </div>
                     {{end}}
-                                    </div>
+                </div>
 
-		                <div class="section">
-                    <div class="section-title">Language / Idioma</div>
+                <div class="section">
+                    <div class="section-title">{{.T.ProfileSectionLanguage}}</div>
                     <div class="form-group">
-                        <label>Interface Language / Idioma de la Interfaz</label>
+                        <label>{{.T.ProfileSectionLanguage}}</label>
                         <select name="language">
                             <option value="en" {{if eq .User.Language "en"}}selected{{end}}>English</option>
                             <option value="es" {{if eq .User.Language "es"}}selected{{end}}>Español</option>
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="btn-primary">Save Profile</button>
+                <button type="submit" class="btn-primary">{{.T.ProfileSave}}</button>
             </form>
-	        <!-- ═══════════ PASSWORD ═══════════ -->
+
+            <!-- ═══════════ PASSWORD ═══════════ -->
             <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);">
                 <div class="section-title">
-                    {{if .HasPassword}}Change Password{{else}}Set a Password{{end}}
+                    {{if .HasPassword}}{{.T.ProfileChangePassword}}{{else}}{{.T.ProfileSetPassword}}{{end}}
                 </div>
 
                 {{if eq .PasswordError "current"}}
-                <div class="error-banner">Current password is incorrect.</div>
+                <div class="error-banner">{{.T.ProfileErrCurrentPW}}</div>
                 {{else if eq .PasswordError "short"}}
-                <div class="error-banner">New password must be at least 8 characters.</div>
+                <div class="error-banner">{{.T.ProfileErrShortPW}}</div>
                 {{else if eq .PasswordError "mismatch"}}
-                <div class="error-banner">Passwords do not match.</div>
+                <div class="error-banner">{{.T.ProfileErrMismatchPW}}</div>
                 {{else if eq .PasswordError "failed"}}
-                <div class="error-banner">Could not update password. Please try again.</div>
+                <div class="error-banner">{{.T.ProfileErrFailedPW}}</div>
                 {{end}}
 
                 <form method="POST" action="/profile/password" autocomplete="off">
@@ -239,7 +236,7 @@
 
                     {{if .HasPassword}}
                     <div class="form-group">
-                        <label>Current Password</label>
+                        <label>{{.T.ProfileCurrentPassword}}</label>
                         <input
                             type="password"
                             name="current_password"
@@ -251,24 +248,24 @@
 
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>New Password</label>
+                            <label>{{.T.ProfileNewPassword}}</label>
                             <input
                                 type="password"
                                 name="new_password"
                                 id="new-password"
                                 autocomplete="new-password"
-                                placeholder="Min. 8 characters"
+                                placeholder="{{.T.ProfilePasswordMin}}"
                                 minlength="8"
                                 required>
                         </div>
                         <div class="form-group">
-                            <label>Confirm Password</label>
+                            <label>{{.T.ProfileConfirmPassword}}</label>
                             <input
                                 type="password"
                                 name="confirm_password"
                                 id="confirm-password"
                                 autocomplete="new-password"
-                                placeholder="Repeat new password"
+                                placeholder="{{.T.ProfilePasswordRepeat}}"
                                 minlength="8"
                                 required>
                         </div>
@@ -277,19 +274,19 @@
                     <div id="pw-match-hint" style="font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:16px;min-height:18px;"></div>
 
                     <button type="submit" class="btn-primary" id="pw-submit-btn">
-                        {{if .HasPassword}}Update Password{{else}}Set Password{{end}}
+                        {{if .HasPassword}}{{.T.ProfileUpdatePassword}}{{else}}{{.T.ProfileSetPassword}}{{end}}
                     </button>
                 </form>
 
                 {{if .IsGoogleUser}}
                 <p style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:14px;line-height:1.6;">
-                    Your account uses Google sign-in.
-                    Setting a password lets you also sign in with email.
+                    {{.T.ProfileGoogleSignIn}}
                 </p>
                 {{end}}
             </div>
-	</div>
+        </div>
 {{template "profile-preview" .}}
+    </div>
 </div>
 {{template "profile-scripts" .}}
 </body>
