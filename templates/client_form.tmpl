@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>
-        {{if eq .Mode "edit"}}Edit Client{{else}}New Client{{end}} | PsiloConValley
+        {{if eq .Mode "edit"}}{{.T.ClientFormEditTitle}}{{else}}{{.T.ClientFormNewTitle}}{{end}} | PsiloConValley
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "nav-styles" .}}
@@ -92,7 +92,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 8px;
             font-size: 14px;
-	    font-family: inherit;
+            font-family: inherit;
             color: #fff;
         }
 
@@ -127,7 +127,7 @@
             border-radius: 8px;
             font-size: 14px;
             font-weight: 700;
-	    font-family: inherit;
+            font-family: inherit;
             cursor: pointer;
             flex: 1;
         }
@@ -144,7 +144,7 @@
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
-	    font-family: inherit;
+            font-family: inherit;
             cursor: pointer;
             text-decoration: none;
             display: flex;
@@ -170,13 +170,13 @@
 <div class="page">
     <div class="card">
         <h1 class="page-title">
-            {{if eq .Mode "edit"}}Edit Client{{else}}New Client{{end}}
+            {{if eq .Mode "edit"}}{{.T.ClientFormEditTitle}}{{else}}{{.T.ClientFormNewTitle}}{{end}}
         </h1>
         <p class="page-subtitle">
             {{if eq .Mode "edit"}}
-                Update client information. Changes apply to future invoices.
+                {{.T.ClientFormEditSubtitle}}
             {{else}}
-                Saved clients auto-fill on every new invoice.
+                {{.T.ClientFormNewSubtitle}}
             {{end}}
         </p>
 
@@ -189,79 +189,71 @@
             {{.csrfField}}
 
             <div class="section">
-                <div class="section-title">Contact Information</div>
+                <div class="section-title">{{.T.ClientFormSectionContact}}</div>
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Client Name *</label>
+                        <label>{{.T.ClientFormClientName}}</label>
                         <input type="text" name="name"
                                value="{{if .Client}}{{.Client.Name}}{{end}}"
-                               placeholder="Acme Corp"
                                required autofocus>
                     </div>
                     <div class="form-group">
-                        <label>Email Address</label>
+                        <label>{{.T.ClientFormEmail}}</label>
                         <input type="email" name="email"
-                               value="{{if .Client}}{{.Client.Email}}{{end}}"
-                               placeholder="billing@acme.com">
+                               value="{{if .Client}}{{.Client.Email}}{{end}}">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Phone</label>
+                    <label>{{.T.ClientFormPhone}}</label>
                     <input type="text" name="phone"
-                           value="{{if .Client}}{{.Client.Phone}}{{end}}"
-                           placeholder="+1 (555) 000-0000">
+                           value="{{if .Client}}{{.Client.Phone}}{{end}}">
                 </div>
             </div>
 
             <div class="section">
-                <div class="section-title">Address</div>
+                <div class="section-title">{{.T.ClientFormSectionAddress}}</div>
                 <div class="form-group">
-                    <label>Street Address</label>
+                    <label>{{.T.ClientFormStreetAddress}}</label>
                     <input type="text" name="address"
-                           value="{{if .Client}}{{.Client.Address}}{{end}}"
-                           placeholder="123 Main St">
+                           value="{{if .Client}}{{.Client.Address}}{{end}}">
                 </div>
                 <div class="grid-3">
                     <div class="form-group">
-                        <label>City</label>
+                        <label>{{.T.ClientFormCity}}</label>
                         <input type="text" name="city"
-                               value="{{if .Client}}{{.Client.City}}{{end}}"
-                               placeholder="San Francisco">
+                               value="{{if .Client}}{{.Client.City}}{{end}}">
                     </div>
                     <div class="form-group">
-                        <label>State / Region</label>
+                        <label>{{.T.ClientFormStateRegion}}</label>
                         <input type="text" name="state"
-                               value="{{if .Client}}{{.Client.State}}{{end}}"
-                               placeholder="CA">
+                               value="{{if .Client}}{{.Client.State}}{{end}}">
                     </div>
                     <div class="form-group">
-                        <label>Zip / Postal</label>
+                        <label>{{.T.ClientFormZipPostal}}</label>
                         <input type="text" name="zip"
-                               value="{{if .Client}}{{.Client.Zip}}{{end}}"
-                               placeholder="94102">
+                               value="{{if .Client}}{{.Client.Zip}}{{end}}">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Country</label>
+                    <label>{{.T.ClientFormCountry}}</label>
                     <input type="text" name="country"
-                           value="{{if .Client}}{{.Client.Country}}{{end}}"
-                           placeholder="US">
+                           value="{{if .Client}}{{.Client.Country}}{{end}}">
                 </div>
             </div>
 
             <div class="section">
-                <div class="section-title">Notes</div>
+                <div class="section-title">{{.T.ClientFormSectionNotes}}</div>
                 <div class="form-group">
-                    <label>Internal Notes</label>
+                    <label>{{.T.ClientFormInternalNotes}}</label>
                     <textarea name="notes"
-                              placeholder="Payment terms, preferences, contact details...">{{if .Client}}{{.Client.Notes}}{{end}}</textarea>
+                              placeholder="{{.T.ClientFormNotesPlaceholder}}">{{if .Client}}{{.Client.Notes}}{{end}}</textarea>
                 </div>
             </div>
 
             <div class="btn-row">
-                <a href="/clients" class="btn-secondary">Cancel</a>
+                <a href="/clients" class="btn-secondary">{{.T.ClientFormCancel}}</a>
                 <button type="submit" class="btn-primary">
-                    {{if eq .Mode "edit"}}Save Changes{{else}}Save Client{{end}}
+                    {{if eq .Mode "edit"}}{{.T.ClientFormSaveChanges}}{{else}}{{.T.ClientFormSaveClient}}{{end}}
                 </button>
             </div>
         </form>

@@ -159,6 +159,27 @@ type T struct {
 	ClientsEmptyTitle     string
 	ClientsEmptyBody      string
 	ClientsAddFirst       string
+	// Client form
+	ClientFormNewTitle       string
+	ClientFormEditTitle      string
+	ClientFormNewSubtitle    string
+	ClientFormEditSubtitle   string
+	ClientFormSectionContact string
+	ClientFormClientName     string
+	ClientFormEmail          string
+	ClientFormPhone          string
+	ClientFormSectionAddress string
+	ClientFormStreetAddress  string
+	ClientFormCity           string
+	ClientFormStateRegion    string
+	ClientFormZipPostal      string
+	ClientFormCountry        string
+	ClientFormSectionNotes   string
+	ClientFormInternalNotes  string
+	ClientFormNotesPlaceholder string
+	ClientFormCancel         string
+	ClientFormSaveChanges    string
+	ClientFormSaveClient     string
 }
 
 var en = T{
@@ -306,6 +327,26 @@ var en = T{
 	ClientsEmptyTitle:     "No Clients Saved",
 	ClientsEmptyBody:      "Save your first client and their info will auto-fill every future invoice. No more retyping addresses.",
 	ClientsAddFirst:       "Add First Client",
+	ClientFormNewTitle:       "New Client",
+	ClientFormEditTitle:      "Edit Client",
+	ClientFormNewSubtitle:    "Saved clients auto-fill on every new invoice.",
+	ClientFormEditSubtitle:   "Update client information. Changes apply to future invoices.",
+	ClientFormSectionContact: "Contact Information",
+	ClientFormClientName:     "Client Name *",
+	ClientFormEmail:          "Email Address",
+	ClientFormPhone:          "Phone",
+	ClientFormSectionAddress: "Address",
+	ClientFormStreetAddress:  "Street Address",
+	ClientFormCity:           "City",
+	ClientFormStateRegion:    "State / Region",
+	ClientFormZipPostal:      "Zip / Postal",
+	ClientFormCountry:        "Country",
+	ClientFormSectionNotes:   "Notes",
+	ClientFormInternalNotes:  "Internal Notes",
+	ClientFormNotesPlaceholder: "Payment terms, preferences, contact details...",
+	ClientFormCancel:         "Cancel",
+	ClientFormSaveChanges:    "Save Changes",
+	ClientFormSaveClient:     "Save Client",
 }
 
 var es = T{
@@ -453,6 +494,26 @@ var es = T{
 	ClientsEmptyTitle:     "No Hay Clientes Guardados",
 	ClientsEmptyBody:      "Guarda tu primer cliente y su información se llenará automáticamente en cada factura. No más escribir direcciones.",
 	ClientsAddFirst:       "Agregar Primer Cliente",
+	ClientFormNewTitle:       "Nuevo Cliente",
+	ClientFormEditTitle:      "Editar Cliente",
+	ClientFormNewSubtitle:    "Los clientes guardados se llenan automáticamente en cada nueva factura.",
+	ClientFormEditSubtitle:   "Actualiza la información del cliente. Los cambios aplican a futuras facturas.",
+	ClientFormSectionContact: "Información de Contacto",
+	ClientFormClientName:     "Nombre del Cliente *",
+	ClientFormEmail:          "Correo Electrónico",
+	ClientFormPhone:          "Teléfono",
+	ClientFormSectionAddress: "Dirección",
+	ClientFormStreetAddress:  "Dirección",
+	ClientFormCity:           "Ciudad",
+	ClientFormStateRegion:    "Estado / Región",
+	ClientFormZipPostal:      "Código Postal",
+	ClientFormCountry:        "País",
+	ClientFormSectionNotes:   "Notas",
+	ClientFormInternalNotes:  "Notas Internas",
+	ClientFormNotesPlaceholder: "Términos de pago, preferencias, datos de contacto...",
+	ClientFormCancel:         "Cancelar",
+	ClientFormSaveChanges:    "Guardar Cambios",
+	ClientFormSaveClient:     "Guardar Cliente",
 }
 
 // Get returns the translation set for the given language code.
