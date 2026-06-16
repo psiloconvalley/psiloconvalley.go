@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Invoices | PsiloConValley</title>
+    <title>{{.T.InvoicesTitle}} | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
 
- {{template "invoices-list-styles" .}}
- {{template "app-components" .}}
+    {{template "invoices-list-styles" .}}
+    {{template "app-components" .}}
 </head>
 <body>
 
@@ -16,21 +16,21 @@
 
 <div class="container">
 
-       <div class="top">
-	<div>
-            <h1>Invoices</h1>
+    <div class="top">
+        <div>
+            <h1>{{.T.InvoicesTitle}}</h1>
             <div class="top-subtitle">
-                {{len .Invoices}} total
+                {{len .Invoices}} {{.T.InvoicesListTotal}}
                 {{if .User}}
                     {{if .IsPro}}
-                    · <span style="color:#4ade80;">Pro — Unlimited</span>
+                    · <span style="color:#4ade80;">{{.T.InvoicesProUnlimited}}</span>
                     {{else}}
-                    · {{.MonthlyCount}}/{{.MonthlyLimit}} this month
+                    · {{.MonthlyCount}}/{{.MonthlyLimit}} {{.T.InvoicesThisMonth}}
                     {{end}}
                 {{end}}
             </div>
         </div>
-	                <a href="/invoices/new" class="btn-new">+ New Invoice</a>
+        <a href="/invoices/new" class="btn-new">{{.T.InvoicesNewInvoice}}</a>
     </div>
 
     {{if .Deleted}}
@@ -52,7 +52,7 @@
         transition: opacity 0.4s ease, transform 0.4s ease;
         cursor: pointer;
     " onclick="dismissBanner()">
-        <span>✓ Invoice deleted successfully</span>
+        <span>{{.T.InvoicesDeleted}}</span>
         <span style="font-size: 18px; opacity: 0.5;">✕</span>
     </div>
     <script>
@@ -73,9 +73,9 @@
     }
     </script>
     {{end}}
-   
+
     {{if not .IsPro}}
-        <div style="
+    <div style="
         background: rgba(255,255,255,0.03);
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 10px;
@@ -89,10 +89,10 @@
     ">
         <div>
             <div style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">
-                Monthly Usage
+                {{.T.InvoicesMonthlyUsage}}
             </div>
             <div style="font-size: 20px; font-weight: 700;">
-                {{.MonthlyCount}} / {{.MonthlyLimit}} invoices
+                {{.MonthlyCount}} / {{.MonthlyLimit}} {{.T.InvoicesUsageLabel}}
             </div>
         </div>
         <div style="flex: 1; max-width: 300px; min-width: 150px;">
@@ -117,16 +117,17 @@
             font-weight: 700;
             color: #f59e0b;
             text-decoration: none;
-        ">Upgrade →</a>
+        ">{{.T.InvoicesUpgrade}}</a>
         {{end}}
     </div>
     {{end}}
-      {{if not .Invoices}}
+
+    {{if not .Invoices}}
     <div class="empty">
         <div class="empty-icon">📭</div>
-        <div class="empty-title">No invoices yet</div>
-        <div class="empty-sub">Create your first invoice to get started.</div>
-        <a href="/invoices/new" class="btn-new">Create Invoice</a>
+        <div class="empty-title">{{.T.InvoicesEmptyTitle}}</div>
+        <div class="empty-sub">{{.T.InvoicesEmptyBody}}</div>
+        <a href="/invoices/new" class="btn-new">{{.T.InvoicesCreateInvoice}}</a>
     </div>
     {{else}}
 
@@ -135,17 +136,17 @@
         <table>
             <thead>
                 <tr>
-                    <th>Invoice</th>
-                    <th>Client</th>
-                    <th>Issued</th>
-                    <th>Due</th>
-                    <th>Status</th>
-                    <th class="right">Total</th>
-		    <th class="right">Actions</th>
+                    <th>{{.T.InvoicesThInvoice}}</th>
+                    <th>{{.T.InvoicesThClient}}</th>
+                    <th>{{.T.InvoicesThIssued}}</th>
+                    <th>{{.T.InvoicesThDue}}</th>
+                    <th>{{.T.InvoicesThStatus}}</th>
+                    <th class="right">{{.T.InvoicesThTotal}}</th>
+                    <th class="right">{{.T.InvoicesThActions}}</th>
                 </tr>
             </thead>
             <tbody>
-		{{range .Invoices}}
+                {{range .Invoices}}
                 <tr>
                     <td>
                         <a href="/invoices/{{.ID}}" class="inv-link">
@@ -153,71 +154,71 @@
                         </a>
                     </td>
                     <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
-		    <td>{{if .IssueDate}}{{.IssueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
-		    <td>{{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
+                    <td>{{if .IssueDate}}{{.IssueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
+                    <td>{{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
                     <td>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                     </td>
                     <td class="right mono">{{money .TotalCents}}</td>
                     <td>
-			<div class="row-actions">
+                        <div class="row-actions">
                             {{if eq .Status "draft"}}
-                            <a href="/invoices/{{.ID}}/send" class="small-btn">Send</a>
-                            <a href="/invoices/{{.ID}}/edit" class="small-btn">Edit</a>
+                            <a href="/invoices/{{.ID}}/send" class="small-btn">{{$.T.InvoicesSend}}</a>
+                            <a href="/invoices/{{.ID}}/edit" class="small-btn">{{$.T.InvoicesEdit}}</a>
                             {{end}}
                             {{if or (eq .Status "sent") (eq .Status "overdue")}}
-                            <a href="/invoices/{{.ID}}/send" class="small-btn">Resend</a>
+                            <a href="/invoices/{{.ID}}/send" class="small-btn">{{$.T.InvoicesResend}}</a>
                             {{end}}
-                            <a href="/invoices/{{.ID}}/duplicate" class="small-btn">Duplicate</a>
+                            <a href="/invoices/{{.ID}}/duplicate" class="small-btn">{{$.T.InvoicesDuplicate}}</a>
                             {{if eq .Status "draft"}}
-			    <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
+                            <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">{{$.T.InvoicesDeleteBtn}}</button>
                             {{end}}
                         </div>
-                                            </td>
+                    </td>
                 </tr>
                 {{end}}
-                            </tbody>
+            </tbody>
         </table>
     </div>
 
     {{/* ── MOBILE CARD LIST ── */}}
     <div class="card-list">
-	{{range .Invoices}}
+        {{range .Invoices}}
         <div class="inv-card">
             <a href="/invoices/{{.ID}}" style="text-decoration:none; color:inherit; display:block;">
                 <div class="inv-card-top">
                     <span class="inv-card-number">
-                        {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}Untitled{{end}}
+                        {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}{{$.T.InvoicesUntitled}}{{end}}
                     </span>
                     <span class="badge badge-{{.Status}}">{{.Status}}</span>
                 </div>
                 <div class="inv-card-client">
-                    {{if .ClientName}}{{.ClientName}}{{else}}No client{{end}}
+                    {{if .ClientName}}{{.ClientName}}{{else}}{{$.T.InvoicesNoClient}}{{end}}
                 </div>
                 <div class="inv-card-bottom">
                     <div class="inv-card-dates">
-		     {{if .IssueDate}}Issued {{.IssueDate.Format "Jan 2, 2006"}}{{end}}
-          	     {{if .DueDate}} · Due {{.DueDate.Format "Jan 2, 2006"}}{{end}}
-		</div>
+                        {{if .IssueDate}}{{$.T.InvoicesIssuedLabel}} {{.IssueDate.Format "Jan 2, 2006"}}{{end}}
+                        {{if .DueDate}} · {{$.T.InvoicesDueLabel}} {{.DueDate.Format "Jan 2, 2006"}}{{end}}
+                    </div>
                     <div class="inv-card-total">{{money .TotalCents}}</div>
                 </div>
             </a>
-	   <div class="inv-card-actions">
+            <div class="inv-card-actions">
                 {{if eq .Status "draft"}}
-                <a href="/invoices/{{.ID}}/send" class="small-btn">Send</a>
-                <a href="/invoices/{{.ID}}/edit" class="small-btn">Edit</a>
+                <a href="/invoices/{{.ID}}/send" class="small-btn">{{$.T.InvoicesSend}}</a>
+                <a href="/invoices/{{.ID}}/edit" class="small-btn">{{$.T.InvoicesEdit}}</a>
                 {{end}}
                 {{if or (eq .Status "sent") (eq .Status "overdue")}}
-                <a href="/invoices/{{.ID}}/send" class="small-btn">Resend</a>
+                <a href="/invoices/{{.ID}}/send" class="small-btn">{{$.T.InvoicesResend}}</a>
                 {{end}}
-                <a href="/invoices/{{.ID}}/duplicate" class="small-btn">Duplicate</a>
+                <a href="/invoices/{{.ID}}/duplicate" class="small-btn">{{$.T.InvoicesDuplicate}}</a>
                 {{if eq .Status "draft"}}
-		 <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">Delete</button>
+                <button type="button" class="small-btn danger" onclick="openDeleteModal('{{.InvoiceNumber}}', {{.ID}})">{{$.T.InvoicesDeleteBtn}}</button>
                 {{end}}
             </div>
-                    </div>
+        </div>
         {{end}}
-            </div>
+    </div>
 
     {{end}}
 </div>
@@ -225,25 +226,25 @@
 <!-- ═══════════ DELETE CONFIRMATION MODAL ═══════════ -->
 <div id="delete-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:500;">
     <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
-        <div style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">Delete Draft Invoice</div>
-        <div style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:20px; line-height:1.5;">This action <strong style="color:#fca5a5;">cannot be undone</strong>. The invoice and all its line items will be permanently deleted.</div>
-        <div style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.6); margin-bottom:8px;">Type the invoice number to confirm:</div>
+        <div style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">{{.T.InvoicesDeleteTitle}}</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:20px; line-height:1.5;">{{.T.InvoicesDeleteBody}}</div>
+        <div style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.6); margin-bottom:8px;">{{.T.InvoicesDeleteConfirm}}</div>
         <div style="font-size:13px; font-weight:700; color:#fca5a5; background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.3); border-radius:6px; padding:8px 12px; margin-bottom:12px; font-family:monospace;" id="delete-modal-number"></div>
         <input
             type="text"
             id="delete-confirm-input"
-            placeholder="Type invoice number here"
+            placeholder="{{.T.InvoicesDeletePlaceholder}}"
             oninput="checkDeleteConfirm()"
             style="width:100%; padding:10px 12px; border:1px solid rgba(255,255,255,0.15); border-radius:8px; font-size:14px; font-family:inherit; margin-bottom:16px; background:rgba(255,255,255,0.05); color:#fff;"
         >
         <div style="display:flex; gap:12px;">
-            <button type="button" onclick="closeDeleteModal()" style="flex:1; padding:11px; border:1px solid rgba(255,255,255,0.15); background:transparent; color:rgba(255,255,255,0.6); border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">Cancel</button>
+            <button type="button" onclick="closeDeleteModal()" style="flex:1; padding:11px; border:1px solid rgba(255,255,255,0.15); background:transparent; color:rgba(255,255,255,0.6); border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">{{.T.InvoicesDeleteCancel}}</button>
             <form id="delete-form" method="POST" action="" style="flex:1;">
                 {{.csrfField}}
                 <input type="hidden" name="confirm_number" id="delete-confirm-hidden">
                 <button type="submit" id="delete-submit-btn" disabled
                     style="width:100%; padding:11px; background:#dc2626; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; opacity:0.4;">
-                    Delete Permanently
+                    {{.T.InvoicesDeletePermanent}}
                 </button>
             </form>
         </div>

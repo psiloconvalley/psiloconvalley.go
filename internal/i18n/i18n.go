@@ -180,6 +180,41 @@ type T struct {
 	ClientFormCancel         string
 	ClientFormSaveChanges    string
 	ClientFormSaveClient     string
+	// Invoices list
+	InvoicesTitle           string
+	InvoicesListTotal       string
+	InvoicesProUnlimited    string
+	InvoicesThisMonth       string
+	InvoicesNewInvoice      string
+	InvoicesDeleted         string
+	InvoicesMonthlyUsage    string
+	InvoicesUsageLabel      string
+	InvoicesUpgrade         string
+	InvoicesEmptyTitle      string
+	InvoicesEmptyBody       string
+	InvoicesCreateInvoice   string
+	InvoicesThInvoice       string
+	InvoicesThClient        string
+	InvoicesThIssued        string
+	InvoicesThDue           string
+	InvoicesThStatus        string
+	InvoicesThTotal         string
+	InvoicesThActions       string
+	InvoicesSend            string
+	InvoicesEdit            string
+	InvoicesResend          string
+	InvoicesDuplicate       string
+	InvoicesDeleteBtn       string
+	InvoicesUntitled        string
+	InvoicesNoClient        string
+	InvoicesIssuedLabel     string
+	InvoicesDueLabel        string
+	InvoicesDeleteTitle     string
+	InvoicesDeleteBody      string
+	InvoicesDeleteConfirm   string
+	InvoicesDeletePlaceholder string
+	InvoicesDeleteCancel    string
+	InvoicesDeletePermanent string
 }
 
 var en = T{
@@ -347,6 +382,41 @@ var en = T{
 	ClientFormCancel:         "Cancel",
 	ClientFormSaveChanges:    "Save Changes",
 	ClientFormSaveClient:     "Save Client",
+	InvoicesTitle:           "Invoices",
+	InvoicesListTotal:           "total",
+	InvoicesProUnlimited:    "Pro — Unlimited",
+	InvoicesThisMonth:       "this month",
+	InvoicesNewInvoice:      "+ New Invoice",
+	InvoicesDeleted:         "✓ Invoice deleted successfully",
+	InvoicesMonthlyUsage:    "Monthly Usage",
+	InvoicesUsageLabel:      "invoices",
+	InvoicesUpgrade:         "Upgrade →",
+	InvoicesEmptyTitle:      "No invoices yet",
+	InvoicesEmptyBody:       "Create your first invoice to get started.",
+	InvoicesCreateInvoice:   "Create Invoice",
+	InvoicesThInvoice:       "Invoice",
+	InvoicesThClient:        "Client",
+	InvoicesThIssued:        "Issued",
+	InvoicesThDue:           "Due",
+	InvoicesThStatus:        "Status",
+	InvoicesThTotal:         "Total",
+	InvoicesThActions:       "Actions",
+	InvoicesSend:            "Send",
+	InvoicesEdit:            "Edit",
+	InvoicesResend:          "Resend",
+	InvoicesDuplicate:       "Duplicate",
+	InvoicesDeleteBtn:       "Delete",
+	InvoicesUntitled:        "Untitled",
+	InvoicesNoClient:        "No client",
+	InvoicesIssuedLabel:     "Issued",
+	InvoicesDueLabel:        "Due",
+	InvoicesDeleteTitle:     "Delete Draft Invoice",
+	InvoicesDeleteBody:      "This action cannot be undone. The invoice and all its line items will be permanently deleted.",
+	InvoicesDeleteConfirm:   "Type the invoice number to confirm:",
+	InvoicesDeletePlaceholder: "Type invoice number here",
+	InvoicesDeleteCancel:    "Cancel",
+	InvoicesDeletePermanent: "Delete Permanently",
+
 }
 
 var es = T{
@@ -511,9 +581,43 @@ var es = T{
 	ClientFormSectionNotes:   "Notas",
 	ClientFormInternalNotes:  "Notas Internas",
 	ClientFormNotesPlaceholder: "Términos de pago, preferencias, datos de contacto...",
-	ClientFormCancel:         "Cancelar",
-	ClientFormSaveChanges:    "Guardar Cambios",
-	ClientFormSaveClient:     "Guardar Cliente",
+	ClientFormCancel:        "Cancelar",
+	ClientFormSaveChanges:   "Guardar Cambios",
+	ClientFormSaveClient:    "Guardar Cliente",
+	InvoicesTitle:           "Facturas",
+	InvoicesListTotal:       "en total",
+	InvoicesProUnlimited:    "Pro — Ilimitado",
+	InvoicesThisMonth:       "este mes",
+	InvoicesNewInvoice:      "+ Nueva Factura",
+	InvoicesDeleted:         "✓ Factura eliminada exitosamente",
+	InvoicesMonthlyUsage:    "Uso Mensual",
+	InvoicesUsageLabel:      "facturas",
+	InvoicesUpgrade:         "Actualizar →",
+	InvoicesEmptyTitle:      "Aún no hay facturas",
+	InvoicesEmptyBody:       "Crea tu primera factura para comenzar.",
+	InvoicesCreateInvoice:   "Crear Factura",
+	InvoicesThInvoice:       "Factura",
+	InvoicesThClient:        "Cliente",
+	InvoicesThIssued:        "Emitida",
+	InvoicesThDue:           "Vence",
+	InvoicesThStatus:        "Estado",
+	InvoicesThTotal:         "Total",
+	InvoicesThActions:       "Acciones",
+	InvoicesSend:            "Enviar",
+	InvoicesEdit:            "Editar",
+	InvoicesResend:          "Reenviar",
+	InvoicesDuplicate:       "Duplicar",
+	InvoicesDeleteBtn:       "Eliminar",
+	InvoicesUntitled:        "Sin Título",
+	InvoicesNoClient:        "Sin cliente",
+	InvoicesIssuedLabel:     "Emitida",
+	InvoicesDueLabel:        "Vence",
+	InvoicesDeleteTitle:     "Eliminar Borrador de Factura",
+	InvoicesDeleteBody:      "Esta acción no se puede deshacer. La factura y todos sus artículos serán eliminados permanentemente.",
+	InvoicesDeleteConfirm:   "Escribe el número de factura para confirmar:",
+	InvoicesDeletePlaceholder: "Escribe el número de factura aquí",
+	InvoicesDeleteCancel:    "Cancelar",
+	InvoicesDeletePermanent: "Eliminar Permanentemente",
 }
 
 // Get returns the translation set for the given language code.
