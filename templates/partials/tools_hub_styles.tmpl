@@ -1,0 +1,174 @@
+{{define "tools-hub-styles"}}
+<style>
+        .hub-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px 80px;
+        }
+
+        .hub-header {
+            margin-bottom: 48px;
+        }
+
+        .hub-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(74,222,128,0.7);
+            margin-bottom: 12px;
+        }
+
+        .hub-header h1 {
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+        }
+
+        .hub-header p {
+            color: rgba(255,255,255,0.55);
+            font-size: 15px;
+            margin-top: 12px;
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 60px;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 28px;
+            text-decoration: none;
+            color: inherit;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 220px;
+        }
+
+        .tool-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+
+        .tool-tag {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.25);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .tool-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .tool-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+            line-height: 1.65;
+        }
+
+        .tool-status {
+            margin-top: 24px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .status-live {
+            color: #4ade80;
+        }
+
+        .status-offline {
+            color: rgba(255,255,255,0.15);
+        }
+
+        .feedback-section {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 48px;
+            max-width: 520px;
+        }
+
+        .feedback-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 16px;
+        }
+
+        .feedback-section textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 16px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            min-height: 90px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .feedback-section textarea:focus {
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .feedback-section textarea::placeholder {
+            color: rgba(255,255,255,0.2);
+        }
+
+        .btn-submit {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.85;
+        }
+
+        .success-msg {
+            color: #4ade80;
+            font-size: 13px;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .hub-container { padding: 40px 16px 60px; }
+            .hub-header h1 { font-size: 34px; }
+            .tool-grid { grid-template-columns: 1fr; }
+            .tool-card { min-height: auto; padding: 24px; }
+        }
+</style>
+{{end}}
