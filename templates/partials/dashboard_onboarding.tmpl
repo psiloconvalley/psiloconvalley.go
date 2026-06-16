@@ -1,0 +1,80 @@
+{{define "dashboard-onboarding"}}
+{{if not .OnboardingDone}}
+<div class="onboarding-wrap">
+
+    <div class="onboarding-header">
+        <div>
+            <div class="onboarding-title">{{.T.OnboardingTitle}}</div>
+            <div class="onboarding-sub">{{.OnboardingSteps}} {{.T.OnboardingStepsOf}}</div>
+        </div>
+        <div class="onboarding-count">{{.OnboardingSteps}}/4</div>
+    </div>
+
+    <div class="onboarding-progress">
+        <div class="onboarding-progress-fill"
+             style="width: {{mul .OnboardingSteps 25}}%"></div>
+    </div>
+
+    <div class="onboarding-steps">
+
+        {{/* Step 1 — Account Created — always done */}}
+        <div class="onboarding-step done">
+            <div class="onboarding-icon done">✓</div>
+            <div class="onboarding-step-body">
+                <div class="onboarding-step-title done">{{.T.OnboardingAccount}}</div>
+                <div class="onboarding-step-sub">{{.T.OnboardingAccountSub}}</div>
+            </div>
+        </div>
+
+        {{/* Step 2 — Business Profile */}}
+        <div class="onboarding-step {{if .HasProfile}}done{{else}}pending{{end}}">
+            <div class="onboarding-icon {{if .HasProfile}}done{{else}}pending{{end}}">
+                {{if .HasProfile}}✓{{else}}2{{end}}
+            </div>
+            <div class="onboarding-step-body">
+                <div class="onboarding-step-title {{if .HasProfile}}done{{else}}pending{{end}}">
+                    {{.T.OnboardingProfile}}
+                </div>
+                <div class="onboarding-step-sub">{{.T.OnboardingProfileSub}}</div>
+            </div>
+            {{if not .HasProfile}}
+            <a href="/profile" class="onboarding-cta">{{.T.OnboardingSetUp}}</a>
+            {{end}}
+        </div>
+
+        {{/* Step 3 — Add Client */}}
+        <div class="onboarding-step {{if .HasClient}}done{{else}}pending{{end}}">
+            <div class="onboarding-icon {{if .HasClient}}done{{else}}pending{{end}}">
+                {{if .HasClient}}✓{{else}}3{{end}}
+            </div>
+            <div class="onboarding-step-body">
+                <div class="onboarding-step-title {{if .HasClient}}done{{else}}pending{{end}}">
+                    {{.T.OnboardingClient}}
+                </div>
+                <div class="onboarding-step-sub">{{.T.OnboardingClientSub}}</div>
+            </div>
+            {{if not .HasClient}}
+            <a href="/clients/new" class="onboarding-cta">{{.T.OnboardingAddClient}}</a>
+            {{end}}
+        </div>
+
+        {{/* Step 4 — First Invoice */}}
+        <div class="onboarding-step {{if .HasInvoice}}done{{else}}pending{{end}}">
+            <div class="onboarding-icon {{if .HasInvoice}}done{{else}}pending{{end}}">
+                {{if .HasInvoice}}✓{{else}}4{{end}}
+            </div>
+            <div class="onboarding-step-body">
+                <div class="onboarding-step-title {{if .HasInvoice}}done{{else}}pending{{end}}">
+                    {{.T.OnboardingInvoice}}
+                </div>
+                <div class="onboarding-step-sub">{{.T.OnboardingInvoiceSub}}</div>
+            </div>
+            {{if not .HasInvoice}}
+            <a href="/invoices/new" class="onboarding-cta">{{.T.OnboardingCreateInv}}</a>
+            {{end}}
+        </div>
+
+    </div>
+</div>
+{{end}}
+{{end}}

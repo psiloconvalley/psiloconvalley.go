@@ -59,6 +59,28 @@ type T struct {
 	FromPaidInvoices string
 	AwaitingPayment  string
 	PastDueDate      string
+
+	// Onboarding
+	OnboardingTitle       string
+	OnboardingStepsOf     string
+	OnboardingAccount     string
+	OnboardingAccountSub  string
+	OnboardingProfile     string
+	OnboardingProfileSub  string
+	OnboardingClient      string
+	OnboardingClientSub   string
+	OnboardingInvoice     string
+	OnboardingInvoiceSub  string
+	OnboardingSetUp       string
+	OnboardingAddClient   string
+	OnboardingCreateInv   string
+
+	// Dashboard extras
+	InvoicesTotal         string
+	ViewExpenses          string
+	RevenueMinusExpenses  string
+	CreateFirstInvoice    string
+	CreateFirstEstimate   string
 }
 
 var en = T{
@@ -110,6 +132,26 @@ var en = T{
 	FromPaidInvoices: "From paid invoices",
 	AwaitingPayment:  "Awaiting payment",
 	PastDueDate:      "Past due date",
+
+	OnboardingTitle:       "Getting Started",
+	OnboardingStepsOf:     "of 4 steps complete",
+	OnboardingAccount:     "Account Created",
+	OnboardingAccountSub:  "You're in. Welcome to PsiloConValley.",
+	OnboardingProfile:     "Set Up Business Profile",
+	OnboardingProfileSub:  "Your name, logo, and contact info appear on every invoice.",
+	OnboardingClient:      "Add Your First Client",
+	OnboardingClientSub:   "Save client details once. Reuse on every invoice.",
+	OnboardingInvoice:     "Send Your First Invoice",
+	OnboardingInvoiceSub:  "Create, send, and get paid. Under 60 seconds.",
+	OnboardingSetUp:       "Set Up →",
+	OnboardingAddClient:   "Add Client →",
+	OnboardingCreateInv:   "Create Invoice →",
+
+	InvoicesTotal:         "invoices total",
+	ViewExpenses:          "View all expenses →",
+	RevenueMinusExpenses:  "Revenue minus expenses",
+	CreateFirstInvoice:    "Create your first invoice to get started.",
+	CreateFirstEstimate:   "Create your first estimate to start winning jobs.",
 }
 
 var es = T{
@@ -133,7 +175,7 @@ var es = T{
 	DashboardAllCaughtUp:    "Estás al día",
 	DashboardNoCaughtUpSub:  "No hay facturas vencidas ni presupuestos pendientes.",
 	DashboardRecentInvoices: "Facturas Recientes",
-	DashboardRecentEstimates: "Presupuestos Recientes",
+	DashboardRecentEstimates: "Presuestos Recientes",
 	DashboardViewAll:        "Ver todo →",
 
 	InvoiceNew:     "Nueva Factura",
@@ -161,6 +203,26 @@ var es = T{
 	FromPaidInvoices: "De facturas pagadas",
 	AwaitingPayment:  "Esperando pago",
 	PastDueDate:      "Fecha vencida",
+
+	OnboardingTitle:       "Primeros Pasos",
+	OnboardingStepsOf:     "de 4 pasos completados",
+	OnboardingAccount:     "Cuenta Creada",
+	OnboardingAccountSub:  "Ya estás dentro. Bienvenido a PsiloConValley.",
+	OnboardingProfile:     "Configura Tu Perfil",
+	OnboardingProfileSub:  "Tu nombre, logo e información de contacto aparecen en cada factura.",
+	OnboardingClient:      "Agrega Tu Primer Cliente",
+	OnboardingClientSub:   "Guarda los datos del cliente una vez. Reutilízalos en cada factura.",
+	OnboardingInvoice:     "Envía Tu Primera Factura",
+	OnboardingInvoiceSub:  "Crea, envía y cobra. En menos de 60 segundos.",
+	OnboardingSetUp:       "Configurar →",
+	OnboardingAddClient:   "Agregar Cliente →",
+	OnboardingCreateInv:   "Crear Factura →",
+
+	InvoicesTotal:         "facturas en total",
+	ViewExpenses:          "Ver todos los gastos →",
+	RevenueMinusExpenses:  "Ingresos menos gastos",
+	CreateFirstInvoice:    "Crea tu primera factura para comenzar.",
+	CreateFirstEstimate:   "Crea tu primer presupuesto para empezar a ganar trabajos.",
 }
 
 // Get returns the translation set for the given language code.

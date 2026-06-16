@@ -1,0 +1,37 @@
+{{define "app-components"}}
+<style>
+  /* ── Badges ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Invoice statuses */
+  .badge-draft   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+  .badge-sent    { background: #1e3a5f; color: #93c5fd; }
+  .badge-paid    { background: #14532d; color: #86efac; }
+  .badge-void    { background: #450a0a; color: #fca5a5; }
+  .badge-overdue { background: #431407; color: #fdba74; }
+
+  /* Estimate statuses */
+  .badge-pending   { background: #1e3a5f;               color: #93c5fd; }
+  .badge-accepted  { background: #14532d;               color: #86efac; }
+  .badge-declined  { background: #450a0a;               color: #fca5a5; }
+  .badge-rejected  { background: #450a0a;               color: #fca5a5; }
+  .badge-expired   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+  .badge-converted { background: #1e3a5f;               color: #93c5fd; }
+
+  /* ── Document links ── */
+  .inv-link             { color: #fff; text-decoration: none; font-weight: 600; }
+  .inv-link:hover       { text-decoration: underline; }
+
+  /* ── Utilities ── */
+  .right { text-align: right; }
+  .mono  { font-variant-numeric: tabular-nums; }
+</style>
+{{end}}

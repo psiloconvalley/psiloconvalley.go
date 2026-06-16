@@ -1,0 +1,44 @@
+{{define "dashboard-needs-attention"}}
+<div class="section">
+    <div class="section-header">
+        <div class="section-title">{{.T.DashboardNeedsAttention}}</div>
+    </div>
+
+    {{if .NeedsAttention}}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th class="right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .NeedsAttention}}
+                <tr>
+                    <td>
+                        <a href="/{{if eq .DocumentType "estimate"}}estimates{{else}}invoices{{end}}/{{.ID}}" class="inv-link">
+                            {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
+                        </a>
+                    </td>
+                    <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
+                    <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+                    <td class="right mono">{{money .TotalCents}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    {{else}}
+    <div class="table-wrap">
+        <div class="empty">
+            <div class="empty-icon">✓</div>
+            <div class="empty-title">{{.T.DashboardAllCaughtUp}}</div>
+            <div class="empty-sub">{{.T.DashboardNoCaughtUpSub}}</div>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{end}}

@@ -3,10 +3,13 @@
 <head>
     <title>Dashboard | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
+
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
-{{template "dashboard-styles" .}}
+    {{template "dashboard-styles" .}}
+    {{template "dashboard-onboarding-styles" .}}
+    {{template "app-components" .}}
+
 </head>
 <body>
 
@@ -16,8 +19,8 @@
 
     <div class="top">
         <div>
-	<h1>{{.T.DashboardTitle}}</h1>
-	<div class="top-sub">{{.T.DashboardWelcome}}{{if .User.Name}}, {{.User.Name}}{{end}}</div>
+            <h1>{{.T.DashboardTitle}}</h1>
+            <div class="top-sub">{{.T.DashboardWelcome}}{{if .User.Name}}, {{.User.Name}}{{end}}</div>
         </div>
     </div>
 
@@ -31,291 +34,67 @@
     </div>
     {{end}}
 
-       {{if .TotalCount}}
     {{/* ── Stats ── */}}
+    {{if .TotalCount}}
     <div class="stats-grid">
         <div class="stat-card">
-	 <div class="stat-label">💰 {{.T.DashboardRevenue}}</div>
+            <div class="stat-label">💰 {{.T.DashboardRevenue}}</div>
             <div class="stat-value green">{{.Revenue}}</div>
-		<div class="stat-sub">{{.T.FromPaidInvoices}}</div>
+            <div class="stat-sub">{{.T.FromPaidInvoices}}</div>
         </div>
         <div class="stat-card">
-	    <div class="stat-label">📤 {{.T.DashboardOutstanding}}</div>
+            <div class="stat-label">📤 {{.T.DashboardOutstanding}}</div>
             <div class="stat-value yellow">{{.Outstanding}}</div>
-	    <div class="stat-sub">{{.T.AwaitingPayment}}</div>
+            <div class="stat-sub">{{.T.AwaitingPayment}}</div>
         </div>
         <div class="stat-card">
-	    <div class="stat-label">⚠️ {{.T.DashboardOverdue}}</div>
+            <div class="stat-label">⚠️ {{.T.DashboardOverdue}}</div>
             <div class="stat-value red">{{.Overdue}}</div>
-	    <div class="stat-sub">{{.T.PastDueDate}}</div>
+            <div class="stat-sub">{{.T.PastDueDate}}</div>
         </div>
         <div class="stat-card">
-	     <div class="stat-label">📋 {{.T.DashboardThisMonth}}</div>
+            <div class="stat-label">📋 {{.T.DashboardThisMonth}}</div>
             <div class="stat-value">{{.MonthlyCount}}</div>
-            <div class="stat-sub">{{.TotalCount}} invoices total</div>
+            <div class="stat-sub">{{.TotalCount}} {{.T.InvoicesTotal}}</div>
         </div>
     </div>
-     {{if .HasExpenses}}
-	<div class="stats-grid stats-grid-two">
+    {{if .HasExpenses}}
+    <div class="stats-grid stats-grid-two">
         <div class="stat-card">
             <div class="stat-label">💸 Expenses This Month</div>
             <div class="stat-value red">{{.MonthlyExpenses}}</div>
-            <div class="stat-sub"><a href="/expenses" style="color:rgba(255,255,255,0.4);text-decoration:none;">View all expenses →</a></div>
+            <div class="stat-sub">
+                <a href="/expenses" style="color:rgba(255,255,255,0.4);text-decoration:none;">
+                    {{.T.ViewExpenses}}
+                </a>
+            </div>
         </div>
         <div class="stat-card">
             <div class="stat-label">📊 Net Profit This Month</div>
-            <div class="stat-value {{if gt .NetProfitCents 0}}green{{else}}red{{end}}">{{.NetProfit}}</div>
-            <div class="stat-sub">Revenue minus expenses</div>
+            <div class="stat-value {{if gt .NetProfitCents 0}}green{{else}}red{{end}}">
+                {{.NetProfit}}
+            </div>
+            <div class="stat-sub">{{.T.RevenueMinusExpenses}}</div>
         </div>
     </div>
     {{end}}
-        {{else if not .OnboardingDone}}
-    {{/* ── Onboarding Progress Tracker ── */}}
-    <div style="
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 14px;
-        padding: 32px 36px;
-        margin-bottom: 32px;
-    ">
-        {{/* Header */}}
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
-            <div>
-                <div style="font-size: 18px; font-weight: 800; letter-spacing: -0.3px;">Getting Started</div>
-                <div style="font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px;">
-                    {{.OnboardingSteps}} of 4 steps complete
-                </div>
-            </div>
-            <div style="font-size: 28px; font-weight: 900; color: rgba(255,255,255,0.15);">
-                {{.OnboardingSteps}}/4
-            </div>
-        </div>
 
-        {{/* Progress bar */}}
-        <div style="
-            height: 4px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 2px;
-            margin-bottom: 28px;
-            overflow: hidden;
-        ">
-            <div style="
-                height: 100%;
-                width: {{mul .OnboardingSteps 25}}%;
-                background: linear-gradient(90deg, #4ade80, #22c55e);
-                border-radius: 2px;
-                transition: width 0.6s ease;
-            "></div>
-        </div>
+    {{/* ── Onboarding ── */}}
+    {{else if not .OnboardingDone}}
+    {{template "dashboard-onboarding" .}}
+    {{end}}
 
-        {{/* Steps */}}
-        <div style="display: flex; flex-direction: column; gap: 12px;">
+    {{/* ── Needs Attention ── */}}
+    {{template "dashboard-needs-attention" .}}
 
-            {{/* Step 1 — always done */}}
-            <div style="
-                display: flex;
-                align-items: center;
-                gap: 16px;
-                padding: 14px 18px;
-                border-radius: 10px;
-                background: rgba(74,222,128,0.06);
-                border: 1px solid rgba(74,222,128,0.15);
-            ">
-                <div style="
-                    width: 28px; height: 28px;
-                    border-radius: 50%;
-                    background: #4ade80;
-                    color: #000;
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 14px; font-weight: 800;
-                    flex-shrink: 0;
-                ">✓</div>
-                <div style="flex: 1;">
-                    <div style="font-size: 14px; font-weight: 700; color: #4ade80;">Account Created</div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px;">You're in. Welcome to PsiloConValley.</div>
-                </div>
-            </div>
-
-            {{/* Step 2 — Business Profile */}}
-            <div style="
-                display: flex;
-                align-items: center;
-                gap: 16px;
-                padding: 14px 18px;
-                border-radius: 10px;
-                background: {{if .HasProfile}}rgba(74,222,128,0.06){{else}}rgba(255,255,255,0.02){{end}};
-                border: 1px solid {{if .HasProfile}}rgba(74,222,128,0.15){{else}}rgba(255,255,255,0.08){{end}};
-            ">
-                <div style="
-                    width: 28px; height: 28px;
-                    border-radius: 50%;
-                    background: {{if .HasProfile}}#4ade80{{else}}rgba(255,255,255,0.08){{end}};
-                    color: {{if .HasProfile}}#000{{else}}rgba(255,255,255,0.3){{end}};
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 14px; font-weight: 800;
-                    flex-shrink: 0;
-                ">{{if .HasProfile}}✓{{else}}2{{end}}</div>
-                <div style="flex: 1;">
-                    <div style="font-size: 14px; font-weight: 700; color: {{if .HasProfile}}#4ade80{{else}}#fff{{end}};">
-                        Set Up Business Profile
-                    </div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px;">
-                        Your name, logo, and contact info appear on every invoice.
-                    </div>
-                </div>
-                {{if not .HasProfile}}
-                <a href="/profile" style="
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    background: #fff;
-                    color: #0a0f1a;
-                    font-size: 12px;
-                    font-weight: 700;
-                    text-decoration: none;
-                    white-space: nowrap;
-                    flex-shrink: 0;
-                ">Set Up →</a>
-                {{end}}
-            </div>
-
-            {{/* Step 3 — Add Client */}}
-            <div style="
-                display: flex;
-                align-items: center;
-                gap: 16px;
-                padding: 14px 18px;
-                border-radius: 10px;
-                background: {{if .HasClient}}rgba(74,222,128,0.06){{else}}rgba(255,255,255,0.02){{end}};
-                border: 1px solid {{if .HasClient}}rgba(74,222,128,0.15){{else}}rgba(255,255,255,0.08){{end}};
-            ">
-                <div style="
-                    width: 28px; height: 28px;
-                    border-radius: 50%;
-                    background: {{if .HasClient}}#4ade80{{else}}rgba(255,255,255,0.08){{end}};
-                    color: {{if .HasClient}}#000{{else}}rgba(255,255,255,0.3){{end}};
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 14px; font-weight: 800;
-                    flex-shrink: 0;
-                ">{{if .HasClient}}✓{{else}}3{{end}}</div>
-                <div style="flex: 1;">
-                    <div style="font-size: 14px; font-weight: 700; color: {{if .HasClient}}#4ade80{{else}}#fff{{end}};">
-                        Add Your First Client
-                    </div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px;">
-                        Save client details once. Reuse on every invoice.
-                    </div>
-                </div>
-                {{if not .HasClient}}
-                <a href="/clients/new" style="
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    background: #fff;
-                    color: #0a0f1a;
-                    font-size: 12px;
-                    font-weight: 700;
-                    text-decoration: none;
-                    white-space: nowrap;
-                    flex-shrink: 0;
-                ">Add Client →</a>
-                {{end}}
-            </div>
-
-            {{/* Step 4 — First Invoice */}}
-            <div style="
-                display: flex;
-                align-items: center;
-                gap: 16px;
-                padding: 14px 18px;
-                border-radius: 10px;
-                background: {{if .HasInvoice}}rgba(74,222,128,0.06){{else}}rgba(255,255,255,0.02){{end}};
-                border: 1px solid {{if .HasInvoice}}rgba(74,222,128,0.15){{else}}rgba(255,255,255,0.08){{end}};
-            ">
-                <div style="
-                    width: 28px; height: 28px;
-                    border-radius: 50%;
-                    background: {{if .HasInvoice}}#4ade80{{else}}rgba(255,255,255,0.08){{end}};
-                    color: {{if .HasInvoice}}#000{{else}}rgba(255,255,255,0.3){{end}};
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 14px; font-weight: 800;
-                    flex-shrink: 0;
-                ">{{if .HasInvoice}}✓{{else}}4{{end}}</div>
-                <div style="flex: 1;">
-                    <div style="font-size: 14px; font-weight: 700; color: {{if .HasInvoice}}#4ade80{{else}}#fff{{end}};">
-                        Send Your First Invoice
-                    </div>
-                    <div style="font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px;">
-                        Create, send, and get paid. Under 60 seconds.
-                    </div>
-                </div>
-                {{if not .HasInvoice}}
-                <a href="/invoices/new" style="
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    background: #fff;
-                    color: #0a0f1a;
-                    font-size: 12px;
-                    font-weight: 700;
-                    text-decoration: none;
-                    white-space: nowrap;
-                    flex-shrink: 0;
-                ">Create Invoice →</a>
-                {{end}}
-            </div>
-
-        </div>
-    </div>
-    {{end}}  
-      {{/* ── Needs attention ── */}}
-    <div class="section">
-        <div class="section-header">
-	 <div class="section-title">{{.T.DashboardNeedsAttention}}</div>
-        </div>
-
-	{{if .NeedsAttention}}
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Document</th>
-                        <th>Client</th>
-                        <th>Status</th>
-                        <th class="right">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{range .NeedsAttention}}
-                    <tr>
-                        <td>
-                            <a href="/{{if eq .DocumentType "estimate"}}estimates{{else}}invoices{{end}}/{{.ID}}" class="inv-link">
-                                {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
-                            </a>
-                        </td>
-                        <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
-                        <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
-                        <td class="right mono">{{money .TotalCents}}</td>
-                    </tr>
-                    {{end}}
-                </tbody>
-            </table>
-        </div>
-        {{else}}
-        <div class="table-wrap">
-            <div class="empty">
-                <div class="empty-icon">✓</div>
-		 <div class="empty-title">{{.T.DashboardAllCaughtUp}}</div>
-	    <div class="empty-sub">{{.T.DashboardNoCaughtUpSub}}</div>
-            </div>
-        </div>
-        {{end}}
-    </div>
-      {{/* ── Recent invoices ── */}}
+    {{/* ── Recent Invoices ── */}}
     <div class="section">
         <div class="section-header">
             <div class="section-title">{{.T.DashboardRecentInvoices}}</div>
             <a href="/invoices" class="section-link">{{.T.DashboardViewAll}}</a>
         </div>
 
-        {{if .RecentInvoices}}
+	          {{if .RecentInvoices}}
         <div class="table-wrap">
             <table>
                 <thead>
@@ -351,19 +130,18 @@
             <div class="empty">
                 <div class="empty-icon">📭</div>
                 <div class="empty-title">{{.T.NoInvoicesYet}}</div>
-                <div class="empty-sub">Create your first invoice to get started.</div>
+                <div class="empty-sub">{{.T.CreateFirstInvoice}}</div>
             </div>
         </div>
         {{end}}
     </div>
 
-    {{/* ── Recent estimates ── */}}
+    {{/* ── Recent Estimates ── */}}
     <div class="section">
         <div class="section-header">
             <div class="section-title">{{.T.DashboardRecentEstimates}}</div>
             <a href="/estimates" class="section-link">{{.T.DashboardViewAll}}</a>
         </div>
-
         {{if .RecentEstimates}}
         <div class="table-wrap">
             <table>
@@ -400,7 +178,7 @@
             <div class="empty">
                 <div class="empty-icon">📋</div>
                 <div class="empty-title">{{.T.NoEstimatesYet}}</div>
-                <div class="empty-sub">Create your first estimate to start winning jobs.</div>
+                <div class="empty-sub">{{.T.CreateFirstEstimate}}</div>
             </div>
         </div>
         {{end}}
@@ -409,4 +187,4 @@
 </div>
 
 </body>
-</html> 
+</html>
