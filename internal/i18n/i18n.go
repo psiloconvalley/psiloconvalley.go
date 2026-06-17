@@ -254,6 +254,34 @@ type T struct {
 	EstimatesListEditAnyway      string
 	EstimatesListEditAnywayWarn  string
 	EstimatesListAcceptedCancel  string
+
+	// Login page
+	LoginTitle           string
+	LoginSubtitle        string
+	LoginLimitBanner     string
+	LoginEmail           string
+	LoginPassword        string
+	LoginSubmit          string
+	LoginForgot          string
+	LoginOr              string
+	LoginGoogle          string
+	LoginGoogleSoon      string
+	LoginNoAccount       string
+	LoginCreateOne       string
+
+	// Register page
+	RegisterTitle        string
+	RegisterSubtitle     string
+	RegisterEmail        string
+	RegisterPassword     string
+	RegisterPasswordHint string
+	RegisterConfirm      string
+	RegisterSubmit       string
+	RegisterOr           string
+	RegisterGoogle       string
+	RegisterGoogleSoon   string
+	RegisterHaveAccount  string
+	RegisterSignIn       string
 }
 
 var en = T{
@@ -494,6 +522,32 @@ var en = T{
 	EstimatesListEditAnywayWarn:   "Status will revert to draft — client will need to re-accept",
 	EstimatesListAcceptedCancel:   "Cancel",
 
+	LoginTitle:           "Welcome back",
+	LoginSubtitle:        "Sign in to your account",
+	LoginLimitBanner:     "You've used your free invoices. Sign in or create an account to continue — it's free.",
+	LoginEmail:           "Email",
+	LoginPassword:        "Password",
+	LoginSubmit:          "Sign In",
+	LoginForgot:          "Forgot password?",
+	LoginOr:              "or",
+	LoginGoogle:          "Continue with Google",
+	LoginGoogleSoon:      "Coming Soon",
+	LoginNoAccount:       "Don't have an account?",
+	LoginCreateOne:       "Create one",
+
+	RegisterTitle:        "Create your account",
+	RegisterSubtitle:     "Generate invoices. Track payments. Own your data.",
+	RegisterEmail:        "Email",
+	RegisterPassword:     "Password",
+	RegisterPasswordHint: "Minimum 8 characters",
+	RegisterConfirm:      "Confirm Password",
+	RegisterSubmit:       "Create Account",
+	RegisterOr:           "or",
+	RegisterGoogle:       "Continue with Google",
+	RegisterGoogleSoon:   "Coming Soon",
+	RegisterHaveAccount:  "Already have an account?",
+	RegisterSignIn:       "Sign in",
+
 }
 
 var es = T{
@@ -733,6 +787,33 @@ var es = T{
 	EstimatesListEditAnyway:       "Editar de Todas Formas",
 	EstimatesListEditAnywayWarn:   "El estado volverá a borrador — el cliente deberá volver a aceptar",
 	EstimatesListAcceptedCancel:   "Cancelar",
+
+	LoginTitle:           "Bienvenido",
+	LoginSubtitle:        "Inicia sesión en tu cuenta",
+	LoginLimitBanner:     "Ya usaste tus facturas gratuitas. Inicia sesión o crea una cuenta para continuar — es gratis.",
+	LoginEmail:           "Correo Electrónico",
+	LoginPassword:        "Contraseña",
+	LoginSubmit:          "Iniciar Sesión",
+	LoginForgot:          "¿Olvidaste tu contraseña?",
+	LoginOr:              "o",
+	LoginGoogle:          "Continuar con Google",
+	LoginGoogleSoon:      "Próximamente",
+	LoginNoAccount:       "¿No tienes una cuenta?",
+	LoginCreateOne:       "Créala aquí",
+
+	RegisterTitle:        "Crea tu cuenta",
+	RegisterSubtitle:     "Genera facturas. Rastrea pagos. Controla tus datos.",
+	RegisterEmail:        "Correo Electrónico",
+	RegisterPassword:     "Contraseña",
+	RegisterPasswordHint: "Mínimo 8 caracteres",
+	RegisterConfirm:      "Confirmar Contraseña",
+	RegisterSubmit:       "Crear Cuenta",
+	RegisterOr:           "o",
+	RegisterGoogle:       "Continuar con Google",
+	RegisterGoogleSoon:   "Próximamente",
+	RegisterHaveAccount:  "¿Ya tienes una cuenta?",
+	RegisterSignIn:       "Inicia sesión",
+
 }
 
 // Get returns the translation set for the given language code.
