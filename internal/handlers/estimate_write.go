@@ -31,6 +31,10 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	if !h.canCreateEstimate(r) {
+		http.Redirect(w, r, "/pricing?reason=estimate-limit", http.StatusSeeOther)
+		return
+	}
 
 	clientName := strings.TrimSpace(r.FormValue("client_name"))
 	companyName := strings.TrimSpace(r.FormValue("company_name"))
@@ -163,6 +167,9 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 		log.Printf("[estimate] create error: %v", err)
 		http.Error(w, "Failed to create estimate", http.StatusInternalServerError)
 		return
+	}
+	if err := h.App.UsageRepo.Increment(r.Context(), user.ID, "estimates"); err != nil {
+    		log.Printf("[estimate] usage increment error: %v", err)
 	}
 	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     audit.UserIDPtr(user.ID),

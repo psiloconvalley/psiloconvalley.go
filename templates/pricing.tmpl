@@ -26,27 +26,47 @@
 
 <div class="page">
 
-    {{if eq .Reason "invoice-limit"}}
+       {{if eq .Reason "send-limit"}}
     <div class="notice">
-        You've reached the free plan limit of 10 invoices per month. Upgrade to Pro for unlimited invoices.
+        You've reached the free plan limit of 3 email sends per month. Upgrade to Growth to keep sending professional invoices.
     </div>
     {{end}}
-    {{if eq .Reason "email-pro"}}
+    {{if eq .Reason "estimate-limit"}}
     <div class="notice">
-        Email delivery is a Pro feature. Upgrade to send invoices directly to your clients.
+        You've reached the free plan limit of 3 estimates per month. Upgrade to Growth to win more jobs.
+    </div>
+    {{end}}
+    {{if eq .Reason "report-limit"}}
+    <div class="notice">
+        Detailed reporting is a Growth feature. Upgrade to see your business analytics.
+    </div>
+    {{end}}
+    {{if eq .Reason "payments"}}
+    <div class="notice">
+        Accepting card payments via Stripe is available on Growth and above. Upgrade to get paid faster.
+    </div>
+    {{end}}
+    {{if eq .Reason "invoice-limit"}}
+    <div class="notice">
+        You've reached your plan's invoice limit this month. Upgrade to create more invoices.
     </div>
     {{end}}
     {{if eq .Reason "client-limit"}}
     <div class="notice">
-        You've reached the free plan limit of 5 clients. Upgrade to Pro for unlimited clients.
+        You've reached your plan's client limit. Upgrade to add more clients.
     </div>
     {{end}}
-     {{if eq .Reason "expenses"}}
+    {{if eq .Reason "email-pro"}}
     <div class="notice">
-        Expense tracking is available on Growth and above. Upgrade to track spending, upload receipts, and see your real net profit.
+        You've reached your email send limit this month. Upgrade to send more invoices.
     </div>
     {{end}}
-    {{if .CheckoutSuccess}}
+    {{if eq .Reason "expenses"}}
+    <div class="notice">
+        Expense tracking is available on Growth and above. Upgrade to track spending and see your real profit.
+    </div>
+    {{end}}
+      {{if .CheckoutSuccess}}
     <div class="notice success">
         Payment received. Your plan has been upgraded. Welcome to the next level.
     </div>
@@ -71,7 +91,7 @@
         </p>
     </div>
 
-    <div class="pricing-grid">
+	       <div class="pricing-grid">
 
         {{/* ── FREE ── */}}
         <div class="pricing-card">
@@ -81,15 +101,15 @@
                 <div class="unit">/ forever</div>
             </div>
             <div class="subtext">
-                Get started immediately. No credit card required.
+                Try the full experience. No credit card required.
             </div>
             <ul class="features">
-                <li>✓ 10 invoices per month</li>
-                <li>✓ 5 estimates per month</li>
+                <li>✓ 5 invoices per month</li>
+                <li>✓ 3 estimates per month</li>
                 <li>✓ 5 saved clients</li>
-                <li>✓ Basic PDF export</li>
+                <li>✓ 3 email sends per month</li>
+                <li>✓ PDF download</li>
                 <li>✓ Manual payment tracking</li>
-                <li>✓ 3 invoice templates</li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "free"}}
@@ -111,16 +131,16 @@
                 <div class="unit">/ month</div>
             </div>
             <div class="subtext">
-                Business intelligence that tells you what's happening — and what to do about it.
+                Everything you need to get paid. Founding rate — lock it in.
             </div>
             <ul class="features">
-                <li>✓ Everything in Free</li>
-                <li>✓ Unlimited invoices & estimates</li>
-                <li>✓ Unlimited clients</li>
-                <li>✓ Client scorecard — reliability scores</li>
-                <li>✓ Invoice reports + CSV export</li>
-                <li>✓ Remove PsiloConValley branding</li>
-                <li>✓ Cash flow insights</li>
+                <li>✓ 15 invoices per month</li>
+                <li>✓ 15 estimates per month</li>
+                <li>✓ 15 saved clients</li>
+                <li>✓ 15 email sends per month</li>
+                <li>✓ Accept card payments via Stripe</li>
+                <li>✓ Expense tracking</li>
+                <li>✓ 1 report per month</li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "growth"}}
@@ -153,15 +173,19 @@
                 <div class="unit">/ month</div>
             </div>
             <div class="subtext">
-                The complete toolkit. Recurring billing, automation, and client payment portals.
+                Unlimited scale. Zero friction. Full automation.
             </div>
             <ul class="features">
-                <li>✓ Everything in Growth</li>
+                <li>✓ Unlimited invoices</li>
+                <li>✓ Unlimited estimates</li>
+                <li>✓ Unlimited clients</li>
+                <li>✓ Unlimited email sending</li>
+                <li>✓ Accept card payments via Stripe</li>
+                <li>✓ Expense tracking</li>
+                <li>✓ Unlimited reports</li>
                 <li>✓ Recurring invoice automation</li>
                 <li>✓ Auto payment reminders</li>
-                <li>✓ Direct client payment portal</li>
-                <li>✓ Professional email delivery</li>
-                <li>✓ Client approval workflow</li>
+                <li>✓ Advanced templates</li>
                 <li>✓ Priority founder support</li>
             </ul>
             {{if .User}}
@@ -183,7 +207,7 @@
                     <a href="/register" class="btn btn-primary">Create Free Account</a>
                     <a href="/login" class="btn btn-secondary">Log In to Upgrade</a>
                 </div>
-            {{end}}
+              {{end}}
         </div>
 
     </div>

@@ -330,6 +330,12 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		count := auth.GetAnonInvoiceCount(r)
 		auth.SetAnonInvoiceCount(w, count+1)
 	}
+	// ── Track monthly invoice usage for plan limits ───────────────────
+	if user != nil {
+		if err := h.App.UsageRepo.Increment(r.Context(), user.ID, "invoices"); err != nil {
+			log.Printf("[invoice] usage increment error: %v", err)
+		}
+	}
 
 	// ── Create recurring schedule if enabled ─────────────────────────
 	if user != nil && r.FormValue("is_recurring") == "on" {

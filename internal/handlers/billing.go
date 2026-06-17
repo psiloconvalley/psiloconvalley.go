@@ -131,7 +131,10 @@ func (h *Handlers) StripeConnectStart(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-
+	if !h.canAccessStripePayments(r) {
+		http.Redirect(w, r, "/pricing?reason=payments", http.StatusSeeOther)
+		return
+	}
 	clientID := os.Getenv("STRIPE_CONNECT_CLIENT_ID")
 	if clientID == "" {
 		log.Println("[stripe-connect] STRIPE_CONNECT_CLIENT_ID not set")
