@@ -9,68 +9,210 @@ import (
 	"psiloconvalley/internal/repo"
 )
 
-// Plan limits — all business rules in one place.
-// FIX D2: freePlanClientLimit is now a named constant, consistent with
-// freePlanMonthlyLimit. Magic numbers in access control are dangerous —
-// a product decision to change the free tier limit should be a one-line
-// diff, not a grep-and-replace across the codebase.
+// ── Plan limits ──────────────────────────────────────────────────────
+// All business rules in one place. A product decision to change any
+// tier limit is a one-line diff.
+//
+// Locked pricing matrix (June 2025):
+//   Feature        Free    Growth($8.88)   Pro($18.88)
+//   Invoices       5/mo    15/mo           Unlimited
+//   Sends          3/mo    15/mo           Unlimited
+//   Clients        5       15              Unlimited
+//   Estimates      3/mo    15/mo           Unlimited
+//   Reports        0       1/mo            Unlimited
+//   Expenses       ✗       ✓               ✓
+//   Recurring      ✗       ✗               ✓
+//   Reminders      ✗       ✗               ✓
+//   Stripe pay     ✗       ✓               ✓
+//   Adv templates  ✗       ✗               ✓
+
 const (
-	freePlanMonthlyLimit = 10
-	freePlanClientLimit  = 5
+	freeInvoiceLimit   = 5
+	freeSendLimit      = 3
+	freeClientLimit    = 5
+	freeEstimateLimit  = 3
+	freeReportLimit    = 0
+
+	growthInvoiceLimit  = 15
+	growthSendLimit     = 15
+	growthClientLimit   = 15
+	growthEstimateLimit = 15
+	growthReportLimit   = 1
 )
+
+// ── Plan helper ──────────────────────────────────────────────────────
+
+func isPro(plan string) bool    { return plan == "pro" }
+func isGrowth(plan string) bool { return plan == "growth" }
+func isPaid(plan string) bool   { return plan == "growth" || plan == "pro" }
+func clientLimitFor(plan string) int {
+	if isPro(plan) {
+		return 0 // unlimited — caller should check isPro first
+	}
+	if isGrowth(plan) {
+		return growthClientLimit
+	}
+	return freeClientLimit
+}
+
+func invoiceLimitFor(plan string) int {
+	if isPro(plan) {
+		return 0
+	}
+	if isGrowth(plan) {
+		return growthInvoiceLimit
+	}
+	return freeInvoiceLimit
+}
+
+// ── Client limit ─────────────────────────────────────────────────────
 
 func (h *Handlers) canAddClient(r *http.Request) bool {
 	user := auth.GetUser(r)
 	if user == nil {
 		return false
 	}
-	if user.Plan == "pro" {
+	if isPro(user.Plan) {
 		return true
 	}
 
 	count, err := h.App.ClientRepo.CountByUserID(r.Context(), user.ID)
 	if err != nil {
-		// FIX D3 (partial): DB error on client count — fail closed.
-		// We cannot verify the limit, so we do not allow the addition.
-		// Log it so the on-call engineer can see DB connectivity issues.
 		log.Printf("canAddClient: db error for user %d: %v", user.ID, err)
 		return false
 	}
 
-	return count < freePlanClientLimit // FIX D2: named constant
+	limit := freeClientLimit
+	if isGrowth(user.Plan) {
+		limit = growthClientLimit
+	}
+	return count < limit
 }
+
+// ── Invoice creation limit ───────────────────────────────────────────
 
 func (h *Handlers) hasReachedLimit(r *http.Request) bool {
 	user := auth.GetUser(r)
-
 	if user == nil {
 		return auth.AnonLimitReached(r)
 	}
-
-	if user.Plan == "pro" {
+	if isPro(user.Plan) {
 		return false
 	}
 
-	count, err := h.App.UserRepo.GetMonthlyInvoiceCount(r.Context(), user.ID)
+	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "invoices")
 	if err != nil {
-		// FIX D3: DB error — fail closed (limit IS reached).
-		// Previously this returned false (limit not reached), meaning a
-		// DB outage granted unlimited invoice creation to all free users.
-		// Failing closed is the safer default for a metered resource.
 		log.Printf("hasReachedLimit: db error for user %d: %v", user.ID, err)
 		return true
 	}
 
-	return count >= freePlanMonthlyLimit
+	limit := freeInvoiceLimit
+	if isGrowth(user.Plan) {
+		limit = growthInvoiceLimit
+	}
+	return count >= limit
 }
 
-// canAccessInvoice is the single authorisation check for all invoice
-// operations. An invoice with no UserID is a guest invoice — accessible
-// to anyone (anonymous creation flow). An invoice with a UserID requires
-// the requesting user to match.
-//
-// FIX D1: The exported duplicate CanAccessInvoice in middleware.go has
-// been removed. This method is the sole implementation.
+// ── Send limit ───────────────────────────────────────────────────────
+
+func (h *Handlers) canSendInvoice(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return false
+	}
+	if isPro(user.Plan) {
+		return true
+	}
+
+	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "sends")
+	if err != nil {
+		log.Printf("canSendInvoice: db error for user %d: %v", user.ID, err)
+		return false
+	}
+
+	limit := freeSendLimit
+	if isGrowth(user.Plan) {
+		limit = growthSendLimit
+	}
+	return count < limit
+}
+
+// ── Estimate limit ───────────────────────────────────────────────────
+
+func (h *Handlers) canCreateEstimate(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return false
+	}
+	if isPro(user.Plan) {
+		return true
+	}
+
+	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "estimates")
+	if err != nil {
+		log.Printf("canCreateEstimate: db error for user %d: %v", user.ID, err)
+		return false
+	}
+
+	limit := freeEstimateLimit
+	if isGrowth(user.Plan) {
+		limit = growthEstimateLimit
+	}
+	return count < limit
+}
+
+// ── Report limit ─────────────────────────────────────────────────────
+
+func (h *Handlers) canViewReport(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return false
+	}
+	if isPro(user.Plan) {
+		return true
+	}
+
+	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "reports")
+	if err != nil {
+		log.Printf("canViewReport: db error for user %d: %v", user.ID, err)
+		return false
+	}
+
+	limit := freeReportLimit
+	if isGrowth(user.Plan) {
+		limit = growthReportLimit
+	}
+	return count < limit
+}
+
+// ── Feature gates (boolean, no counting) ─────────────────────────────
+
+func (h *Handlers) canAccessExpenses(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return false
+	}
+	return isPaid(user.Plan)
+}
+
+func (h *Handlers) canAccessRecurring(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return false
+	}
+	return isPro(user.Plan)
+}
+
+func (h *Handlers) canAccessStripePayments(r *http.Request) bool {
+	user := auth.GetUser(r)
+	if user == nil {
+		return false
+	}
+	return isPaid(user.Plan)
+}
+
+// ── Invoice access control (unchanged) ───────────────────────────────
+
 func (h *Handlers) canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
 	if inv == nil {
 		return false
@@ -78,7 +220,6 @@ func (h *Handlers) canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
 
 	user := auth.GetUser(r)
 
-	// Registered invoice: must belong to logged-in user.
 	if inv.UserID != nil {
 		if user == nil {
 			return false
@@ -86,7 +227,6 @@ func (h *Handlers) canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
 		return user.ID == *inv.UserID
 	}
 
-	// Guest invoice: must be accessed by anonymous browser with matching token.
 	if user != nil {
 		return false
 	}
@@ -99,23 +239,16 @@ func (h *Handlers) canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
 	return anonToken == inv.AnonymousToken
 }
 
-// canViewInvoice allows read-only access to an invoice.
-// Used by the detail and pay handlers — anyone with the link can view.
-// This is safe because invoices contain no secrets — they are documents
-// meant to be shared with clients via email links.
-// Owner-only operations (edit, delete, status) still use canAccessInvoice.
 func (h *Handlers) canViewInvoice(r *http.Request, inv *repo.Invoice) bool {
 	if inv == nil {
 		return false
 	}
 
-	// 1. Any logged-in user who owns this invoice
 	user := auth.GetUser(r)
 	if inv.UserID != nil && user != nil && user.ID == *inv.UserID {
 		return true
 	}
 
-	// 2. Anonymous token match (for guest invoices)
 	if inv.AnonymousToken != "" {
 		anonToken, ok := auth.GetAnonymousToken(r)
 		if ok && anonToken == inv.AnonymousToken {
@@ -123,8 +256,6 @@ func (h *Handlers) canViewInvoice(r *http.Request, inv *repo.Invoice) bool {
 		}
 	}
 
-	// 3. Public access token match (for shared registered invoices)
-	// Check query parameter ?access=...
 	if inv.PublicToken != "" {
 		accessToken := r.URL.Query().Get("access")
 		if accessToken != "" && accessToken == inv.PublicToken {

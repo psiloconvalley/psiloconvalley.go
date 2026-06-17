@@ -8,7 +8,7 @@ import (
 )
 
 // TestInvoiceTemplate_SyncItemInputsPresent guards against removal of
-// the syncItemInputs() JavaScript function in invoice_new.tmpl.
+// the syncItemInputs() JavaScript function.
 //
 // Background: invoice_new.tmpl has two responsive layouts for line items:
 //   - Desktop: <tbody id="items_body_desktop"> — visible above 639px
@@ -20,16 +20,39 @@ import (
 //
 // This was a production bug (invoice 86 had 12 items instead of 3).
 // The fix disables inputs in the hidden layout before submit.
-// This test ensures that fix is never silently removed.
+//
+// JS was moved to static/js/invoice_new.js in Session 5 refactor.
+// The template must include the script tag; the static file must contain
+// the function. Both are guarded here.
 func TestInvoiceTemplate_SyncItemInputsPresent(t *testing.T) {
-	const templatePath = "../../templates/invoice_new.tmpl"
-
-	content, err := os.ReadFile(templatePath)
+	// Guard 1: template must reference the static JS file
+	templateContent, err := os.ReadFile("../../templates/invoice_new.tmpl")
 	if err != nil {
 		t.Fatalf("could not read invoice_new.tmpl: %v", err)
 	}
+	tmpl := string(templateContent)
 
-	tmpl := string(content)
+	if !strings.Contains(tmpl, "invoice-new-scripts") {
+		t.Error("REGRESSION: invoice_new.tmpl is missing {{template \"invoice-new-scripts\" .}}\nReason: scripts partial must be included or JS will not load")
+	}
+
+	// Guard 2: scripts partial must reference the static JS file
+	scriptsPartial, err := os.ReadFile("../../templates/partials/invoice_new_scripts.tmpl")
+	if err != nil {
+		t.Fatalf("could not read invoice_new_scripts.tmpl: %v", err)
+	}
+	partial := string(scriptsPartial)
+
+	if !strings.Contains(partial, "invoice_new.js") {
+		t.Error("REGRESSION: invoice_new_scripts.tmpl is missing invoice_new.js src\nReason: static JS file must be loaded")
+	}
+
+	// Guard 3: static JS file must contain the sync function and all critical patterns
+	jsContent, err := os.ReadFile("../../static/js/invoice_new.js")
+	if err != nil {
+		t.Fatalf("could not read static/js/invoice_new.js: %v", err)
+	}
+	js := string(jsContent)
 
 	guards := []struct {
 		name    string
@@ -75,9 +98,9 @@ func TestInvoiceTemplate_SyncItemInputsPresent(t *testing.T) {
 
 	for _, g := range guards {
 		t.Run(g.name, func(t *testing.T) {
-			if !strings.Contains(tmpl, g.snippet) {
+			if !strings.Contains(js, g.snippet) {
 				t.Errorf(
-					"REGRESSION: invoice_new.tmpl is missing %q\nReason: %s",
+					"REGRESSION: static/js/invoice_new.js is missing %q\nReason: %s",
 					g.snippet,
 					g.reason,
 				)

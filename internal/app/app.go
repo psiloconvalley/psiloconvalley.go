@@ -45,6 +45,7 @@ type App struct {
 	EstRespRepo   *repo.EstimateResponseRepo
 	ExpenseRepo   *repo.ExpenseRepo
 	AuditRepo  *repo.AuditRepo
+	UsageRepo  *repo.UsageRepo
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
@@ -132,7 +133,8 @@ func NewApp(db *sql.DB) *App {
 		ReceiptStore:      newReceiptStore(baseURL),
 		EstRespRepo:       repo.NewEstimateResponseRepo(db),
 		ExpenseRepo:       repo.NewExpenseRepo(db),
-		AuditRepo:  repo.NewAuditRepo(db),
+		AuditRepo: 	   repo.NewAuditRepo(db),
+		UsageRepo:  	   repo.NewUsageRepo(db),
 	}
 }
 	
@@ -206,10 +208,12 @@ func (a *App) Render(w http.ResponseWriter, r *http.Request, name string, data m
 	)
 
 	// ── Inject translations based on user language preference ─────────
-	lang := "en"
-	if user != nil && user.Language != "" {
-		lang = user.Language
-	}
+lang := "en"
+if user != nil && user.Language != "" {
+    lang = user.Language
+} else if strings.Contains(r.Header.Get("Accept-Language"), "es") {
+    lang = "es"
+}
 	data["T"] = i18n.Get(lang)
 	var buf bytes.Buffer
 	if err := a.Templates.ExecuteTemplate(&buf, name, data); err != nil {

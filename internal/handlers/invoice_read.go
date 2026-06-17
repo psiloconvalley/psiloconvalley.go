@@ -109,7 +109,7 @@ func (h *Handlers) InvoicesList(w http.ResponseWriter, r *http.Request) {
 		"Invoices":     invoices,
 		"User":         user,
 		"MonthlyCount": monthlyCount,
-		"MonthlyLimit": freePlanMonthlyLimit,
+		"MonthlyLimit": invoiceLimitFor(user.Plan),
 		"IsPro":        user.Plan == "pro",
 		"Deleted":      r.URL.Query().Get("deleted") == "true",
 	})

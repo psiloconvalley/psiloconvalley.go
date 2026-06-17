@@ -29,10 +29,10 @@ func (h *Handlers) InvoiceSendGet(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	if user.Plan != "pro" {
-		http.Redirect(w, r, "/pricing?reason=email-pro", http.StatusSeeOther)
-		return
-	}
+if !h.canSendInvoice(r) {
+    http.Redirect(w, r, "/pricing?reason=email-pro", http.StatusSeeOther)
+    return
+}
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
@@ -60,10 +60,10 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	if user.Plan != "pro" {
-		http.Redirect(w, r, "/pricing?reason=email-pro", http.StatusSeeOther)
-		return
-	}
+if !h.canSendInvoice(r) {
+    http.Redirect(w, r, "/pricing?reason=send-limit", http.StatusSeeOther)
+    return
+}
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
@@ -137,11 +137,13 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 	// ── Send via Resend ───────────────────────────────────────────────
 	pdfFilename := fmt.Sprintf("invoice-%s.pdf", inv.InvoiceNumber)
 
-	if err := h.App.Mailer.SendInvoice(toEmail, emailData, pdfBytes, pdfFilename); err != nil {
-		log.Printf("[send] email send error: %v", err)
-		http.Error(w, "Failed to send email. Please try again.", http.StatusInternalServerError)
-		return
-	}
+if err := h.App.Mailer.SendInvoice(toEmail, emailData, pdfBytes, pdfFilename); err != nil {
+    log.Printf("[send] email send error: %v", err)
+    http.Error(w, "Failed to send email. Please try again.", http.StatusInternalServerError)
+    return
+}
+// ── Increment monthly send counter ───────────────────────────────
+h.App.UsageRepo.Increment(r.Context(), user.ID, "sends")
 
 	// ── Auto-advance status draft → sent ─────────────────────────────
 	if inv.Status == "draft" && inv.UserID != nil {
