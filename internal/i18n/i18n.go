@@ -215,6 +215,45 @@ type T struct {
 	InvoicesDeletePlaceholder string
 	InvoicesDeleteCancel    string
 	InvoicesDeletePermanent string
+
+	// Estimates list page
+	EstimatesListTitle           string
+	EstimatesListTotal           string
+	EstimatesListNew             string
+	EstimatesListDeleted         string
+	EstimatesListConverted       string
+	EstimatesListEmptyTitle      string
+	EstimatesListEmptySub        string
+	EstimatesListEmptyBtn        string
+	EstimatesListThEstimate      string
+	EstimatesListThClient        string
+	EstimatesListThIssued        string
+	EstimatesListThValidUntil    string
+	EstimatesListThStatus        string
+	EstimatesListThTotal         string
+	EstimatesListThActions       string
+	EstimatesListSend            string
+	EstimatesListEdit            string
+	EstimatesListResend          string
+	EstimatesListView            string
+	EstimatesListConvert         string
+	EstimatesListDeleteBtn       string
+	EstimatesListUntitled        string
+	EstimatesListNoClient        string
+	EstimatesListCreatedLabel    string
+	EstimatesListDeleteTitle     string
+	EstimatesListDeleteBody      string
+	EstimatesListDeleteConfirm   string
+	EstimatesListDeletePlaceholder string
+	EstimatesListDeleteCancel    string
+	EstimatesListDeletePermanent string
+	EstimatesListAcceptedTitle   string
+	EstimatesListAcceptedBody    string
+	EstimatesListConvertToInv    string
+	EstimatesListConvertSub      string
+	EstimatesListEditAnyway      string
+	EstimatesListEditAnywayWarn  string
+	EstimatesListAcceptedCancel  string
 }
 
 var en = T{
@@ -417,6 +456,44 @@ var en = T{
 	InvoicesDeleteCancel:    "Cancel",
 	InvoicesDeletePermanent: "Delete Permanently",
 
+	EstimatesListTitle:            "Estimates",
+	EstimatesListTotal:            "total",
+	EstimatesListNew:              "+ New Estimate",
+	EstimatesListDeleted:          "✓ Estimate deleted successfully",
+	EstimatesListConverted:        "✓ Estimate converted to invoice",
+	EstimatesListEmptyTitle:       "No estimates yet",
+	EstimatesListEmptySub:         "Create your first estimate to send to a client for approval.",
+	EstimatesListEmptyBtn:         "Create Estimate",
+	EstimatesListThEstimate:       "Estimate",
+	EstimatesListThClient:         "Client",
+	EstimatesListThIssued:         "Issued",
+	EstimatesListThValidUntil:     "Valid Until",
+	EstimatesListThStatus:         "Status",
+	EstimatesListThTotal:          "Total",
+	EstimatesListThActions:        "Actions",
+	EstimatesListSend:             "Send",
+	EstimatesListEdit:             "Edit",
+	EstimatesListResend:           "Resend",
+	EstimatesListView:             "View",
+	EstimatesListConvert:          "Convert",
+	EstimatesListDeleteBtn:        "Delete",
+	EstimatesListUntitled:         "Untitled",
+	EstimatesListNoClient:         "No client",
+	EstimatesListCreatedLabel:     "Created",
+	EstimatesListDeleteTitle:      "Delete Draft Estimate",
+	EstimatesListDeleteBody:       "This action cannot be undone. The estimate and all its line items will be permanently deleted.",
+	EstimatesListDeleteConfirm:    "Type the estimate number to confirm:",
+	EstimatesListDeletePlaceholder: "Type estimate number here",
+	EstimatesListDeleteCancel:     "Cancel",
+	EstimatesListDeletePermanent:  "Delete Permanently",
+	EstimatesListAcceptedTitle:    "This estimate has been accepted",
+	EstimatesListAcceptedBody:     "The client has already approved this estimate. What would you like to do?",
+	EstimatesListConvertToInv:     "Convert to Invoice",
+	EstimatesListConvertSub:       "Recommended — create an invoice from this accepted estimate",
+	EstimatesListEditAnyway:       "Edit Anyway",
+	EstimatesListEditAnywayWarn:   "Status will revert to draft — client will need to re-accept",
+	EstimatesListAcceptedCancel:   "Cancel",
+
 }
 
 var es = T{
@@ -618,6 +695,44 @@ var es = T{
 	InvoicesDeletePlaceholder: "Escribe el número de factura aquí",
 	InvoicesDeleteCancel:    "Cancelar",
 	InvoicesDeletePermanent: "Eliminar Permanentemente",
+
+	EstimatesListTitle:            "Presupuestos",
+	EstimatesListTotal:            "en total",
+	EstimatesListNew:              "+ Nuevo Presupuesto",
+	EstimatesListDeleted:          "✓ Presupuesto eliminado exitosamente",
+	EstimatesListConverted:        "✓ Presupuesto convertido a factura",
+	EstimatesListEmptyTitle:       "Aún no hay presupuestos",
+	EstimatesListEmptySub:         "Crea tu primer presupuesto para enviarlo a un cliente para su aprobación.",
+	EstimatesListEmptyBtn:         "Crear Presupuesto",
+	EstimatesListThEstimate:       "Presupuesto",
+	EstimatesListThClient:         "Cliente",
+	EstimatesListThIssued:         "Emitido",
+	EstimatesListThValidUntil:     "Válido Hasta",
+	EstimatesListThStatus:         "Estado",
+	EstimatesListThTotal:          "Total",
+	EstimatesListThActions:        "Acciones",
+	EstimatesListSend:             "Enviar",
+	EstimatesListEdit:             "Editar",
+	EstimatesListResend:           "Reenviar",
+	EstimatesListView:             "Ver",
+	EstimatesListConvert:          "Convertir",
+	EstimatesListDeleteBtn:        "Eliminar",
+	EstimatesListUntitled:         "Sin título",
+	EstimatesListNoClient:         "Sin cliente",
+	EstimatesListCreatedLabel:     "Creado",
+	EstimatesListDeleteTitle:      "Eliminar Borrador de Presupuesto",
+	EstimatesListDeleteBody:       "Esta acción no se puede deshacer. El presupuesto y todos sus artículos serán eliminados permanentemente.",
+	EstimatesListDeleteConfirm:    "Escribe el número de presupuesto para confirmar:",
+	EstimatesListDeletePlaceholder: "Escribe el número de presupuesto aquí",
+	EstimatesListDeleteCancel:     "Cancelar",
+	EstimatesListDeletePermanent:  "Eliminar Permanentemente",
+	EstimatesListAcceptedTitle:    "Este presupuesto ha sido aceptado",
+	EstimatesListAcceptedBody:     "El cliente ya aprobó este presupuesto. ¿Qué deseas hacer?",
+	EstimatesListConvertToInv:     "Convertir a Factura",
+	EstimatesListConvertSub:       "Recomendado — crea una factura a partir de este presupuesto aceptado",
+	EstimatesListEditAnyway:       "Editar de Todas Formas",
+	EstimatesListEditAnywayWarn:   "El estado volverá a borrador — el cliente deberá volver a aceptar",
+	EstimatesListAcceptedCancel:   "Cancelar",
 }
 
 // Get returns the translation set for the given language code.
