@@ -69,49 +69,7 @@
                  MAIN FORM COLUMN
             ══════════════════════════════════════════════════════ */}}
             <div class="main">
-		{{/* ── Mobile-only Appearance Controls ──
-     Shown above the preview on mobile so users don't have to
-     scroll to the bottom sidebar to toggle logo/title.
-     These have separate IDs from the sidebar toggles.
-     JS syncs both pairs.
-── */}}
-<div class="mobile-appearance" style="
-    background: #0d1422;
-    color: white;
-    padding: 16px 20px;
-    border-radius: 10px;
-    margin-bottom: 16px;
-">
-    <div style="
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.5);
-        margin-bottom: 12px;
-    ">Appearance</div>
-
-    <label class="config-toggle">
-        <span class="config-item-label">Show Logo</span>
-        <input type="checkbox" id="toggle_logo_mobile" {{if .Invoice.ShowLogo}}checked{{end}}>
-        <span class="toggle-slider"><span class="toggle-knob"></span></span>
-	       </label>
-
-    <div class="logo-position-row" style="margin-bottom:12px;">
-        <span class="config-item-label">Logo Position</span>
-        <div class="logo-pos-btns">
-            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "left"}}active{{end}}" data-pos="left" onclick="setLogoPos('left')">Left</button>
-            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "center"}}active{{end}}" data-pos="center" onclick="setLogoPos('center')">Center</button>
-            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "right"}}active{{end}}" data-pos="right" onclick="setLogoPos('right')">Right</button>
-        </div>
-    </div>
-
-    <label class="config-toggle" style="margin-bottom:0;">
-	 <span class="config-item-label">Show {{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}} Title</span>
-           <input type="checkbox" id="toggle_title_mobile" {{if .Invoice.ShowTitle}}checked{{end}}>
-        <span class="toggle-slider"><span class="toggle-knob"></span></span>
-    </label>
-</div>
+{{template "invoice-new-mobile-appearance" .}}
 {{template "invoice-new-preview" .}}
                 <h1>
 			{{if eq .DocumentType "estimate"}}
