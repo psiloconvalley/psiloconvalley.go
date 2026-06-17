@@ -1,0 +1,132 @@
+{{define "invoice-new-client"}}
+                {{/* ── Section 2: Client ── */}}
+                <section class="section">
+                    <div class="step-badge">
+                        <span class="step-dot active"></span>
+                        <span class="step-dot active"></span>
+                        <span class="step-dot"></span>
+                        Step 2 of 3
+                    </div>
+                    <h2>Customer Details</h2>
+
+                    {{if .Clients}}
+                    <div style="margin-bottom:20px;">
+                        <label>Auto-Fill Saved Customer</label>
+                        <select id="client_selector" onchange="fillClient(this)">
+                            <option value="">— Type below or choose saved —</option>
+                            {{range .Clients}}
+                            <option value="{{.ID}}"
+                                data-name="{{.Name}}"
+                                data-email="{{.Email}}"
+                                data-address="{{.Address}}"
+                                data-city="{{.City}}"
+                                data-state="{{.State}}"
+                                data-zip="{{.Zip}}"
+                                data-country="{{.Country}}"
+                                {{if $.Invoice.ClientID}}{{if eq $.Invoice.ClientID .ID}}selected{{end}}{{end}}>
+                                {{.Name}}{{if .Email}} ({{.Email}}){{end}}
+                            </option>
+                            {{end}}
+                        </select>
+                    </div>
+                    {{end}}
+
+                    <input type="hidden" name="client_id" id="client_id"
+                           value="{{if .Invoice.ClientID}}{{.Invoice.ClientID}}{{end}}">
+
+                    <div class="grid-3">
+                        <div>
+                            <label>Customer Name <span style="color:var(--danger)">*</span></label>
+                            <input type="text" name="client_name" id="client_name" required
+                                   value="{{field .Invoice.ClientName}}"
+                                   placeholder="Globex Corp"
+                                   autocomplete="off">
+                        </div>
+                        <div>
+                            <label>Email</label>
+                            <input type="email" name="client_email" id="client_email"
+                                   value="{{field .Invoice.ClientEmail}}"
+                                   placeholder="ap@globex.com"
+                                   inputmode="email"
+                                   autocomplete="off">
+                        </div>
+                        <div>
+				<label>{{if eq .DocumentType "estimate"}}Estimate Number{{else}}Invoice Number{{end}}</label>
+                            {{if eq .Mode "edit"}}
+                            <input type="text" name="invoice_number" readonly
+                                   value="{{.Invoice.InvoiceNumber}}">
+                            {{else}}
+                            <input type="text" name="invoice_number"
+                                   value="{{field .Invoice.InvoiceNumber}}"
+                                   placeholder="INV-2026-001">
+                            {{end}}
+                            {{if .Errors}}
+                            {{range .Errors}}
+                            {{if eq .Field "invoice_number"}}
+                            <div class="field-error">{{.Message}}</div>
+                            {{end}}
+                            {{end}}
+                            {{end}}
+
+		    </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top:16px;">
+                        <div>
+                            <label>Issue Date</label>
+                            {{/* font-size:16px on date inputs prevents iOS Safari
+                                 from zooming the viewport on focus — a major mobile UX
+                                 regression that was present in the original template */}}
+                            <input type="date" name="issue_date"
+                                   value="{{field .Invoice.IssueDate}}"
+                                   style="font-size:16px;">
+                        </div>
+                        <div>
+                            <label>Due Date</label>
+                            <input type="date" name="due_date"
+                                   value="{{field .Invoice.DueDate}}"
+                                   style="font-size:16px;">
+                        </div>
+                    </div>
+
+                    <div class="grid-3" style="margin-top:16px;">
+                        <div>
+                            <label>Address</label>
+                            <input type="text" name="client_address" id="client_address"
+                                   value="{{field .Invoice.ClientAddress}}"
+                                   placeholder="456 Enterprise Dr">
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="client_city" id="client_city"
+                                   value="{{field .Invoice.ClientCity}}"
+                                   placeholder="Austin">
+                        </div>
+                        <div>
+                            <label>ZIP / Postal</label>
+                            <input type="text" name="client_zip" id="client_zip"
+                                   value="{{field .Invoice.ClientZip}}"
+                                   placeholder="73301"
+                                   inputmode="numeric">
+                        </div>
+                    </div>
+
+                        <div class="grid-2" style="margin-top:16px;">
+                        <div>
+                            <label>Country</label>
+                            <input type="text" name="client_country" id="client_country"
+                                   value="{{field .Invoice.ClientCountry}}"
+                                   placeholder="United States">
+                        </div>
+                        <div>
+                            <label>State / Region</label>
+                            <select name="client_state" id="client_state">
+                                <option value="">— Select State —</option>
+                                {{range .USStates}}
+                                <option value="{{.Name}}" {{if eq $.Invoice.ClientState .Name}}selected{{end}}>{{.Name}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                    </div>
+
+{{end}}
