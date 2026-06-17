@@ -1,0 +1,123 @@
+{{define "invoice-new-items-styles"}}
+<style>
+        /* ── Desktop line items table ── */
+        .items-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+        th {
+            background: #f1f5f9;
+            color: var(--ink-muted);
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        th:first-child { border-radius: 8px 0 0 8px; }
+        th:last-child  { border-radius: 0 8px 8px 0; }
+        td { padding: 12px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        td input { padding: 10px 12px; font-size: 13px; }
+        .right { text-align: right; }
+        .row-amount { font-weight: 600; vertical-align: middle; padding-top: 22px; font-variant-numeric: tabular-nums; }
+
+        /* Desktop table, mobile cards */
+        .items-desktop { display: block; }
+        .items-mobile-list { display: none; }
+
+        /* ── Mobile line item cards ──
+           On mobile the 6-column table (desc, details, qty, price, amount,
+           remove) is impossible to use on a 390px screen. We replace it with
+           stacked cards — one per line item — where each card has:
+             Row 1: Description input (full width)
+             Row 2: Details input (full width, collapsible)
+             Row 3: Qty | Price | Amount | Remove (4-col, touch targets)
+           The form field names are identical — the Go parser sees the same
+           description[] / details[] / quantity[] / unit_price[] arrays
+           regardless of which layout submitted the form.
+        ── */
+        .item-card-mobile {
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+        .item-card-mobile input {
+            margin-bottom: 8px;
+        }
+        .item-card-mobile .item-row-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+        }
+        .item-card-mobile .item-row-meta label {
+            font-size: 11px;
+            margin-bottom: 3px;
+        }
+        .item-card-mobile .row-total {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+            padding-top: 20px;
+        }
+
+        /* ── Buttons ── */
+        .add-btn {
+            margin-top: 16px;
+            background: transparent;
+            color: var(--accent);
+            border: 2px dashed var(--border);
+            padding: 14px;
+            width: 100%;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+            min-height: 44px;
+        }
+        .add-btn:hover { border-color: var(--accent); background: #f8fafc; }
+
+        .remove-btn {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1;
+            transition: all 0.15s;
+            flex-shrink: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .remove-btn:hover { background: var(--danger); color: white; }
+
+        .save-btn {
+            width: 100%;
+            margin-top: 36px;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            background: #ffffff;
+            color: #0d1422;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-height: 52px;
+        }
+        .save-btn:hover { background: #f1f5f9; transform: translateY(-1px); }
+        .save-btn:active { transform: translateY(0); }
+</style>
+{{end}}

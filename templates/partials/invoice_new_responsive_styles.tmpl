@@ -1,0 +1,142 @@
+{{define "invoice-new-responsive-styles"}}
+<style>
+        /* ── Mobile summary bar ──
+           On mobile the sidebar moves below the form (grid stacks).
+           To avoid the user having to scroll all the way down to see
+           the running total, we show a slim fixed bar at the bottom
+           of the viewport displaying the live total and the submit button.
+           The full sidebar is still rendered below the form for tax/currency
+           controls — this bar is purely a visibility shortcut.
+        ── */
+        .mobile-total-bar {
+            display: none;
+        }
+
+        /* ── PDF / mobile visibility helpers ── */
+        .desktop-only { display: inline-flex; }
+        .mobile-only  { display: none; }
+
+        /* ── Mobile/desktop appearance section visibility ── */
+        .mobile-appearance  { display: none; }
+        .desktop-appearance { display: block; }
+
+        /* ============================================================
+           RESPONSIVE BREAKPOINTS
+           ============================================================ */
+
+        /* Tablet: collapse sidebar below form, single-column grids */
+        @media (max-width: 1000px) {
+            .layout { grid-template-columns: 1fr; gap: 24px; }
+            .sidebar { position: static; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .mobile-appearance  { display: block; }
+            .desktop-appearance { display: none; }
+        }
+
+        /* Mobile: full single-column, swap table for cards, show bottom bar */
+        @media (max-width: 639px) {
+            .page { padding: 0 0 120px; }
+
+            .main { padding: 24px 16px; border-radius: 0; }
+            .sidebar { border-radius: 0; padding: 24px 16px; }
+
+            h1 { font-size: 26px; }
+            h2 { font-size: 17px; margin-bottom: 16px; }
+
+            .section { margin-top: 36px; padding-top: 28px; }
+
+            .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 12px; }
+
+            /* Swap table for cards */
+            .items-desktop     { display: none; }
+            .items-mobile-list { display: block; }
+
+            /* Show fixed bottom bar */
+            .mobile-total-bar {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #0d1422;
+                color: white;
+                padding: 12px 16px;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                z-index: 50;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            }
+            .mobile-total-label {
+                font-size: 12px;
+                color: rgba(255,255,255,0.5);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .mobile-total-amount {
+                font-size: 20px;
+                font-weight: 800;
+                font-variant-numeric: tabular-nums;
+            }
+            .mobile-submit-btn {
+                background: white;
+                color: #0d1422;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 700;
+                font-size: 13px;
+                cursor: pointer;
+                white-space: nowrap;
+                min-height: 44px;
+                font-family: inherit;
+            }
+
+            .desktop-only { display: none; }
+            .mobile-only  { display: inline-flex; }
+
+            /* Prevents iOS zoom on focus */
+            input[type="date"] { font-size: 16px; }
+        }
+
+        /* ── Hint animation ── */
+        @keyframes hintPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* ── Logo position toggle ── */
+        .logo-position-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .logo-pos-btns {
+            display: flex;
+            gap: 4px;
+        }
+        .logo-pos-btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .logo-pos-btn:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.8);
+        }
+        .logo-pos-btn.active {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.4);
+            color: #ffffff;
+        }
+</style>
+{{end}}
