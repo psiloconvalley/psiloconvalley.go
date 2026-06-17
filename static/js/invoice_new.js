@@ -12,32 +12,29 @@ function getCurrencySymbol() {
 function calculateLiveTotals() {
     const sym = getCurrencySymbol();
     let subtotal = 0;
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
 
-    // Desktop rows
-    document.querySelectorAll('#items_body_desktop tr').forEach(row => {
-        const qty   = parseFloat(row.querySelector('.qty')?.value)   || 0;
-        const price = parseFloat(row.querySelector('.price')?.value) || 0;
-        const amt   = qty * price;
-        subtotal += amt;
-        const amtEl = row.querySelector('.row-amount');
-        if (amtEl) amtEl.textContent = sym + amt.toFixed(2);
-    });
-
-    // Mobile cards (same data, different DOM)
-    document.querySelectorAll('#items_body_mobile .item-card-mobile').forEach(card => {
-        const qty   = parseFloat(card.querySelector('.qty')?.value)   || 0;
-        const price = parseFloat(card.querySelector('.price')?.value) || 0;
-        const amt   = qty * price;
-        // Mobile cards share the same inputs — don't double-count
-        const totalEl = card.querySelector('.row-total');
-        if (totalEl) totalEl.textContent = sym + amt.toFixed(2);
-    });
-
-    // If both layouts are in the DOM, the desktop inputs are the ones
-    // actually submitted (mobile is hidden via CSS display:none).
-    // But on a real mobile viewport only mobile inputs are visible.
-    // The subtotal above counts desktop OR mobile depending on which
-    // is rendered — they are mutually exclusive via CSS, so no double-counting.
+    if (isMobile) {
+        // Read from mobile cards — these are the active inputs on mobile
+        document.querySelectorAll('#items_body_mobile .item-card-mobile').forEach(card => {
+            const qty   = parseFloat(card.querySelector('.qty')?.value)   || 0;
+            const price = parseFloat(card.querySelector('.price')?.value) || 0;
+            const amt   = qty * price;
+            subtotal += amt;
+            const totalEl = card.querySelector('.row-total');
+            if (totalEl) totalEl.textContent = sym + amt.toFixed(2);
+        });
+    } else {
+        // Read from desktop rows — these are the active inputs on desktop
+        document.querySelectorAll('#items_body_desktop tr').forEach(row => {
+            const qty   = parseFloat(row.querySelector('.qty')?.value)   || 0;
+            const price = parseFloat(row.querySelector('.price')?.value) || 0;
+            const amt   = qty * price;
+            subtotal += amt;
+            const amtEl = row.querySelector('.row-amount');
+            if (amtEl) amtEl.textContent = sym + amt.toFixed(2);
+        });
+    }
 
     const taxRate      = parseFloat(document.getElementById('tax_rate')?.value) || 0;
     const taxAmt       = subtotal * (taxRate / 100);
@@ -51,13 +48,12 @@ function calculateLiveTotals() {
     const discountLine = document.getElementById('discount_line');
     if (discountLine) discountLine.style.display = discountAmt > 0 ? 'flex' : 'none';
 
-    if (el('subtotal_display'))    el('subtotal_display').textContent    = fmt(subtotal);
-    if (el('tax_display'))         el('tax_display').textContent         = fmt(taxAmt);
-    if (el('discount_display'))    el('discount_display').textContent    = '-' + fmt(discountAmt);
-    if (el('total_display'))       el('total_display').textContent       = fmt(total);
-    if (el('mobile_total_display'))el('mobile_total_display').textContent = fmt(total);
+    if (el('subtotal_display'))     el('subtotal_display').textContent     = fmt(subtotal);
+    if (el('tax_display'))          el('tax_display').textContent          = fmt(taxAmt);
+    if (el('discount_display'))     el('discount_display').textContent     = '-' + fmt(discountAmt);
+    if (el('total_display'))        el('total_display').textContent        = fmt(total);
+    if (el('mobile_total_display')) el('mobile_total_display').textContent = fmt(total);
 }
-
 
 // ── Enter key on last line item adds a new row ────────────────────
 function handleDescEnter(e) {
