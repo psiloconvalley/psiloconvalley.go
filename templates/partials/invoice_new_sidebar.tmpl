@@ -1,0 +1,260 @@
+{{define "invoice-new-sidebar"}}
+	            <aside class="sidebar">
+                <div class="sidebar-box">
+                    <h2 class="summary-title">{{if eq .DocumentType "estimate"}}Customize Estimate{{else}}Customize Invoice{{end}}</h2>
+
+                    {{/* ── Appearance Toggles ── */}}
+                    <div class="sidebar-section desktop-appearance">
+                        <div class="sidebar-section-label">Appearance</div>
+
+                        <label class="config-toggle">
+                            <span class="config-item-label">Show Logo</span>
+                		<input type="checkbox" name="show_logo" id="toggle_logo" {{if .Invoice.ShowLogo}}checked{{end}}>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+
+			 </label>
+
+                        <div class="logo-position-row" id="logo-position-desktop">
+                            <span class="config-item-label">Logo Position</span>
+                            <div class="logo-pos-btns">
+                                <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "left"}}active{{end}}" data-pos="left" onclick="setLogoPos('left')">Left</button>
+                                <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "center"}}active{{end}}" data-pos="center" onclick="setLogoPos('center')">Center</button>
+                                <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "right"}}active{{end}}" data-pos="right" onclick="setLogoPos('right')">Right</button>
+                            </div>
+                            <input type="hidden" name="logo_position" id="logo_position_input" value="{{if .Invoice.LogoPosition}}{{.Invoice.LogoPosition}}{{else}}left{{end}}">
+                        </div>
+
+                        <label class="config-toggle">
+				<span class="config-item-label">Show {{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}} Title</span>
+
+                                                        <input type="checkbox" name="show_title" id="toggle_title" {{if .Invoice.ShowTitle}}checked{{end}}>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+                    </div>
+                    {{/* ── Template & Brand Color ── */}}
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Template</div>
+
+                        <div class="template-grid">
+                            {{range .Templates}}
+                            {{if and .ProOnly (not (and $.User (eq $.User.Plan "pro")))}}
+                            <div class="template-option locked">
+                                <div class="template-dot"></div>
+                                <div>
+                                    <div class="template-name">{{.Name}}</div>
+                                    <div class="template-desc">{{.Description}}</div>
+                                </div>
+                                <span class="template-lock">🔒</span>
+                            </div>
+                            {{else}}
+                            <label class="template-option {{if eq $.Invoice.TemplateID .ID}}selected{{end}}">
+                                <input type="radio" name="template_id" value="{{.ID}}"
+                                    {{if eq $.Invoice.TemplateID .ID}}checked{{end}}
+                                    onchange="this.closest('.template-grid').querySelectorAll('.template-option').forEach(o=>o.classList.remove('selected')); this.closest('.template-option').classList.add('selected')">
+                                <div class="template-dot"></div>
+                                <div>
+                                    <div class="template-name">{{.Name}}</div>
+                                    <div class="template-desc">{{.Description}}</div>
+                                </div>
+                            </label>
+                            {{end}}
+                            {{end}}
+                        </div>
+
+                        {{if and .User (eq .User.Plan "pro")}}
+                        <div style="margin-top: 16px;">
+                            <div class="sidebar-section-label" style="margin-bottom: 10px;">Brand Color</div>
+                            <div class="color-picker-row">
+                                <input type="color" name="brand_color" id="brand_color_picker"
+                                    value="{{.Invoice.BrandColor}}"
+                                    oninput="document.getElementById('brand_color_hex').textContent = this.value">
+                                <div>
+                                    <div class="color-picker-label">Accent Color</div>
+                                    <div class="color-picker-hex" id="brand_color_hex">{{.Invoice.BrandColor}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {{else}}
+                        <div style="margin-top: 16px; opacity: 0.4;">
+                            <div class="sidebar-section-label" style="margin-bottom: 10px;">Brand Color</div>
+                            <div class="color-picker-row">
+                                <input type="color" disabled value="#0d1422"
+                                    style="cursor: not-allowed;">
+                                <div>
+                                    <div class="color-picker-label">Accent Color</div>
+                                    <div class="color-picker-hex">
+                                        <a href="/pricing?reason=brand-color" style="color: #fbbf24; text-decoration: none; font-weight: 600;">Upgrade to Pro</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+		                        {{/* ── Payment Reminders ── */}}
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Reminders</div>
+
+                        {{if and .User (eq .User.Plan "pro")}}
+                        <label class="config-toggle">
+                            <span class="config-item-label">Auto Reminders</span>
+                            <input type="checkbox" name="auto_reminders" id="toggle_reminders" {{if .Invoice.AutoReminders}}checked{{end}}>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                            Automatically remind your client before and after the due date if unpaid.
+                        </div>
+                        {{else}}
+                        <label class="config-toggle" style="opacity: 0.4; cursor: not-allowed;">
+                            <span class="config-item-label">Auto Reminders</span>
+                            <input type="checkbox" disabled>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                            <a href="/pricing?reason=reminders" style="color: #fbbf24; text-decoration: none; font-weight: 600;">Upgrade to Pro</a> to send automatic payment reminders.
+                        </div>
+                        {{end}}
+                    </div>
+		                        {{/* ── Recurring Schedule ── */}}
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Recurring</div>
+
+                        {{if and .User (eq .User.Plan "pro")}}
+                        <label class="config-toggle">
+                            <span class="config-item-label">Make Recurring</span>
+                            <input type="checkbox" name="is_recurring" id="toggle_recurring" {{if .Invoice.IsRecurring}}checked{{end}}>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+
+                        <div id="recurring_options" style="display: none; margin-top: 12px;">
+                            <div style="margin-bottom: 12px;">
+                                <label>Frequency</label>
+                                <select name="recurring_frequency" id="recurring_frequency" style="width: 100%;">
+                                    <option value="weekly" {{if eq .Invoice.RecurringFrequency "weekly"}}selected{{end}}>Weekly</option>
+                                    <option value="monthly" {{if eq .Invoice.RecurringFrequency "monthly"}}selected{{end}}>Monthly</option>
+                                    <option value="quarterly" {{if eq .Invoice.RecurringFrequency "quarterly"}}selected{{end}}>Quarterly</option>
+                                    <option value="yearly" {{if eq .Invoice.RecurringFrequency "yearly"}}selected{{end}}>Yearly</option>
+                                </select>
+                            </div>
+
+                            <label class="config-toggle">
+                                <span class="config-item-label">Auto-send</span>
+                                <input type="checkbox" name="recurring_auto_send" id="toggle_auto_send" {{if .Invoice.RecurringAutoSend}}checked{{end}}>
+                                <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                            </label>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                                Automatically email the invoice when generated.
+                            </div>
+                        </div>
+                        {{else}}
+                        <label class="config-toggle" style="opacity: 0.4; cursor: not-allowed;">
+                            <span class="config-item-label">Make Recurring</span>
+                            <input type="checkbox" disabled>
+                            <span class="toggle-slider"><span class="toggle-knob"></span></span>
+                        </label>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: -4px; line-height: 1.4;">
+                            <a href="/pricing?reason=recurring" style="color: #fbbf24; text-decoration: none; font-weight: 600;">Upgrade to Pro</a> to create recurring invoices.
+                        </div>
+                        {{end}}
+                    </div>
+
+                    {{/* ── Financial Controls ── */}}
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Invoice Settings</div>
+
+                        <div style="margin-bottom:16px;">
+                            <label>Currency</label>
+                            <select name="currency" id="currency">
+                                {{range .Currencies}}
+                                <option value="{{.Code}}" data-symbol="{{.Symbol}}"
+                                        {{if eq $.Invoice.Currency .Code}}selected{{end}}>
+                                    {{.Code}} — {{.Name}}
+                                </option>
+                                {{end}}
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom:16px;">
+                            <label>Tax Rate (%)</label>
+                            <input type="number" step="0.01" min="0" name="tax_rate" id="tax_rate"
+                                   value="{{if .Invoice.TaxRateBps}}{{bpsToPercent .Invoice.TaxRateBps}}{{else}}0{{end}}"
+                                   placeholder="0.00" inputmode="decimal">
+                        </div>
+
+                        <div style="margin-bottom:16px;">
+                            <label>Discount ($)</label>
+                            <input type="number" step="0.01" min="0" name="discount_amount" id="discount_amount"
+                                   value="{{if .Invoice.DiscountAmountCentsRaw}}{{formatCents .Invoice.DiscountAmountCentsRaw}}{{else}}0.00{{end}}"
+                                   placeholder="0.00" inputmode="decimal">
+                        </div>
+
+                        <div>
+                            <label>Payment Instructions</label>
+                            <textarea name="payment_details" rows="3"
+                                      placeholder="Bank: Chase · Routing: xxx · Account: xxxx">{{.Invoice.PaymentDetails}}</textarea>
+                        </div>
+                    </div>
+
+                    {{/* ── Financial Summary ── */}}
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-label">Summary</div>
+
+                        <div class="summary-line">
+                            <span>Subtotal</span>
+                            <span id="subtotal_display">{{if .Invoice.Subtotal}}{{.Invoice.Subtotal}}{{else}}$0.00{{end}}</span>
+                        </div>
+                        <div class="summary-line">
+                            <span>Tax</span>
+                            <span id="tax_display">{{if .Invoice.TaxAmount}}{{.Invoice.TaxAmount}}{{else}}$0.00{{end}}</span>
+                        </div>
+                        <div class="summary-line" id="discount_line" style="display:none;">
+                            <span>Discount</span>
+                            <span id="discount_display">-$0.00</span>
+                        </div>
+                        <div class="summary-line summary-total">
+                            <span>Total</span>
+                            <span id="total_display">{{if .Invoice.Total}}{{.Invoice.Total}}{{else}}$0.00{{end}}</span>
+                        </div>
+                    </div>
+			<button type="submit" class="save-btn">
+                        {{if eq .DocumentType "estimate"}}
+                            {{if eq .Mode "edit"}}💾 Update Estimate{{else}}✅ Save Estimate{{end}}
+                        {{else}}
+                            {{if eq .Mode "edit"}}💾 Update Invoice{{else}}✅ Save Invoice{{end}}
+                        {{end}}	
+			</button>
+                    <div id="draft-indicator" style="text-align:center;margin-top:12px;font-size:12px;color:rgba(255,255,255,0.6);opacity:0;transition:opacity 0.3s ease;"></div>
+                </div>
+
+                <div class="sidebar-box sidebar-integrations">
+                    <div class="sidebar-section-label">Payment & Integrations</div>
+                    <div class="integration-item">
+                        <span class="integration-icon">🏦</span>
+                        <div>
+                            <div class="integration-name">Bank Transfer</div>
+                            <div class="integration-desc">Add payment instructions above</div>
+                        </div>
+                    </div>
+                    <div class="integration-item">
+                        <span class="integration-icon">📨</span>
+                        <div>
+                            <div class="integration-name">Email Delivery</div>
+                            <div class="integration-desc">Send invoices directly to clients</div>
+                        </div>
+                    </div>
+                    <div class="integration-item">
+                        <span class="integration-icon">👥</span>
+                        <div>
+                            <div class="integration-name">Saved Clients</div>
+                            <div class="integration-desc">Auto-fill from your client list</div>
+                        </div>
+                    </div>
+                    <div class="integration-item">
+                        <span class="integration-icon">🔗</span>
+                        <div>
+                            <div class="integration-name">Crypto Payments</div>
+                            <div class="integration-desc coming-soon">Coming Soon</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+{{end}}

@@ -1,0 +1,142 @@
+{{define "invoice-new-line-items"}}
+                {{/* ── Section 3: Line Items ── */}}
+                <section class="section">
+                    <div class="step-badge">
+                        <span class="step-dot active"></span>
+                        <span class="step-dot active"></span>
+                        <span class="step-dot active"></span>
+                        Step 3 of 3
+                    </div>
+                    <h2>Items to Bill</h2>
+
+                    {{if .Errors}}
+                    {{range .Errors}}
+                    {{if eq .Field "items"}}
+                    <div class="field-error" style="margin-bottom:12px;">{{.Message}}</div>
+                    {{end}}
+                    {{end}}
+                    {{end}}
+
+                    {{/* ── DESKTOP: 6-column table ── */}}
+                    <div class="items-desktop items-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:33%;">Description</th>
+                                    <th style="width:27%;">Details / Notes</th>
+                                    <th style="width:10%;">Qty</th>
+                                    <th style="width:14%;">Unit Price</th>
+                                    <th style="width:10%; text-align:right;">Amount</th>
+                                    <th style="width:6%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="items_body_desktop">
+                                {{if .Invoice.Items}}
+                                    {{range .Invoice.Items}}
+                                    <tr>
+                                        <td><input type="text" name="description[]" class="item-desc"
+                                                   value="{{.Description}}" placeholder="Web Development"></td>
+                                        <td><input type="text" name="details[]" class="item-details"
+                                                   value="{{.Details}}" placeholder="40 hours @ $X"></td>
+                                        <td><input type="number" step="0.01" min="0.01" name="quantity[]"
+                                                   class="qty" value="{{.QuantityRaw}}" inputmode="decimal"></td>
+                                        <td><input type="number" step="0.01" min="0" name="unit_price[]"
+                                                   class="price"
+                                                   value="{{if .UnitPriceCents}}{{formatCents .UnitPriceCents}}{{else}}0.00{{end}}"
+                                                   inputmode="decimal"></td>
+                                        <td class="right row-amount">{{if .LineTotal}}{{.LineTotal}}{{else}}$0.00{{end}}</td>
+                                        <td style="text-align:center;">
+                                            <button type="button" class="remove-btn" onclick="removeRow(this,'desktop')">×</button>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                {{else}}
+                                    <tr>
+                                        <td><input type="text" name="description[]" class="item-desc"
+                                                   placeholder="Web Development"></td>
+                                        <td><input type="text" name="details[]" class="item-details"
+                                                   placeholder="40 hours @ $X"></td>
+                                        <td><input type="number" step="0.01" min="0.01" name="quantity[]"
+                                                   class="qty" value="1" inputmode="decimal"></td>
+                                        <td><input type="number" step="0.01" min="0" name="unit_price[]"
+                                                   class="price" value="0.00" inputmode="decimal"></td>
+                                        <td class="right row-amount">$0.00</td>
+                                        <td style="text-align:center;">
+                                            <button type="button" class="remove-btn" onclick="removeRow(this,'desktop')">×</button>
+                                        </td>
+                                    </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{/* ── MOBILE: stacked item cards ──
+                         Same field names as the desktop table — the Go parser
+                         receives identical description[] / details[] / quantity[]
+                         / unit_price[] arrays from both layouts.
+                         inputmode="decimal" shows the decimal keypad on iOS/Android.
+                    ── */}}
+                    <div class="items-mobile-list" id="items_body_mobile">
+                        {{if .Invoice.Items}}
+                            {{range .Invoice.Items}}
+                            <div class="item-card-mobile">
+                                <label style="font-size:11px;">Description</label>
+                                <input type="text" name="description[]" class="item-desc"
+                                       value="{{.Description}}" placeholder="Web Development">
+                                <label style="font-size:11px;">Details (optional)</label>
+                                <input type="text" name="details[]" class="item-details"
+                                       value="{{.Details}}" placeholder="40 hours @ $X">
+                                <div class="item-row-meta">
+                                    <div>
+                                        <label>Qty</label>
+                                        <input type="number" step="0.01" min="0.01" name="quantity[]"
+                                               class="qty" value="{{.QuantityRaw}}" inputmode="decimal">
+                                    </div>
+                                    <div>
+                                        <label>Price</label>
+                                        <input type="number" step="0.01" min="0" name="unit_price[]"
+                                               class="price"
+                                               value="{{if .UnitPriceCents}}{{formatCents .UnitPriceCents}}{{else}}0.00{{end}}"
+                                               inputmode="decimal">
+                                    </div>
+                                    <div class="row-total">$0.00</div>
+                                    <button type="button" class="remove-btn" onclick="removeRow(this,'mobile')">×</button>
+                                </div>
+                            </div>
+                            {{end}}
+                        {{else}}
+                            <div class="item-card-mobile">
+                                <label style="font-size:11px;">Description</label>
+                                <input type="text" name="description[]" class="item-desc"
+                                       placeholder="Web Development">
+                                <label style="font-size:11px;">Details (optional)</label>
+                                <input type="text" name="details[]" class="item-details"
+                                       placeholder="40 hours @ $X">
+                                <div class="item-row-meta">
+                                    <div>
+                                        <label>Qty</label>
+                                        <input type="number" step="0.01" min="0.01" name="quantity[]"
+                                               class="qty" value="1" inputmode="decimal">
+                                    </div>
+                                    <div>
+                                        <label>Price</label>
+                                        <input type="number" step="0.01" min="0" name="unit_price[]"
+                                               class="price" value="0.00" inputmode="decimal">
+                                    </div>
+                                    <div class="row-total">$0.00</div>
+                                    <button type="button" class="remove-btn" onclick="removeRow(this,'mobile')">×</button>
+                                </div>
+                            </div>
+                        {{end}}
+                    </div>
+
+                    <button type="button" class="add-btn" onclick="addRow()">+ Add Line Item</button>
+
+                    <div style="margin-top:32px;">
+                        <label>Invoice Memo / Footer Notes</label>
+                        <textarea name="notes"
+                                  placeholder="Thank you for your business! Payment is due within 30 days.">{{.Invoice.Notes}}</textarea>
+                    </div>
+                </section>
+
+{{end}}
