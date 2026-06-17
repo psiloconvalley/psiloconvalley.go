@@ -282,6 +282,28 @@ type T struct {
 	RegisterGoogleSoon   string
 	RegisterHaveAccount  string
 	RegisterSignIn       string
+
+	// Expenses list page
+	ExpensesListTitle       string
+	ExpensesListSubtitle    string
+	ExpensesListNew         string
+	ExpensesListSaved       string
+	ExpensesListDeleted     string
+	ExpensesListThisMonth   string
+	ExpensesListThisYear    string
+	ExpensesListThDate      string
+	ExpensesListThVendor    string
+	ExpensesListThCategory  string
+	ExpensesListThDesc      string
+	ExpensesListThAmount    string
+	ExpensesListThReceipt   string
+	ExpensesListView        string
+	ExpensesListEdit        string
+	ExpensesListExpense     string
+	ExpensesListReceipt     string
+	ExpensesListEmptyTitle  string
+	ExpensesListEmptySub    string
+	ExpensesListEmptyBtn    string
 }
 
 var en = T{
@@ -548,6 +570,27 @@ var en = T{
 	RegisterHaveAccount:  "Already have an account?",
 	RegisterSignIn:       "Sign in",
 
+	ExpensesListTitle:       "Expenses",
+	ExpensesListSubtitle:    "Track business spending",
+	ExpensesListNew:         "+ New Expense",
+	ExpensesListSaved:       "✓ Expense saved successfully",
+	ExpensesListDeleted:     "✓ Expense deleted",
+	ExpensesListThisMonth:   "This Month",
+	ExpensesListThisYear:    "This Year",
+	ExpensesListThDate:      "Date",
+	ExpensesListThVendor:    "Vendor",
+	ExpensesListThCategory:  "Category",
+	ExpensesListThDesc:      "Description",
+	ExpensesListThAmount:    "Amount",
+	ExpensesListThReceipt:   "Receipt",
+	ExpensesListView:        "View →",
+	ExpensesListEdit:        "Edit",
+	ExpensesListExpense:     "Expense",
+	ExpensesListReceipt:     "📎 Receipt",
+	ExpensesListEmptyTitle:  "No expenses yet",
+	ExpensesListEmptySub:    "Start tracking your business spending to see your real profit.",
+	ExpensesListEmptyBtn:    "+ Add Your First Expense",
+
 }
 
 var es = T{
@@ -813,6 +856,27 @@ var es = T{
 	RegisterGoogleSoon:   "Próximamente",
 	RegisterHaveAccount:  "¿Ya tienes una cuenta?",
 	RegisterSignIn:       "Inicia sesión",
+
+	ExpensesListTitle:       "Gastos",
+	ExpensesListSubtitle:    "Rastrea los gastos del negocio",
+	ExpensesListNew:         "+ Nuevo Gasto",
+	ExpensesListSaved:       "✓ Gasto guardado exitosamente",
+	ExpensesListDeleted:     "✓ Gasto eliminado",
+	ExpensesListThisMonth:   "Este Mes",
+	ExpensesListThisYear:    "Este Año",
+	ExpensesListThDate:      "Fecha",
+	ExpensesListThVendor:    "Proveedor",
+	ExpensesListThCategory:  "Categoría",
+	ExpensesListThDesc:      "Descripción",
+	ExpensesListThAmount:    "Monto",
+	ExpensesListThReceipt:   "Recibo",
+	ExpensesListView:        "Ver →",
+	ExpensesListEdit:        "Editar",
+	ExpensesListExpense:     "Gasto",
+	ExpensesListReceipt:     "📎 Recibo",
+	ExpensesListEmptyTitle:  "Aún no hay gastos",
+	ExpensesListEmptySub:    "Comienza a registrar los gastos de tu negocio para ver tu ganancia real.",
+	ExpensesListEmptyBtn:    "+ Agregar Tu Primer Gasto",
 
 }
 

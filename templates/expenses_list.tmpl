@@ -16,27 +16,27 @@
 <div class="container">
     <div class="top">
         <div>
-            <h1>Expenses</h1>
-            <p class="top-subtitle">Track business spending</p>
+            <h1>{{.T.ExpensesListTitle}}</h1>
+            <p class="top-subtitle">{{.T.ExpensesListSubtitle}}</p>
         </div>
-        <a href="/expenses/new" class="btn-new">+ New Expense</a>
+        <a href="/expenses/new" class="btn-new">{{.T.ExpensesListNew}}</a>
     </div>
 
     {{if .Saved}}
-    <div class="success-banner">✓ Expense saved successfully</div>
+    <div class="success-banner">{{.T.ExpensesListSaved}}</div>
     {{end}}
 
     {{if .Deleted}}
-    <div class="success-banner">✓ Expense deleted</div>
+    <div class="success-banner">{{.T.ExpensesListDeleted}}</div>
     {{end}}
 
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">This Month</div>
+            <div class="stat-label">{{.T.ExpensesListThisMonth}}</div>
             <div class="stat-value">{{.MonthTotal}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">This Year</div>
+            <div class="stat-label">{{.T.ExpensesListThisYear}}</div>
             <div class="stat-value">{{.YearTotal}}</div>
         </div>
     </div>
@@ -45,12 +45,12 @@
     <table class="expense-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Vendor</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th style="text-align:right">Amount</th>
-                <th>Receipt</th>
+                <th>{{.T.ExpensesListThDate}}</th>
+                <th>{{.T.ExpensesListThVendor}}</th>
+                <th>{{.T.ExpensesListThCategory}}</th>
+                <th>{{.T.ExpensesListThDesc}}</th>
+                <th style="text-align:right">{{.T.ExpensesListThAmount}}</th>
+                <th>{{.T.ExpensesListThReceipt}}</th>
                 <th></th>
             </tr>
         </thead>
@@ -63,10 +63,10 @@
                 <td>{{if .Description}}{{.Description}}{{else}}—{{end}}</td>
                 <td class="expense-amount" style="text-align:right">{{money .AmountCents}}</td>
                 <td class="expense-receipt">
-                    {{if .ReceiptURL}}<a href="{{.ReceiptURL}}" target="_blank">View →</a>{{else}}—{{end}}
+                    {{if .ReceiptURL}}<a href="{{.ReceiptURL}}" target="_blank">{{$.T.ExpensesListView}}</a>{{else}}—{{end}}
                 </td>
                 <td class="expense-actions">
-                    <a href="/expenses/{{.ID}}/edit">Edit</a>
+                    <a href="/expenses/{{.ID}}/edit">{{$.T.ExpensesListEdit}}</a>
                 </td>
             </tr>
             {{end}}
@@ -78,19 +78,19 @@
         {{range .Expenses}}
         <div class="mobile-card">
             <div class="mobile-card-top">
-                <span class="mobile-card-vendor">{{if .Vendor}}{{.Vendor}}{{else}}Expense{{end}}</span>
+                <span class="mobile-card-vendor">{{if .Vendor}}{{.Vendor}}{{else}}{{$.T.ExpensesListExpense}}{{end}}</span>
                 <span class="mobile-card-amount">{{money .AmountCents}}</span>
             </div>
             <div class="mobile-card-meta">
                 <span>{{.ExpenseDate.Format "Jan 02, 2006"}}</span>
                 <span class="expense-category">{{.Category}}</span>
-                {{if .ReceiptURL}}<a href="{{.ReceiptURL}}" target="_blank" style="color:rgba(255,255,255,0.5);text-decoration:none;">📎 Receipt</a>{{end}}
+                {{if .ReceiptURL}}<a href="{{.ReceiptURL}}" target="_blank" style="color:rgba(255,255,255,0.5);text-decoration:none;">{{$.T.ExpensesListReceipt}}</a>{{end}}
             </div>
             {{if .Description}}
             <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:8px;">{{.Description}}</div>
             {{end}}
             <div class="mobile-card-actions">
-                <a href="/expenses/{{.ID}}/edit">Edit</a>
+                <a href="/expenses/{{.ID}}/edit">{{$.T.ExpensesListEdit}}</a>
             </div>
         </div>
         {{end}}
@@ -98,9 +98,9 @@
 
     {{else}}
     <div class="empty-state">
-        <h3>No expenses yet</h3>
-        <p>Start tracking your business spending to see your real profit.</p>
-        <a href="/expenses/new" class="btn-new">+ Add Your First Expense</a>
+        <h3>{{.T.ExpensesListEmptyTitle}}</h3>
+        <p>{{.T.ExpensesListEmptySub}}</p>
+        <a href="/expenses/new" class="btn-new">{{.T.ExpensesListEmptyBtn}}</a>
     </div>
     {{end}}
 </div>
