@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -74,7 +74,7 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 			h.App.Render(w, r, "login.tmpl", map[string]any{"Error": "Invalid credentials", "Email": email})
 			return
 		}
-		log.Printf("login db error: %v", err)
+		slog.Error("login db lookup failed", "err", err)
 		http.Error(w, "Auth service unavailable", http.StatusInternalServerError)
 		return
 	}
@@ -82,7 +82,8 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 	// a fresh set of attempts instead of being re-locked immediately.
 	if user.LockedUntil != nil && !user.IsLocked() {
 		if err := h.App.UserRepo.ResetFailedLogins(r.Context(), user.ID); err != nil {
-			log.Printf("[auth] reset expired lockout error for user %d: %v", user.ID, err)
+			slog.Warn("lockout reset failed", "err", err, "user_id", user.ID)
+		
 		} else {
 			user.FailedLoginAttempts = 0
 			user.LockedUntil = nil
@@ -101,7 +102,7 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 	if !user.CheckPassword(pass) {
 		// Record failed attempt — may trigger lockout.
 		if err := h.App.UserRepo.RecordFailedLogin(r.Context(), user.ID); err != nil {
-			log.Printf("[auth] record failed login error for user %d: %v", user.ID, err)
+			slog.Warn("failed login recording error", "err", err, "user_id", user.ID)
 		}
 		audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     audit.UserIDPtr(user.ID),
@@ -117,13 +118,13 @@ func (h *Handlers) LoginPost(w http.ResponseWriter, r *http.Request) {
 
 	// Successful login — reset failed attempts.
 	if err := h.App.UserRepo.ResetFailedLogins(r.Context(), user.ID); err != nil {
-		log.Printf("[auth] reset failed logins error for user %d: %v", user.ID, err)
+		slog.Warn("failed login counter reset error", "err", err, "user_id", user.ID)
 	}
 
 	// Transparent rehash — upgrade bcrypt to Argon2id on next login.
 	if user.NeedsRehash() {
 		if err := h.App.UserRepo.RehashPassword(r.Context(), user.ID, pass); err != nil {
-			log.Printf("[auth] rehash failed for user %d: %v", user.ID, err)
+			slog.Warn("password rehash failed", "err", err, "user_id", user.ID)
 		}
 	}
 
@@ -156,7 +157,7 @@ func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	googleUser, err := auth.ProcessGoogleCallback(w, r)
 	if err != nil {
-		log.Printf("google oauth callback error: %v", err)
+		slog.Error("google oauth callback failed", "err", err)
 		if strings.Contains(err.Error(), "invalid oauth state") {
 			http.Redirect(w, r, "/auth/google", http.StatusTemporaryRedirect)
 			return
@@ -173,7 +174,7 @@ func (h *Handlers) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 		googleUser.Email, googleUser.ID, googleUser.Name, googleUser.Picture,
 	)
 	if err != nil {
-		log.Printf("google user upsert error: %v", err)
+		slog.Error("google user upsert failed", "err", err)
 		http.Error(w, "Could not create or find account", http.StatusInternalServerError)
 		return
 	}
@@ -218,7 +219,7 @@ func (h *Handlers) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 	token, err := h.App.UserRepo.SetMagicToken(r.Context(), email)
 	if err != nil {
 		// Do not reveal the error — log it and show generic success
-		log.Printf("[auth] magic token error for %s: %v", email, err)
+		slog.Error("magic link token generation failed", "err", err, "email", email)
 		h.App.Render(w, r, "forgot_password.tmpl", map[string]any{"Success": successMsg})
 		return
 	}
@@ -227,7 +228,7 @@ func (h *Handlers) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 	if token != "" {
 		link := h.App.BaseURL + "/auth/magic?token=" + token
 		if err := h.App.Mailer.SendMagicLink(email, link); err != nil {
-			log.Printf("[auth] magic link email failed for %s: %v", email, err)
+			slog.Error("magic link email send failed", "err", err, "email", email)
 		}
 	}
 
@@ -258,7 +259,7 @@ func (h *Handlers) MagicLinkPost(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.App.UserRepo.ConsumeMagicToken(r.Context(), token)
 	if err != nil {
-		log.Printf("[auth] invalid magic token attempt: %v", err)
+		slog.Warn("invalid magic token attempt", "err", err)
 		h.App.Render(w, r, "forgot_password.tmpl", map[string]any{
 			"Error": "This link is invalid or has expired. Please request a new one.",
 		})
