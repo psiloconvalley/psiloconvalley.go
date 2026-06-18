@@ -3,14 +3,14 @@
 <head>
     <title>Pricing | Psiloconvalley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free invoicing to start. Growth at $8.88/mo. Pro at $18.88/mo. Unlimited invoices, estimates, reports, recurring billing, and payment processing.">
+    <meta name="description" content="Free invoicing to start. Growth at $8.88/mo. Pro at $18.88/mo. Scale when you are ready.">
     <meta name="robots" content="index,follow">
     <link rel="canonical" href="https://psiloconvalley.com/pricing">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="PsiloConValley">
     <meta property="og:url" content="https://psiloconvalley.com/pricing">
     <meta property="og:title" content="Pricing | PsiloConValley">
-    <meta property="og:description" content="Free invoicing to start. Growth at $8.88/mo. Pro at $18.88/mo. Unlimited everything.">
+    <meta property="og:description" content="Free invoicing to start. Growth at $8.88/mo founding rate. Pro at $18.88/mo unlimited.">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Pricing | PsiloConValley">
     <meta name="twitter:description" content="Simple, transparent pricing for professional invoicing. Free to start.">
@@ -91,7 +91,7 @@
         </p>
     </div>
 
-	       <div class="pricing-grid">
+        <div class="pricing-grid">
 
         {{/* ── FREE ── */}}
         <div class="pricing-card">
@@ -104,12 +104,14 @@
                 Try the full experience. No credit card required.
             </div>
             <ul class="features">
-                <li>✓ 5 invoices per month</li>
-                <li>✓ 3 estimates per month</li>
-                <li>✓ 5 saved clients</li>
-                <li>✓ 3 email sends per month</li>
-                <li>✓ PDF download</li>
-                <li>✓ Manual payment tracking</li>
+                <li><span class="feat-yes">✓</span><span>5 invoices per month</span></li>
+                <li><span class="feat-yes">✓</span><span>3 estimates per month</span></li>
+                <li><span class="feat-yes">✓</span><span>5 saved clients</span></li>
+                <li><span class="feat-yes">✓</span><span>3 email sends per month</span></li>
+                <li><span class="feat-yes">✓</span><span>PDF download</span></li>
+                <li><span class="feat-no">✗</span><span>Stripe card payments</span></li>
+                <li><span class="feat-no">✗</span><span>Expense tracking</span></li>
+                <li><span class="feat-no">✗</span><span>Reports</span></li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "free"}}
@@ -130,17 +132,18 @@
                 <div class="amount">$8.88</div>
                 <div class="unit">/ month</div>
             </div>
+            <div class="founding-tag">Founding Rate — Lock It In</div>
             <div class="subtext">
-                Everything you need to get paid. Founding rate — lock it in.
+                Everything you need to get paid.
             </div>
             <ul class="features">
-                <li>✓ 15 invoices per month</li>
-                <li>✓ 15 estimates per month</li>
-                <li>✓ 15 saved clients</li>
-                <li>✓ 15 email sends per month</li>
-                <li>✓ Accept card payments via Stripe</li>
-                <li>✓ Expense tracking</li>
-                <li>✓ 1 report per month</li>
+                <li><span class="feat-yes">✓</span><span>15 invoices per month</span></li>
+                <li><span class="feat-yes">✓</span><span>15 estimates per month</span></li>
+                <li><span class="feat-yes">✓</span><span>15 saved clients</span></li>
+                <li><span class="feat-yes">✓</span><span>15 email sends per month</span></li>
+                <li><span class="feat-yes">✓</span><span>Accept card payments via Stripe</span></li>
+                <li><span class="feat-yes">✓</span><span>Expense tracking</span></li>
+                <li><span class="feat-yes">✓</span><span>1 report per month</span></li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "growth"}}
@@ -176,17 +179,17 @@
                 Unlimited scale. Zero friction. Full automation.
             </div>
             <ul class="features">
-                <li>✓ Unlimited invoices</li>
-                <li>✓ Unlimited estimates</li>
-                <li>✓ Unlimited clients</li>
-                <li>✓ Unlimited email sending</li>
-                <li>✓ Accept card payments via Stripe</li>
-                <li>✓ Expense tracking</li>
-                <li>✓ Unlimited reports</li>
-                <li>✓ Recurring invoice automation</li>
-                <li>✓ Auto payment reminders</li>
-                <li>✓ Advanced templates</li>
-                <li>✓ Priority founder support</li>
+                <li><span class="feat-yes">✓</span><span>Unlimited invoices</span></li>
+                <li><span class="feat-yes">✓</span><span>Unlimited estimates</span></li>
+                <li><span class="feat-yes">✓</span><span>Unlimited clients</span></li>
+                <li><span class="feat-yes">✓</span><span>Unlimited email sending</span></li>
+                <li><span class="feat-yes">✓</span><span>Accept card payments via Stripe</span></li>
+                <li><span class="feat-yes">✓</span><span>Expense tracking</span></li>
+                <li><span class="feat-yes">✓</span><span>Unlimited reports</span></li>
+                <li><span class="feat-yes">✓</span><span>Recurring invoice automation</span></li>
+                <li><span class="feat-yes">✓</span><span>Auto payment reminders</span></li>
+                <li><span class="feat-yes">✓</span><span>Advanced templates</span></li>
+                <li><span class="feat-yes">✓</span><span>Priority founder support</span></li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "pro"}}
@@ -207,7 +210,7 @@
                     <a href="/register" class="btn btn-primary">Create Free Account</a>
                     <a href="/login" class="btn btn-secondary">Log In to Upgrade</a>
                 </div>
-              {{end}}
+            {{end}}
         </div>
 
     </div>
