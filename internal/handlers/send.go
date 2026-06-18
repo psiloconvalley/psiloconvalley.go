@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -91,7 +91,7 @@ if !h.canSendInvoice(r) {
 	}
 
 	if err := h.App.Templates.ExecuteTemplate(&buf, service.InvoiceTemplateName(invoiceView.TemplateID), templateData); err != nil {
-		log.Printf("[send] template render error: %v", err)
+		slog.Error("invoice send template render failed", "err", err)
 		http.Error(w, "Could not render invoice", http.StatusInternalServerError)
 		return
 	}
@@ -104,7 +104,7 @@ if !h.canSendInvoice(r) {
 
 	pdfBytes, err := pdf.Generate(pdfCtx, buf.String())
 	if err != nil {
-		log.Printf("[send] pdf generation error: %v", err)
+		slog.Error("invoice send pdf generation failed", "err", err)
 		http.Error(w, "Could not generate PDF", http.StatusInternalServerError)
 		return
 	}
@@ -113,7 +113,7 @@ if !h.canSendInvoice(r) {
 	baseURL := h.App.BaseURL
 	token, err := h.App.InvRepo.EnsurePublicToken(r.Context(), id)
 	if err != nil {
-		log.Printf("[send] failed to ensure public token for invoice %d: %v", id, err)
+		slog.Warn("invoice public token generation failed", "err", err, "invoice_id", id)
 	}
 	invoiceURL := fmt.Sprintf("%s/invoices/%d", baseURL, id)
 	if token != "" {
@@ -138,7 +138,7 @@ if !h.canSendInvoice(r) {
 	pdfFilename := fmt.Sprintf("invoice-%s.pdf", inv.InvoiceNumber)
 
 if err := h.App.Mailer.SendInvoice(toEmail, emailData, pdfBytes, pdfFilename); err != nil {
-    log.Printf("[send] email send error: %v", err)
+	slog.Error("invoice email send failed", "err", err, "invoice_id", id, "user_id", user.ID)
     http.Error(w, "Failed to send email. Please try again.", http.StatusInternalServerError)
     return
 }
@@ -151,22 +151,20 @@ h.App.UsageRepo.Increment(r.Context(), user.ID, "sends")
 			r.Context(), id, "sent", *inv.UserID,
 		); err != nil {
 			// Non-fatal — email already sent successfully
-			log.Printf("[send] status update warning: %v", err)
+			slog.Warn("invoice status update after send failed", "err", err, "invoice_id", id)
 		}
 	}
 
-	log.Printf("[send] invoice %s sent to %s by user %d",
-		inv.InvoiceNumber, toEmail, user.ID)
-
+	slog.Info("invoice sent", "invoice_number", inv.InvoiceNumber, "to", toEmail, "user_id", user.ID)
 	// ── Schedule automatic reminders if enabled ──────────────────────
 	// Cancel any existing pending reminders first to prevent duplicates
 	// when the same invoice is sent more than once.
 	if inv.AutoReminders && inv.DueDate != nil {
 		cancelled, err := h.App.SchedulerRepo.CancelJobsForInvoice(r.Context(), inv.ID)
 		if err != nil {
-			log.Printf("[send] warning: failed to cancel existing reminders for invoice %d: %v", inv.ID, err)
+			slog.Warn("reminder cancellation failed before reschedule", "err", err, "invoice_id", inv.ID)
 		} else if cancelled > 0 {
-			log.Printf("[send] cleared %d stale reminder jobs for invoice %d before rescheduling", cancelled, inv.ID)
+			slog.Info("stale reminder jobs cleared", "count", cancelled, "invoice_id", inv.ID)
 		}
 		h.scheduleReminders(r.Context(), inv.ID, *inv.DueDate)
 	}
@@ -210,12 +208,11 @@ func (h *Handlers) scheduleReminders(ctx context.Context, invoiceID int64, dueDa
 
 		jobID, err := h.App.SchedulerRepo.CreateJob(ctx, "send_reminder", payload, runAt)
 		if err != nil {
-			log.Printf("[send] failed to schedule %s reminder for invoice %d: %v",
-				r.reminderType, invoiceID, err)
+			slog.Error("reminder scheduling failed", "err", err, "type", r.reminderType, "invoice_id", invoiceID)
 			continue
 		}
 
-		log.Printf("[send] scheduled %s reminder for invoice %d (job %d, run_at %s)",
-			r.reminderType, invoiceID, jobID, runAt.Format("2006-01-02 15:04"))
+		slog.Info("reminder scheduled", "type", r.reminderType, "invoice_id", invoiceID, "job_id", jobID, "run_at", runAt.Format("2006-01-02 15:04"))
 	}
+
 }
