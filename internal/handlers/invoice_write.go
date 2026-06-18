@@ -2,7 +2,7 @@
 package handlers
 
 import (
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"strconv"
@@ -148,7 +148,7 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 	// Schedule reminders when marked sent.
 	if newStatus == "sent" && inv.AutoReminders && inv.DueDate != nil {
 		if err := h.App.InvService.ScheduleReminders(r.Context(), id, *inv.DueDate); err != nil {
-			log.Printf("[invoice] failed to schedule reminders for invoice %d: %v", id, err)
+			slog.Error("invoice reminder scheduling failed", "err", err, "invoice_id", id)
 		}
 	}
 	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
@@ -238,7 +238,7 @@ func (h *Handlers) InvoiceDeletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.App.InvRepo.DeleteDraftInvoice(r.Context(), id, user.ID); err != nil {
-		log.Printf("[invoice] delete error: %v", err)
+		slog.Error("invoice delete failed", "err", err, "invoice_id", id, "user_id", user.ID)
 		http.Error(w, "Could not delete invoice", http.StatusInternalServerError)
 		return
 	}
@@ -251,6 +251,6 @@ func (h *Handlers) InvoiceDeletePost(w http.ResponseWriter, r *http.Request) {
 		Metadata:   map[string]any{"invoice_number": inv.InvoiceNumber},
 	})
 
-	log.Printf("[invoice] draft invoice %d deleted by user %d", id, user.ID)
+	slog.Info("invoice deleted", "invoice_id", id, "user_id", user.ID)
 	http.Redirect(w, r, "/invoices?deleted=true", http.StatusSeeOther)
 }
