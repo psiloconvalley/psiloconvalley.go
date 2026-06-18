@@ -371,6 +371,136 @@ type T struct {
 	ReportsThTotal          string
 	ReportsEmptyTitle       string
 	ReportsEmptySub         string
+
+	// Invoice New — Mode titles
+	InvoiceNewCreateInvoice    string
+	InvoiceNewEditInvoice      string
+	InvoiceNewDuplicateInvoice string
+	InvoiceNewCreateEstimate   string
+	InvoiceNewEditEstimate     string
+	InvoiceNewEditingBanner    string
+	InvoiceNewDuplicateBanner  string
+	InvoiceNewFixErrors        string
+
+	// Invoice New — Steps
+	InvoiceNewStep1            string
+	InvoiceNewStep2            string
+	InvoiceNewStep3            string
+
+	// Invoice New — Company section
+	InvoiceNewYourDetails      string
+	InvoiceNewCompanyName      string
+	InvoiceNewEmail            string
+	InvoiceNewAddress          string
+	InvoiceNewCity             string
+	InvoiceNewZip              string
+	InvoiceNewCountry          string
+	InvoiceNewStateRegion      string
+	InvoiceNewSelectState      string
+
+	// Invoice New — Client section
+	InvoiceNewCustomerDetails  string
+	InvoiceNewAutoFill         string
+	InvoiceNewAutoFillHint     string
+	InvoiceNewCustomerName     string
+	InvoiceNewInvoiceNumber    string
+	InvoiceNewEstimateNumber   string
+	InvoiceNewIssueDate        string
+	InvoiceNewDueDate          string
+
+	// Invoice New — Appearance
+	InvoiceNewAppearance       string
+	InvoiceNewShowLogo         string
+	InvoiceNewLogoPosition     string
+	InvoiceNewLogoLeft         string
+	InvoiceNewLogoCenter       string
+	InvoiceNewLogoRight        string
+	InvoiceNewShowInvTitle     string
+	InvoiceNewShowEstTitle     string
+
+	// Invoice New — Preview
+	InvoiceNewPreviewInv       string
+	InvoiceNewPreviewEst       string
+	InvoiceNewAddLogo          string
+	InvoiceNewAddLogoHint      string
+	InvoiceNewCreateAccount    string
+	InvoiceNewCreateAcctHint   string
+
+	// Invoice New — Line items
+	InvoiceNewItemsToBill      string
+	InvoiceNewThDesc           string
+	InvoiceNewThDetails        string
+	InvoiceNewThQty            string
+	InvoiceNewThUnitPrice      string
+	InvoiceNewThAmount         string
+	InvoiceNewAddLineItem      string
+	InvoiceNewMemo             string
+	InvoiceNewMemoPlaceholder  string
+	InvoiceNewDetailsOptional  string
+	InvoiceNewPrice            string
+
+	// Invoice New — Sidebar
+	InvoiceNewCustomizeInv     string
+	InvoiceNewCustomizeEst     string
+	InvoiceNewTemplate         string
+	InvoiceNewBrandColor       string
+	InvoiceNewAccentColor      string
+	InvoiceNewUpgradePro       string
+	InvoiceNewReminders        string
+	InvoiceNewAutoReminders    string
+	InvoiceNewAutoRemindHint   string
+	InvoiceNewAutoRemindUpg    string
+	InvoiceNewRecurring        string
+	InvoiceNewMakeRecurring    string
+	InvoiceNewFrequency        string
+	InvoiceNewFreqWeekly       string
+	InvoiceNewFreqMonthly      string
+	InvoiceNewFreqQuarterly    string
+	InvoiceNewFreqYearly       string
+	InvoiceNewAutoSend         string
+	InvoiceNewAutoSendHint     string
+	InvoiceNewRecurringUpg     string
+	InvoiceNewSettings         string
+	InvoiceNewCurrency         string
+	InvoiceNewTaxRate          string
+	InvoiceNewDiscount         string
+	InvoiceNewPaymentInstr     string
+	InvoiceNewSummary          string
+	InvoiceNewSubtotal         string
+	InvoiceNewTax              string
+	InvoiceNewDiscountLabel    string
+	InvoiceNewTotal            string
+	InvoiceNewSaveInvoice      string
+	InvoiceNewUpdateInvoice    string
+	InvoiceNewSaveEstimate     string
+	InvoiceNewUpdateEstimate   string
+	InvoiceNewPayIntegrations  string
+	InvoiceNewBankTransfer     string
+	InvoiceNewBankTransferHint string
+	InvoiceNewEmailDelivery    string
+	InvoiceNewEmailDelHint     string
+	InvoiceNewSavedClients     string
+	InvoiceNewSavedClientsHint string
+	InvoiceNewCrypto           string
+	InvoiceNewComingSoon       string
+	InvoiceNewMobileTotal      string
+	InvoiceNewPreviewInvLabel     string
+	InvoiceNewPreviewEstLabel     string
+	InvoiceNewPlaceholderCompany  string
+	InvoiceNewPlaceholderCoEmail  string
+	InvoiceNewPlaceholderCoAddr   string
+	InvoiceNewPlaceholderCoCity   string
+	InvoiceNewPlaceholderCoZip    string
+	InvoiceNewPlaceholderCountry  string
+	InvoiceNewPlaceholderClient   string
+	InvoiceNewPlaceholderClEmail  string
+	InvoiceNewPlaceholderDocNum   string
+	InvoiceNewPlaceholderClAddr   string
+	InvoiceNewPlaceholderClCity   string
+	InvoiceNewPlaceholderClZip    string
+	InvoiceNewPlaceholderLineDesc string
+	InvoiceNewPlaceholderLineDet  string
+	InvoiceNewPayInstrPlaceholder string
 }
 
 // Get returns the translation set for the given language code.

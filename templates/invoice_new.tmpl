@@ -3,16 +3,15 @@
 <head>
 <title>
         {{if eq .DocumentType "estimate"}}
-            {{if eq .Mode "edit"}}Edit Estimate{{else}}Create Estimate{{end}}
+            {{if eq .Mode "edit"}}{{.T.InvoiceNewEditEstimate}}{{else}}{{.T.InvoiceNewCreateEstimate}}{{end}}
         {{else}}
-            {{if eq .Mode "edit"}}Edit Invoice
-            {{else if eq .Mode "duplicate"}}Duplicate Invoice
-            {{else}}Create Invoice{{end}}
+            {{if eq .Mode "edit"}}{{.T.InvoiceNewEditInvoice}}
+            {{else if eq .Mode "duplicate"}}{{.T.InvoiceNewDuplicateInvoice}}
+            {{else}}{{.T.InvoiceNewCreateInvoice}}{{end}}
         {{end}} — PsiloConValley
 </title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Create professional invoices in seconds.">
-
 
     {{template "invoice-new-layout-styles" .}}
     {{template "invoice-new-form-styles" .}}
@@ -29,28 +28,21 @@
 
     {{if eq .Mode "edit"}}
     <div class="banner" style="margin: 16px 16px 0;">
-	  <span>✏️ Editing {{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}}</span>
+        <span>✏️ {{.T.InvoiceNewEditingBanner}} {{if eq .DocumentType "estimate"}}{{.T.InvoiceNewCreateEstimate}}{{else}}{{.T.InvoiceNewCreateInvoice}}{{end}}</span>
         <strong>#{{.Invoice.InvoiceNumber}}</strong>
     </div>
     {{end}}
 
     {{if eq .Mode "duplicate"}}
     <div class="banner" style="background:#e0e7ff; color:#1e40af; border-color:#bfdbfe; margin: 16px 16px 0;">
-        <span>📋 Creating duplicate copy</span>
+        <span>📋 {{.T.InvoiceNewDuplicateBanner}}</span>
         <strong>#{{.Invoice.InvoiceNumber}}</strong>
     </div>
     {{end}}
 
-    {{/* ── Validation error banner ──
-         Rendered when the handler calls reRenderInvoiceForm with errors.
-         All field errors are listed here AND inline beneath their input.
-         Both are needed: the banner gives a summary the user sees
-         immediately without scrolling; the inline errors show exactly
-         which field failed without hunting.
-    ── */}}
     {{if .Errors}}
     <div class="error-banner" style="margin: 16px 16px 0;">
-        <strong>Please fix the following before saving:</strong>
+        <strong>{{.T.InvoiceNewFixErrors}}</strong>
         <ul>
             {{range .Errors}}
             <li>{{.Message}}</li>
@@ -72,12 +64,12 @@
 {{template "invoice-new-mobile-appearance" .}}
 {{template "invoice-new-preview" .}}
                 <h1>
-			{{if eq .DocumentType "estimate"}}
-                            {{if eq .Mode "edit"}}Edit Estimate{{else}}Create Estimate{{end}}
+                    {{if eq .DocumentType "estimate"}}
+                        {{if eq .Mode "edit"}}{{.T.InvoiceNewEditEstimate}}{{else}}{{.T.InvoiceNewCreateEstimate}}{{end}}
                     {{else}}
-                        {{if eq .Mode "edit"}}Edit Invoice
-                        {{else if eq .Mode "duplicate"}}New Invoice Copy
-                        {{else}}Create Invoice{{end}}
+                        {{if eq .Mode "edit"}}{{.T.InvoiceNewEditInvoice}}
+                        {{else if eq .Mode "duplicate"}}{{.T.InvoiceNewDuplicateInvoice}}
+                        {{else}}{{.T.InvoiceNewCreateInvoice}}{{end}}
                     {{end}}
                 </h1>
 
@@ -87,23 +79,23 @@
                         <span class="step-dot active"></span>
                         <span class="step-dot"></span>
                         <span class="step-dot"></span>
-                        Step 1 of 3
+                        {{.T.InvoiceNewStep1}}
                     </div>
-                    <h2>Your Business Details</h2>
+                    <h2>{{.T.InvoiceNewYourDetails}}</h2>
 
                     <div class="grid-2">
                         <div>
-                            <label>Company Name <span style="color:var(--danger)">*</span></label>
+                            <label>{{.T.InvoiceNewCompanyName}} <span style="color:var(--danger)">*</span></label>
                             <input type="text" name="company_name" required
                                    value="{{field .Invoice.CompanyName}}"
-                                   placeholder="Acme Agency LLC"
+                                   placeholder="{{.T.InvoiceNewPlaceholderCompany}}"
                                    autocomplete="organization">
                         </div>
                         <div>
-                            <label>Email</label>
+                            <label>{{.T.InvoiceNewEmail}}</label>
                             <input type="email" name="company_email"
                                    value="{{field .Invoice.CompanyEmail}}"
-                                   placeholder="billing@acme.com"
+                                   placeholder="{{.T.InvoiceNewPlaceholderCoEmail}}"
                                    autocomplete="email"
                                    inputmode="email">
                         </div>
@@ -111,41 +103,41 @@
 
                     <div class="grid-3" style="margin-top:16px;">
                         <div>
-                            <label>Address</label>
+                            <label>{{.T.InvoiceNewAddress}}</label>
                             <input type="text" name="company_address"
                                    value="{{field .Invoice.CompanyAddress}}"
-                                   placeholder="123 Innovation Way"
+                                   placeholder="{{.T.InvoiceNewPlaceholderCoAddr}}"
                                    autocomplete="street-address">
                         </div>
                         <div>
-                            <label>City</label>
+                            <label>{{.T.InvoiceNewCity}}</label>
                             <input type="text" name="company_city"
                                    value="{{field .Invoice.CompanyCity}}"
-                                   placeholder="San Francisco"
+                                   placeholder="{{.T.InvoiceNewPlaceholderCoCity}}"
                                    autocomplete="address-level2">
                         </div>
                         <div>
-                            <label>ZIP / Postal</label>
+                            <label>{{.T.InvoiceNewZip}}</label>
                             <input type="text" name="company_zip"
                                    value="{{field .Invoice.CompanyZip}}"
-                                   placeholder="94103"
+                                   placeholder="{{.T.InvoiceNewPlaceholderCoZip}}"
                                    autocomplete="postal-code"
                                    inputmode="numeric">
                         </div>
                     </div>
 
-                        <div class="grid-2" style="margin-top:16px;">
+                    <div class="grid-2" style="margin-top:16px;">
                         <div>
-                            <label>Country</label>
+                            <label>{{.T.InvoiceNewCountry}}</label>
                             <input type="text" name="company_country"
                                    value="{{field .Invoice.CompanyCountry}}"
-                                   placeholder="United States"
+                                   placeholder="{{.T.InvoiceNewPlaceholderCountry}}"
                                    autocomplete="country-name">
                         </div>
                         <div>
-                            <label>State / Region</label>
+                            <label>{{.T.InvoiceNewStateRegion}}</label>
                             <select name="company_state" autocomplete="address-level1">
-                                <option value="">— Select State —</option>
+                                <option value="">{{.T.InvoiceNewSelectState}}</option>
                                 {{range .USStates}}
                                 <option value="{{.Name}}" {{if eq $.Invoice.CompanyState .Name}}selected{{end}}>{{.Name}}</option>
                                 {{end}}
@@ -163,31 +155,22 @@
             ══════════════════════════════════════════════════════ */}}
 
 {{template "invoice-new-sidebar" .}}
-	           </div>
-
-
+            </div>
 
     </form>
 </div>
 
-{{/* ── Mobile fixed bottom bar ──
-     Only visible on screens < 640px via CSS.
-     Shows the running total and a submit trigger.
-     The button calls form.submit() — no duplicate form, no CSRF issue.
-     The full sidebar (with tax/currency controls) still renders below
-     the form for users who need to adjust those settings.
-── */}}
 <div class="mobile-total-bar">
     <div>
-        <div class="mobile-total-label">Total</div>
+        <div class="mobile-total-label">{{.T.InvoiceNewMobileTotal}}</div>
         <div class="mobile-total-amount" id="mobile_total_display">$0.00</div>
     </div>
     <button type="button" class="mobile-submit-btn"
             onclick="document.getElementById('invoice-form').submit()">
         {{if eq .DocumentType "estimate"}}
-            {{if eq .Mode "edit"}}Update{{else}}Save Estimate{{end}}
+            {{if eq .Mode "edit"}}{{.T.InvoiceNewUpdateEstimate}}{{else}}{{.T.InvoiceNewSaveEstimate}}{{end}}
         {{else}}
-            {{if eq .Mode "edit"}}Update{{else}}Save Invoice{{end}}
+            {{if eq .Mode "edit"}}{{.T.InvoiceNewUpdateInvoice}}{{else}}{{.T.InvoiceNewSaveInvoice}}{{end}}
         {{end}}
     </button>
 </div>
@@ -195,3 +178,4 @@
 {{template "invoice-new-scripts" .}}
 
 </body>
+</html>

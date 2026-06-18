@@ -1,13 +1,12 @@
 {{define "invoice-new-line-items"}}
-                {{/* ── Section 3: Line Items ── */}}
                 <section class="section">
                     <div class="step-badge">
                         <span class="step-dot active"></span>
                         <span class="step-dot active"></span>
                         <span class="step-dot active"></span>
-                        Step 3 of 3
+                        {{.T.InvoiceNewStep3}}
                     </div>
-                    <h2>Items to Bill</h2>
+                    <h2>{{.T.InvoiceNewItemsToBill}}</h2>
 
                     {{if .Errors}}
                     {{range .Errors}}
@@ -22,11 +21,11 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width:33%;">Description</th>
-                                    <th style="width:27%;">Details / Notes</th>
-                                    <th style="width:10%;">Qty</th>
-                                    <th style="width:14%;">Unit Price</th>
-                                    <th style="width:10%; text-align:right;">Amount</th>
+                                    <th style="width:33%;">{{.T.InvoiceNewThDesc}}</th>
+                                    <th style="width:27%;">{{.T.InvoiceNewThDetails}}</th>
+                                    <th style="width:10%;">{{.T.InvoiceNewThQty}}</th>
+                                    <th style="width:14%;">{{.T.InvoiceNewThUnitPrice}}</th>
+                                    <th style="width:10%; text-align:right;">{{.T.InvoiceNewThAmount}}</th>
                                     <th style="width:6%;"></th>
                                 </tr>
                             </thead>
@@ -35,9 +34,9 @@
                                     {{range .Invoice.Items}}
                                     <tr>
                                         <td><input type="text" name="description[]" class="item-desc"
-                                                   value="{{.Description}}" placeholder="Web Development"></td>
+                                                   value="{{.Description}}" placeholder="{{$.T.InvoiceNewPlaceholderLineDesc}}"></td>
                                         <td><input type="text" name="details[]" class="item-details"
-                                                   value="{{.Details}}" placeholder="40 hours @ $X"></td>
+                                                   value="{{.Details}}" placeholder="{{$.T.InvoiceNewPlaceholderLineDet}}"></td>
                                         <td><input type="number" step="0.01" min="0.01" name="quantity[]"
                                                    class="qty" value="{{.QuantityRaw}}" inputmode="decimal"></td>
                                         <td><input type="number" step="0.01" min="0" name="unit_price[]"
@@ -53,9 +52,9 @@
                                 {{else}}
                                     <tr>
                                         <td><input type="text" name="description[]" class="item-desc"
-                                                   placeholder="Web Development"></td>
+                                                   placeholder="{{.T.InvoiceNewPlaceholderLineDesc}}"></td>
                                         <td><input type="text" name="details[]" class="item-details"
-                                                   placeholder="40 hours @ $X"></td>
+                                                   placeholder="{{.T.InvoiceNewPlaceholderLineDet}}"></td>
                                         <td><input type="number" step="0.01" min="0.01" name="quantity[]"
                                                    class="qty" value="1" inputmode="decimal"></td>
                                         <td><input type="number" step="0.01" min="0" name="unit_price[]"
@@ -70,30 +69,25 @@
                         </table>
                     </div>
 
-                    {{/* ── MOBILE: stacked item cards ──
-                         Same field names as the desktop table — the Go parser
-                         receives identical description[] / details[] / quantity[]
-                         / unit_price[] arrays from both layouts.
-                         inputmode="decimal" shows the decimal keypad on iOS/Android.
-                    ── */}}
+                    {{/* ── MOBILE: stacked item cards ── */}}
                     <div class="items-mobile-list" id="items_body_mobile">
                         {{if .Invoice.Items}}
                             {{range .Invoice.Items}}
                             <div class="item-card-mobile">
-                                <label style="font-size:11px;">Description</label>
+                                <label style="font-size:11px;">{{$.T.InvoiceNewThDesc}}</label>
                                 <input type="text" name="description[]" class="item-desc"
-                                       value="{{.Description}}" placeholder="Web Development">
-                                <label style="font-size:11px;">Details (optional)</label>
+                                       value="{{.Description}}" placeholder="{{$.T.InvoiceNewPlaceholderLineDesc}}">
+                                <label style="font-size:11px;">{{$.T.InvoiceNewDetailsOptional}}</label>
                                 <input type="text" name="details[]" class="item-details"
-                                       value="{{.Details}}" placeholder="40 hours @ $X">
+                                       value="{{.Details}}" placeholder="{{$.T.InvoiceNewPlaceholderLineDet}}">
                                 <div class="item-row-meta">
                                     <div>
-                                        <label>Qty</label>
+                                        <label>{{$.T.InvoiceNewThQty}}</label>
                                         <input type="number" step="0.01" min="0.01" name="quantity[]"
                                                class="qty" value="{{.QuantityRaw}}" inputmode="decimal">
                                     </div>
                                     <div>
-                                        <label>Price</label>
+                                        <label>{{$.T.InvoiceNewPrice}}</label>
                                         <input type="number" step="0.01" min="0" name="unit_price[]"
                                                class="price"
                                                value="{{if .UnitPriceCents}}{{formatCents .UnitPriceCents}}{{else}}0.00{{end}}"
@@ -106,20 +100,20 @@
                             {{end}}
                         {{else}}
                             <div class="item-card-mobile">
-                                <label style="font-size:11px;">Description</label>
+                                <label style="font-size:11px;">{{.T.InvoiceNewThDesc}}</label>
                                 <input type="text" name="description[]" class="item-desc"
-                                       placeholder="Web Development">
-                                <label style="font-size:11px;">Details (optional)</label>
+                                       placeholder="{{.T.InvoiceNewPlaceholderLineDesc}}">
+                                <label style="font-size:11px;">{{.T.InvoiceNewDetailsOptional}}</label>
                                 <input type="text" name="details[]" class="item-details"
-                                       placeholder="40 hours @ $X">
+                                       placeholder="{{.T.InvoiceNewPlaceholderLineDet}}">
                                 <div class="item-row-meta">
                                     <div>
-                                        <label>Qty</label>
+                                        <label>{{.T.InvoiceNewThQty}}</label>
                                         <input type="number" step="0.01" min="0.01" name="quantity[]"
                                                class="qty" value="1" inputmode="decimal">
                                     </div>
                                     <div>
-                                        <label>Price</label>
+                                        <label>{{.T.InvoiceNewPrice}}</label>
                                         <input type="number" step="0.01" min="0" name="unit_price[]"
                                                class="price" value="0.00" inputmode="decimal">
                                     </div>
@@ -130,13 +124,12 @@
                         {{end}}
                     </div>
 
-                    <button type="button" class="add-btn" onclick="addRow()">+ Add Line Item</button>
+                    <button type="button" class="add-btn" onclick="addRow()">{{.T.InvoiceNewAddLineItem}}</button>
 
                     <div style="margin-top:32px;">
-                        <label>Invoice Memo / Footer Notes</label>
+                        <label>{{.T.InvoiceNewMemo}}</label>
                         <textarea name="notes"
-                                  placeholder="Thank you for your business! Payment is due within 30 days.">{{.Invoice.Notes}}</textarea>
+                                  placeholder="{{.T.InvoiceNewMemoPlaceholder}}">{{.Invoice.Notes}}</textarea>
                     </div>
                 </section>
-
 {{end}}

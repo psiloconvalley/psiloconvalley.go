@@ -1,30 +1,24 @@
 {{define "invoice-new-mobile-appearance"}}
-{{/* ── Mobile-only Appearance Controls ──
-     Shown above the preview on mobile so users don't have to
-     scroll to the bottom sidebar to toggle logo/title.
-     These have separate IDs from the sidebar toggles.
-     JS syncs both pairs.
-── */}}
 <div class="mobile-appearance mobile-appearance-panel">
-    <div class="mobile-appearance-title">Appearance</div>
+    <div class="mobile-appearance-title">{{.T.InvoiceNewAppearance}}</div>
 
     <label class="config-toggle">
-        <span class="config-item-label">Show Logo</span>
+        <span class="config-item-label">{{.T.InvoiceNewShowLogo}}</span>
         <input type="checkbox" id="toggle_logo_mobile" {{if .Invoice.ShowLogo}}checked{{end}}>
         <span class="toggle-slider"><span class="toggle-knob"></span></span>
     </label>
 
     <div class="logo-position-row mobile-appearance-logo-row">
-        <span class="config-item-label">Logo Position</span>
+        <span class="config-item-label">{{.T.InvoiceNewLogoPosition}}</span>
         <div class="logo-pos-btns">
-            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "left"}}active{{end}}" data-pos="left" onclick="setLogoPos('left')">Left</button>
-            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "center"}}active{{end}}" data-pos="center" onclick="setLogoPos('center')">Center</button>
-            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "right"}}active{{end}}" data-pos="right" onclick="setLogoPos('right')">Right</button>
+            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "left"}}active{{end}}" data-pos="left" onclick="setLogoPos('left')">{{.T.InvoiceNewLogoLeft}}</button>
+            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "center"}}active{{end}}" data-pos="center" onclick="setLogoPos('center')">{{.T.InvoiceNewLogoCenter}}</button>
+            <button type="button" class="logo-pos-btn {{if eq .Invoice.LogoPosition "right"}}active{{end}}" data-pos="right" onclick="setLogoPos('right')">{{.T.InvoiceNewLogoRight}}</button>
         </div>
     </div>
 
     <label class="config-toggle mobile-appearance-last-toggle">
-        <span class="config-item-label">Show {{if eq .DocumentType "estimate"}}Estimate{{else}}Invoice{{end}} Title</span>
+        <span class="config-item-label">{{if eq .DocumentType "estimate"}}{{.T.InvoiceNewShowEstTitle}}{{else}}{{.T.InvoiceNewShowInvTitle}}{{end}}</span>
         <input type="checkbox" id="toggle_title_mobile" {{if .Invoice.ShowTitle}}checked{{end}}>
         <span class="toggle-slider"><span class="toggle-knob"></span></span>
     </label>
