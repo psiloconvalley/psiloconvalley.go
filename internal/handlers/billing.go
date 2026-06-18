@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -88,7 +88,7 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 
 	s, err := checkoutsession.New(params)
 	if err != nil {
-		log.Printf("[stripe] checkout session create failed for user %d: %v", user.ID, err)
+		slog.Error("stripe checkout session creation failed", "err", err, "user_id", user.ID)
 		http.Error(w, "Could not start checkout", http.StatusInternalServerError)
 		return
 	}
@@ -115,7 +115,7 @@ func (h *Handlers) BillingPortalPost(w http.ResponseWriter, r *http.Request) {
 
 	s, err := billingportalsession.New(params)
 	if err != nil {
-		log.Printf("[stripe] billing portal session failed for user %d: %v", user.ID, err)
+		slog.Error("stripe billing portal session failed", "err", err, "user_id", user.ID)
 		http.Error(w, "Could not open billing portal", http.StatusInternalServerError)
 		return
 	}
@@ -137,7 +137,7 @@ func (h *Handlers) StripeConnectStart(w http.ResponseWriter, r *http.Request) {
 	}
 	clientID := os.Getenv("STRIPE_CONNECT_CLIENT_ID")
 	if clientID == "" {
-		log.Println("[stripe-connect] STRIPE_CONNECT_CLIENT_ID not set")
+		slog.Error("stripe connect client_id not configured")
 		http.Error(w, "Stripe Connect is not configured", http.StatusInternalServerError)
 		return
 	}
@@ -168,14 +168,14 @@ func (h *Handlers) StripeConnectCallback(w http.ResponseWriter, r *http.Request)
 	// Check for OAuth errors from Stripe
 	if errMsg := r.URL.Query().Get("error"); errMsg != "" {
 		errDesc := r.URL.Query().Get("error_description")
-		log.Printf("[stripe-connect] OAuth error for user %d: %s — %s", user.ID, errMsg, errDesc)
+		slog.Error("stripe connect oauth error", "user_id", user.ID, "error", errMsg, "description", errDesc)
 		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
 		return
 	}
 
 	code := r.URL.Query().Get("code")
 	if code == "" {
-		log.Printf("[stripe-connect] missing authorization code for user %d", user.ID)
+		slog.Warn("stripe connect missing authorization code", "user_id", user.ID)
 		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
 		return
 	}
@@ -189,7 +189,7 @@ func (h *Handlers) StripeConnectCallback(w http.ResponseWriter, r *http.Request)
 		"grant_type":    {"authorization_code"},
 	})
 	if err != nil {
-		log.Printf("[stripe-connect] token exchange failed for user %d: %v", user.ID, err)
+		slog.Error("stripe connect token exchange failed", "err", err, "user_id", user.ID)
 		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
 		return
 	}
@@ -202,31 +202,31 @@ func (h *Handlers) StripeConnectCallback(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		log.Printf("[stripe-connect] failed to decode token response for user %d: %v", user.ID, err)
+		slog.Error("stripe connect token decode failed", "err", err, "user_id", user.ID)
 		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
 		return
 	}
 
 	if result.Error != "" {
-		log.Printf("[stripe-connect] token error for user %d: %s — %s", user.ID, result.Error, result.ErrorDesc)
+		slog.Error("stripe connect token error", "user_id", user.ID, "error", result.Error, "description", result.ErrorDesc)
 		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
 		return
 	}
 
 	if result.StripeUserID == "" {
-		log.Printf("[stripe-connect] empty stripe_user_id for user %d", user.ID)
+		slog.Warn("stripe connect empty stripe_user_id", "user_id", user.ID)
 		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
 		return
 	}
 
 	// Save the connected account ID
 	if err := h.App.UserRepo.SaveStripeConnectID(r.Context(), user.ID, result.StripeUserID); err != nil {
-		log.Printf("[stripe-connect] failed to save connect ID for user %d: %v", user.ID, err)
+		slog.Error("stripe connect id save failed", "err", err, "user_id", user.ID)
 		http.Redirect(w, r, "/profile?stripe_error=1", http.StatusSeeOther)
 		return
 	}
 
-	log.Printf("[stripe-connect] user %d connected Stripe account %s", user.ID, result.StripeUserID)
+	slog.Info("stripe connect account linked", "user_id", user.ID, "stripe_account", result.StripeUserID)
 	http.Redirect(w, r, "/profile?stripe_connected=1", http.StatusSeeOther)
 }
 
@@ -309,11 +309,11 @@ func (h *Handlers) InvoicePayGet(w http.ResponseWriter, r *http.Request) {
 
 	s, err := checkoutsession.New(params)
 	if err != nil {
-		log.Printf("[stripe-connect] checkout session failed for invoice %d: %v", id, err)
+		slog.Error("stripe connect checkout session failed", "err", err, "invoice_id", id)
 		http.Error(w, "Could not start payment", http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("[stripe-connect] payment session created for invoice %d on account %s", id, owner.StripeConnectID)
+	slog.Info("stripe connect payment session created", "invoice_id", id, "stripe_account", owner.StripeConnectID)
 	http.Redirect(w, r, s.URL, http.StatusSeeOther)
 }
