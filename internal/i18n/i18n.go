@@ -304,6 +304,34 @@ type T struct {
 	ExpensesListEmptyTitle  string
 	ExpensesListEmptySub    string
 	ExpensesListEmptyBtn    string
+
+	// Expense form page
+	ExpenseNewTitle         string
+	ExpenseEditTitle        string
+	ExpenseNewSubtitle      string
+	ExpenseEditSubtitle     string
+	ExpenseDetails          string
+	ExpenseAmount           string
+	ExpenseCurrency         string
+	ExpenseCategory         string
+	ExpenseCategorySelect   string
+	ExpenseDate             string
+	ExpenseVendor           string
+	ExpenseVendorPlaceholder string
+	ExpenseDescription      string
+	ExpenseDescPlaceholder  string
+	ExpenseOptional         string
+	ExpenseLinkClient       string
+	ExpenseLinkNone         string
+	ExpenseLinkHint         string
+	ExpenseReceipt          string
+	ExpenseReceiptHint      string
+	ExpenseReceiptView      string
+	ExpenseSave             string
+	ExpenseUpdate           string
+	ExpenseDelete           string
+	ExpenseDeleteConfirm    string
+	ExpenseBack             string
 }
 
 var en = T{
@@ -591,6 +619,33 @@ var en = T{
 	ExpensesListEmptySub:    "Start tracking your business spending to see your real profit.",
 	ExpensesListEmptyBtn:    "+ Add Your First Expense",
 
+	ExpenseNewTitle:          "New Expense",
+	ExpenseEditTitle:         "Edit Expense",
+	ExpenseNewSubtitle:       "Track a business expense",
+	ExpenseEditSubtitle:      "Update expense details",
+	ExpenseDetails:           "Expense Details",
+	ExpenseAmount:            "Amount *",
+	ExpenseCurrency:          "Currency",
+	ExpenseCategory:          "Category *",
+	ExpenseCategorySelect:    "Select category...",
+	ExpenseDate:              "Date *",
+	ExpenseVendor:            "Vendor / Paid To",
+	ExpenseVendorPlaceholder: "e.g. AWS, Home Depot, Delta Airlines",
+	ExpenseDescription:       "Description / Notes",
+	ExpenseDescPlaceholder:   "What was this expense for?",
+	ExpenseOptional:          "Optional",
+	ExpenseLinkClient:        "Link to Client",
+	ExpenseLinkNone:          "None — general expense",
+	ExpenseLinkHint:          "Link this expense to a specific client or project.",
+	ExpenseReceipt:           "Receipt Upload",
+	ExpenseReceiptHint:       "Image or PDF. Max 5MB.",
+	ExpenseReceiptView:       "📎 View current receipt →",
+	ExpenseSave:              "Save Expense",
+	ExpenseUpdate:            "Update Expense",
+	ExpenseDelete:            "Delete Expense",
+	ExpenseDeleteConfirm:     "Delete this expense? This cannot be undone.",
+	ExpenseBack:              "← Back to Expenses",
+
 }
 
 var es = T{
@@ -877,6 +932,33 @@ var es = T{
 	ExpensesListEmptyTitle:  "Aún no hay gastos",
 	ExpensesListEmptySub:    "Comienza a registrar los gastos de tu negocio para ver tu ganancia real.",
 	ExpensesListEmptyBtn:    "+ Agregar Tu Primer Gasto",
+
+	ExpenseNewTitle:          "Nuevo Gasto",
+	ExpenseEditTitle:         "Editar Gasto",
+	ExpenseNewSubtitle:       "Registra un gasto del negocio",
+	ExpenseEditSubtitle:      "Actualizar detalles del gasto",
+	ExpenseDetails:           "Detalles del Gasto",
+	ExpenseAmount:            "Monto *",
+	ExpenseCurrency:          "Moneda",
+	ExpenseCategory:          "Categoría *",
+	ExpenseCategorySelect:    "Seleccionar categoría...",
+	ExpenseDate:              "Fecha *",
+	ExpenseVendor:            "Proveedor / Pagado A",
+	ExpenseVendorPlaceholder: "ej. AWS, Home Depot, Delta Airlines",
+	ExpenseDescription:       "Descripción / Notas",
+	ExpenseDescPlaceholder:   "¿Para qué fue este gasto?",
+	ExpenseOptional:          "Opcional",
+	ExpenseLinkClient:        "Vincular a Cliente",
+	ExpenseLinkNone:          "Ninguno — gasto general",
+	ExpenseLinkHint:          "Vincula este gasto a un cliente o proyecto específico.",
+	ExpenseReceipt:           "Subir Recibo",
+	ExpenseReceiptHint:       "Imagen o PDF. Máx 5MB.",
+	ExpenseReceiptView:       "📎 Ver recibo actual →",
+	ExpenseSave:              "Guardar Gasto",
+	ExpenseUpdate:            "Actualizar Gasto",
+	ExpenseDelete:            "Eliminar Gasto",
+	ExpenseDeleteConfirm:     "¿Eliminar este gasto? Esta acción no se puede deshacer.",
+	ExpenseBack:              "← Volver a Gastos",
 
 }
 
