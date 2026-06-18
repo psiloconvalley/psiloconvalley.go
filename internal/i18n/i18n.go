@@ -332,6 +332,43 @@ type T struct {
 	ExpenseDelete           string
 	ExpenseDeleteConfirm    string
 	ExpenseBack             string
+
+	// Reports page
+	ReportsTitle            string
+	ReportsSubtitle         string
+	ReportsScorecards       string
+	ReportsDateRange        string
+	ReportsThisMonth        string
+	ReportsLastMonth        string
+	ReportsStatus           string
+	ReportsStatusAll        string
+	ReportsStatusPaid       string
+	ReportsStatusSent       string
+	ReportsStatusOverdue    string
+	ReportsStatusDraft      string
+	ReportsExport           string
+	ReportsCollected        string
+	ReportsCollectedSub     string
+	ReportsOutstanding      string
+	ReportsOutstandingSub   string
+	ReportsOverdue          string
+	ReportsOverdueSub       string
+	ReportsInvoices         string
+	ReportsInvoicesSub      string
+	ReportsAvgPayment       string
+	ReportsAvgPaymentSub    string
+	ReportsDetailTitle      string
+	ReportsThInvoice        string
+	ReportsThClient         string
+	ReportsThIssued         string
+	ReportsThDue            string
+	ReportsThStatus         string
+	ReportsThDaysToPay      string
+	ReportsThSubtotal       string
+	ReportsThTax            string
+	ReportsThTotal          string
+	ReportsEmptyTitle       string
+	ReportsEmptySub         string
 }
 
 var en = T{
@@ -646,6 +683,42 @@ var en = T{
 	ExpenseDeleteConfirm:     "Delete this expense? This cannot be undone.",
 	ExpenseBack:              "← Back to Expenses",
 
+	ReportsTitle:            "Reports",
+	ReportsSubtitle:         "Invoice history · Export · Analysis",
+	ReportsScorecards:       "Client Scorecards →",
+	ReportsDateRange:        "Date Range",
+	ReportsThisMonth:        "This Month",
+	ReportsLastMonth:        "Last Month",
+	ReportsStatus:           "Status",
+	ReportsStatusAll:        "All",
+	ReportsStatusPaid:       "Paid",
+	ReportsStatusSent:       "Sent",
+	ReportsStatusOverdue:    "Overdue",
+	ReportsStatusDraft:      "Draft",
+	ReportsExport:           "↓ Export CSV",
+	ReportsCollected:        "💰 Collected",
+	ReportsCollectedSub:     "Paid invoices",
+	ReportsOutstanding:      "📤 Outstanding",
+	ReportsOutstandingSub:   "Sent + overdue",
+	ReportsOverdue:          "⚠️ Overdue",
+	ReportsOverdueSub:       "Past due date",
+	ReportsInvoices:         "📋 Invoices",
+	ReportsInvoicesSub:      "In this period",
+	ReportsAvgPayment:       "⏱ Avg. Payment",
+	ReportsAvgPaymentSub:    "Days to get paid",
+	ReportsDetailTitle:      "Invoice Detail",
+	ReportsThInvoice:        "Invoice",
+	ReportsThClient:         "Client",
+	ReportsThIssued:         "Issued",
+	ReportsThDue:            "Due",
+	ReportsThStatus:         "Status",
+	ReportsThDaysToPay:      "Days to Pay",
+	ReportsThSubtotal:       "Subtotal",
+	ReportsThTax:            "Tax",
+	ReportsThTotal:          "Total",
+	ReportsEmptyTitle:       "No invoices in this period",
+	ReportsEmptySub:         "Try a different date range or status filter.",
+
 }
 
 var es = T{
@@ -959,6 +1032,42 @@ var es = T{
 	ExpenseDelete:            "Eliminar Gasto",
 	ExpenseDeleteConfirm:     "¿Eliminar este gasto? Esta acción no se puede deshacer.",
 	ExpenseBack:              "← Volver a Gastos",
+
+	ReportsTitle:            "Reportes",
+	ReportsSubtitle:         "Historial de facturas · Exportar · Análisis",
+	ReportsScorecards:       "Scorecards de Clientes →",
+	ReportsDateRange:        "Rango de Fechas",
+	ReportsThisMonth:        "Este Mes",
+	ReportsLastMonth:        "Mes Pasado",
+	ReportsStatus:           "Estado",
+	ReportsStatusAll:        "Todos",
+	ReportsStatusPaid:       "Pagado",
+	ReportsStatusSent:       "Enviado",
+	ReportsStatusOverdue:    "Vencido",
+	ReportsStatusDraft:      "Borrador",
+	ReportsExport:           "↓ Exportar CSV",
+	ReportsCollected:        "💰 Cobrado",
+	ReportsCollectedSub:     "Facturas pagadas",
+	ReportsOutstanding:      "📤 Por Cobrar",
+	ReportsOutstandingSub:   "Enviadas + vencidas",
+	ReportsOverdue:          "⚠️ Vencido",
+	ReportsOverdueSub:       "Fecha vencida",
+	ReportsInvoices:         "📋 Facturas",
+	ReportsInvoicesSub:      "En este período",
+	ReportsAvgPayment:       "⏱ Pago Promedio",
+	ReportsAvgPaymentSub:    "Días para cobrar",
+	ReportsDetailTitle:      "Detalle de Facturas",
+	ReportsThInvoice:        "Factura",
+	ReportsThClient:         "Cliente",
+	ReportsThIssued:         "Emitida",
+	ReportsThDue:            "Vence",
+	ReportsThStatus:         "Estado",
+	ReportsThDaysToPay:      "Días para Pagar",
+	ReportsThSubtotal:       "Subtotal",
+	ReportsThTax:            "Impuesto",
+	ReportsThTotal:          "Total",
+	ReportsEmptyTitle:       "Sin facturas en este período",
+	ReportsEmptySub:         "Intenta un rango de fechas o filtro de estado diferente.",
 
 }
 

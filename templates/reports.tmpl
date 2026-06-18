@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Reports | PsiloConValley</title>
+    <title>{{.T.ReportsTitle}} | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
@@ -14,24 +14,25 @@
 <div class="container">
 
     <!-- Header -->
-<div class="top">
-    <div>
-        <h1>Reports</h1>
-        <div class="top-sub">Invoice history · Export · Analysis</div>
+    <div class="top">
+        <div>
+            <h1>{{.T.ReportsTitle}}</h1>
+            <div class="top-sub">{{.T.ReportsSubtitle}}</div>
         </div>
         <div class="top-actions">
-            <a href="/reports/clients" class="btn-secondary">Client Scorecards →</a>
+            <a href="/reports/clients" class="btn-secondary">{{.T.ReportsScorecards}}</a>
         </div>
-</div> 
+    </div>
+
     <!-- Filter bar -->
     <div class="filter-bar">
         <div class="filter-group">
-            <div class="filter-label">Date Range</div>
+            <div class="filter-label">{{.T.ReportsDateRange}}</div>
             <div class="preset-buttons">
                 <a href="/reports?preset=this_month&status={{.Status}}"
-                   class="preset-btn {{if eq .Preset "this_month"}}active{{end}}">This Month</a>
+                   class="preset-btn {{if eq .Preset "this_month"}}active{{end}}">{{.T.ReportsThisMonth}}</a>
                 <a href="/reports?preset=last_month&status={{.Status}}"
-                   class="preset-btn {{if eq .Preset "last_month"}}active{{end}}">Last Month</a>
+                   class="preset-btn {{if eq .Preset "last_month"}}active{{end}}">{{.T.ReportsLastMonth}}</a>
                 <a href="/reports?preset=q1&status={{.Status}}"
                    class="preset-btn {{if eq .Preset "q1"}}active{{end}}">Q1</a>
                 <a href="/reports?preset=q2&status={{.Status}}"
@@ -46,67 +47,67 @@
         </div>
 
         <div class="filter-group">
-            <div class="filter-label">Status</div>
+            <div class="filter-label">{{.T.ReportsStatus}}</div>
             <select onchange="applyStatusFilter(this.value)">
-                <option value="all"     {{if eq .Status "all"}}selected{{end}}>All</option>
-                <option value="paid"    {{if eq .Status "paid"}}selected{{end}}>Paid</option>
-                <option value="sent"    {{if eq .Status "sent"}}selected{{end}}>Sent</option>
-                <option value="overdue" {{if eq .Status "overdue"}}selected{{end}}>Overdue</option>
-                <option value="draft"   {{if eq .Status "draft"}}selected{{end}}>Draft</option>
+                <option value="all"     {{if eq .Status "all"}}selected{{end}}>{{.T.ReportsStatusAll}}</option>
+                <option value="paid"    {{if eq .Status "paid"}}selected{{end}}>{{.T.ReportsStatusPaid}}</option>
+                <option value="sent"    {{if eq .Status "sent"}}selected{{end}}>{{.T.ReportsStatusSent}}</option>
+                <option value="overdue" {{if eq .Status "overdue"}}selected{{end}}>{{.T.ReportsStatusOverdue}}</option>
+                <option value="draft"   {{if eq .Status "draft"}}selected{{end}}>{{.T.ReportsStatusDraft}}</option>
             </select>
         </div>
 
         <a href="/reports/export.csv?preset={{.Preset}}&status={{.Status}}&start={{.StartDate}}&end={{.EndDate}}"
            class="btn-export">
-            ↓ Export CSV
+            {{.T.ReportsExport}}
         </a>
     </div>
 
     <!-- Summary cards -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">💰 Collected</div>
+            <div class="stat-label">{{.T.ReportsCollected}}</div>
             <div class="stat-value green">{{.Collected}}</div>
-            <div class="stat-sub">Paid invoices</div>
+            <div class="stat-sub">{{.T.ReportsCollectedSub}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">📤 Outstanding</div>
+            <div class="stat-label">{{.T.ReportsOutstanding}}</div>
             <div class="stat-value yellow">{{.Outstanding}}</div>
-            <div class="stat-sub">Sent + overdue</div>
+            <div class="stat-sub">{{.T.ReportsOutstandingSub}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">⚠️ Overdue</div>
+            <div class="stat-label">{{.T.ReportsOverdue}}</div>
             <div class="stat-value red">{{.Overdue}}</div>
-            <div class="stat-sub">Past due date</div>
+            <div class="stat-sub">{{.T.ReportsOverdueSub}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">📋 Invoices</div>
+            <div class="stat-label">{{.T.ReportsInvoices}}</div>
             <div class="stat-value">{{.InvoiceCount}}</div>
-            <div class="stat-sub">In this period</div>
+            <div class="stat-sub">{{.T.ReportsInvoicesSub}}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">⏱ Avg. Payment</div>
+            <div class="stat-label">{{.T.ReportsAvgPayment}}</div>
             <div class="stat-value blue">{{if .AvgDays}}{{.AvgDays}}d{{else}}—{{end}}</div>
-            <div class="stat-sub">Days to get paid</div>
+            <div class="stat-sub">{{.T.ReportsAvgPaymentSub}}</div>
         </div>
     </div>
 
     <!-- Invoice table -->
-    <div class="section-title">Invoice Detail</div>
+    <div class="section-title">{{.T.ReportsDetailTitle}}</div>
     <div class="table-wrap">
         {{if .Rows}}
         <table>
             <thead>
                 <tr>
-                    <th>Invoice</th>
-                    <th>Client</th>
-                    <th>Issued</th>
-                    <th>Due</th>
-                    <th>Status</th>
-                    <th>Days to Pay</th>
-                    <th class="right">Subtotal</th>
-                    <th class="right">Tax</th>
-                    <th class="right">Total</th>
+                    <th>{{.T.ReportsThInvoice}}</th>
+                    <th>{{.T.ReportsThClient}}</th>
+                    <th>{{.T.ReportsThIssued}}</th>
+                    <th>{{.T.ReportsThDue}}</th>
+                    <th>{{.T.ReportsThStatus}}</th>
+                    <th>{{.T.ReportsThDaysToPay}}</th>
+                    <th class="right">{{.T.ReportsThSubtotal}}</th>
+                    <th class="right">{{.T.ReportsThTax}}</th>
+                    <th class="right">{{.T.ReportsThTotal}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -128,8 +129,8 @@
         {{else}}
         <div class="empty">
             <div class="empty-icon">📊</div>
-            <div class="empty-title">No invoices in this period</div>
-            <div class="empty-sub">Try a different date range or status filter.</div>
+            <div class="empty-title">{{.T.ReportsEmptyTitle}}</div>
+            <div class="empty-sub">{{.T.ReportsEmptySub}}</div>
         </div>
         {{end}}
     </div>
