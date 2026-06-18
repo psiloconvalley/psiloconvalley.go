@@ -4,7 +4,7 @@ package handlers
 import (
 	"encoding/json"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -37,12 +37,12 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Printf("[stripe] webhook signature error: %v", err)
+		slog.Error ("stripe webhook signature invalid", "err", err)
 		http.Error(w, "Invalid webhook signature", http.StatusBadRequest)
 		return
 	}
 
-	log.Printf("[stripe] webhook event received: %s", event.Type)
+	slog.Info("stripe webhook event received", "type", event.Type, "event_id", event.ID)
 
 	switch event.Type {
 	case "checkout.session.completed":
@@ -56,7 +56,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 		if invoiceIDStr := cs.Metadata["invoice_id"]; invoiceIDStr != "" {
 			invoiceID, err := strconv.ParseInt(invoiceIDStr, 10, 64)
 			if err != nil {
-				log.Printf("[stripe-connect] invalid invoice_id in metadata: %s", invoiceIDStr)
+			    slog.Warn("stripe connect invalid invoice_id in metadata", "invoice_id_str", invoiceIDStr, "event_id", event.ID)
 				w.WriteHeader(http.StatusOK)
 				return
 			}
@@ -65,7 +65,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			userID, _ := strconv.ParseInt(userIDStr, 10, 64)
 
 			if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), invoiceID, "paid", userID); err != nil {
-				log.Printf("[stripe-connect] failed to mark invoice %d as paid: %v", invoiceID, err)
+				slog.Error("stripe connect failed to mark invoice paid", "err", err, "invoice_id", invoiceID)
 				http.Error(w, "Failed to update invoice status", http.StatusInternalServerError)
 				return
 			}
@@ -84,7 +84,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 				},
 			})
 
-			log.Printf("[stripe-connect] invoice %d marked as paid via Stripe Connect", invoiceID)
+			slog.Info("invoice marked paid via stripe connect", "invoice_id", invoiceID)
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -95,7 +95,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			userIDStr = cs.Metadata["user_id"]
 		}
 		if userIDStr == "" {
-			log.Printf("[stripe] checkout.session.completed missing user_id")
+			slog.Warn("stripe checkout session missing user_id", "event_id", event.ID)
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -113,7 +113,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := h.App.UserRepo.UpdateUserPlan(r.Context(), userID, newPlan); err != nil {
-			log.Printf("[stripe] failed upgrading user %d to %s: %v", userID, newPlan, err)
+			slog.Error("stripe plan upgrade failed", "err", err, "user_id", userID, "plan", newPlan)
 			http.Error(w, "Failed to update user plan", http.StatusInternalServerError)
 			return
 		}
@@ -133,10 +133,10 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			},
 		})
 
-		log.Printf("[stripe] upgraded user %d to %s", userID, newPlan)
+		slog.Info("user plan upgraded", "user_id", userID, "plan", newPlan)
 		if cs.Customer != nil {
 			if err := h.App.UserRepo.UpdateStripeCustomerID(r.Context(), userID, cs.Customer.ID); err != nil {
-				log.Printf("[stripe] failed saving stripe customer id for user %d: %v", userID, err)
+				slog.Warn("stripe customer id save failed", "err", err, "user_id", userID)
 			}
 		}
 
@@ -180,7 +180,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 
 		userIDStr := sub.Metadata["user_id"]
 		if userIDStr == "" {
-			log.Printf("[stripe] customer.subscription.deleted missing user_id")
+			slog.Warn("stripe subscription deleted missing user_id", "event_id", event.ID)
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -192,12 +192,12 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := h.App.UserRepo.UpdateUserPlan(r.Context(), userID, "free"); err != nil {
-			log.Printf("[stripe] failed downgrading user %d to free: %v", userID, err)
+			slog.Error("stripe plan downgrade failed", "err", err, "user_id", userID)
 			http.Error(w, "Failed to update user plan", http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("[stripe] downgraded user %d to free", userID)
+		slog.Info("user plan downgraded to free", "user_id", userID)
 	}
 
 	w.WriteHeader(http.StatusOK)

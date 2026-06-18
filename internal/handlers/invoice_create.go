@@ -4,7 +4,7 @@ package handlers
 import (
 	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"strconv"
@@ -98,7 +98,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	if invoiceNumber != "" && user != nil {
 		exists, err := h.App.InvRepo.InvoiceNumberExists(r.Context(), invoiceNumber, user.ID)
 		if err != nil {
-			log.Printf("[invoice] invoice number exists check error: %v", err)
+			slog.Error("invoice number check failed", "err", err)
 			http.Error(w, "Failed to validate invoice number", http.StatusInternalServerError)
 			return
 		}
@@ -197,7 +197,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		if user != nil {
 			num, err := h.App.UserRepo.NextInvoiceNumber(r.Context(), user.ID)
 			if err != nil {
-				log.Printf("[invoice] failed to generate invoice number: %v", err)
+				slog.Error("invoice number generation failed", "err", err, "user_id", user.ID)
 				invoiceNumber = fmt.Sprintf("INV-%d", time.Now().UnixNano())
 			} else {
 				invoiceNumber = num
@@ -256,7 +256,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {
-		log.Printf("[invoice] create error: %v", err)
+		slog.Error("invoice create failed", "err", err)
 
 		// Catch duplicate invoice number from DB constraint
 		if strings.Contains(err.Error(), "invoices_invoice_number_key") ||
@@ -333,7 +333,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	// ── Track monthly invoice usage for plan limits ───────────────────
 	if user != nil {
 		if err := h.App.UsageRepo.Increment(r.Context(), user.ID, "invoices"); err != nil {
-			log.Printf("[invoice] usage increment error: %v", err)
+			slog.Warn("invoice usage increment failed", "err", err, "user_id", user.ID)
 		}
 	}
 
@@ -345,7 +345,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 			Frequency: r.FormValue("recurring_frequency"),
 			AutoSend:  r.FormValue("recurring_auto_send") == "on",
 		}); err != nil {
-			log.Printf("[invoice] failed to create recurring schedule: %v", err)
+			slog.Error("recurring schedule creation failed", "err", err, "user_id", user.ID, "invoice_id", invoiceID)
 		}
 	}
 		// ── Audit log ─────────────────────────────────────────────────────
