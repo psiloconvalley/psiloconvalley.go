@@ -20,8 +20,8 @@
                         <a href="/invoices">{{.T.NavInvoices}}</a>
                         <a href="/estimates">{{.T.NavEstimates}}</a>
 		        <a href="/recurring">{{.T.NavRecurring}}</a>
-                        <a href="/reports">Reports</a>
-			<a href="/expenses">Expenses</a>
+			<a href="/reports">{{.T.NavReports}}</a>
+		        <a href="/expenses">{{.T.NavExpenses}}</a>
                     </div>
                 </div>
                 <a href="/clients">{{.T.NavClients}}</a>
@@ -123,7 +123,7 @@ document.addEventListener('click', function(e) {
                 border: 1px solid rgba(255,255,255,0.08);
                 color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
                 transition: background 0.15s;
-            ">📊 View your reports</a>
+	    ">📊 {{.T.NavReports}}</a>
             <a href="/profile" style="
                 display: flex; align-items: center; gap: 10px;
                 padding: 10px 14px; border-radius: 8px;

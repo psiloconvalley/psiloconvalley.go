@@ -15,6 +15,8 @@ type T struct {
 	NavPricing   string
 	NavProfile   string
 	NavLogout    string
+	NavExpenses  string
+	NavReports   string
 
 	// Dashboard
 	DashboardTitle    string

@@ -12,6 +12,8 @@ var en = T{
 	NavPricing:   "Pricing",
 	NavProfile:   "Profile",
 	NavLogout:    "Logout",
+	NavExpenses:  "Expenses",
+	NavReports:   "Reports",
 
 	DashboardTitle:          "Command Center",
 	DashboardWelcome:        "Welcome back",
