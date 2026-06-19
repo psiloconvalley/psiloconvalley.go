@@ -28,17 +28,17 @@
     {{if not .IsPro}}
     <div class="upgrade-banner">
         <div class="upgrade-text">
-            <strong>Upgrade to Pro</strong> — Unlock recurring invoices, automatic payment reminders, and unlimited clients.
+	   <strong>{{.T.DashboardUpgradeTitle}}</strong> — {{.T.DashboardUpgradeBody}}
         </div>
-        <a href="/pricing" class="btn-upgrade">Upgrade for $18.88/mo →</a>
+     <a href="/pricing" class="btn-upgrade">{{.T.DashboardUpgradeCta}}</a>
     </div>
     {{end}}
        {{if .ShowPasskeyNudge}}
     <div class="upgrade-banner" style="border-color: rgba(96,165,250,0.28); background: linear-gradient(180deg, rgba(37,99,235,0.10), rgba(17,24,39,0.72));">
         <div class="upgrade-text">
-            <strong style="color:#93c5fd;">🔐 Sign in faster with Face ID</strong> — Add a passkey to your account and sign in with your face, fingerprint, or device PIN.
+	   <strong style="color:#93c5fd;">{{.T.DashboardPasskeyTitle}}</strong> — {{.T.DashboardPasskeyBody}}
         </div>
-        <a href="/profile#passkey" class="btn-upgrade" style="background:#2563eb;">Set Up Passkey →</a>
+    <a href="/profile#passkey" class="btn-upgrade" style="background:#2563eb;">{{.T.DashboardPasskeyCta}}</a>
     </div>
     {{end}}
 
@@ -69,7 +69,7 @@
     {{if .HasExpenses}}
     <div class="stats-grid stats-grid-two">
         <div class="stat-card">
-            <div class="stat-label">💸 Expenses This Month</div>
+	    <div class="stat-label">💸 {{.T.DashboardExpensesMonth}}</div>
             <div class="stat-value red">{{.MonthlyExpenses}}</div>
             <div class="stat-sub">
                 <a href="/expenses" style="color:rgba(255,255,255,0.4);text-decoration:none;">
@@ -78,7 +78,7 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">📊 Net Profit This Month</div>
+	    <div class="stat-label">📊 {{.T.DashboardNetProfitMonth}}</div>
             <div class="stat-value {{if gt .NetProfitCents 0}}green{{else}}red{{end}}">
                 {{.NetProfit}}
             </div>
@@ -107,11 +107,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Invoice</th>
-                        <th>Client</th>
-                        <th>Status</th>
-                        <th>Due</th>
-                        <th class="right">Total</th>
+			<th>{{.T.DashboardThInvoice}}</th>
+                        <th>{{.T.DashboardThClient}}</th>
+                        <th>{{.T.DashboardThStatus}}</th>
+                        <th>{{.T.DashboardThDue}}</th>
+                        <th class="right">{{.T.DashboardThTotal}}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,11 +155,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Estimate</th>
-                        <th>Client</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th class="right">Total</th>
+		     	<th>{{.T.DashboardThEstimate}}</th>
+        		<th>{{.T.DashboardThClient}}</th>
+                        <th>{{.T.DashboardThStatus}}</th>
+                        <th class="right">{{.T.DashboardThTotal}}</th>
                     </tr>
                 </thead>
                 <tbody>

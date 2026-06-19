@@ -31,6 +31,27 @@ type T struct {
 	DashboardRecentInvoices string
 	DashboardRecentEstimates string
 	DashboardViewAll string
+	// Dashboard — upgrade banner
+	DashboardUpgradeTitle   string
+	DashboardUpgradeBody    string
+	DashboardUpgradeCta     string
+
+	// Dashboard — passkey nudge
+	DashboardPasskeyTitle   string
+	DashboardPasskeyBody    string
+	DashboardPasskeyCta     string
+
+	// Dashboard — stat labels
+	DashboardExpensesMonth  string
+	DashboardNetProfitMonth string
+
+	// Dashboard — table headers
+	DashboardThInvoice      string
+	DashboardThEstimate     string
+	DashboardThClient       string
+	DashboardThStatus       string
+	DashboardThDue          string
+	DashboardThTotal        string
 
 	// Invoices
 	InvoiceNew    string

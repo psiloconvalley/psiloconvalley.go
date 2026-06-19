@@ -27,6 +27,27 @@ var en = T{
 	DashboardRecentInvoices: "Recent Invoices",
 	DashboardRecentEstimates: "Recent Estimates",
 	DashboardViewAll:        "View all →",
+	// Dashboard — upgrade banner
+	DashboardUpgradeTitle:   "Upgrade to Pro",
+	DashboardUpgradeBody:    "Unlock recurring invoices, automatic payment reminders, and unlimited clients.",
+	DashboardUpgradeCta:     "Upgrade for $18.88/mo →",
+
+	// Dashboard — passkey nudge
+	DashboardPasskeyTitle:   "🔐 Sign in faster with Face ID",
+	DashboardPasskeyBody:    "Add a passkey to your account and sign in with your face, fingerprint, or device PIN.",
+	DashboardPasskeyCta:     "Set Up Passkey →",
+
+	// Dashboard — stat labels
+	DashboardExpensesMonth:  "Expenses This Month",
+	DashboardNetProfitMonth: "Net Profit This Month",
+
+	// Dashboard — table headers
+	DashboardThInvoice:      "Invoice",
+	DashboardThEstimate:     "Estimate",
+	DashboardThClient:       "Client",
+	DashboardThStatus:       "Status",
+	DashboardThDue:          "Due",
+	DashboardThTotal:        "Total",
 
 	InvoiceNew:     "New Invoice",
 	InvoiceDraft:   "Draft",

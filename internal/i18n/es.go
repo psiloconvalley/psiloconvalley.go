@@ -27,6 +27,27 @@ var es = T{
 	DashboardRecentInvoices: "Facturas Recientes",
 	DashboardRecentEstimates: "Presuestos Recientes",
 	DashboardViewAll:        "Ver todo →",
+	// Dashboard — upgrade banner
+	DashboardUpgradeTitle:   "Subir a Pro",
+	DashboardUpgradeBody:    "Desbloquea facturas recurrentes, recordatorios automáticos de pago y clientes ilimitados.",
+	DashboardUpgradeCta:     "Subir por $18.88/mes →",
+
+	// Dashboard — passkey nudge
+	DashboardPasskeyTitle:   "🔐 Inicia sesión más rápido con Face ID",
+	DashboardPasskeyBody:    "Agrega un passkey a tu cuenta e inicia sesión con tu cara, huella digital o PIN.",
+	DashboardPasskeyCta:     "Configurar Passkey →",
+
+	// Dashboard — stat labels
+	DashboardExpensesMonth:  "Gastos Este Mes",
+	DashboardNetProfitMonth: "Ganancia Neta Este Mes",
+
+	// Dashboard — table headers
+	DashboardThInvoice:      "Factura",
+	DashboardThEstimate:     "Presupuesto",
+	DashboardThClient:       "Cliente",
+	DashboardThStatus:       "Estado",
+	DashboardThDue:          "Vence",
+	DashboardThTotal:        "Total",
 
 	InvoiceNew:     "Nueva Factura",
 	InvoiceDraft:   "Borrador",
