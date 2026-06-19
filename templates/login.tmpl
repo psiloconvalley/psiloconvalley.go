@@ -225,6 +225,8 @@
         {{if .Error}}
         <div class="error-banner">{{.Error}}</div>
         {{end}}
+	 <form method="POST" action="/login">
+            {{.csrfField}}
             <div class="form-group">
                 <label>{{.T.LoginEmail}}</label>
                 <input type="email" name="email"
