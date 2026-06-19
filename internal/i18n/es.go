@@ -583,5 +583,23 @@ var es = T{
 	PricingEntTitle:            "¿Necesitas controles empresariales?",
 	PricingEntSub:              "Consultorios médicos, despachos legales y agencias — registros de auditoría, tiempo de sesión y soporte dedicado.",
 	PricingEntCta:              "Ver Opciones Empresariales →",
+	// Home dashboard (logged-in user on homepage)
+	HomeDashWelcome:       "Bienvenido de nuevo,",
+	HomeDashPlan:          "Plan",
+	HomeDashPlanFree:      "Gratis",
+	HomeDashPlanGrowth:    "Growth",
+	HomeDashPlanPro:       "Pro",
+	HomeDashRevenue:       "Ingresos",
+	HomeDashOutstanding:   "Pendiente",
+	HomeDashOverdue:       "Vencido",
+	HomeDashMonthly:       "Facturas Este Mes",
+	HomeDashNewInvoice:    "Nueva Factura",
+	HomeDashNewInvSub:     "Crea y envía una factura profesional",
+	HomeDashViewInvoices:  "Ver Facturas",
+	HomeDashViewInvSub:    "Administra tu historial de facturas",
+	HomeDashClients:       "Clientes",
+	HomeDashClientsSub:    "Administra tu directorio de clientes",
+	HomeDashSettings:      "Configuración",
+	HomeDashSettingsSub:   "Perfil de negocio y preferencias",
 
 }

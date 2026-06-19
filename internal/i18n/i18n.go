@@ -604,6 +604,24 @@ type T struct {
 	PricingEntTitle            string
 	PricingEntSub              string
 	PricingEntCta              string
+	// Home dashboard (logged-in user on homepage)
+	HomeDashWelcome       string
+	HomeDashPlan          string
+	HomeDashPlanFree      string
+	HomeDashPlanGrowth    string
+	HomeDashPlanPro       string
+	HomeDashRevenue       string
+	HomeDashOutstanding   string
+	HomeDashOverdue       string
+	HomeDashMonthly       string
+	HomeDashNewInvoice    string
+	HomeDashNewInvSub     string
+	HomeDashViewInvoices  string
+	HomeDashViewInvSub    string
+	HomeDashClients       string
+	HomeDashClientsSub    string
+	HomeDashSettings      string
+	HomeDashSettingsSub   string
 }
 
 

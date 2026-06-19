@@ -583,5 +583,23 @@ var en = T{
 	PricingEntTitle:            "Need enterprise controls?",
 	PricingEntSub:              "Medical offices, law firms, and agencies — audit logs, session timeout, and dedicated support.",
 	PricingEntCta:              "Explore Enterprise →",
+	// Home dashboard (logged-in user on homepage)
+	HomeDashWelcome:       "Welcome back,",
+	HomeDashPlan:          "Plan",
+	HomeDashPlanFree:      "Free",
+	HomeDashPlanGrowth:    "Growth",
+	HomeDashPlanPro:       "Pro",
+	HomeDashRevenue:       "Revenue",
+	HomeDashOutstanding:   "Outstanding",
+	HomeDashOverdue:       "Overdue",
+	HomeDashMonthly:       "Invoices This Month",
+	HomeDashNewInvoice:    "New Invoice",
+	HomeDashNewInvSub:     "Create and send a professional invoice",
+	HomeDashViewInvoices:  "View Invoices",
+	HomeDashViewInvSub:    "Manage your invoice history",
+	HomeDashClients:       "Clients",
+	HomeDashClientsSub:    "Manage your client directory",
+	HomeDashSettings:      "Settings",
+	HomeDashSettingsSub:   "Business profile and preferences",
 
 }

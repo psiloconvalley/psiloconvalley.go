@@ -3,11 +3,13 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"psiloconvalley/internal/app"
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/repo"
 	"github.com/resend/resend-go/v2"
 
 )
@@ -20,10 +22,25 @@ func NewHandlers(a *app.App) *Handlers {
 	return &Handlers{App: a}
 }
 
-// ---------- Basic pages ----------
-
 func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
-    h.App.Render(w, r, "home.tmpl", nil)
+	user := auth.GetUser(r)
+
+	// Anon users get the marketing page — no DB call needed
+	if user == nil {
+		h.App.Render(w, r, "home.tmpl", nil)
+		return
+	}
+
+	// Logged-in users get real business stats
+	stats, err := h.App.InvRepo.GetDashboardStats(r.Context(), user.ID)
+	if err != nil {
+		slog.Error("home stats query failed", "user_id", user.ID, "err", err)
+		stats = &repo.DashboardStats{} // degrade gracefully — show zeros
+	}
+
+	h.App.Render(w, r, "home.tmpl", map[string]any{
+		"Stats": stats,
+	})
 }
 func (h *Handlers) Research(w http.ResponseWriter, r *http.Request) {
 	h.App.Render(w, r, "research.tmpl", nil)
