@@ -1,0 +1,453 @@
+{{define "invoice-doc-body"}}
+{{if .Sent}}
+<div style="
+    background:#dcfce7;
+    border-bottom:1px solid #bbf7d0;
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:#15803d;
+">
+    <span style="font-size:18px;">✅</span>
+    <div>
+        Invoice <strong>{{.Invoice.InvoiceNumber}}</strong> sent successfully.
+        {{if .SentTo}}A PDF copy was delivered to <strong>{{.SentTo}}</strong>.{{end}}
+    </div>
+</div>
+{{end}}
+
+{{template "nav" .}}
+
+<div class="page">
+    <div class="invoice-card">
+
+        <div class="top-accent"></div>
+
+               {{if and .Invoice.LogoURL .Invoice.ShowLogo}}
+        <div style="padding: 24px 36px 0; text-align:{{if .Invoice.LogoPosition}}{{.Invoice.LogoPosition}}{{else}}left{{end}};">
+            <img
+                src="{{.Invoice.LogoURL}}"
+                alt="{{.Invoice.CompanyName}}"
+                style="max-width:200px; max-height:80px; object-fit:contain; display:inline-block;"
+            >
+        </div>
+        {{end}}
+       
+        <header class="header-top">
+            <div class="header-title-block">
+		{{if .Invoice.ShowTitle}}<span class="doc-title">{{if .IsEstimate}}ESTIMATE{{else}}INVOICE{{end}}</span>{{end}}
+                <span class="doc-number">#{{.Invoice.InvoiceNumber}}</span>
+            </div>
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Status</span>
+                    <span class="meta-value">
+                        <span class="status-badge status-{{.Invoice.Status}}">{{.Invoice.Status}}</span>
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Issued</span>
+                    <span class="meta-value">{{.Invoice.IssueDate}}</span>
+                </div>
+                {{if .Invoice.DueDate}}
+                <div class="meta-item">
+                    <span class="meta-label">Due</span>
+                    <span class="meta-value">{{.Invoice.DueDate}}</span>
+                </div>
+                {{end}}
+                <div class="meta-item">
+                    <span class="meta-label">Currency</span>
+                    <span class="meta-value">{{.Invoice.Currency}}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="addresses-band">
+            <div class="address-col">
+                <div class="address-label">From</div>
+                <div class="address-name">{{.Invoice.CompanyName}}</div>
+                <div class="address-line">
+                    {{if .Invoice.CompanyAddress}}{{.Invoice.CompanyAddress}}<br>{{end}}
+                    {{if .Invoice.CompanyCity}}{{.Invoice.CompanyCity}}{{if .Invoice.CompanyState}}, {{.Invoice.CompanyState}}{{end}} {{.Invoice.CompanyZip}}<br>{{end}}
+                    {{if .Invoice.CompanyCountry}}{{.Invoice.CompanyCountry}}<br>{{end}}
+                    {{if .Invoice.CompanyEmail}}{{.Invoice.CompanyEmail}}{{end}}
+                </div>
+            </div>
+            <div class="address-col">
+                <div class="address-label">Bill To</div>
+                <div class="address-name">{{.Invoice.ClientName}}</div>
+                <div class="address-line">
+                    {{if .Invoice.ClientAddress}}{{.Invoice.ClientAddress}}<br>{{end}}
+                    {{if .Invoice.ClientCity}}{{.Invoice.ClientCity}}{{if .Invoice.ClientState}}, {{.Invoice.ClientState}}{{end}} {{.Invoice.ClientZip}}<br>{{end}}
+                    {{if .Invoice.ClientCountry}}{{.Invoice.ClientCountry}}<br>{{end}}
+                    {{if .Invoice.ClientEmail}}{{.Invoice.ClientEmail}}{{end}}
+                </div>
+            </div>
+        </section>
+
+        {{/* ── Desktop line items table ── */}}
+        <div class="table-wrapper">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="right">Qty</th>
+                        <th class="right">Unit Price</th>
+                        <th class="right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Invoice.Items}}
+                    <tr>
+                        <td>
+                            <div class="item-description">{{.Description}}</div>
+                            {{if .Details}}
+                            <div class="item-details">{{.Details}}</div>
+                            {{end}}
+                        </td>
+                        <td class="right numeric">{{.Quantity}}</td>
+                        <td class="right money">{{.UnitPrice}}</td>
+                        <td class="right money">{{.LineTotal}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        {{/* ── Mobile line items cards ──
+             Replaces the table on screens < 700px.
+             Each item is a self-contained card with description,
+             optional details, qty × price, and line total.
+             touch targets are not needed here (read-only view).
+        ── */}}
+        <div class="items-mobile">
+            {{range .Invoice.Items}}
+            <div class="item-card-m">
+                <div class="item-card-m-desc">{{.Description}}</div>
+                {{if .Details}}
+                <div class="item-card-m-detail">{{.Details}}</div>
+                {{end}}
+                <div class="item-card-m-meta">
+                    <span>{{.Quantity}} × {{.UnitPrice}}</span>
+                    <span class="item-card-m-total">{{.LineTotal}}</span>
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+        <footer class="invoice-footer-split">
+            <div class="notes-block">
+                {{if .Invoice.PaymentDetails}}
+                <div>
+                    <div class="info-label">Payment Instructions</div>
+                    <div class="info-content">{{.Invoice.PaymentDetails}}</div>
+                </div>
+                {{end}}
+                {{if .Invoice.Notes}}
+                <div>
+                    <div class="info-label">Notes & Memo</div>
+                    <div class="info-content">{{.Invoice.Notes}}</div>
+                </div>
+                {{end}}
+            </div>
+
+            <div class="totals-box">
+                <div class="totals-row">
+                    <span class="totals-label">Subtotal</span>
+                    <span class="totals-value">{{.Invoice.Subtotal}}</span>
+                </div>
+                {{if ne .Invoice.TaxRate "0"}}
+                <div class="totals-row">
+                    <span class="totals-label">Tax ({{.Invoice.TaxRate}}%)</span>
+                    <span class="totals-value">{{.Invoice.TaxAmount}}</span>
+                </div>
+                {{end}}
+                {{if ne .Invoice.Discount "$0.00"}}
+                <div class="totals-row">
+                    <span class="totals-label">Discount</span>
+                    <span class="totals-value">-{{.Invoice.Discount}}</span>
+                </div>
+                {{end}}
+		<div class="totals-row grand-total">
+                    <span class="totals-label">Total Due</span>
+                    <span class="totals-value">{{.Invoice.Total}}</span>
+                </div>
+                {{if .Invoice.DueDate}}
+                <div style="
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    border-top: 1px dashed #e2e8f0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Payment Due</span>
+                    <span style="font-size: 13px; font-weight: 800; color: {{if eq .Invoice.Status "overdue"}}#dc2626{{else}}#0d1422{{end}};">
+                        {{.Invoice.DueDate}}
+                    </span>
+                </div>
+                {{end}}
+            </div>
+	</footer>
+	  {{if .ShowBranding}}
+                <div style="
+                    text-align: center;
+                    padding: 16px 36px;
+                    border-top: 1px solid #f1f5f9;
+                    margin-top: 0;
+                ">
+                    <span style="font-size: 11px; color: #94a3b8; font-weight: 500;">
+                        Generated by <a href="https://psiloconvalley.com" style="color: #94a3b8; text-decoration: none; font-weight: 700;">PsiloConValley</a>
+                        &nbsp;·&nbsp;
+                        <a href="https://psiloconvalley.com/pricing" style="color: #94a3b8; text-decoration: none;">Remove branding →</a>
+                    </span>
+                </div>
+                {{end}}
+
+                    {{/* ── Actions: hidden in PDF mode ── */}}
+        {{if not .Invoice.Hints.PDFMode}}
+        <section class="invoice-actions-wrapper">
+            <div class="primary-actions">
+                {{if .IsEstimate}}
+                    {{/* ── Estimate Actions ── */}}
+                    {{if .User}}
+                        {{if eq .Invoice.Status "draft"}}
+                        <a href="/estimates/{{.Invoice.ID}}/send" class="action-btn action-btn-primary">📨 Send</a>
+                        <a href="/estimates/{{.Invoice.ID}}/edit" class="action-btn">✏️ Edit</a>
+                        {{end}}
+                        {{if eq .Invoice.Status "sent"}}
+                        <a href="/estimates/{{.Invoice.ID}}/send" class="action-btn action-btn-primary">📨 Resend</a>
+                        {{end}}
+                        {{if eq .Invoice.Status "accepted"}}
+                        <form method="POST" action="/estimates/{{.Invoice.ID}}/convert" style="display:inline;">
+                            {{.csrfField}}
+                            <button type="submit" class="action-btn" style="background:#14532d; color:#86efac; border-color:#14532d;">🔄 Convert to Invoice</button>
+                        </form>
+                        {{end}}
+                    {{end}}
+
+                    <a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>
+
+                    <div class="more-dropdown" id="moreDropdown">
+                        <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
+                        <div class="more-dropdown-menu">
+                            <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
+                            <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
+                            <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="more-dropdown-item mobile-only">👁 Preview PDF</a>
+                            {{if .User}}{{if eq .Invoice.Status "draft"}}
+                            <div class="more-dropdown-divider"></div>
+                            <button type="button" class="more-dropdown-item more-dropdown-item-danger" onclick="closeMoreMenu(); openDeleteModal('{{.Invoice.InvoiceNumber}}', {{.Invoice.ID}})">🗑 Delete Draft</button>
+                            {{end}}{{end}}
+                        </div>
+                    </div>
+                {{else}}
+                    {{/* ── Invoice Actions ── */}}
+                    {{if .User}}
+                    <a href="/invoices/{{.Invoice.ID}}/send" class="action-btn action-btn-primary">📨 Send</a>
+                    {{end}}
+
+                    {{if .PayNowEnabled}}
+                    <a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" class="action-btn action-btn-pay">💳 Pay Now</a>
+                    {{end}}
+
+                    {{if eq .Invoice.Status "draft"}}
+                    <a href="/invoices/{{.Invoice.ID}}/edit" class="action-btn">✏️ Edit</a>
+                    {{end}}
+
+                    <a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>
+
+                    <div class="more-dropdown" id="moreDropdown">
+                        <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
+                        <div class="more-dropdown-menu">
+                            <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
+                            <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
+                            <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="more-dropdown-item mobile-only">👁 Preview PDF</a>
+                            {{if .User}}{{if eq .Invoice.Status "draft"}}
+                            <div class="more-dropdown-divider"></div>
+                            <button type="button" class="more-dropdown-item more-dropdown-item-danger" onclick="closeMoreMenu(); openDeleteModal('{{.Invoice.InvoiceNumber}}', {{.Invoice.ID}})">🗑 Delete Draft</button>
+                            {{end}}{{end}}
+                        </div>
+                    </div>
+                {{end}}
+            </div>
+
+            {{if .IsEstimate}}
+                {{/* ── Estimate Status Panel ── */}}
+                {{if .User}}
+                <div class="status-panel">
+                    <div class="status-panel-title">Change Estimate Status</div>
+                    <div class="status-actions">
+                        {{if eq .Invoice.Status "draft"}}
+                        <form method="POST" action="/estimates/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="sent">
+                            <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">Mark as Sent</button>
+                        </form>
+                        {{end}}
+
+                        {{if eq .Invoice.Status "sent"}}
+                        <form method="POST" action="/estimates/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="accepted">
+                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark Accepted</button>
+                        </form>
+                        <form method="POST" action="/estimates/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="rejected">
+                            <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">Mark Rejected</button>
+                        </form>
+                        <form method="POST" action="/estimates/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="expired">
+                            <button type="submit" class="status-btn" style="background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4);">Mark Expired</button>
+                        </form>
+                        {{end}}
+
+                        {{if eq .Invoice.Status "accepted"}}
+                        <form method="POST" action="/estimates/{{.Invoice.ID}}/convert">
+                            {{.csrfField}}
+                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">🔄 Convert to Invoice</button>
+                        </form>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            {{else}}
+                {{/* ── Invoice Status Panel ── */}}
+                {{if .User}}
+                <div class="status-panel">
+                    <div class="status-panel-title">Change Invoice Status</div>
+                    <div class="status-actions">
+                        {{if eq .Invoice.Status "draft"}}
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="sent">
+                            <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">Mark as Sent</button>
+                        </form>
+                        {{end}}
+
+                        {{if eq .Invoice.Status "sent"}}
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="paid">
+                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
+                        </form>
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="overdue">
+                            <button type="submit" class="status-btn" style="background:#fef9c3; color:#854d0e;">Mark Overdue</button>
+                        </form>
+                        {{end}}
+
+                        {{if eq .Invoice.Status "overdue"}}
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="paid">
+                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
+                        </form>
+                        {{end}}
+
+                        {{if and (ne .Invoice.Status "void") (ne .Invoice.Status "paid")}}
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="void">
+                            <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">Void</button>
+                        </form>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            {{end}}
+        </section>
+        {{end}} 
+       </div>
+</div>
+
+<!-- ═══════════ DELETE CONFIRMATION MODAL ═══════════ -->
+<div id="delete-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:500;">
+    <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:16px; padding:32px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="font-size:20px; font-weight:800; color:#0d1422; margin-bottom:8px;">Delete Draft Invoice</div>
+        <div style="font-size:13px; color:#666; margin-bottom:20px; line-height:1.5;">This action <strong>cannot be undone</strong>. The invoice and all its line items will be permanently deleted.</div>
+        <div style="font-size:13px; font-weight:600; color:#444; margin-bottom:8px;">Type the invoice number to confirm:</div>
+        <div style="font-size:13px; font-weight:700; color:#dc2626; background:#fee2e2; border-radius:6px; padding:8px 12px; margin-bottom:12px; font-family:monospace;" id="delete-modal-number"></div>
+        <input
+            type="text"
+            id="delete-confirm-input"
+            placeholder="Type invoice number here"
+            oninput="checkDeleteConfirm()"
+            style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; font-family:inherit; margin-bottom:16px;"
+        >
+        <div style="display:flex; gap:12px;">
+            <button type="button" onclick="closeDeleteModal()" style="flex:1; padding:11px; border:1px solid #ddd; background:white; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">Cancel</button>
+            <form id="delete-form" method="POST" action="" style="flex:1;">
+                {{.csrfField}}
+                <input type="hidden" name="confirm_number" id="delete-confirm-hidden">
+                <button type="submit" id="delete-submit-btn" disabled
+                    style="width:100%; padding:11px; background:#dc2626; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; opacity:0.4;">
+                    Delete Permanently
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+var _deleteInvoiceNumber = '';
+function toggleMoreMenu() {
+    document.getElementById('moreDropdown').classList.toggle('open');
+}
+
+function closeMoreMenu() {
+    document.getElementById('moreDropdown').classList.remove('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    var dd = document.getElementById('moreDropdown');
+    if (dd && !dd.contains(e.target)) {
+        dd.classList.remove('open');
+    }
+});
+
+function openDeleteModal(invoiceNumber, invoiceID) {
+    _deleteInvoiceNumber = invoiceNumber;
+    document.getElementById('delete-modal-number').textContent = invoiceNumber;
+    document.getElementById('delete-confirm-input').value = '';
+    document.getElementById('delete-confirm-hidden').value = '';
+    document.getElementById('delete-submit-btn').disabled = true;
+    document.getElementById('delete-submit-btn').style.opacity = '0.4';
+    document.getElementById('delete-form').action = '/invoices/' + invoiceID + '/delete';
+    document.getElementById('delete-overlay').style.display = 'block';
+    setTimeout(function(){ document.getElementById('delete-confirm-input').focus(); }, 50);
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-overlay').style.display = 'none';
+}
+
+function checkDeleteConfirm() {
+    var val = document.getElementById('delete-confirm-input').value.trim();
+    var btn = document.getElementById('delete-submit-btn');
+    var hidden = document.getElementById('delete-confirm-hidden');
+    if (val === _deleteInvoiceNumber) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        hidden.value = val;
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.4';
+        hidden.value = '';
+    }
+}
+
+// Close on overlay click
+document.getElementById('delete-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+</script>
+{{end}}
+
