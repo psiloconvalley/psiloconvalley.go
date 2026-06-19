@@ -121,13 +121,15 @@ func (h *Handlers) PasskeyRegistrationFinish(w http.ResponseWriter, r *http.Requ
 
 	// Store the credential in the database
 	cred := &repo.WebAuthnCredential{
-		UserID:       user.ID,
-		CredentialID: credential.ID,
-		PublicKey:    credential.PublicKey,
-		SignCount:    uint32(credential.Authenticator.SignCount),
-		DeviceName:   "Passkey", // Users can rename later
+		UserID:         user.ID,
+		CredentialID:   credential.ID,
+		PublicKey:      credential.PublicKey,
+		SignCount:      uint32(credential.Authenticator.SignCount),
+		DeviceName:     "Passkey",
+		BackupEligible: credential.Flags.BackupEligible,
+		BackupState:    credential.Flags.BackupState,
 	}
-
+	
 	if err := h.App.PasskeyRepo.Create(r.Context(), cred); err != nil {
 		slog.Error("passkey credential store failed",
 			"user_id", user.ID, "err", err)
@@ -200,11 +202,15 @@ func (h *Handlers) PasskeyLoginFinish(w http.ResponseWriter, r *http.Request) {
 		wCred := webauthn.Credential{
 			ID:        cred.CredentialID,
 			PublicKey: cred.PublicKey,
+			Flags: webauthn.CredentialFlags{
+				BackupEligible: cred.BackupEligible,
+				BackupState:    cred.BackupState,
+			},
 			Authenticator: webauthn.Authenticator{
 				SignCount: uint32(cred.SignCount),
 			},
 		}
-		return &webAuthnUser{User: user, Creds: []webauthn.Credential{wCred}}, nil
+			return &webAuthnUser{User: user, Creds: []webauthn.Credential{wCred}}, nil
 	}
 
 	credential, err := auth.WebAuthn.FinishDiscoverableLogin(handler, *sessionData, r)

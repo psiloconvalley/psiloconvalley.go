@@ -15,6 +15,8 @@ type WebAuthnCredential struct {
 	PublicKey    []byte
 	SignCount    uint32
 	DeviceName   string
+	BackupEligible bool
+	BackupState    bool
 	CreatedAt    time.Time
 	LastUsedAt   *time.Time
 }
@@ -27,9 +29,11 @@ func NewPasskeyRepo(db *sql.DB) *PasskeyRepo { return &PasskeyRepo{db: db} }
 func (r *PasskeyRepo) Create(ctx context.Context, cred *WebAuthnCredential) error {
 	_, err := r.db.ExecContext(ctx, `
 		INSERT INTO webauthn_credentials
-			(user_id, credential_id, public_key, sign_count, device_name)
-		VALUES ($1, $2, $3, $4, $5)`,
-		cred.UserID, cred.CredentialID, cred.PublicKey, cred.SignCount, cred.DeviceName,
+			(user_id, credential_id, public_key, sign_count, device_name, be_flag, bs_flag)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		cred.UserID, cred.CredentialID, cred.PublicKey,
+		cred.SignCount, cred.DeviceName,
+		cred.BackupEligible, cred.BackupState,
 	)
 	return err
 }
@@ -38,7 +42,7 @@ func (r *PasskeyRepo) Create(ctx context.Context, cred *WebAuthnCredential) erro
 func (r *PasskeyRepo) GetByUserID(ctx context.Context, userID int64) ([]WebAuthnCredential, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, user_id, credential_id, public_key, sign_count,
-		       device_name, created_at, last_used_at
+		       device_name, be_flag, bs_flag, created_at, last_used_at
 		FROM webauthn_credentials
 		WHERE user_id = $1
 		ORDER BY created_at`, userID,
@@ -53,7 +57,9 @@ func (r *PasskeyRepo) GetByUserID(ctx context.Context, userID int64) ([]WebAuthn
 		var c WebAuthnCredential
 		if err := rows.Scan(
 			&c.ID, &c.UserID, &c.CredentialID, &c.PublicKey,
-			&c.SignCount, &c.DeviceName, &c.CreatedAt, &c.LastUsedAt,
+			&c.SignCount, &c.DeviceName,
+			&c.BackupEligible, &c.BackupState,
+			&c.CreatedAt, &c.LastUsedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -67,12 +73,14 @@ func (r *PasskeyRepo) GetByCredentialID(ctx context.Context, credID []byte) (*We
 	var c WebAuthnCredential
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, credential_id, public_key, sign_count,
-		       device_name, created_at, last_used_at
+		       device_name, be_flag, bs_flag, created_at, last_used_at
 		FROM webauthn_credentials
 		WHERE credential_id = $1`, credID,
 	).Scan(
 		&c.ID, &c.UserID, &c.CredentialID, &c.PublicKey,
-		&c.SignCount, &c.DeviceName, &c.CreatedAt, &c.LastUsedAt,
+		&c.SignCount, &c.DeviceName,
+		&c.BackupEligible, &c.BackupState,
+		&c.CreatedAt, &c.LastUsedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -100,4 +108,3 @@ func (r *PasskeyRepo) Delete(ctx context.Context, id int64, userID int64) error 
 	)
 	return err
 }
-
