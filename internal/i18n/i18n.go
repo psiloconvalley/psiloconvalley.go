@@ -517,6 +517,7 @@ type T struct {
 	InvoiceNewPlaceholderClient   string
 	InvoiceNewPlaceholderClEmail  string
 	InvoiceNewPlaceholderDocNum   string
+	InvoiceNewPlaceholderEstNum   string
 	InvoiceNewPlaceholderClAddr   string
 	InvoiceNewPlaceholderClCity   string
 	InvoiceNewPlaceholderClZip    string

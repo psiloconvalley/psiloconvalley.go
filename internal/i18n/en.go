@@ -497,6 +497,7 @@ var en = T{
 	InvoiceNewPlaceholderClient:   "Sunset Apartments",
 	InvoiceNewPlaceholderClEmail:  "manager@sunsetapts.com",
 	InvoiceNewPlaceholderDocNum:   "INV-2026-001",
+	InvoiceNewPlaceholderEstNum:   "EST-2026-001",
 	InvoiceNewPlaceholderClAddr:   "456 Desert View Dr",
 	InvoiceNewPlaceholderClCity:   "Scottsdale",
 	InvoiceNewPlaceholderClZip:    "85251",

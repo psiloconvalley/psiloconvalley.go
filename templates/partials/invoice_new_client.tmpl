@@ -57,7 +57,7 @@
                             {{else}}
                             <input type="text" name="invoice_number"
                                    value="{{field .Invoice.InvoiceNumber}}"
-                                   placeholder="{{.T.InvoiceNewPlaceholderDocNum}}">
+			    placeholder="{{if eq .DocumentType "estimate"}}{{.T.InvoiceNewPlaceholderEstNum}}{{else}}{{.T.InvoiceNewPlaceholderDocNum}}{{end}}">
                             {{end}}
                             {{if .Errors}}
                             {{range .Errors}}
