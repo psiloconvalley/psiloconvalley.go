@@ -527,7 +527,85 @@ type T struct {
 	InvoiceSendStatusNote    string
 	InvoiceSendPDFNote       string
 	InvoiceSendSending       string
+	// Pricing page — notices
+	PricingNoticeSendLimit     string
+	PricingNoticeEstimateLimit string
+	PricingNoticeReportLimit   string
+	PricingNoticePayments      string
+	PricingNoticeInvoiceLimit  string
+	PricingNoticeClientLimit   string
+	PricingNoticeEmailPro      string
+	PricingNoticeExpenses      string
+	PricingNoticeSuccess       string
+	PricingNoticeCanceled      string
+	PricingNoticeAlreadyPro    string
+
+	// Pricing page — hero
+	PricingEyebrow             string
+	PricingHeroTitle           string
+	PricingHeroSub             string
+
+	// Pricing page — Free card
+	PricingFreeTitle           string
+	PricingFreeUnit            string
+	PricingFreeSub             string
+	PricingFreeInvoices        string
+	PricingFreeEstimates       string
+	PricingFreeClients         string
+	PricingFreeEmails          string
+	PricingFreePDF             string
+	PricingFreeNoStripe        string
+	PricingFreeNoExpenses      string
+	PricingFreeNoReports       string
+	PricingFreeCurrentPlan     string
+	PricingFreeCtaRegister     string
+
+	// Pricing page — Growth card
+	PricingGrowthBadge         string
+	PricingGrowthTitle         string
+	PricingGrowthUnit          string
+	PricingGrowthFoundingTag   string
+	PricingGrowthSub           string
+	PricingGrowthInvoices      string
+	PricingGrowthEstimates     string
+	PricingGrowthClients       string
+	PricingGrowthEmails        string
+	PricingGrowthStripe        string
+	PricingGrowthExpenses      string
+	PricingGrowthReports       string
+	PricingGrowthManageBilling string
+	PricingGrowthCurrentPlan   string
+	PricingGrowthAlreadyPro    string
+	PricingGrowthUpgrade       string
+	PricingGrowthCtaRegister   string
+
+	// Pricing page — Pro card
+	PricingProTitle            string
+	PricingProUnit             string
+	PricingProSub              string
+	PricingProInvoices         string
+	PricingProEstimates        string
+	PricingProClients          string
+	PricingProEmails           string
+	PricingProStripe           string
+	PricingProExpenses         string
+	PricingProReports          string
+	PricingProRecurring        string
+	PricingProReminders        string
+	PricingProTemplates        string
+	PricingProSupport          string
+	PricingProManageBilling    string
+	PricingProCurrentPlan      string
+	PricingProUpgrade          string
+	PricingProCtaRegister      string
+	PricingProCtaLogin         string
+
+	// Pricing page — Enterprise callout
+	PricingEntTitle            string
+	PricingEntSub              string
+	PricingEntCta              string
 }
+
 
 // Get returns the translation set for the given language code.
 // Falls back to English for any unknown code.

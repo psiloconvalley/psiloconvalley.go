@@ -18,7 +18,6 @@
     {{template "nav-styles" .}}
     {{template "base-styles" .}}
     {{template "pricing-styles" .}}
-
 </head>
 <body>
 
@@ -26,198 +25,168 @@
 
 <div class="page">
 
-       {{if eq .Reason "send-limit"}}
-    <div class="notice">
-        You've reached the free plan limit of 3 email sends per month. Upgrade to Growth to keep sending professional invoices.
-    </div>
+    {{if eq .Reason "send-limit"}}
+    <div class="notice">{{.T.PricingNoticeSendLimit}}</div>
     {{end}}
     {{if eq .Reason "estimate-limit"}}
-    <div class="notice">
-        You've reached the free plan limit of 3 estimates per month. Upgrade to Growth to win more jobs.
-    </div>
+    <div class="notice">{{.T.PricingNoticeEstimateLimit}}</div>
     {{end}}
     {{if eq .Reason "report-limit"}}
-    <div class="notice">
-        Detailed reporting is a Growth feature. Upgrade to see your business analytics.
-    </div>
+    <div class="notice">{{.T.PricingNoticeReportLimit}}</div>
     {{end}}
     {{if eq .Reason "payments"}}
-    <div class="notice">
-        Accepting card payments via Stripe is available on Growth and above. Upgrade to get paid faster.
-    </div>
+    <div class="notice">{{.T.PricingNoticePayments}}</div>
     {{end}}
     {{if eq .Reason "invoice-limit"}}
-    <div class="notice">
-        You've reached your plan's invoice limit this month. Upgrade to create more invoices.
-    </div>
+    <div class="notice">{{.T.PricingNoticeInvoiceLimit}}</div>
     {{end}}
     {{if eq .Reason "client-limit"}}
-    <div class="notice">
-        You've reached your plan's client limit. Upgrade to add more clients.
-    </div>
+    <div class="notice">{{.T.PricingNoticeClientLimit}}</div>
     {{end}}
     {{if eq .Reason "email-pro"}}
-    <div class="notice">
-        You've reached your email send limit this month. Upgrade to send more invoices.
-    </div>
+    <div class="notice">{{.T.PricingNoticeEmailPro}}</div>
     {{end}}
     {{if eq .Reason "expenses"}}
-    <div class="notice">
-        Expense tracking is available on Growth and above. Upgrade to track spending and see your real profit.
-    </div>
+    <div class="notice">{{.T.PricingNoticeExpenses}}</div>
     {{end}}
-      {{if .CheckoutSuccess}}
-    <div class="notice success">
-        Payment received. Your plan has been upgraded. Welcome to the next level.
-    </div>
+    {{if .CheckoutSuccess}}
+    <div class="notice success">{{.T.PricingNoticeSuccess}}</div>
     {{end}}
     {{if .CheckoutCanceled}}
-    <div class="notice">
-        Checkout was canceled. No charge was made.
-    </div>
+    <div class="notice">{{.T.PricingNoticeCanceled}}</div>
     {{end}}
     {{if .AlreadyPro}}
-    <div class="notice">
-        You are already on the Pro plan.
-    </div>
+    <div class="notice">{{.T.PricingNoticeAlreadyPro}}</div>
     {{end}}
 
     <div class="hero">
-        <div class="eyebrow">Simple Pricing</div>
-        <h1>Start Free. Scale Up.</h1>
-        <p>
-            Three tiers built for where you are right now.
-            No hidden fees. Cancel anytime.
-        </p>
+        <div class="eyebrow">{{.T.PricingEyebrow}}</div>
+        <h1>{{.T.PricingHeroTitle}}</h1>
+        <p>{{.T.PricingHeroSub}}</p>
     </div>
 
-        <div class="pricing-grid">
+    <div class="pricing-grid">
 
         {{/* ── FREE ── */}}
         <div class="pricing-card">
-            <div class="plan-name">Free</div>
+            <div class="plan-name">{{.T.PricingFreeTitle}}</div>
             <div class="price">
                 <div class="amount">$0</div>
-                <div class="unit">/ forever</div>
+                <div class="unit">{{.T.PricingFreeUnit}}</div>
             </div>
-            <div class="subtext">
-                Try the full experience. No credit card required.
-            </div>
+            <div class="subtext">{{.T.PricingFreeSub}}</div>
             <ul class="features">
-                <li><span class="feat-yes">✓</span><span>5 invoices per month</span></li>
-                <li><span class="feat-yes">✓</span><span>3 estimates per month</span></li>
-                <li><span class="feat-yes">✓</span><span>5 saved clients</span></li>
-                <li><span class="feat-yes">✓</span><span>3 email sends per month</span></li>
-                <li><span class="feat-yes">✓</span><span>PDF download</span></li>
-                <li><span class="feat-no">✗</span><span>Stripe card payments</span></li>
-                <li><span class="feat-no">✗</span><span>Expense tracking</span></li>
-                <li><span class="feat-no">✗</span><span>Reports</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingFreeInvoices}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingFreeEstimates}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingFreeClients}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingFreeEmails}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingFreePDF}}</span></li>
+                <li><span class="feat-no">✗</span><span>{{.T.PricingFreeNoStripe}}</span></li>
+                <li><span class="feat-no">✗</span><span>{{.T.PricingFreeNoExpenses}}</span></li>
+                <li><span class="feat-no">✗</span><span>{{.T.PricingFreeNoReports}}</span></li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "free"}}
-                <div class="plan-state">✓ Your current plan</div>
+                <div class="plan-state">{{.T.PricingFreeCurrentPlan}}</div>
                 {{end}}
             {{else}}
                 <div class="cta-actions">
-                    <a href="/register" class="btn btn-secondary">Create Free Account</a>
+                    <a href="/register" class="btn btn-secondary">{{.T.PricingFreeCtaRegister}}</a>
                 </div>
             {{end}}
         </div>
 
         {{/* ── GROWTH ── */}}
         <div class="pricing-card growth">
-            <div class="popular-badge">Most Popular</div>
-            <div class="plan-name">Growth</div>
+            <div class="popular-badge">{{.T.PricingGrowthBadge}}</div>
+            <div class="plan-name">{{.T.PricingGrowthTitle}}</div>
             <div class="price">
                 <div class="amount">$8.88</div>
-                <div class="unit">/ month</div>
+                <div class="unit">{{.T.PricingGrowthUnit}}</div>
             </div>
-            <div class="founding-tag">Founding Rate — Lock It In</div>
-            <div class="subtext">
-                Everything you need to get paid.
-            </div>
+            <div class="founding-tag">{{.T.PricingGrowthFoundingTag}}</div>
+            <div class="subtext">{{.T.PricingGrowthSub}}</div>
             <ul class="features">
-                <li><span class="feat-yes">✓</span><span>15 invoices per month</span></li>
-                <li><span class="feat-yes">✓</span><span>15 estimates per month</span></li>
-                <li><span class="feat-yes">✓</span><span>15 saved clients</span></li>
-                <li><span class="feat-yes">✓</span><span>15 email sends per month</span></li>
-                <li><span class="feat-yes">✓</span><span>Accept card payments via Stripe</span></li>
-                <li><span class="feat-yes">✓</span><span>Expense tracking</span></li>
-                <li><span class="feat-yes">✓</span><span>1 report per month</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthInvoices}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthEstimates}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthClients}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthEmails}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthStripe}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthExpenses}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthReports}}</span></li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "growth"}}
                     <form method="POST" action="/billing/portal" class="cta-form">
                         {{.csrfField}}
-                        <button type="submit" class="btn btn-secondary">Manage Billing</button>
+                        <button type="submit" class="btn btn-secondary">{{.T.PricingGrowthManageBilling}}</button>
                     </form>
-                    <div class="plan-state">✓ Your current plan</div>
+                    <div class="plan-state">{{.T.PricingGrowthCurrentPlan}}</div>
                 {{else if eq .User.Plan "pro"}}
-                    <div class="plan-state">You're on Pro — already included</div>
+                    <div class="plan-state">{{.T.PricingGrowthAlreadyPro}}</div>
                 {{else}}
                     <form method="POST" action="/checkout" class="cta-form">
                         {{.csrfField}}
                         <input type="hidden" name="plan" value="growth">
-                        <button type="submit" class="btn btn-growth">Upgrade to Growth →</button>
+                        <button type="submit" class="btn btn-growth">{{.T.PricingGrowthUpgrade}}</button>
                     </form>
                 {{end}}
             {{else}}
                 <div class="cta-actions">
-                    <a href="/register" class="btn btn-growth">Get Started →</a>
+                    <a href="/register" class="btn btn-growth">{{.T.PricingGrowthCtaRegister}}</a>
                 </div>
             {{end}}
         </div>
 
         {{/* ── PRO ── */}}
         <div class="pricing-card pro">
-            <div class="plan-name">Pro</div>
+            <div class="plan-name">{{.T.PricingProTitle}}</div>
             <div class="price">
                 <div class="amount">$18.88</div>
-                <div class="unit">/ month</div>
+                <div class="unit">{{.T.PricingProUnit}}</div>
             </div>
-            <div class="subtext">
-                Unlimited scale. Zero friction. Full automation.
-            </div>
+            <div class="subtext">{{.T.PricingProSub}}</div>
             <ul class="features">
-                <li><span class="feat-yes">✓</span><span>Unlimited invoices</span></li>
-                <li><span class="feat-yes">✓</span><span>Unlimited estimates</span></li>
-                <li><span class="feat-yes">✓</span><span>Unlimited clients</span></li>
-                <li><span class="feat-yes">✓</span><span>Unlimited email sending</span></li>
-                <li><span class="feat-yes">✓</span><span>Accept card payments via Stripe</span></li>
-                <li><span class="feat-yes">✓</span><span>Expense tracking</span></li>
-                <li><span class="feat-yes">✓</span><span>Unlimited reports</span></li>
-                <li><span class="feat-yes">✓</span><span>Recurring invoice automation</span></li>
-                <li><span class="feat-yes">✓</span><span>Auto payment reminders</span></li>
-                <li><span class="feat-yes">✓</span><span>Advanced templates</span></li>
-                <li><span class="feat-yes">✓</span><span>Priority founder support</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProInvoices}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProEstimates}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProClients}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProEmails}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProStripe}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProExpenses}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProReports}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProRecurring}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProReminders}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProTemplates}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProSupport}}</span></li>
             </ul>
             {{if .User}}
                 {{if eq .User.Plan "pro"}}
                     <form method="POST" action="/billing/portal" class="cta-form">
                         {{.csrfField}}
-                        <button type="submit" class="btn btn-secondary">Manage Billing</button>
+                        <button type="submit" class="btn btn-secondary">{{.T.PricingProManageBilling}}</button>
                     </form>
-                    <div class="plan-state">✓ Your current plan</div>
+                    <div class="plan-state">{{.T.PricingProCurrentPlan}}</div>
                 {{else}}
                     <form method="POST" action="/checkout" class="cta-form">
                         {{.csrfField}}
                         <input type="hidden" name="plan" value="pro">
-                        <button type="submit" class="btn btn-primary">Upgrade to Pro →</button>
+                        <button type="submit" class="btn btn-primary">{{.T.PricingProUpgrade}}</button>
                     </form>
                 {{end}}
             {{else}}
                 <div class="cta-actions">
-                    <a href="/register" class="btn btn-primary">Create Free Account</a>
-                    <a href="/login" class="btn btn-secondary">Log In to Upgrade</a>
+                    <a href="/register" class="btn btn-primary">{{.T.PricingProCtaRegister}}</a>
+                    <a href="/login" class="btn btn-secondary">{{.T.PricingProCtaLogin}}</a>
                 </div>
             {{end}}
         </div>
 
     </div>
+
     <div class="ent-callout">
-        <h3>Need enterprise controls?</h3>
-        <p>Medical offices, law firms, and agencies — audit logs, session timeout, and dedicated support.</p>
-        <a href="/enterprise">Explore Enterprise →</a>
+        <h3>{{.T.PricingEntTitle}}</h3>
+        <p>{{.T.PricingEntSub}}</p>
+        <a href="/enterprise">{{.T.PricingEntCta}}</a>
     </div>
 
 </div>
