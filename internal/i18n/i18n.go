@@ -501,6 +501,32 @@ type T struct {
 	InvoiceNewPlaceholderLineDesc string
 	InvoiceNewPlaceholderLineDet  string
 	InvoiceNewPayInstrPlaceholder string
+
+	// Invoice Send page
+	InvoiceSendTitle         string
+	InvoiceSendSubtitle      string
+	InvoiceSendLabel         string
+	InvoiceSendInvoiceLabel  string
+	InvoiceSendAmountDue     string
+	InvoiceSendDue           string
+	InvoiceSendTo            string
+	InvoiceSendToPlaceholder string
+	InvoiceSendToHint        string
+	InvoiceSendNote          string
+	InvoiceSendNoteOptional  string
+	InvoiceSendNotePlaceholder string
+	InvoiceSendNoteHint      string
+	InvoiceSendPreview       string
+	InvoiceSendFrom          string
+	InvoiceSendSubjectInv    string
+	InvoiceSendSubjectEst    string
+	InvoiceSendAttachment    string
+	InvoiceSendBtnInv        string
+	InvoiceSendBtnEst        string
+	InvoiceSendCancel        string
+	InvoiceSendStatusNote    string
+	InvoiceSendPDFNote       string
+	InvoiceSendSending       string
 }
 
 // Get returns the translation set for the given language code.

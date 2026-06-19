@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{if .IsEstimate}}Send Estimate{{else}}Send Invoice{{end}} {{.Invoice.InvoiceNumber}} | PsiloConValley</title>
+    <title>{{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendTitle}}{{end}} {{.Invoice.InvoiceNumber}} | PsiloConValley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
@@ -17,9 +16,9 @@
 <div class="page">
 
     <div class="page-header">
-        <p class="page-label">Invoice Delivery</p>
-	<h1 class="page-title">{{if .IsEstimate}}Send Estimate{{else}}Send Invoice{{end}}</h1>
-	<p class="page-sub">A PDF will be generated and delivered to your client via email.</p>
+        <p class="page-label">{{.T.InvoiceSendLabel}}</p>
+        <h1 class="page-title">{{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendTitle}}{{end}}</h1>
+        <p class="page-sub">{{.T.InvoiceSendSubtitle}}</p>
     </div>
 
     <!-- Invoice Summary Card -->
@@ -28,16 +27,16 @@
         <div class="card-body">
             <div class="summary-row">
                 <div>
-                    <div class="summary-label">Invoice</div>
+                    <div class="summary-label">{{.T.InvoiceSendInvoiceLabel}}</div>
                     <div class="summary-number">{{.Invoice.InvoiceNumber}}</div>
                     <div class="summary-client">{{.Invoice.ClientName}}</div>
                 </div>
                 <div class="summary-amount">
-                    <div class="summary-label">Amount Due</div>
+                    <div class="summary-label">{{.T.InvoiceSendAmountDue}}</div>
                     <div class="summary-total">{{.Invoice.Currency}} {{.Invoice.Total}}</div>
                     {{if .Invoice.DueDate}}
-			<div class="summary-due">Due {{.Invoice.DueDate}}</div>
-		    {{end}}
+                    <div class="summary-due">{{.T.InvoiceSendDue}} {{.Invoice.DueDate}}</div>
+                    {{end}}
                 </div>
             </div>
         </div>
@@ -47,58 +46,55 @@
     <div class="card">
         <div class="card-body">
             <form class="send-form" method="POST"
-		  action="{{if .IsEstimate}}/estimates/{{.InvoiceID}}/send{{else}}/invoices/{{.InvoiceID}}/send{{end}}"
+                  action="{{if .IsEstimate}}/estimates/{{.InvoiceID}}/send{{else}}/invoices/{{.InvoiceID}}/send{{end}}"
                   id="send-form">
                 {{.csrfField}}
 
-                <!-- Recipient -->
                 <div class="field-group">
-                    <label for="to_email">Send To</label>
+                    <label for="to_email">{{.T.InvoiceSendTo}}</label>
                     <input
                         type="email"
                         id="to_email"
                         name="to_email"
                         value="{{.ClientEmail}}"
-                        placeholder="client@company.com"
+                        placeholder="{{.T.InvoiceSendToPlaceholder}}"
                         required
                         autocomplete="email"
                     >
-                    <span class="field-hint">Client will receive the invoice PDF as an attachment</span>
+                    <span class="field-hint">{{.T.InvoiceSendToHint}}</span>
                 </div>
 
-                <!-- Personal Note -->
                 <div class="field-group">
-                    <label for="personal_note">Personal Note <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+                    <label for="personal_note">{{.T.InvoiceSendNote}} <span style="font-weight:400;text-transform:none;letter-spacing:0;">{{.T.InvoiceSendNoteOptional}}</span></label>
                     <textarea
                         id="personal_note"
                         name="personal_note"
-                        placeholder="Add a message to your client..."
+                        placeholder="{{.T.InvoiceSendNotePlaceholder}}"
                     ></textarea>
-                    <span class="field-hint">Appears in the email body above the invoice details</span>
+                    <span class="field-hint">{{.T.InvoiceSendNoteHint}}</span>
                 </div>
 
-                <!-- Email Preview -->
                 <div class="email-preview">
-                    <div class="preview-label">Email Preview</div>
-                    <div class="preview-line">From: <span>noreply@psiloconvalley.com</span></div>
-		<div class="preview-line">Subject: <span>{{if .IsEstimate}}Estimate{{else}}Invoice{{end}} {{.Invoice.InvoiceNumber}} from {{.Invoice.CompanyName}} - {{.Invoice.Currency}} {{.Invoice.Total}}</span></div>{{if not .IsEstimate}}<div class="preview-line">Attachment: <span>invoice-{{.Invoice.InvoiceNumber}}.pdf</span></div>{{end}}
-                                    </div>
+                    <div class="preview-label">{{.T.InvoiceSendPreview}}</div>
+                    <div class="preview-line">{{.T.InvoiceSendFrom}} <span>noreply@psiloconvalley.com</span></div>
+                    <div class="preview-line">Subject: <span>{{if .IsEstimate}}{{.T.InvoiceSendSubjectEst}}{{else}}{{.T.InvoiceSendSubjectInv}}{{end}} {{.Invoice.InvoiceNumber}} from {{.Invoice.CompanyName}} - {{.Invoice.Currency}} {{.Invoice.Total}}</span></div>
+                    {{if not .IsEstimate}}<div class="preview-line">{{.T.InvoiceSendAttachment}} <span>invoice-{{.Invoice.InvoiceNumber}}.pdf</span></div>{{end}}
+                </div>
 
-                <!-- Actions -->
                 <div class="form-actions">
                     <button type="submit" class="btn-send" id="btn-send">
-		    {{if .IsEstimate}}Send Estimate →{{else}}Send Invoice →{{end}}
+                        {{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendBtnInv}}{{end}}
                     </button>
-			<a href="{{if .IsEstimate}}/estimates/{{.InvoiceID}}{{else}}/invoices/{{.InvoiceID}}{{end}}" class="btn-cancel">
-                        Cancel
+                    <a href="{{if .IsEstimate}}/estimates/{{.InvoiceID}}{{else}}/invoices/{{.InvoiceID}}{{end}}" class="btn-cancel">
+                        {{.T.InvoiceSendCancel}}
                     </a>
                 </div>
 
                 <p class="send-note">
                     {{if eq .Invoice.Status "draft"}}
-                    Invoice status will automatically update from Draft to Sent after delivery.
+                    {{.T.InvoiceSendStatusNote}}
                     {{end}}
-                    A PDF copy will be attached to the email.
+                    {{.T.InvoiceSendPDFNote}}
                 </p>
 
             </form>
@@ -111,7 +107,7 @@
 document.getElementById('send-form').addEventListener('submit', function() {
     const btn = document.getElementById('btn-send');
     btn.disabled = true;
-    btn.textContent = 'Sending...';
+    btn.textContent = '{{.T.InvoiceSendSending}}';
 });
 </script>
 
