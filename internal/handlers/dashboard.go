@@ -109,6 +109,8 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		onboardingSteps++
 	}
 
+	passkeys, _ := h.App.PasskeyRepo.GetByUserID(r.Context(), user.ID)
+	
 	h.App.Render(w, r, "dashboard.tmpl", map[string]any{
 		"User":            user,
 		"Revenue":         util.Money(stats.RevenueCents),
@@ -130,5 +132,6 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		"HasInvoice":      hasInvoice,
 		"OnboardingDone":  onboardingDone,
 		"OnboardingSteps": onboardingSteps,
+		"ShowPasskeyNudge": len(passkeys) == 0,
 	})
 }

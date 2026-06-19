@@ -33,6 +33,14 @@
         <a href="/pricing" class="btn-upgrade">Upgrade for $18.88/mo →</a>
     </div>
     {{end}}
+       {{if .ShowPasskeyNudge}}
+    <div class="upgrade-banner" style="border-color: rgba(96,165,250,0.28); background: linear-gradient(180deg, rgba(37,99,235,0.10), rgba(17,24,39,0.72));">
+        <div class="upgrade-text">
+            <strong style="color:#93c5fd;">🔐 Sign in faster with Face ID</strong> — Add a passkey to your account and sign in with your face, fingerprint, or device PIN.
+        </div>
+        <a href="/profile#passkey" class="btn-upgrade" style="background:#2563eb;">Set Up Passkey →</a>
+    </div>
+    {{end}}
 
     {{/* ── Stats ── */}}
     {{if .TotalCount}}
