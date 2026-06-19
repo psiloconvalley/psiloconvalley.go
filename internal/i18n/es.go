@@ -111,6 +111,7 @@ var es = T{
 	ProfileSectionFinancial: "Configuración Financiera",
 	ProfileSectionPayment:   "Procesamiento de Pagos",
 	ProfileSectionLanguage:  "Language / Idioma",
+	ProfileSectionSecurity:  "🔒 Seguridad",
 	ProfileCompanyName:      "Nombre de Empresa *",
 	ProfileEmail:            "Correo Electrónico",
 	ProfileStreetAddress:    "Dirección",

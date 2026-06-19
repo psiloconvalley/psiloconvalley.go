@@ -111,6 +111,7 @@ var en = T{
 	ProfileSectionFinancial: "Financial Settings",
 	ProfileSectionPayment:   "Payment Processing",
 	ProfileSectionLanguage:  "Language / Idioma",
+	ProfileSectionSecurity:  "🔒 Security",
 	ProfileCompanyName:      "Company Name *",
 	ProfileEmail:            "Email Address",
 	ProfileStreetAddress:    "Street Address",

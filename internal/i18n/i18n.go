@@ -122,6 +122,7 @@ type T struct {
 	ProfileSectionFinancial string
 	ProfileSectionPayment   string
 	ProfileSectionLanguage  string
+	ProfileSectionSecurity  string
 	ProfileCompanyName      string
 	ProfileEmail            string
 	ProfileStreetAddress    string
