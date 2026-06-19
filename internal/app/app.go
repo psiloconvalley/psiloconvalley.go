@@ -215,6 +215,7 @@ if user != nil && user.Language != "" {
     lang = "es"
 }
 	data["T"] = i18n.Get(lang)
+	data["Lang"] = lang
 	var buf bytes.Buffer
 	if err := a.Templates.ExecuteTemplate(&buf, name, data); err != nil {
 		log.Printf("template error [%s]: %v", name, err)
