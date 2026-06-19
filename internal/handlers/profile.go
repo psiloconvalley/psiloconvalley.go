@@ -31,6 +31,8 @@ func (h *Handlers) ProfileGet(w http.ResponseWriter, r *http.Request) {
 u, _ := h.App.UserRepo.GetByID(user.ID)
 isMagicLogin := r.URL.Query().Get("magic") == "true"
 
+passkeys, _ := h.App.PasskeyRepo.GetByUserID(r.Context(), user.ID)
+
 h.App.Render(w, r, "profile.tmpl", map[string]any{
    "Profile":         profile,
    "Saved":           r.URL.Query().Get("saved") == "true",
@@ -43,6 +45,8 @@ h.App.Render(w, r, "profile.tmpl", map[string]any{
    "HasPassword":     u != nil && u.PasswordHash != "",
    "PasswordSaved":   r.URL.Query().Get("pw_saved") == "true",
    "PasswordError":   r.URL.Query().Get("pw_error"),
+   "Passkeys":        passkeys,
+   "PasskeyDeleted":  r.URL.Query().Get("passkey_deleted") == "true",
 })
 }
 

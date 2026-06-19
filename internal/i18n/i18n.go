@@ -632,6 +632,14 @@ type T struct {
 	ProfilePasskeyRegistering string
 	ProfilePasskeyErrorGeneric string
 	ProfilePasskeyErrorPrefix  string
+	ProfilePasskeyListTitle    string
+	ProfilePasskeyListEmpty    string
+	ProfilePasskeyDevice       string
+	ProfilePasskeyAddedOn      string
+	ProfilePasskeyLastUsed     string
+	ProfilePasskeyDelete       string
+	ProfilePasskeyDeleted      string
+	ProfilePasskeyDeleteConfirm string
 }
 
 

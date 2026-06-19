@@ -39,6 +39,7 @@ const (
 	ActionPasskeyRegistered = "passkey.registered"
 	ActionPasskeyLoginOK    = "passkey.login"
 	ActionPasskeyLoginFailed = "passkey.login_failed"
+	ActionPasskeyDeleted     = "passkey.deleted"
 
 	// Payment actions
 	ActionPaymentReceived = "payment.received"

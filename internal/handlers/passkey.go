@@ -3,9 +3,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-webauthn/webauthn/webauthn"
 
 	"psiloconvalley/internal/audit"
@@ -251,4 +253,37 @@ func (h *Handlers) PasskeyLoginFinish(w http.ResponseWriter, r *http.Request) {
 		"status":   "ok",
 		"redirect": "/dashboard",
 	})
+}
+// PasskeyDelete removes a registered passkey from the user's account.
+func (h *Handlers) PasskeyDelete(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	var id int64
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil || id <= 0 {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.App.PasskeyRepo.Delete(r.Context(), id, user.ID); err != nil {
+		slog.Error("passkey delete failed",
+			"user_id", user.ID, "passkey_id", id, "err", err)
+		http.Error(w, "Could not delete passkey", http.StatusInternalServerError)
+		return
+	}
+
+	slog.Info("passkey deleted", "user_id", user.ID, "passkey_id", id)
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+		UserID:     audit.UserIDPtr(user.ID),
+		Action:     audit.ActionPasskeyDeleted,
+		EntityType: audit.EntityPasskey,
+		EntityID:   audit.EntityIDPtr(id),
+		IPAddress:  audit.IPFromRequest(r),
+	})
+
+	http.Redirect(w, r, "/profile?passkey_deleted=true", http.StatusSeeOther)
 }

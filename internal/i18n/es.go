@@ -611,6 +611,14 @@ var es = T{
 	ProfilePasskeyRegistering: "Registrando...",
 	ProfilePasskeyErrorGeneric: "Falló el registro",
 	ProfilePasskeyErrorPrefix:  "Falló el registro:",
+	ProfilePasskeyListTitle:     "Passkeys Registrados",
+	ProfilePasskeyListEmpty:     "Aún no hay passkeys registrados.",
+	ProfilePasskeyDevice:        "Dispositivo",
+	ProfilePasskeyAddedOn:       "Agregado",
+	ProfilePasskeyLastUsed:      "Último Uso",
+	ProfilePasskeyDelete:        "Eliminar",
+	ProfilePasskeyDeleted:       "✓ Passkey eliminado",
+	ProfilePasskeyDeleteConfirm: "¿Eliminar este passkey? Puede que necesites tu contraseña para iniciar sesión después.",
 
 
 }

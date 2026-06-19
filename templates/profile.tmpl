@@ -220,6 +220,35 @@
                 <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">
 		{{.T.ProfilePasskeySubtitle}}
                 </p>
+		{{if .PasskeyDeleted}}
+                <div class="success-banner">{{.T.ProfilePasskeyDeleted}}</div>
+                {{end}}
+
+                {{if .Passkeys}}
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">{{.T.ProfilePasskeyListTitle}}</div>
+                    {{range .Passkeys}}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: #fff;">{{.DeviceName}}</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px;">
+                                {{$.T.ProfilePasskeyAddedOn}} {{.CreatedAt.Format "Jan 2, 2006"}}
+                                {{if .LastUsedAt}} · {{$.T.ProfilePasskeyLastUsed}} {{.LastUsedAt.Format "Jan 2, 2006"}}{{end}}
+                            </div>
+                        </div>
+                        <form method="POST" action="/passkeys/{{.ID}}/delete"
+                              onsubmit="return confirm('{{$.T.ProfilePasskeyDeleteConfirm}}');">
+                            {{$.csrfField}}
+                            <button type="submit" style="background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                                {{$.T.ProfilePasskeyDelete}}
+                            </button>
+                        </form>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <p style="font-size: 12px; color: rgba(255,255,255,0.25); margin-bottom: 16px;">{{.T.ProfilePasskeyListEmpty}}</p>
+                {{end}}
                 <div id="passkey-status" style="margin-bottom: 16px;"></div>
                 <button type="button" id="passkey-register-btn" class="btn-primary" style="width: auto;">
 		{{.T.ProfilePasskeyAdd}}
