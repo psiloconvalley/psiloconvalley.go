@@ -1,0 +1,60 @@
+# ============================================================================
+# PsiloConValley — Chrome Runtime Base Image
+# Published to: ghcr.io/psiloconvalley/chrome-base:bookworm
+# Rebuild only when Chromium version or system deps change.
+# ============================================================================
+
+FROM debian:bookworm-slim
+
+LABEL org.opencontainers.image.title="PsiloConValley Chrome Base" \
+      org.opencontainers.image.source="https://github.com/psiloconvalley/psiloconvalley.go"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC
+
+# ── System packages + Chromium ───────────────────────────────────────
+# Chromium pulls most shared libs as dependencies.
+# fonts-noto-cjk: uncomment when adding Mandarin/Japanese/Korean PDF support.
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      tzdata \
+      chromium \
+      fonts-liberation \
+      fonts-noto-color-emoji \
+    ; \
+    rm -rf /var/lib/apt/lists/*
+
+# ── App user (non-root) ─────────────────────────────────────────────
+RUN groupadd --system --gid 1001 appgroup && \
+    useradd \
+      --system \
+      --uid 1001 \
+      --gid appgroup \
+      --create-home \
+      --home-dir /home/appuser \
+      --shell /usr/sbin/nologin \
+      appuser && \
+    mkdir -p \
+      /app \
+      /tmp/chromedp \
+      /home/appuser/.cache/chromium \
+      /home/appuser/.config/chromium && \
+    chown -R appuser:appgroup \
+      /app \
+      /tmp/chromedp \
+      /home/appuser
+
+WORKDIR /app
+
+ENV HOME=/home/appuser \
+    XDG_CACHE_HOME=/home/appuser/.cache \
+    XDG_CONFIG_HOME=/home/appuser/.config \
+    CHROME_BIN=/usr/bin/chromium \
+    CHROMIUM_PATH=/usr/bin/chromium \
+    CHROMEDP_NO_SANDBOX=true \
+    PORT=8080 \
+    GOGC=100 \
+    GOMEMLIMIT=512MiB
