@@ -14,7 +14,9 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r := chi.NewRouter()
 	r.NotFound(h.NotFound)
 
-
+	// ── Global security middleware ───────────────────────────────────
+	r.Use(auth.RateLimitGlobal)
+	r.Use(handlers.MaxBodySize(10 << 20)) // 10MB max request body
 	r.Use(handlers.SecurityHeaders)
 	r.Use(auth.LoadUser(h.App.UserRepo))
 

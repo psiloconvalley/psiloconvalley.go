@@ -111,6 +111,7 @@ var (
 	registerLimiter     = newRateLimiter(5, time.Minute)
 	forgotPasswordLimiter = newRateLimiter(5, time.Minute)
 	magicLimiter        = newRateLimiter(10, time.Minute)
+	globalLimiter       = newRateLimiter(60, time.Minute)
 )
 
 // RateLimit returns a middleware that applies the given limiter.
@@ -145,4 +146,7 @@ func RateLimitForgotPassword(next http.Handler) http.Handler {
 
 func RateLimitMagicLink(next http.Handler) http.Handler {
 	return RateLimit(magicLimiter)(next)
+}
+func RateLimitGlobal(next http.Handler) http.Handler {
+	return RateLimit(globalLimiter)(next)
 }
