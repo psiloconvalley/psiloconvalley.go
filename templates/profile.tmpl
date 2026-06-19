@@ -216,13 +216,13 @@
             </form>
         <!-- ═══════════ PASSKEY ═══════════ -->
             <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);">
-                <div class="section-title">🔐 Passkey / Face ID</div>
+		<div class="section-title">{{.T.ProfilePasskeyTitle}}</div>
                 <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">
-                    Sign in with your face, fingerprint, or device PIN. No password needed.
+		{{.T.ProfilePasskeySubtitle}}
                 </p>
                 <div id="passkey-status" style="margin-bottom: 16px;"></div>
                 <button type="button" id="passkey-register-btn" class="btn-primary" style="width: auto;">
-                    + Add Passkey
+		{{.T.ProfilePasskeyAdd}}
                 </button>
             </div>
 
@@ -234,21 +234,20 @@
                 // Hide button if browser doesn't support WebAuthn
                 if (!window.PublicKeyCredential) {
                     btn.style.display = 'none';
-                    status.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3);">Your browser does not support passkeys.</div>';
+		    status.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3);">{{.T.ProfilePasskeyNoSupport}}</div>';
                     return;
                 }
 
                 btn.addEventListener('click', async function() {
                     btn.disabled = true;
-                    btn.textContent = 'Registering...';
-
+		btn.textContent = '{{.T.ProfilePasskeyRegistering}}';
                     try {
                         // 1. Get registration options from server
                         var beginResp = await fetch('/passkeys/register/begin', {
                             method: 'POST',
                             credentials: 'same-origin'
                         });
-                        if (!beginResp.ok) throw new Error('Server error');
+			if (!beginResp.ok) throw new Error('{{.T.ProfilePasskeyErrorGeneric}}');
                         var options = await beginResp.json();
 
                         // 2. Decode base64url fields for the browser API
@@ -284,16 +283,16 @@
                         });
 
                         if (finishResp.ok) {
-                            status.innerHTML = '<div style="color:#4ade80; font-size:13px; font-weight:700;">✓ Passkey registered successfully. You can now use Face ID to sign in.</div>';
-                            btn.textContent = '✓ Passkey Added';
+			    status.innerHTML = '<div style="color:#4ade80; font-size:13px; font-weight:700;">{{.T.ProfilePasskeySuccess}}</div>';
+			    btn.textContent = '{{.T.ProfilePasskeyAdded}}';
                             btn.disabled = true;
                         } else {
-                            throw new Error('Registration failed');
+			throw new Error('{{.T.ProfilePasskeyErrorGeneric}}');
                         }
                     } catch (e) {
-                        status.innerHTML = '<div style="color:#fca5a5; font-size:13px;">Registration failed: ' + e.message + '</div>';
+			status.innerHTML = '<div style="color:#fca5a5; font-size:13px;">{{.T.ProfilePasskeyErrorPrefix}} ' + e.message + '</div>';
                         btn.disabled = false;
-                        btn.textContent = '+ Add Passkey';
+		    btn.textContent = '{{.T.ProfilePasskeyAdd}}';
                     }
                 });
 

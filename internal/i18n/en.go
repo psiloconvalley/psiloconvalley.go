@@ -601,5 +601,16 @@ var en = T{
 	HomeDashClientsSub:    "Manage your client directory",
 	HomeDashSettings:      "Settings",
 	HomeDashSettingsSub:   "Business profile and preferences",
+	// Profile — Passkey section
+	ProfilePasskeyTitle:     "🔐 Passkey / Face ID",
+	ProfilePasskeySubtitle:  "Sign in with your face, fingerprint, or device PIN. No password needed.",
+	ProfilePasskeyAdd:       "+ Add Passkey",
+	ProfilePasskeyAdded:     "✓ Passkey Added",
+	ProfilePasskeyNoSupport: "Your browser does not support passkeys.",
+	ProfilePasskeySuccess:   "✓ Passkey registered successfully. You can now use Face ID to sign in.",
+	ProfilePasskeyRegistering: "Registering...",
+	ProfilePasskeyErrorGeneric: "Registration failed",
+	ProfilePasskeyErrorPrefix:  "Registration failed:",
+
 
 }

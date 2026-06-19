@@ -622,6 +622,16 @@ type T struct {
 	HomeDashClientsSub    string
 	HomeDashSettings      string
 	HomeDashSettingsSub   string
+	// Profile — Passkey section
+	ProfilePasskeyTitle        string
+	ProfilePasskeySubtitle     string
+	ProfilePasskeyAdd          string
+	ProfilePasskeyAdded        string
+	ProfilePasskeyNoSupport    string
+	ProfilePasskeySuccess      string
+	ProfilePasskeyRegistering string
+	ProfilePasskeyErrorGeneric string
+	ProfilePasskeyErrorPrefix  string
 }
 
 

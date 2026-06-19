@@ -601,5 +601,16 @@ var es = T{
 	HomeDashClientsSub:    "Administra tu directorio de clientes",
 	HomeDashSettings:      "Configuración",
 	HomeDashSettingsSub:   "Perfil de negocio y preferencias",
+	// Profile — Passkey section
+	ProfilePasskeyTitle:     "🔐 Passkey / Face ID",
+	ProfilePasskeySubtitle:  "Inicia sesión con tu cara, huella digital o PIN. Sin contraseña.",
+	ProfilePasskeyAdd:       "+ Agregar Passkey",
+	ProfilePasskeyAdded:     "✓ Passkey Agregado",
+	ProfilePasskeyNoSupport: "Tu navegador no admite passkeys.",
+	ProfilePasskeySuccess:   "✓ Passkey registrado exitosamente. Ahora puedes usar Face ID para iniciar sesión.",
+	ProfilePasskeyRegistering: "Registrando...",
+	ProfilePasskeyErrorGeneric: "Falló el registro",
+	ProfilePasskeyErrorPrefix:  "Falló el registro:",
+
 
 }
