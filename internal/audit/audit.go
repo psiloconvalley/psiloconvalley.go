@@ -34,6 +34,11 @@ const (
 	ActionAuthLoginFailed = "auth.login_failed"
 	ActionAuthLogout      = "auth.logout"
 	ActionAuthRegister    = "auth.register"
+	
+	// Passkey actions
+	ActionPasskeyRegistered = "passkey.registered"
+	ActionPasskeyLoginOK    = "passkey.login"
+	ActionPasskeyLoginFailed = "passkey.login_failed"
 
 	// Payment actions
 	ActionPaymentReceived = "payment.received"
@@ -46,6 +51,7 @@ const (
 	EntityEstimate = "estimate"
 	EntityUser     = "user"
 	EntityPayment  = "payment"
+	EntityPasskey  = "passkey"
 )
 
 // Entry holds the data for a single audit log event.

@@ -225,6 +225,104 @@
         {{if .Error}}
         <div class="error-banner">{{.Error}}</div>
         {{end}}
+	 <div id="passkey-login-section" style="display:none; margin-top: 12px;">
+            <button type="button" id="passkey-login-btn" class="oauth-btn oauth-active" style="width:100%; justify-content:center;">
+                🔐 Sign in with Passkey
+            </button>
+            <div id="passkey-login-status" style="margin-top: 8px;"></div>
+        </div>
+
+        <script>
+        (function() {
+            if (!window.PublicKeyCredential) return;
+
+            // Show the passkey button only if browser supports it
+            document.getElementById('passkey-login-section').style.display = 'block';
+
+            var btn = document.getElementById('passkey-login-btn');
+            var status = document.getElementById('passkey-login-status');
+
+            btn.addEventListener('click', async function() {
+                btn.disabled = true;
+                btn.textContent = 'Verifying...';
+
+                try {
+                    // 1. Get assertion options from server
+                    var beginResp = await fetch('/passkeys/login/begin', {
+                        method: 'POST',
+                        credentials: 'same-origin'
+                    });
+                    if (!beginResp.ok) throw new Error('Server error');
+                    var options = await beginResp.json();
+
+                    // 2. Decode base64url fields
+                    options.publicKey.challenge = base64urlToBuffer(options.publicKey.challenge);
+                    if (options.publicKey.allowCredentials) {
+                        options.publicKey.allowCredentials = options.publicKey.allowCredentials.map(function(c) {
+                            c.id = base64urlToBuffer(c.id);
+                            return c;
+                        });
+                    }
+
+                    // 3. Trigger Face ID / Touch ID / PIN
+                    var assertion = await navigator.credentials.get(options);
+
+                    // 4. Encode response for server
+                    var body = JSON.stringify({
+                        id: assertion.id,
+                        rawId: bufferToBase64url(assertion.rawId),
+                        type: assertion.type,
+                        response: {
+                            authenticatorData: bufferToBase64url(assertion.response.authenticatorData),
+                            clientDataJSON: bufferToBase64url(assertion.response.clientDataJSON),
+                            signature: bufferToBase64url(assertion.response.signature),
+                            userHandle: assertion.response.userHandle ? bufferToBase64url(assertion.response.userHandle) : null
+                        }
+                    });
+
+                    // 5. Verify with server
+                    var finishResp = await fetch('/passkeys/login/finish', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: body
+                    });
+
+                    if (finishResp.ok) {
+                        var result = await finishResp.json();
+                        window.location.href = result.redirect || '/dashboard';
+                    } else {
+                        throw new Error('Authentication failed');
+                    }
+                } catch (e) {
+                    if (e.name === 'NotAllowedError') {
+                        status.innerHTML = '';
+                    } else {
+                        status.innerHTML = '<div style="color:#fca5a5; font-size:12px;">Login failed: ' + e.message + '</div>';
+                    }
+                    btn.disabled = false;
+                    btn.textContent = '🔐 Sign in with Passkey';
+                }
+            });
+
+            function base64urlToBuffer(base64url) {
+                var base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+                var pad = base64.length % 4;
+                if (pad) base64 += '='.repeat(4 - pad);
+                var binary = atob(base64);
+                var bytes = new Uint8Array(binary.length);
+                for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                return bytes.buffer;
+            }
+
+            function bufferToBase64url(buffer) {
+                var bytes = new Uint8Array(buffer);
+                var binary = '';
+                for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+                return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+            }
+        })();
+        </script>
 
         <form method="POST" action="/login">
             {{.csrfField}}

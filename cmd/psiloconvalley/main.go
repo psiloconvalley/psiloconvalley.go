@@ -32,6 +32,9 @@ func main() {
 	pdf.Init()
 	defer pdf.Shutdown()
 	auth.InitGoogleOAuth()
+	if err := auth.InitWebAuthn(); err != nil {
+		log.Fatal("webauthn init:", err)
+	}
 
 	// 4. Construct Core Layers
 	application := app.NewApp(app.DB)
@@ -41,6 +44,10 @@ func main() {
 	// 5. Apply Global CSRF Protection
 	csrfHandler := nosurf.New(baseRouter)
 	csrfHandler.ExemptPath("/stripe/webhook")
+	csrfHandler.ExemptPath("/passkeys/login/begin")
+	csrfHandler.ExemptPath("/passkeys/login/finish")
+	csrfHandler.ExemptPath("/passkeys/register/begin")
+	csrfHandler.ExemptPath("/passkeys/register/finish")
 	csrfHandler.ExemptFunc(func(r *http.Request) bool {
 	return strings.HasPrefix(r.URL.Path, "/estimates/") &&
 			strings.HasSuffix(r.URL.Path, "/respond")

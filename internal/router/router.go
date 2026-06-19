@@ -48,6 +48,10 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.With(auth.RateLimitForgotPassword).Post("/forgot-password", h.ForgotPasswordPost)
 	r.Get("/auth/magic", h.MagicLinkGet)
 	r.With(auth.RateLimitMagicLink).Post("/auth/magic", h.MagicLinkPost)
+	
+	// ── Passkey authentication (public — user not yet identified) ──
+	r.Post("/passkeys/login/begin", h.PasskeyLoginBegin)
+	r.Post("/passkeys/login/finish", h.PasskeyLoginFinish)
 
 	// ── Freemium invoice routes (ownership enforced in handlers) ───
 	r.Get("/invoices/new", h.InvoiceNewGet)
@@ -63,11 +67,13 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
+	// Passkey registration (requires login)
+		r.Post("/passkeys/register/begin", h.PasskeyRegistrationBegin)
+		r.Post("/passkeys/register/finish", h.PasskeyRegistrationFinish)
 		r.Post("/checkout", h.CheckoutPost)
 		r.Post("/billing/portal", h.BillingPortalPost)
 		r.Get("/auth/stripe/connect", h.StripeConnectStart)
 		r.Get("/auth/stripe/callback", h.StripeConnectCallback)
-
 		r.Get("/profile", h.ProfileGet)
 		r.Post("/profile", h.ProfilePost)
 		r.Post("/profile/password", h.ChangePasswordPost)

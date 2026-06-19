@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,13 +20,15 @@ import (
 // =====================================================================
 
 const (
-	SessionCookieName    = "__pscv_session"
-	SessionDuration      = 7 * 24 * time.Hour
-	IdleTimeout          = 30 * time.Minute
-	AnonymousCookieName  = "__pscv_anon_count"
-	AnonymousTokenCookie = "__pscv_anon_token"
-	MaxFreeInvoices      = 3
+	SessionCookieName       = "__pscv_session"
+	SessionDuration         = 7 * 24 * time.Hour
+	IdleTimeout             = 30 * time.Minute
+	AnonymousCookieName     = "__pscv_anon_count"
+	AnonymousTokenCookie    = "__pscv_anon_token"
+	WebAuthnSessionCookie   = "__pscv_wa_session"
+	MaxFreeInvoices         = 3
 )
+
 
 // =====================================================================
 // Session Secret — HMAC-SHA256 Signing
@@ -214,6 +217,63 @@ func ClearAnonymousToken(w http.ResponseWriter) {
 // =====================================================================
 // Utility
 // =====================================================================
+// SetSignedCookie stores a signed cookie value using HMAC-SHA256.
+// Value format: base64(payload).hex(hmac)
+func SetSignedCookie(w http.ResponseWriter, name string, payload string, maxAgeSeconds int) {
+	encoded := base64.RawURLEncoding.EncodeToString([]byte(payload))
+	sig := sign(encoded)
+	value := encoded + "." + sig
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		MaxAge:   maxAgeSeconds,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// GetSignedCookie verifies and returns the original payload.
+// Returns ("", false) if missing, malformed, or tampered.
+func GetSignedCookie(r *http.Request, name string) (string, bool) {
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		return "", false
+	}
+
+	parts := strings.SplitN(cookie.Value, ".", 2)
+	if len(parts) != 2 {
+		return "", false
+	}
+
+	encoded, sig := parts[0], parts[1]
+	if !verifySignature(encoded, sig) {
+		return "", false
+	}
+
+	raw, err := base64.RawURLEncoding.DecodeString(encoded)
+	if err != nil {
+		return "", false
+	}
+
+	return string(raw), true
+}
+
+// ClearCookie expires a cookie immediately.
+func ClearCookie(w http.ResponseWriter, name string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
 
 func GenerateToken(length int) (string, error) {
 	bytes := make([]byte, length)
