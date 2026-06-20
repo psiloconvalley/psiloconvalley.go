@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,7 +21,7 @@ func (h *Handlers) ClientsList(w http.ResponseWriter, r *http.Request) {
 
 	clients, err := h.App.ClientRepo.ListByUserID(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("list clients error: %v", err)
+		slog.Error("client list query failed", "user_id", user.ID, "err", err)
 	}
 
 	count, _ := h.App.ClientRepo.CountByUserID(r.Context(), user.ID)
@@ -95,7 +95,7 @@ func (h *Handlers) ClientNewPost(w http.ResponseWriter, r *http.Request) {
 
 	newID, err := h.App.ClientRepo.Create(r.Context(), c)
 	if err != nil {
-		log.Printf("create client error: %v", err)
+		slog.Error("client create failed", "user_id", user.ID, "err", err)
 		h.App.Render(w, r, "client_form.tmpl", map[string]any{
 			"Mode":   "create",
 			"Error":  "Could not save client",
@@ -104,7 +104,7 @@ func (h *Handlers) ClientNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("CLIENT CREATED: id=%d name=%s biz_profile=%d", newID, c.Name, c.BusinessProfileID)
+	slog.Info("client created", "client_id", newID, "name", c.Name, "biz_profile_id", c.BusinessProfileID)
 	http.Redirect(w, r, "/clients?saved=true", http.StatusSeeOther)
 }
 
@@ -160,7 +160,7 @@ func (h *Handlers) ClientEditPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.App.ClientRepo.Update(r.Context(), c, user.ID); err != nil {
-		log.Printf("update client error: %v", err)
+		slog.Error("client update failed", "user_id", user.ID, "err", err)
 		h.App.Render(w, r, "client_form.tmpl", map[string]any{
 			"Mode":   "edit",
 			"Error":  "Could not update client",
@@ -182,7 +182,7 @@ func (h *Handlers) ClientDelete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
 	if err := h.App.ClientRepo.Delete(r.Context(), id, user.ID); err != nil {
-		log.Printf("delete client error: %v", err)
+		slog.Error("client delete failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Could not delete client", http.StatusInternalServerError)
 		return
 	}

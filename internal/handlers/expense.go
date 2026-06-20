@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"io"
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"strconv"
@@ -36,7 +36,7 @@ func (h *Handlers) ExpensesList(w http.ResponseWriter, r *http.Request) {
 
 	expenses, err := h.App.ExpenseRepo.List(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("[expenses] list error: %v", err)
+		slog.Error("expense list query failed", "user_id", user.ID, "err", err)
 	}
 
 	monthTotal, _ := h.App.ExpenseRepo.MonthlyTotal(r.Context(), user.ID)
@@ -93,7 +93,7 @@ func (h *Handlers) ExpenseCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseMultipartForm(6 << 20); err != nil {
-		log.Printf("[expenses] parse form error: %v", err)
+		slog.Warn("expense form parse failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
 		return
 	}
@@ -117,7 +117,7 @@ func (h *Handlers) ExpenseCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	id, err := h.App.ExpenseRepo.Create(r.Context(), exp)
 	if err != nil {
-		log.Printf("[expenses] create error: %v", err)
+		slog.Error("expense create failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Could not save expense", http.StatusInternalServerError)
 		return
 	}
@@ -127,7 +127,7 @@ func (h *Handlers) ExpenseCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if exp.ReceiptURL != "" {
 		if err := h.App.ExpenseRepo.Update(r.Context(), exp); err != nil {
-			log.Printf("[expenses] update receipt URL error: %v", err)
+			slog.Warn("expense receipt URL update failed", "user_id", user.ID, "err", err)
 		}
 	}
 
@@ -194,7 +194,7 @@ func (h *Handlers) ExpenseEditPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseMultipartForm(6 << 20); err != nil {
-		log.Printf("[expenses] parse form error: %v", err)
+		slog.Warn("expense edit form parse failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Invalid form data", http.StatusBadRequest)
 		return
 	}
@@ -225,7 +225,7 @@ func (h *Handlers) ExpenseEditPost(w http.ResponseWriter, r *http.Request) {
 	h.handleReceiptUpload(r, user.ID, id, exp)
 
 	if err := h.App.ExpenseRepo.Update(r.Context(), exp); err != nil {
-		log.Printf("[expenses] update error: %v", err)
+		slog.Error("expense update failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Could not update expense", http.StatusInternalServerError)
 		return
 	}
@@ -254,7 +254,7 @@ func (h *Handlers) ExpenseDeletePost(w http.ResponseWriter, r *http.Request) {
 	_ = h.App.ReceiptStore.Delete(user.ID, id)
 
 	if err := h.App.ExpenseRepo.Delete(r.Context(), id, user.ID); err != nil {
-		log.Printf("[expenses] delete error: %v", err)
+		slog.Error("expense delete failed", "user_id", user.ID, "err", err)
 	}
 
 	http.Redirect(w, r, "/expenses?deleted=true", http.StatusSeeOther)
@@ -312,19 +312,19 @@ func (h *Handlers) handleReceiptUpload(r *http.Request, userID, expenseID int64,
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		log.Printf("[expenses] receipt read error: %v", err)
+		slog.Warn("expense receipt read failed", "err", err)
 		return
 	}
 
 	ext, err := receipt.ValidateFile(data, header.Filename)
 	if err != nil {
-		log.Printf("[expenses] receipt validation error: %v", err)
+		slog.Warn("expense receipt validation failed", "err", err)
 		return
 	}
 
 	url, err := h.App.ReceiptStore.Save(userID, expenseID, data, ext)
 	if err != nil {
-		log.Printf("[expenses] receipt save error: %v", err)
+		slog.Error("expense receipt save failed", "err", err)
 		return
 	}
 

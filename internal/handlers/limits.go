@@ -2,7 +2,7 @@
 package handlers
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"psiloconvalley/internal/auth"
@@ -78,7 +78,7 @@ func (h *Handlers) canAddClient(r *http.Request) bool {
 
 	count, err := h.App.ClientRepo.CountByUserID(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("canAddClient: db error for user %d: %v", user.ID, err)
+		slog.Error("client limit check failed", "user_id", user.ID, "err", err)
 		return false
 	}
 
@@ -102,7 +102,7 @@ func (h *Handlers) hasReachedLimit(r *http.Request) bool {
 
 	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "invoices")
 	if err != nil {
-		log.Printf("hasReachedLimit: db error for user %d: %v", user.ID, err)
+		slog.Error("invoice limit check failed", "user_id", user.ID, "err", err)
 		return true
 	}
 
@@ -126,7 +126,7 @@ func (h *Handlers) canSendInvoice(r *http.Request) bool {
 
 	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "sends")
 	if err != nil {
-		log.Printf("canSendInvoice: db error for user %d: %v", user.ID, err)
+		slog.Error("send limit check failed", "user_id", user.ID, "err", err)
 		return false
 	}
 
@@ -150,7 +150,7 @@ func (h *Handlers) canCreateEstimate(r *http.Request) bool {
 
 	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "estimates")
 	if err != nil {
-		log.Printf("canCreateEstimate: db error for user %d: %v", user.ID, err)
+		slog.Error("estimate limit check failed", "user_id", user.ID, "err", err)
 		return false
 	}
 
@@ -174,7 +174,7 @@ func (h *Handlers) canViewReport(r *http.Request) bool {
 
 	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "reports")
 	if err != nil {
-		log.Printf("canViewReport: db error for user %d: %v", user.ID, err)
+		slog.Error("report limit check failed", "user_id", user.ID, "err", err)
 		return false
 	}
 

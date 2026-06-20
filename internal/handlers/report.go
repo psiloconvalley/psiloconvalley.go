@@ -5,7 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"strings"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -30,7 +30,7 @@ func (h *Handlers) ReportGet(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.App.InvRepo.ListInvoicesForReport(r.Context(), user.ID, start, end, status)
 	if err != nil {
-		log.Printf("[report] query error: %v", err)
+		slog.Error("report query failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Failed to load report", http.StatusInternalServerError)
 		return
 	}
@@ -92,7 +92,7 @@ func (h *Handlers) ReportExportCSV(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.App.InvRepo.ListInvoicesForReport(r.Context(), user.ID, start, end, status)
 	if err != nil {
-		log.Printf("[report] csv export error: %v", err)
+		slog.Error("report csv export failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Failed to export", http.StatusInternalServerError)
 		return
 	}
@@ -229,7 +229,7 @@ func (h *Handlers) ClientScorecardGet(w http.ResponseWriter, r *http.Request) {
 
 	cards, err := h.App.InvRepo.GetClientScorecards(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("[scorecard] query error: %v", err)
+		slog.Error("scorecard query failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Failed to load scorecards", http.StatusInternalServerError)
 		return
 	}

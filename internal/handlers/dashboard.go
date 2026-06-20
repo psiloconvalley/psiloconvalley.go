@@ -2,7 +2,7 @@
 package handlers
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"psiloconvalley/internal/auth"
@@ -20,7 +20,7 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 	// ── Aggregate stats ───────────────────────────────────────────────
 	stats, err := h.App.InvRepo.GetDashboardStats(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("[dashboard] stats error: %v", err)
+		slog.Error("dashboard stats query failed", "user_id", user.ID, "err", err)
 		http.Error(w, "Failed to load dashboard", http.StatusInternalServerError)
 		return
 	}
@@ -28,21 +28,21 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 	// ── Recent invoices (last 10 — we filter from these) ─────────────
 	recent, err := h.App.InvRepo.ListInvoices(r.Context(), 10, 0, &user.ID)
 	if err != nil {
-		log.Printf("[dashboard] recent invoices error: %v", err)
+		slog.Warn("dashboard recent invoices query failed", "user_id", user.ID, "err", err)
 		recent = nil
 	}
 
 	// ── Recent estimates (last 10 — we filter from these) ────────────
 	estimates, err := h.App.InvRepo.ListEstimates(r.Context(), 10, 0, user.ID)
 	if err != nil {
-		log.Printf("[dashboard] recent estimates error: %v", err)
+		slog.Warn("dashboard recent estimates query failed", "user_id", user.ID, "err", err)
 		estimates = nil
 	}
 
 	// ── Active recurring schedules ────────────────────────────────────
 	schedules, err := h.App.SchedulerRepo.ListRecurringByUserID(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("[dashboard] recurring schedules error: %v", err)
+		slog.Warn("dashboard recurring schedules query failed", "user_id", user.ID, "err", err)
 		schedules = nil
 	}
 
