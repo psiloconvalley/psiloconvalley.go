@@ -60,12 +60,6 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/invoices/{id}/pdf", h.InvoicePDFGet)
 	r.Get("/invoices/{id}/pay", h.InvoicePayGet)
 
-	// ── Dynamic Open Graph image routes ───────────────────────────
-	r.Get("/og/default.jpg", h.OGDefaultImage)
-	r.Get("/og/invoice/{id}", h.OGInvoiceImage)
-	r.Get("/og/invoice/{id}.jpg", h.OGInvoiceImage)
-	r.Get("/og/estimate/{id}", h.OGEstimateImage)
-	r.Get("/og/estimate/{id}.jpg", h.OGEstimateImage)
 
 	// ── Public estimate response routes ───────────────────────────
 	r.Get("/estimates/{id}/respond", h.EstimateRespondGet)

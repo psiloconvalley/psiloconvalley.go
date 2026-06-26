@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: #060e1a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.bg-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(57,255,138,0.08) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(57,255,138,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,255,138,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+}
+.center {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+}
+.mark {
+    margin: 0 auto 32px;
+    width: 64px;
+    height: 64px;
+    position: relative;
+}
+.wordmark {
+    font-size: 64px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 20px;
+}
+.tagline {
+    font-size: 26px;
+    font-weight: 400;
+    color: #39ff8a;
+    opacity: 0.75;
+    letter-spacing: 0.5px;
+}
+.domain {
+    position: absolute;
+    bottom: 32px;
+    right: 40px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.2);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="bg-glow"></div>
+<div class="center">
+    <svg class="mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="32" r="18" fill="none" stroke="#39ff8a" stroke-width="1.5" opacity="0.6"/>
+        <circle cx="40" cy="32" r="18" fill="none" stroke="#39ff8a" stroke-width="1.5" opacity="0.6"/>
+        <circle cx="32" cy="32" r="5" fill="#39ff8a" opacity="0.9"/>
+        <circle cx="32" cy="32" r="10" fill="#39ff8a" opacity="0.06"/>
+    </svg>
+    <div class="wordmark">Psilocon Valley</div>
+    <div class="tagline">Invoices &amp; Estimates in Minutes</div>
+</div>
+<div class="domain">psiloconvalley.com</div>
+</body>
+</html>

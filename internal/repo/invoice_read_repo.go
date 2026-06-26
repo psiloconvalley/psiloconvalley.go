@@ -319,3 +319,21 @@ func (r *InvoiceRepo) InvoiceNumberExists(
 	).Scan(&exists)
 	return exists, err
 }
+
+// GetByPublicToken fetches an invoice by its public_token column.
+// Used by the OG image handler — no auth required, token is the access control.
+// Returns nil, nil if not found (caller should 404).
+func (r *InvoiceRepo) GetByPublicToken(
+	ctx context.Context,
+	token string,
+) (*Invoice, []InvoiceItem, error) {
+	var id int64
+	err := r.db.QueryRowContext(ctx,
+		`SELECT id FROM invoices WHERE public_token = $1 LIMIT 1`,
+		token,
+	).Scan(&id)
+	if err != nil {
+		return nil, nil, nil // not found — caller serves 404
+	}
+	return r.GetInvoiceWithItems(ctx, id)
+}

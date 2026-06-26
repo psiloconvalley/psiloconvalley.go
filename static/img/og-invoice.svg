@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="50%" stop-color="#060e1a"/>
+      <stop offset="100%" stop-color="#020408"/>
+    </radialGradient>
+    <radialGradient id="cardglow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#39ff8a" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#39ff8a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="card-shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="32" flood-color="#39ff8a" flood-opacity="0.12"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="8"  flood-color="#000000" flood-opacity="0.60"/>
+    </filter>
+    <filter id="paid-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="card-clip">
+      <rect x="320" y="60" width="680" height="510" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines — finance feel -->
+  <g stroke="#39ff8a" stroke-opacity="0.03" stroke-width="1">
+    <line x1="0" y1="105" x2="1200" y2="105"/>
+    <line x1="0" y1="210" x2="1200" y2="210"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="525" x2="1200" y2="525"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Card glow -->
+  <rect x="320" y="60" width="680" height="510" rx="16" fill="url(#cardglow)"/>
+
+  <!-- Invoice card -->
+  <rect x="320" y="60" width="680" height="510" rx="16"
+        fill="#ffffff" filter="url(#card-shadow)"/>
+
+  <!-- Card header band -->
+  <rect x="320" y="60" width="680" height="72" rx="16" fill="#0a1628"/>
+  <rect x="320" y="108" width="680" height="24" fill="#0a1628"/>
+
+  <!-- Header: logo mark + company -->
+  <g transform="translate(356, 90)">
+    <circle cx="-4" cy="0" r="8" fill="none" stroke="#39ff8a" stroke-width="1.2" stroke-opacity="0.80"/>
+    <circle cx="4"  cy="0" r="8" fill="none" stroke="#39ff8a" stroke-width="1.2" stroke-opacity="0.80"/>
+    <circle cx="0"  cy="0" r="2.5" fill="#39ff8a" opacity="0.90"/>
+  </g>
+  <text x="388" y="96"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="15" font-weight="700" fill="#ffffff" dominant-baseline="middle"
+    letter-spacing="0.5">Psilocon Valley</text>
+
+  <!-- Header right: INVOICE label -->
+  <text x="964" y="88"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="11" font-weight="600" fill="#39ff8a" fill-opacity="0.70"
+    text-anchor="end" dominant-baseline="middle" letter-spacing="2">INVOICE</text>
+  <text x="964" y="106"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="700" fill="#ffffff"
+    text-anchor="end" dominant-baseline="middle">#INV-2025-001</text>
+
+  <!-- From block -->
+  <text x="356" y="162"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">FROM</text>
+  <text x="356" y="180"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="14" font-weight="700" fill="#0f172a">Miguel Hernandez</text>
+  <text x="356" y="196"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="12" font-weight="400" fill="#64748b">Pool &amp; Spa Services</text>
+
+  <!-- To block -->
+  <text x="600" y="162"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">BILL TO</text>
+  <text x="600" y="180"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="14" font-weight="700" fill="#0f172a">Riverside Properties LLC</text>
+  <text x="600" y="196"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="12" font-weight="400" fill="#64748b">12 properties · San Diego, CA</text>
+
+  <!-- Date + Due -->
+  <text x="820" y="162"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">ISSUED</text>
+  <text x="820" y="180"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="600" fill="#0f172a">Jun 1, 2025</text>
+  <text x="820" y="162"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5" dy="36">DUE</text>
+  <text x="820" y="180"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="600" fill="#0f172a" dy="36">Jun 15, 2025</text>
+
+  <!-- Divider -->
+  <line x1="340" y1="218" x2="980" y2="218" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Line items header -->
+  <text x="356" y="238"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">DESCRIPTION</text>
+  <text x="820" y="238"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">QTY</text>
+  <text x="964" y="238"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5" text-anchor="end">AMOUNT</text>
+
+  <line x1="340" y1="248" x2="980" y2="248" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Line item 1 -->
+  <text x="356" y="272"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="500" fill="#0f172a">Weekly Pool Maintenance</text>
+  <text x="356" y="288"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="11" fill="#94a3b8">Chemical balance, skimming, filter check</text>
+  <text x="820" y="272"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" fill="#0f172a">4</text>
+  <text x="964" y="272"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="600" fill="#0f172a" text-anchor="end">$600.00</text>
+
+  <!-- Line item 2 -->
+  <text x="356" y="316"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="500" fill="#0f172a">Equipment Inspection</text>
+  <text x="356" y="332"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="11" fill="#94a3b8">Pump, heater, and valve assessment</text>
+  <text x="820" y="316"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" fill="#0f172a">1</text>
+  <text x="964" y="316"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="600" fill="#0f172a" text-anchor="end">$150.00</text>
+
+  <!-- Line item 3 -->
+  <text x="356" y="360"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="500" fill="#0f172a">Acid Wash — Deep Clean</text>
+  <text x="356" y="376"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="11" fill="#94a3b8">Full drain, acid treatment, refill</text>
+  <text x="820" y="360"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" fill="#0f172a">1</text>
+  <text x="964" y="360"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="600" fill="#0f172a" text-anchor="end">$400.00</text>
+
+  <!-- Divider before total -->
+  <line x1="340" y1="398" x2="980" y2="398" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Subtotal / Tax / Total -->
+  <text x="820" y="420"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="12" fill="#64748b">Subtotal</text>
+  <text x="964" y="420"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="12" fill="#64748b" text-anchor="end">$1,150.00</text>
+
+  <text x="820" y="442"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="12" fill="#64748b">Tax (8.75%)</text>
+  <text x="964" y="442"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="12" fill="#64748b" text-anchor="end">$100.63</text>
+
+  <line x1="800" y1="454" x2="980" y2="454" stroke="#e2e8f0" stroke-width="1"/>
+
+  <text x="820" y="476"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="15" font-weight="800" fill="#0f172a">TOTAL</text>
+  <text x="964" y="476"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="18" font-weight="800" fill="#0f172a" text-anchor="end">$1,250.63</text>
+
+  <!-- PAID stamp -->
+  <g transform="translate(430, 440) rotate(-18)">
+    <rect x="-64" y="-22" width="128" height="44" rx="6"
+          fill="none" stroke="#22c55e" stroke-width="3" stroke-opacity="0.85"
+          filter="url(#paid-glow)"/>
+    <text x="0" y="1"
+      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      font-size="26" font-weight="900" fill="#22c55e" fill-opacity="0.85"
+      text-anchor="middle" dominant-baseline="middle" letter-spacing="6">PAID</text>
+  </g>
+
+  <!-- Left side — brand message -->
+  <text x="56" y="200"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="13" font-weight="600" fill="#39ff8a" fill-opacity="0.70"
+    letter-spacing="2">PSILOCON VALLEY</text>
+
+  <text x="56" y="240"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="38" font-weight="800" fill="#ffffff" letter-spacing="-1">Send the</text>
+  <text x="56" y="284"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="38" font-weight="800" fill="#ffffff" letter-spacing="-1">invoice.</text>
+  <text x="56" y="328"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="38" font-weight="800" fill="#39ff8a" letter-spacing="-1">Get paid.</text>
+
+  <text x="56" y="390"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="14" font-weight="400" fill="#ffffff" fill-opacity="0.45"
+    letter-spacing="0">Free to start.</text>
+
+  <!-- Bottom left — domain -->
+  <text x="56" y="598"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="14" font-weight="500" fill="#ffffff" fill-opacity="0.25"
+    letter-spacing="0.5">psiloconvalley.com</text>
+
+</svg>

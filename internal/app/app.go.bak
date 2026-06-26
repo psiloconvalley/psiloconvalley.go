@@ -81,17 +81,6 @@ func NewApp(db *sql.DB) *App {
 		}
 	}
 
-	ogMatches, err := filepath.Glob("templates/og/*.tmpl")
-	if err != nil {
-		log.Fatal("template glob error (og):", err)
-	}
-	if len(ogMatches) > 0 {
-		t, err = t.ParseGlob("templates/og/*.tmpl")
-		if err != nil {
-			log.Fatal("template parse error (og):", err)
-		}
-	}
-
 	baseURL := os.Getenv("APP_BASE_URL")
 	if baseURL == "" {
 		baseURL = "https://psiloconvalley.com"

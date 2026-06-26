@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="50%" stop-color="#060e1a"/>
+      <stop offset="100%" stop-color="#020408"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#39ff8a" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#39ff8a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="aurora" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#39ff8a" stop-opacity="0.06"/>
+      <stop offset="50%" stop-color="#00d4ff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#39ff8a" stop-opacity="0.06"/>
+    </linearGradient>
+    <filter id="blur-glow">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="text-glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="spore-glow">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#aurora)"/>
+  <circle cx="600" cy="315" r="280" fill="url(#glow)"/>
+
+  <!-- Mycelium network -->
+  <g stroke="#39ff8a" fill="none" stroke-linecap="round">
+    <line x1="600" y1="315" x2="225" y2="15"   stroke-width="0.8" stroke-opacity="0.18"/>
+    <line x1="600" y1="315" x2="975" y2="0"    stroke-width="0.8" stroke-opacity="0.15"/>
+    <line x1="600" y1="315" x2="1050" y2="465" stroke-width="0.8" stroke-opacity="0.18"/>
+    <line x1="600" y1="315" x2="150" y2="540"  stroke-width="0.8" stroke-opacity="0.15"/>
+    <line x1="600" y1="315" x2="375" y2="615"  stroke-width="0.8" stroke-opacity="0.18"/>
+    <line x1="600" y1="315" x2="900" y2="615"  stroke-width="0.8" stroke-opacity="0.15"/>
+    <line x1="600" y1="315" x2="600" y2="0"    stroke-width="0.6" stroke-opacity="0.14"/>
+    <line x1="600" y1="315" x2="600" y2="630"  stroke-width="0.6" stroke-opacity="0.14"/>
+    <line x1="600" y1="315" x2="0"   y2="315"  stroke-width="0.6" stroke-opacity="0.12"/>
+    <line x1="600" y1="315" x2="1200" y2="315" stroke-width="0.6" stroke-opacity="0.12"/>
+    <line x1="225" y1="15"   x2="75"   y2="90"  stroke-width="0.5" stroke-opacity="0.12"/>
+    <line x1="975" y1="0"    x2="1125" y2="90"  stroke-width="0.5" stroke-opacity="0.12"/>
+    <line x1="1050" y1="465" x2="1175" y2="390" stroke-width="0.5" stroke-opacity="0.12"/>
+    <line x1="150" y1="540"  x2="30"   y2="600" stroke-width="0.5" stroke-opacity="0.12"/>
+    <line x1="375" y1="615"  x2="200"  y2="580" stroke-width="0.5" stroke-opacity="0.10"/>
+    <line x1="900" y1="615"  x2="1080" y2="580" stroke-width="0.5" stroke-opacity="0.10"/>
+    <line x1="375" y1="158"  x2="225"  y2="15"  stroke-width="0.4" stroke-opacity="0.10"/>
+    <line x1="825" y1="158"  x2="975"  y2="0"   stroke-width="0.4" stroke-opacity="0.10"/>
+    <line x1="825" y1="472"  x2="1050" y2="465" stroke-width="0.4" stroke-opacity="0.10"/>
+    <line x1="375" y1="472"  x2="150"  y2="540" stroke-width="0.4" stroke-opacity="0.10"/>
+  </g>
+
+  <!-- Nutrient nodes -->
+  <g fill="#39ff8a">
+    <circle cx="225"  cy="15"  r="3"   opacity="0.35"/>
+    <circle cx="975"  cy="0"   r="3"   opacity="0.30"/>
+    <circle cx="1050" cy="465" r="3"   opacity="0.35"/>
+    <circle cx="150"  cy="540" r="3"   opacity="0.30"/>
+    <circle cx="375"  cy="615" r="3"   opacity="0.35"/>
+    <circle cx="900"  cy="615" r="3"   opacity="0.30"/>
+    <circle cx="600"  cy="0"   r="2.5" opacity="0.25"/>
+    <circle cx="75"   cy="90"  r="2"   opacity="0.20"/>
+    <circle cx="1125" cy="90"  r="2"   opacity="0.20"/>
+    <circle cx="1175" cy="390" r="2"   opacity="0.20"/>
+    <circle cx="30"   cy="600" r="2"   opacity="0.20"/>
+  </g>
+
+  <!-- Vesica Piscis — glow layer -->
+  <g filter="url(#blur-glow)">
+    <circle cx="570" cy="315" r="48" fill="none" stroke="#39ff8a" stroke-width="1.2" stroke-opacity="0.35"/>
+    <circle cx="630" cy="315" r="48" fill="none" stroke="#39ff8a" stroke-width="1.2" stroke-opacity="0.35"/>
+  </g>
+  <!-- Vesica Piscis — crisp layer -->
+  <circle cx="570" cy="315" r="48" fill="none" stroke="#39ff8a" stroke-width="0.8" stroke-opacity="0.50"/>
+  <circle cx="630" cy="315" r="48" fill="none" stroke="#39ff8a" stroke-width="0.8" stroke-opacity="0.50"/>
+
+  <!-- Outer ring -->
+  <circle cx="600" cy="315" r="82" fill="none" stroke="#39ff8a" stroke-width="0.6" stroke-opacity="0.12"/>
+
+  <!-- Spore bloom -->
+  <circle cx="600" cy="315" r="30" fill="#39ff8a" opacity="0.04" filter="url(#spore-glow)"/>
+  <circle cx="600" cy="315" r="10" fill="#39ff8a" opacity="0.85" filter="url(#spore-glow)"/>
+  <circle cx="600" cy="315" r="5"  fill="#39ff8a" opacity="0.95"/>
+
+  <!-- Wordmark — glow layer -->
+  <text
+    x="600" y="210"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="72" font-weight="800" letter-spacing="-2"
+    fill="#ffffff" text-anchor="middle" dominant-baseline="middle"
+    filter="url(#text-glow)" opacity="0.15">Psilocon Valley</text>
+  <!-- Wordmark — crisp layer -->
+  <text
+    x="600" y="210"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="72" font-weight="800" letter-spacing="-2"
+    fill="#ffffff" text-anchor="middle" dominant-baseline="middle">Psilocon Valley</text>
+
+  <!-- Tagline -->
+  <text
+    x="600" y="430"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="28" font-weight="400" letter-spacing="0.5"
+    fill="#39ff8a" fill-opacity="0.75"
+    text-anchor="middle" dominant-baseline="middle">Invoices &amp; Estimates in Minutes</text>
+
+  <!-- Domain watermark -->
+  <text
+    x="1164" y="598"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="18" font-weight="500" letter-spacing="0.5"
+    fill="#ffffff" fill-opacity="0.20"
+    text-anchor="end" dominant-baseline="middle">psiloconvalley.com</text>
+
+  <!-- Corner mark -->
+  <g transform="translate(48, 44) scale(1.4)">
+    <circle cx="0" cy="0" r="14" fill="none" stroke="#39ff8a" stroke-width="0.5" stroke-opacity="0.20"/>
+    <circle cx="-4" cy="0" r="8"  fill="none" stroke="#39ff8a" stroke-width="0.7" stroke-opacity="0.30"/>
+    <circle cx="4"  cy="0" r="8"  fill="none" stroke="#39ff8a" stroke-width="0.7" stroke-opacity="0.30"/>
+    <circle cx="0"  cy="0" r="2"  fill="#39ff8a" opacity="0.70"/>
+  </g>
+
+</svg>
