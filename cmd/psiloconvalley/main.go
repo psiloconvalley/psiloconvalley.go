@@ -48,11 +48,9 @@ func main() {
 	csrfHandler.ExemptPath("/passkeys/login/finish")
 	csrfHandler.ExemptPath("/passkeys/register/begin")
 	csrfHandler.ExemptPath("/passkeys/register/finish")
-	// OG image routes — crawler requests, no browser session, CSRF irrelevant
-	csrfHandler.ExemptPath("/og/default.jpg")
+	// OG image routes — bots/crawlers don't have cookies/tokens
 	csrfHandler.ExemptFunc(func(r *http.Request) bool {
-		return strings.HasPrefix(r.URL.Path, "/og/invoice/") ||
-			strings.HasPrefix(r.URL.Path, "/og/estimate/")
+		return strings.HasPrefix(r.URL.Path, "/og/")
 	})
 	csrfHandler.ExemptFunc(func(r *http.Request) bool {
 	return strings.HasPrefix(r.URL.Path, "/estimates/") &&
