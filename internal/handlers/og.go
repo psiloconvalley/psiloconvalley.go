@@ -109,7 +109,7 @@ func (h *Handlers) OGInvoiceImage(w http.ResponseWriter, r *http.Request) {
 		LineItems: lineItems,
 	}
 
-	imgBytes, err := h.renderOGTemplate("og/invoice.tmpl", data, r)
+	imgBytes, err := h.renderOGTemplate("og_invoice.tmpl", data, r)
 	if err != nil {
 		slog.Error("og invoice render failed", "id", id, "err", err)
 		serveDefaultOG(w, r)
@@ -165,7 +165,7 @@ func (h *Handlers) OGEstimateImage(w http.ResponseWriter, r *http.Request) {
 		LineItems:  lineItems,
 	}
 
-	imgBytes, err := h.renderOGTemplate("og/estimate.tmpl", data, r)
+	imgBytes, err := h.renderOGTemplate("og_estimate.tmpl", data, r)
 	if err != nil {
 		slog.Error("og estimate render failed", "id", id, "err", err)
 		serveDefaultOG(w, r)
@@ -178,7 +178,7 @@ func (h *Handlers) OGEstimateImage(w http.ResponseWriter, r *http.Request) {
 // OGDefaultImage renders the branded default OG card.
 // Route: GET /og/default.jpg
 func (h *Handlers) OGDefaultImage(w http.ResponseWriter, r *http.Request) {
-	imgBytes, err := h.renderOGTemplate("og/default.tmpl", nil, r)
+	imgBytes, err := h.renderOGTemplate("og_default.tmpl", nil, r)
 	if err != nil {
 		slog.Error("og default render failed", "err", err)
 		serveDefaultOG(w, r)
