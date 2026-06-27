@@ -9,6 +9,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -20,26 +22,63 @@ import (
 // OG Image Handlers — Dynamic Open Graph image generation
 //
 // Each handler:
-//   1. Fetches real data from the DB
-//   2. Renders an og/ template to an HTML string
-//   3. Screenshots it with Chromium at 1200×630
-//   4. Serves image/jpeg with a 5-minute cache header
-//   5. Falls back to static og-default.jpg on any error
+//   1. Fetches real data (or screenshots a live URL)
+//   2. Renders HTML → Chromium → JPEG at ogWidth × ogHeight
+//   3. Serves image/jpeg with ogCacheTTL cache headers
+//   4. Falls back to static og-default.jpg on any error
 //
 // These routes are intentionally public — no auth required.
-// The integer ID is the same access control as InvoiceDetail.
 // Crawlers (Twitterbot, facebookexternalhit, etc.) hit these URLs
-// when someone shares an invoice or estimate link on social media.
+// when someone shares a link on social media.
 // =====================================================================
 
-// ogLineItem is a minimal line item for OG templates.
-// We don't need all InvoiceItemView fields — just what renders on the card.
+// ── Shared constants ────────────────────────────────────────────────
+const (
+	ogWidth    = 1200
+	ogHeight   = 630
+	ogQuality  = 90
+	ogCacheTTL = 300 // seconds — 5 minutes
+)
+
+// ── In-memory OG cache ──────────────────────────────────────────────
+// Prevents Chromium from firing on every crawler request.
+// A single cached JPEG serves all requests within the TTL window.
+// Thread-safe via sync.RWMutex — reads don't block each other.
+type ogCache struct {
+	mu      sync.RWMutex
+	data    []byte
+	expires time.Time
+}
+
+func (c *ogCache) get() ([]byte, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.data == nil || time.Now().After(c.expires) {
+		return nil, false
+	}
+	return c.data, true
+}
+
+func (c *ogCache) set(data []byte, ttl time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data = data
+	c.expires = time.Now().Add(ttl)
+}
+
+// One cache per OG endpoint type.
+// Invoice/estimate images are keyed by ID so they don't use this cache —
+// they rely on HTTP Cache-Control headers instead.
+var defaultOGCache = &ogCache{}
+
+// ── View models for OG templates ────────────────────────────────────
+// Minimal structs — only what renders on the social card.
+
 type ogLineItem struct {
 	Description string
 	Amount      string
 }
 
-// ogInvoiceData is the view model for templates/og/invoice.tmpl
 type ogInvoiceData struct {
 	FromName  string
 	FromBiz   string
@@ -51,7 +90,6 @@ type ogInvoiceData struct {
 	LineItems []ogLineItem
 }
 
-// ogEstimateData is the view model for templates/og/estimate.tmpl
 type ogEstimateData struct {
 	FromName   string
 	FromBiz    string
@@ -63,35 +101,57 @@ type ogEstimateData struct {
 	LineItems  []ogLineItem
 }
 
+// ── Handlers ────────────────────────────────────────────────────────
+
+// OGDefaultImage screenshots the live homepage for the default OG card.
+// Cached in memory for 5 minutes — Chromium fires at most once per TTL.
+// Route: GET /og/default.jpg
+func (h *Handlers) OGDefaultImage(w http.ResponseWriter, r *http.Request) {
+	// Serve from cache if fresh
+	if cached, ok := defaultOGCache.get(); ok {
+		serveJPEG(w, cached)
+		return
+	}
+
+	// Cache miss — screenshot the live homepage
+	url := h.App.BaseURL
+	if url == "" {
+		url = "https://psiloconvalley.com"
+	}
+
+	imgBytes, err := pdf.ScreenshotURL(r.Context(), url, ogWidth, ogHeight)
+	if err != nil {
+		slog.Error("og default screenshot failed", "url", url, "err", err)
+		serveDefaultOGFallback(w, r)
+		return
+	}
+
+	// Store in cache
+	defaultOGCache.set(imgBytes, time.Duration(ogCacheTTL)*time.Second)
+
+	serveJPEG(w, imgBytes)
+}
+
 // OGInvoiceImage generates a dynamic OG image for a given invoice ID.
 // Route: GET /og/invoice/{id}.jpg
 func (h *Handlers) OGInvoiceImage(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimSuffix(chi.URLParam(r, "id"), ".jpg")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		serveDefaultOG(w, r)
+		serveDefaultOGFallback(w, r)
 		return
 	}
 
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
 	if err != nil || inv == nil {
 		slog.Warn("og invoice not found", "id", id)
-		serveDefaultOG(w, r)
+		serveDefaultOGFallback(w, r)
 		return
 	}
 
 	// Map to OG view model — max 3 line items to fit the card
 	invPage := views.MapInvoicePage(inv, items, "og")
-	lineItems := make([]ogLineItem, 0, 3)
-	for i, item := range invPage.Items {
-		if i >= 3 {
-			break
-		}
-		lineItems = append(lineItems, ogLineItem{
-			Description: item.Description,
-			Amount:      item.LineTotal,
-		})
-	}
+	lineItems := mapLineItems(invPage.Items, 3)
 
 	dueDate := invPage.DueDate
 	if dueDate == "" {
@@ -112,7 +172,7 @@ func (h *Handlers) OGInvoiceImage(w http.ResponseWriter, r *http.Request) {
 	imgBytes, err := h.renderOGTemplate("og_invoice.tmpl", data, r)
 	if err != nil {
 		slog.Error("og invoice render failed", "id", id, "err", err)
-		serveDefaultOG(w, r)
+		serveDefaultOGFallback(w, r)
 		return
 	}
 
@@ -125,29 +185,19 @@ func (h *Handlers) OGEstimateImage(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimSuffix(chi.URLParam(r, "id"), ".jpg")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		serveDefaultOG(w, r)
+		serveDefaultOGFallback(w, r)
 		return
 	}
 
-	// Estimates use the same Invoice model with DocumentType="estimate"
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
 	if err != nil || inv == nil {
 		slog.Warn("og estimate not found", "id", id)
-		serveDefaultOG(w, r)
+		serveDefaultOGFallback(w, r)
 		return
 	}
 
 	invPage := views.MapInvoicePage(inv, items, "og")
-	lineItems := make([]ogLineItem, 0, 3)
-	for i, item := range invPage.Items {
-		if i >= 3 {
-			break
-		}
-		lineItems = append(lineItems, ogLineItem{
-			Description: item.Description,
-			Amount:      item.LineTotal,
-		})
-	}
+	lineItems := mapLineItems(invPage.Items, 3)
 
 	dueDate := invPage.DueDate
 	if dueDate == "" {
@@ -168,59 +218,57 @@ func (h *Handlers) OGEstimateImage(w http.ResponseWriter, r *http.Request) {
 	imgBytes, err := h.renderOGTemplate("og_estimate.tmpl", data, r)
 	if err != nil {
 		slog.Error("og estimate render failed", "id", id, "err", err)
-		serveDefaultOG(w, r)
+		serveDefaultOGFallback(w, r)
 		return
 	}
 
 	serveJPEG(w, imgBytes)
 }
 
-// OGDefaultImage renders the branded default OG card.
-// Route: GET /og/default.jpg
-func (h *Handlers) OGDefaultImage(w http.ResponseWriter, r *http.Request) {
-	// Point Chromium at the actual live homepage
-	url := "https://psiloconvalley.com"
-	
-	// Use the new ScreenshotURL method
-	imgBytes, err := pdf.ScreenshotURL(r.Context(), url, 1200, 630)
-	if err != nil {
-		slog.Error("og live screenshot failed", "url", url, "err", err)
-		serveDefaultOG(w, r)
-		return
-	}
-	serveJPEG(w, imgBytes)
-}
+// ── Internal helpers ────────────────────────────────────────────────
 
-// ── Internal helpers ──────────────────────────────────────────────────
+// mapLineItems converts invoice item views to OG line items.
+// Limits to maxItems to fit the social card layout.
+func mapLineItems(items []views.InvoiceItemView, maxItems int) []ogLineItem {
+	result := make([]ogLineItem, 0, maxItems)
+	for i, item := range items {
+		if i >= maxItems {
+			break
+		}
+		result = append(result, ogLineItem{
+			Description: item.Description,
+			Amount:      item.LineTotal,
+		})
+	}
+	return result
+}
 
 // renderOGTemplate executes a named template to an HTML string,
-// then screenshots it with Chromium at 1200×630.
+// then screenshots it with Chromium at ogWidth × ogHeight.
 func (h *Handlers) renderOGTemplate(name string, data any, r *http.Request) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := h.App.Templates.ExecuteTemplate(&buf, name, data); err != nil {
 		return nil, fmt.Errorf("template execute [%s]: %w", name, err)
 	}
-	return pdf.Screenshot(r.Context(), buf.String(), 1200, 630)
+	return pdf.Screenshot(r.Context(), buf.String(), ogWidth, ogHeight)
 }
 
-// serveJPEG writes JPEG bytes with a 5-minute public cache header.
-// 5 minutes = crawlers get fresh data quickly without hammering Chromium.
+// serveJPEG writes JPEG bytes with a public cache header.
 func serveJPEG(w http.ResponseWriter, img []byte) {
 	w.Header().Set("Content-Type", "image/jpeg")
-	w.Header().Set("Cache-Control", "public, max-age=300, s-maxage=300")
+	w.Header().Set("Cache-Control",
+		fmt.Sprintf("public, max-age=%d, s-maxage=%d", ogCacheTTL, ogCacheTTL))
 	w.Header().Set("Content-Length", strconv.Itoa(len(img)))
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(img)
 }
 
-// serveDefaultOG serves the static fallback OG image.
+// serveDefaultOGFallback serves the static fallback OG image.
 // Called when DB lookup fails, Chromium errors, or ID is invalid.
 // Static file — zero Chromium cost — safe to call from any error path.
-func serveDefaultOG(w http.ResponseWriter, r *http.Request) {
+func serveDefaultOGFallback(w http.ResponseWriter, r *http.Request) {
 	path := "static/img/og-default.jpg"
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		// Static file not yet created — serve a plain 200 with no body
-		// rather than a 404 that breaks social cards entirely.
 		w.Header().Set("Content-Type", "image/jpeg")
 		w.WriteHeader(http.StatusOK)
 		return
