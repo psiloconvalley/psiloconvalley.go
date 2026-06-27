@@ -102,10 +102,9 @@ func (h *Handlers) hasReachedLimit(r *http.Request) bool {
 
 	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "invoices")
 	if err != nil {
-		slog.Error("invoice limit check failed", "user_id", user.ID, "err", err)
-		return true
-	}
-
+	slog.Warn("invoice limit check failed, allowing user", "user_id", user.ID, "err", err)
+	return false
+}
 	limit := freeInvoiceLimit
 	if isGrowth(user.Plan) {
 		limit = growthInvoiceLimit
