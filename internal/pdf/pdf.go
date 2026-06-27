@@ -246,3 +246,41 @@ func Screenshot(ctx context.Context, html string, width, height int) ([]byte, er
 
 	return imgBuf, nil
 }
+
+// ScreenshotURL navigates to a live URL and captures the viewport.
+func ScreenshotURL(ctx context.Context, url string, width, height int) ([]byte, error) {
+	Init()
+
+	select {
+	case pdfSem <- struct{}{}:
+		defer func() { <-pdfSem }()
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+
+	taskCtx, cancelTask := chromedp.NewContext(allocCtx)
+	defer cancelTask()
+
+	timeoutCtx, cancelTimeout := context.WithTimeout(taskCtx, 20*time.Second)
+	defer cancelTimeout()
+
+	var imgBuf []byte
+	err := chromedp.Run(timeoutCtx,
+		chromedp.EmulateViewport(int64(width), int64(height)),
+		chromedp.Navigate(url),
+		// Wait for the mycelium canvas or hero to be visible
+		chromedp.WaitVisible(`body`, chromedp.ByQuery),
+		// Brief pause for animations to settle
+		chromedp.Sleep(2 * time.Second),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			var err error
+			imgBuf, err = page.CaptureScreenshot().
+				WithFormat(page.CaptureScreenshotFormatJpeg).
+				WithQuality(90).
+				Do(ctx)
+			return err
+		}),
+	)
+
+	return imgBuf, err
+}

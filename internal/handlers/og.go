@@ -178,9 +178,13 @@ func (h *Handlers) OGEstimateImage(w http.ResponseWriter, r *http.Request) {
 // OGDefaultImage renders the branded default OG card.
 // Route: GET /og/default.jpg
 func (h *Handlers) OGDefaultImage(w http.ResponseWriter, r *http.Request) {
-	imgBytes, err := h.renderOGTemplate("og_default.tmpl", nil, r)
+	// Point Chromium at the actual live homepage
+	url := "https://psiloconvalley.com"
+	
+	// Use the new ScreenshotURL method
+	imgBytes, err := pdf.ScreenshotURL(r.Context(), url, 1200, 630)
 	if err != nil {
-		slog.Error("og default render failed", "err", err)
+		slog.Error("og live screenshot failed", "url", url, "err", err)
 		serveDefaultOG(w, r)
 		return
 	}
