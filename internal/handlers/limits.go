@@ -125,10 +125,9 @@ func (h *Handlers) canSendInvoice(r *http.Request) bool {
 
 	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, "sends")
 	if err != nil {
-		slog.Error("send limit check failed", "user_id", user.ID, "err", err)
-		return false
-	}
-
+    slog.Warn("send limit check failed, allowing user", "user_id", user.ID, "err", err)
+    return true
+}
 	limit := freeSendLimit
 	if isGrowth(user.Plan) {
 		limit = growthSendLimit
