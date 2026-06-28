@@ -31,6 +31,7 @@
             </div>
         </div>
         <div class="top-right">
+            <a class="btn btn-secondary" href="/clients/import" style="margin-right:8px;">📤 {{.T.ClientsImport}}</a>
             <a class="btn btn-secondary" href="/clients/export.csv" style="margin-right:8px;">📥 {{.T.ClientsExport}}</a>
             {{if .CanAddClient}}
             <a class="btn" href="/clients/new">{{.T.ClientsNewClient}}</a>

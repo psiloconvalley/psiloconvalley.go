@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.T.ClientsImport}} | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "nav-styles" .}}
+    {{template "app-styles" .}}
+    <style>
+        .page { max-width: 640px; margin: 48px auto; padding: 0 24px; }
+        .card {
+            background: rgba(15,15,15,0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 40px;
+        }
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+        .page-subtitle {
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 24px;
+            transition: border-color 0.2s;
+        }
+        .upload-zone:hover { border-color: rgba(74,222,128,0.3); }
+        .upload-zone input[type="file"] {
+            margin: 16px auto 0;
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+        }
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+        .upload-text {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 4px;
+        }
+        .upload-hint {
+            font-size: 12px;
+            color: rgba(255,255,255,0.25);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover { background: #1e293b; }
+        .format-hint {
+            margin-top: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+        }
+        .format-hint-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 8px;
+        }
+        .format-hint code {
+            display: block;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.8;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .result-banner {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .result-success {
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.2);
+            color: #4ade80;
+        }
+        .result-errors {
+            margin-top: 12px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        .result-errors li { margin-bottom: 4px; }
+        .error-banner {
+            background: rgba(220,38,38,0.1);
+            border: 1px solid rgba(220,38,38,0.2);
+            color: #fca5a5;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+        }
+        .back-link:hover { color: rgba(255,255,255,0.7); }
+    </style>
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="page">
+    <div class="card">
+        <h1 class="page-title">{{.T.ClientsImport}}</h1>
+        <p class="page-subtitle">{{.T.ClientsImportSubtitle}}</p>
+
+        {{if .Error}}
+        <div class="error-banner">{{.Error}}</div>
+        {{end}}
+
+        {{if .Result}}
+        <div class="result-banner result-success">
+            ✅ {{.Result.Imported}} {{.T.ClientsImportedCount}}
+            {{if gt .Result.Skipped 0}}
+            · {{.Result.Skipped}} {{.T.ClientsImportSkipped}}
+            {{end}}
+            {{if .Result.Errors}}
+            <ul class="result-errors">
+                {{range .Result.Errors}}<li>{{.}}</li>{{end}}
+            </ul>
+            {{end}}
+        </div>
+        {{end}}
+
+        <form method="POST" action="/clients/import" enctype="multipart/form-data">
+            {{.csrfField}}
+            <div class="upload-zone">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">{{.T.ClientsImportUploadText}}</div>
+                <div class="upload-hint">CSV · {{.T.ClientsImportMaxSize}}</div>
+                <input type="file" name="csv_file" accept=".csv" required>
+            </div>
+            <button type="submit" class="submit-btn">{{.T.ClientsImportSubmit}}</button>
+        </form>
+
+        <div class="format-hint">
+            <div class="format-hint-title">{{.T.ClientsImportFormatTitle}}</div>
+            <code>Name,Email,Phone,Address,City,State,Zip,Country,Notes
+John Smith,john@example.com,555-1234,123 Main St,San Jose,CA,95112,US,Pool service</code>
+        </div>
+
+        <a href="/clients" class="back-link">← {{.T.ClientsImportBackToClients}}</a>
+    </div>
+</div>
+
+</body>
+</html>

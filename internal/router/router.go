@@ -91,6 +91,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Post("/clients/{id}/edit", h.ClientEditPost)
 		r.Post("/clients/{id}/delete", h.ClientDelete)
 		r.Get("/clients/export.csv", h.ClientExportCSV)
+		r.Get("/clients/import", h.ClientImportGet)
+		r.Post("/clients/import", h.ClientImportPost)
 		r.Post("/passkeys/{id}/delete", h.PasskeyDelete)
 
 		// Invoice management
