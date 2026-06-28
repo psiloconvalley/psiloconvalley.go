@@ -57,6 +57,7 @@ type InvoicePage struct {
 	// Company
 	CompanyName    string
 	CompanyEmail   string
+	CompanyPhone   string
 	CompanyAddress string
 	CompanyCity    string
 	CompanyZip     string
@@ -202,6 +203,7 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 
 		CompanyName:    inv.CompanyName,
 		CompanyEmail:   inv.CompanyEmail,
+		CompanyPhone:   inv.CompanyPhone,
 		CompanyAddress: inv.CompanyAddress,
 		CompanyCity:    inv.CompanyCity,
 		CompanyZip:     inv.CompanyZip,

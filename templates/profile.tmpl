@@ -124,6 +124,10 @@
                             <input type="email" name="email" id="field-email" value="{{if .Profile}}{{.Profile.Email}}{{end}}">
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label>{{.T.ProfilePhone}}</label>
+                        <input type="tel" name="phone" value="{{if .Profile}}{{.Profile.Phone}}{{end}}" placeholder="(555) 123-4567">
+                    </div>
                 </div>
 
                 <div class="section">

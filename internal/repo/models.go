@@ -22,6 +22,7 @@ type BusinessProfile struct {
 	State     string
 	Zip       string
 	Country   string
+	Phone     string
 	TaxID     string
 	Currency  string
 	LogoURL   string
@@ -171,6 +172,7 @@ type Invoice struct {
 	LogoURL           string
 	CompanyName       string
 	CompanyEmail      string
+	CompanyPhone      string
 	CompanyAddress    string
 	CompanyCity       string
 	CompanyZip        string

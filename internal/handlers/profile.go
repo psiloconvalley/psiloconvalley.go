@@ -80,6 +80,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		State:   catalog.NormalizeState(r.FormValue("state")),
 		Zip:     strings.TrimSpace(r.FormValue("zip")),
 		Country: strings.TrimSpace(r.FormValue("country")),
+		Phone:   strings.TrimSpace(r.FormValue("phone")),
 		TaxID:   strings.TrimSpace(r.FormValue("tax_id")),
 		Currency: func() string {
 			c := strings.TrimSpace(r.FormValue("currency"))

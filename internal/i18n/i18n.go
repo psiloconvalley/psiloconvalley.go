@@ -125,6 +125,7 @@ type T struct {
 	ProfileSectionSecurity  string
 	ProfileCompanyName      string
 	ProfileEmail            string
+	ProfilePhone            string
 	ProfileStreetAddress    string
 	ProfileCity             string
 	ProfileStateRegion      string

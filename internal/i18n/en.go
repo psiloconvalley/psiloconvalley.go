@@ -114,6 +114,7 @@ var en = T{
 	ProfileSectionSecurity:  "🔒 Security",
 	ProfileCompanyName:      "Company Name *",
 	ProfileEmail:            "Email Address",
+	ProfilePhone:            "Phone Number",
 	ProfileStreetAddress:    "Street Address",
 	ProfileCity:             "City",
 	ProfileStateRegion:      "State / Region",
