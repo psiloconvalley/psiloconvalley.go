@@ -247,9 +247,9 @@
         }
         .action-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
         .action-btn-primary {
-            background: #2563eb; color: #fff; border-color: #2563eb;
+            background: #0f172a; color: #fff; border-color: #0f172a;
         }
-        .action-btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+        .action-btn-primary:hover { background: #1e293b; border-color: #1e293b; }
         .action-btn-pay {
             background: #f0eee9; color: #0d1422; border-color: #d5d0c8;
         }
@@ -269,9 +269,18 @@
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            min-width: 180px;
+            min-width: 200px;
             z-index: 50;
             padding: 4px 0;
+        }
+        @media (max-width: 640px) {
+            .more-dropdown-menu {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                min-width: 220px;
+                box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+            }
         }
         .more-dropdown.open .more-dropdown-menu { display: block; }
         .more-dropdown-item {
