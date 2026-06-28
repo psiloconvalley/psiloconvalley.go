@@ -89,10 +89,43 @@ func (h *Handlers) ClientImportPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Map header names to column indices (case-insensitive)
+	// Map header names to column indices (case-insensitive).
+	// Supports common variations so users don't have to match exactly.
+	headerAliases := map[string]string{
+		"client name":  "name",
+		"client":       "name",
+		"nombre":       "name",
+		"correo":       "email",
+		"email address":"email",
+		"telefono":     "phone",
+		"teléfono":     "phone",
+		"telephone":    "phone",
+		"street":       "address",
+		"direccion":    "address",
+		"dirección":    "address",
+		"street address": "address",
+		"ciudad":       "city",
+		"estado":       "state",
+		"province":     "state",
+		"region":       "state",
+		"postal code":  "zip",
+		"zip code":     "zip",
+		"codigo postal":"zip",
+		"código postal":"zip",
+		"pais":         "country",
+		"país":         "country",
+		"notas":        "notes",
+	}
+
 	colMap := make(map[string]int)
 	for i, col := range header {
-		colMap[strings.ToLower(strings.TrimSpace(col))] = i
+		key := strings.ToLower(strings.TrimSpace(col))
+		// Check if this header is an alias for a standard column
+		if canonical, ok := headerAliases[key]; ok {
+			colMap[canonical] = i
+		} else {
+			colMap[key] = i
+		}
 	}
 
 	// Validate required "name" column exists
@@ -160,6 +193,26 @@ func (h *Handlers) ClientImportPost(w http.ResponseWriter, r *http.Request) {
 
 	h.App.Render(w, r, "client_import.tmpl", map[string]any{
 		"Result": result,
+	})
+}
+
+// ClientImportTemplate serves a downloadable CSV template with headers + example row.
+// Route: GET /clients/import/template.csv
+func (h *Handlers) ClientImportTemplate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+	w.Header().Set("Content-Disposition", `attachment; filename="client_import_template.csv"`)
+
+	writer := csv.NewWriter(w)
+	defer writer.Flush()
+
+	// Header row — shared with export
+	_ = writer.Write(clientCSVHeaders)
+
+	// Example row — shows the user what to fill in
+	_ = writer.Write([]string{
+		"Example Client", "client@email.com", "555-123-4567",
+		"123 Main St", "San Jose", "CA", "95112", "United States",
+		"Monthly pool service",
 	})
 }
 

@@ -153,6 +153,23 @@
         </div>
         {{end}}
 
+        <div style="text-align:center; margin-bottom:24px;">
+            <a href="/clients/import/template.csv" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 20px;
+                background: rgba(74,222,128,0.08);
+                border: 1px solid rgba(74,222,128,0.2);
+                border-radius: 8px;
+                color: #4ade80;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.2s;
+            ">📋 {{.T.ClientsImportDownloadTemplate}}</a>
+        </div>
+
         <form method="POST" action="/clients/import" enctype="multipart/form-data">
             {{.csrfField}}
             <div class="upload-zone">

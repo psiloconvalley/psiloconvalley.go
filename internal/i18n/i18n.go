@@ -177,7 +177,8 @@ type T struct {
 	ClientsImportMaxSize       string
 	ClientsImportSubmit        string
 	ClientsImportFormatTitle   string
-	ClientsImportBackToClients string
+	ClientsImportBackToClients    string
+	ClientsImportDownloadTemplate string
 	ClientsImportedCount       string
 	ClientsImportSkipped       string
 	ClientsLimitBanner    string
