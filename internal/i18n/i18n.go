@@ -229,6 +229,9 @@ type T struct {
 	InvoicesEdit            string
 	InvoicesResend          string
 	InvoicesDuplicate       string
+	InvoicesCopyLink        string
+	InvoicesCopied          string
+	InvoicesShareWhatsApp   string
 	InvoicesDeleteBtn       string
 	InvoicesUntitled        string
 	InvoicesNoClient        string

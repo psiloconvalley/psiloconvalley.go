@@ -691,7 +691,7 @@
                     {{end}}
 
                     {{if .ShareURL}}
-                    <button type="button" class="action-btn" id="copyLinkBtn" onclick="copyShareLink()">🔗 Copy Link</button>
+                    <button type="button" class="action-btn" id="copyLinkBtn" onclick="copyShareLink()" data-copy-label="🔗 {{.T.InvoicesCopyLink}}" data-copied-label="✅ {{.T.InvoicesCopied}}">🔗 {{.T.InvoicesCopyLink}}</button>
                     {{end}}
 
                     {{if .PayNowEnabled}}
@@ -708,7 +708,7 @@
                         <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
                         <div class="more-dropdown-menu">
                             {{if .ShareURL}}
-                            <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="more-dropdown-item" style="color:#25D366;">💬 Share via WhatsApp</a>
+                            <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="more-dropdown-item" style="color:#25D366;">💬 {{.T.InvoicesShareWhatsApp}}</a>
                             {{end}}
                             <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
                             <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
@@ -848,21 +848,22 @@ function copyShareLink() {
     var btn = document.getElementById('copyLinkBtn');
     var url = '{{.ShareURL}}';
     if (!url) return;
+    var copyLabel = btn.getAttribute('data-copy-label') || '🔗 Copy Link';
+    var copiedLabel = btn.getAttribute('data-copied-label') || '✅ Copied!';
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(function() {
-            btn.textContent = '✅ Copied!';
-            setTimeout(function() { btn.textContent = '🔗 Copy Link'; }, 2000);
+            btn.textContent = copiedLabel;
+            setTimeout(function() { btn.textContent = copyLabel; }, 2000);
         });
     } else {
-        // Fallback for older browsers / non-HTTPS contexts
         var input = document.createElement('input');
         input.value = url;
         document.body.appendChild(input);
         input.select();
         document.execCommand('copy');
         document.body.removeChild(input);
-        btn.textContent = '✅ Copied!';
-        setTimeout(function() { btn.textContent = '🔗 Copy Link'; }, 2000);
+        btn.textContent = copiedLabel;
+        setTimeout(function() { btn.textContent = copyLabel; }, 2000);
     }
 }
 
