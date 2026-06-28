@@ -170,6 +170,8 @@ type T struct {
 	ClientsProUnlimited   string
 	ClientsFreeSlotsUsed  string
 	ClientsNewClient      string
+	ClientsExport         string
+	ClientsImport         string
 	ClientsLimitBanner    string
 	ClientsLimitUpgrade   string
 	ClientsSavedSuccess   string

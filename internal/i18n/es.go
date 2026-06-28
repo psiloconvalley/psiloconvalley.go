@@ -158,6 +158,8 @@ var es = T{
 	ClientsProUnlimited:   "Pro — Ilimitado",
 	ClientsFreeSlotsUsed:  "espacios gratis usados",
 	ClientsNewClient:      "+ Nuevo Cliente",
+	ClientsExport:         "Exportar CSV",
+	ClientsImport:         "Importar CSV",
 	ClientsLimitBanner:    "Has usado los 5 espacios gratis. Actualiza a Pro para clientes ilimitados, historial de facturas por cliente y análisis de ingresos.",
 	ClientsLimitUpgrade:   "Actualizar a Pro →",
 	ClientsSavedSuccess:   "✓ Cliente guardado exitosamente",

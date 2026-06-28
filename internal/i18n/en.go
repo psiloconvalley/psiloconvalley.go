@@ -158,6 +158,8 @@ var en = T{
 	ClientsProUnlimited:   "Pro — Unlimited",
 	ClientsFreeSlotsUsed:  "free slots used",
 	ClientsNewClient:      "+ New Client",
+	ClientsExport:         "Export CSV",
+	ClientsImport:         "Import CSV",
 	ClientsLimitBanner:    "You've used all 5 free client slots. Upgrade to Pro for unlimited clients, invoice history per client, and revenue analytics.",
 	ClientsLimitUpgrade:   "Upgrade to Pro →",
 	ClientsSavedSuccess:   "✓ Client saved successfully",
