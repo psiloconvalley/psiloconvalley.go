@@ -30,7 +30,7 @@ func main() {
 	defer app.CloseDB()
 
 	// 2b. Run database migrations
-	if err := migrate.Run(app.DB, "/app/migrations"); err != nil {
+	if err := migrate.Run(app.DB, "migrations"); err != nil {
 		log.Fatal("migration failed: ", err)
 	}
 
