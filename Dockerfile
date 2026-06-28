@@ -28,6 +28,7 @@ FROM ghcr.io/psiloconvalley/chrome-base:bookworm
 COPY --from=builder --chown=appuser:appgroup /out/psiloconvalley /app/psiloconvalley
 COPY --chown=appuser:appgroup templates/ /app/templates/
 COPY --chown=appuser:appgroup static/ /app/static/
+COPY --chown=appuser:appgroup migrations/ /app/migrations/
 
 RUN chmod 555 /app/psiloconvalley
 
