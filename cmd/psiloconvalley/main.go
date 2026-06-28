@@ -14,6 +14,7 @@ import (
 	"github.com/justinas/nosurf"
 
 	"psiloconvalley/internal/app"
+	"psiloconvalley/internal/migrate"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/handlers"
 	"psiloconvalley/internal/pdf"
@@ -27,6 +28,11 @@ func main() {
 	// 2. Initialize Database (PostgreSQL)
 	app.InitDB()
 	defer app.CloseDB()
+
+	// 2b. Run database migrations
+	if err := migrate.Run(app.DB, "migrations"); err != nil {
+		log.Fatal("migration failed: ", err)
+	}
 
 	// 3. Initialize External Services
 	pdf.Init()
