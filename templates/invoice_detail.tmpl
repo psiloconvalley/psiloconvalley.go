@@ -273,13 +273,31 @@
             z-index: 50;
             padding: 4px 0;
         }
+
+        /* Mobile: use a bottom action sheet instead of an anchored dropdown.
+           This prevents clipping/off-screen menus and is much easier to tap. */
         @media (max-width: 640px) {
+            .more-dropdown {
+                position: static;
+            }
             .more-dropdown-menu {
-                right: auto;
-                left: 50%;
-                transform: translateX(-50%);
-                min-width: 220px;
-                box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+                position: fixed;
+                top: auto;
+                right: 12px;
+                left: 12px;
+                bottom: 16px;
+                transform: none;
+                min-width: 0;
+                width: auto;
+                max-width: none;
+                border-radius: 14px;
+                box-shadow: 0 20px 48px rgba(0,0,0,0.18);
+                padding: 6px 0;
+                z-index: 1000;
+            }
+            .more-dropdown-item {
+                padding: 12px 16px;
+                font-size: 13px;
             }
         }
         .more-dropdown.open .more-dropdown-menu { display: block; }
