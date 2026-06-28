@@ -2,6 +2,7 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -159,15 +160,28 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Build shareable URL with public token — owner only
+	var shareURL string
+	if isOwner && inv.PublicToken != "" {
+		shareURL = fmt.Sprintf("%s/invoices/%d?access=%s", h.App.BaseURL, inv.ID, inv.PublicToken)
+	} else if isOwner && inv.PublicToken == "" {
+		// Generate token if missing (backfill for old invoices)
+		if token, err := h.App.InvRepo.EnsurePublicToken(r.Context(), inv.ID); err == nil {
+			shareURL = fmt.Sprintf("%s/invoices/%d?access=%s", h.App.BaseURL, inv.ID, token)
+		}
+	}
+
 	h.App.Render(w, r, service.InvoiceTemplateName(invoiceView.TemplateID), map[string]any{
 		"Invoice":       invoiceView,
 		"IsLoggedIn":    user != nil,
+		"IsOwner":       isOwner,
 		"Sent":          r.URL.Query().Get("sent") == "true",
 		"SentTo":        r.URL.Query().Get("to"),
 		"Paid":          r.URL.Query().Get("paid") == "1",
 		"PayNowEnabled": payNowEnabled,
 		"AccessToken":   r.URL.Query().Get("access"),
 		"ShowBranding":  showBranding,
+		"ShareURL":      shareURL,
 	})
 }
 

@@ -655,6 +655,12 @@
                     {{if .User}}
                     <a href="/invoices/{{.Invoice.ID}}/send" class="action-btn action-btn-primary">📨 Send</a>
                     {{end}}
+
+                    {{if .ShareURL}}
+                    <button type="button" class="action-btn" id="copyLinkBtn" onclick="copyShareLink()">🔗 Copy Link</button>
+                    <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="action-btn" style="color:#25D366;">💬 WhatsApp</a>
+                    {{end}}
+
                     {{if .PayNowEnabled}}
                     <a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" class="action-btn action-btn-pay">💳 Pay Now</a>
                     {{end}}
@@ -786,6 +792,29 @@
 </div>
 
 <script>
+// ── Share link clipboard copy ────────────────────────────────────
+function copyShareLink() {
+    var btn = document.getElementById('copyLinkBtn');
+    var url = '{{.ShareURL}}';
+    if (!url) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+            btn.textContent = '✅ Copied!';
+            setTimeout(function() { btn.textContent = '🔗 Copy Link'; }, 2000);
+        });
+    } else {
+        // Fallback for older browsers / non-HTTPS contexts
+        var input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        btn.textContent = '✅ Copied!';
+        setTimeout(function() { btn.textContent = '🔗 Copy Link'; }, 2000);
+    }
+}
+
 var _deleteInvoiceNumber = '';
 
 function toggleMoreMenu() {

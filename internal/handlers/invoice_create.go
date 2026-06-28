@@ -366,5 +366,10 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 			"anonymous":      user == nil,
 		},
 	})
+	// ── Ensure public share token exists ──────────────────────────────
+	if _, err := h.App.InvRepo.EnsurePublicToken(r.Context(), invoiceID); err != nil {
+		slog.Warn("public token generation failed", "invoice_id", invoiceID, "err", err)
+	}
+
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(invoiceID, 10), http.StatusSeeOther)
 }
