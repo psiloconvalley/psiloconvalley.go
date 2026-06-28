@@ -36,15 +36,17 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Plan == "pro" {
-		http.Redirect(w, r, "/pricing?already=1", http.StatusSeeOther)
-		return
-	}
-
 	// Determine which plan the user is buying
 	plan := r.FormValue("plan")
 	if plan == "" {
 		plan = "pro"
+	}
+
+	// Guard: block users who already have the plan they are trying to buy.
+	// Prevents duplicate subscriptions from double-clicks or back-navigation.
+	if user.Plan == plan {
+		http.Redirect(w, r, "/pricing?already=1", http.StatusSeeOther)
+		return
 	}
 
 	var priceID string
@@ -62,12 +64,26 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 	}
 	userID := strconv.FormatInt(user.ID, 10)
 
+	// Map internal language code to Stripe locale.
+	// Stripe supports: auto, bg, cs, da, de, el, en, en-GB, es, es-419,
+	// et, fi, fil, fr, fr-CA, hr, hu, id, it, ja, ko, lt, lv, ms, mt,
+	// nb, nl, pl, pt, pt-BR, ro, ru, sk, sl, sv, th, tr, vi, zh, zh-HK, zh-TW
+	stripeLocale := "auto"
+	if user.Language == "es" {
+		stripeLocale = "es"
+	}
+
 	params := &stripe.CheckoutSessionParams{
 		SuccessURL:        stripe.String(h.App.BaseURL + "/pricing?success=1"),
 		CancelURL:         stripe.String(h.App.BaseURL + "/pricing?canceled=1"),
 		Mode:              stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 		ClientReferenceID: stripe.String(userID),
 		CustomerEmail:     stripe.String(user.Email),
+		Locale:            stripe.String(stripeLocale),
+		// Explicitly restrict to card payments only.
+		// Prevents Stripe Link from appearing — Link adds friction for
+		// first-time users and is confusing in non-English locales.
+		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				Price:    stripe.String(priceID),
@@ -84,7 +100,7 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 				"plan":    plan,
 			},
 		},
-		}
+	}
 
 	s, err := checkoutsession.New(params)
 	if err != nil {
