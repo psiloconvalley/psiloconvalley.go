@@ -214,8 +214,8 @@
 
                /* ── Actions ── */
         .invoice-actions-wrapper {
-            margin-top: 20px;
-            padding: 20px 36px;
+            margin-top: 12px;
+            padding: 14px 36px;
             border-top: 1px solid #e5e7eb;
             background: #fafafa;
             overflow: visible;
@@ -227,7 +227,7 @@
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .action-btn {
@@ -248,9 +248,9 @@
         }
         .action-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
         .action-btn-primary {
-            background: var(--brand); color: #fff; border-color: var(--brand);
+            background: #2563eb; color: #fff; border-color: #2563eb;
         }
-        .action-btn-primary:hover { background: #1e293b; border-color: #1e293b; }
+        .action-btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
         .action-btn-pay {
             background: #f0eee9; color: #0d1422; border-color: #d5d0c8;
         }
@@ -658,7 +658,6 @@
 
                     {{if .ShareURL}}
                     <button type="button" class="action-btn" id="copyLinkBtn" onclick="copyShareLink()">🔗 Copy Link</button>
-                    <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="action-btn" style="color:#25D366;">💬 WhatsApp</a>
                     {{end}}
 
                     {{if .PayNowEnabled}}
@@ -671,6 +670,9 @@
                     <div class="more-dropdown" id="moreDropdown">
                         <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
                         <div class="more-dropdown-menu">
+                            {{if .ShareURL}}
+                            <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="more-dropdown-item" style="color:#25D366;">💬 Share via WhatsApp</a>
+                            {{end}}
                             <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
                             <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
                             <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="more-dropdown-item mobile-only">👁 Preview PDF</a>
