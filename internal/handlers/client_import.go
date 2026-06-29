@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 )
 
 const (
@@ -170,9 +171,9 @@ func (h *Handlers) ClientImportPost(w http.ResponseWriter, r *http.Request) {
 			getCol(record, colMap, "email"),
 			getCol(record, colMap, "address"),
 			getCol(record, colMap, "city"),
-			getCol(record, colMap, "state"),
+			catalog.NormalizeState(getCol(record, colMap, "state")),
 			getCol(record, colMap, "zip"),
-			getCol(record, colMap, "country"),
+			catalog.NormalizeCountry(getCol(record, colMap, "country")),
 		)
 		if err != nil {
 			result.Errors = append(result.Errors, "Row "+itoa(rowNum)+" ("+name+"): "+err.Error())

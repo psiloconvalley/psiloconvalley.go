@@ -79,8 +79,8 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		City:    strings.TrimSpace(r.FormValue("city")),
 		State:   catalog.NormalizeState(r.FormValue("state")),
 		Zip:     strings.TrimSpace(r.FormValue("zip")),
-		Country: strings.TrimSpace(r.FormValue("country")),
-		Phone:   strings.TrimSpace(r.FormValue("phone")),
+		Country: catalog.NormalizeCountry(r.FormValue("country")),
+		Phone:   catalog.FormatPhone(r.FormValue("phone")),
 		TaxID:   strings.TrimSpace(r.FormValue("tax_id")),
 		Currency: func() string {
 			c := strings.TrimSpace(r.FormValue("currency"))

@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
 )
 
@@ -77,10 +78,10 @@ func (h *Handlers) ClientNewPost(w http.ResponseWriter, r *http.Request) {
 		Email:             strings.TrimSpace(r.FormValue("email")),
 		Address:           strings.TrimSpace(r.FormValue("address")),
 		City:              strings.TrimSpace(r.FormValue("city")),
-		State:             strings.TrimSpace(r.FormValue("state")),
+		State:             catalog.NormalizeState(r.FormValue("state")),
 		Zip:               strings.TrimSpace(r.FormValue("zip")),
-		Country:           strings.TrimSpace(r.FormValue("country")),
-		Phone:             strings.TrimSpace(r.FormValue("phone")),
+		Country:           catalog.NormalizeCountry(r.FormValue("country")),
+		Phone:             catalog.FormatPhone(r.FormValue("phone")),
 		Notes:             strings.TrimSpace(r.FormValue("notes")),
 	}
 
@@ -143,10 +144,10 @@ func (h *Handlers) ClientEditPost(w http.ResponseWriter, r *http.Request) {
 		Email:   strings.TrimSpace(r.FormValue("email")),
 		Address: strings.TrimSpace(r.FormValue("address")),
 		City:    strings.TrimSpace(r.FormValue("city")),
-		State:   strings.TrimSpace(r.FormValue("state")),
+		State:   catalog.NormalizeState(r.FormValue("state")),
 		Zip:     strings.TrimSpace(r.FormValue("zip")),
-		Country: strings.TrimSpace(r.FormValue("country")),
-		Phone:   strings.TrimSpace(r.FormValue("phone")),
+		Country: catalog.NormalizeCountry(r.FormValue("country")),
+		Phone:   catalog.FormatPhone(r.FormValue("phone")),
 		Notes:   strings.TrimSpace(r.FormValue("notes")),
 	}
 

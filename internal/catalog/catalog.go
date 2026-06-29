@@ -114,3 +114,87 @@ func NormalizeState(input string) string {
 	// Non-US or unknown — return as-is
 	return input
 }
+
+// NormalizeCountry maps common country abbreviations and variations
+// to a canonical full name. Returns input unchanged if no match found.
+func NormalizeCountry(input string) string {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return input
+	}
+
+	aliases := map[string]string{
+		"US":             "United States",
+		"USA":            "United States",
+		"U.S.":           "United States",
+		"U.S.A":          "United States",
+		"U.S.A.":         "United States",
+		"UNITED STATES":  "United States",
+		"UNITED STATES OF AMERICA": "United States",
+		"MX":             "Mexico",
+		"MEX":            "Mexico",
+		"MEXICO":         "Mexico",
+		"MÉXICO":         "Mexico",
+		"CA":             "Canada",
+		"CAN":            "Canada",
+		"CANADA":         "Canada",
+		"GB":             "United Kingdom",
+		"UK":             "United Kingdom",
+		"UNITED KINGDOM": "United Kingdom",
+	}
+
+	if full, ok := aliases[strings.ToUpper(input)]; ok {
+		return full
+	}
+
+	return input
+}
+
+// FormatPhone normalizes a US phone number to (XXX) XXX-XXXX format.
+// Handles common input variations:
+//   5551234567     → (555) 123-4567
+//   555-123-4567   → (555) 123-4567
+//   555.123.4567   → (555) 123-4567
+//   (555) 123-4567 → (555) 123-4567  (already formatted)
+//   +15551234567   → +1 (555) 123-4567
+//   +1 555 123 4567 → +1 (555) 123-4567
+//
+// Non-US or unrecognized formats are returned as-is.
+func FormatPhone(input string) string {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return input
+	}
+
+	// Strip all non-digit characters except leading +
+	hasPlus := strings.HasPrefix(input, "+")
+	digits := make([]byte, 0, 15)
+	for _, c := range input {
+		if c >= '0' && c <= '9' {
+			digits = append(digits, byte(c))
+		}
+	}
+
+	// Handle +1 prefix (US country code)
+	if hasPlus && len(digits) == 11 && digits[0] == '1' {
+		return "+1 (" + string(digits[1:4]) + ") " + string(digits[4:7]) + "-" + string(digits[7:11])
+	}
+
+	// 11 digits starting with 1 — US with country code
+	if len(digits) == 11 && digits[0] == '1' {
+		return "+1 (" + string(digits[1:4]) + ") " + string(digits[4:7]) + "-" + string(digits[7:11])
+	}
+
+	// 10 digits — standard US
+	if len(digits) == 10 {
+		return "(" + string(digits[0:3]) + ") " + string(digits[3:6]) + "-" + string(digits[6:10])
+	}
+
+	// 7 digits — local number
+	if len(digits) == 7 {
+		return string(digits[0:3]) + "-" + string(digits[3:7])
+	}
+
+	// Unrecognized format — return original trimmed
+	return input
+}
