@@ -162,7 +162,7 @@ func (r *ClientRepo) CountByUserID(ctx context.Context, userID int64) (int, erro
 func (r *ClientRepo) FindOrCreate(
 	ctx context.Context,
 	bizProfileID int64,
-	name, email, address, city, state, zip, country string,
+	name, email, phone, address, city, state, zip, country string,
 ) (int64, error) {
 	var id int64
 	err := r.db.QueryRowContext(ctx, `
@@ -175,13 +175,14 @@ func (r *ClientRepo) FindOrCreate(
 		_, _ = r.db.ExecContext(ctx, `
 			UPDATE clients SET
 				email   = COALESCE(NULLIF($1, ''), email),
-				address = COALESCE(NULLIF($2, ''), address),
-				city    = COALESCE(NULLIF($3, ''), city),
-				state   = COALESCE(NULLIF($4, ''), state),
-				zip     = COALESCE(NULLIF($5, ''), zip),
-				country = COALESCE(NULLIF($6, ''), country)
-			WHERE id = $7
-		`, email, address, city, state, zip, country, id)
+				phone   = COALESCE(NULLIF($2, ''), phone),
+				address = COALESCE(NULLIF($3, ''), address),
+				city    = COALESCE(NULLIF($4, ''), city),
+				state   = COALESCE(NULLIF($5, ''), state),
+				zip     = COALESCE(NULLIF($6, ''), zip),
+				country = COALESCE(NULLIF($7, ''), country)
+			WHERE id = $8
+		`, email, phone, address, city, state, zip, country, id)
 		return id, nil
 	}
 	if err != sql.ErrNoRows {
@@ -189,10 +190,10 @@ func (r *ClientRepo) FindOrCreate(
 	}
 	err = r.db.QueryRowContext(ctx, `
 		INSERT INTO clients
-			(business_profile_id, name, email, address, city, state, zip, country)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			(business_profile_id, name, email, phone, address, city, state, zip, country)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id
-	`, bizProfileID, name, email, address, city, state, zip, country).Scan(&id)
+	`, bizProfileID, name, email, phone, address, city, state, zip, country).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("client create: %w", err)
 	}

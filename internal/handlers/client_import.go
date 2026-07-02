@@ -169,6 +169,7 @@ func (h *Handlers) ClientImportPost(w http.ResponseWriter, r *http.Request) {
 			profile.ID,
 			name,
 			getCol(record, colMap, "email"),
+			catalog.FormatPhone(getCol(record, colMap, "phone")),
 			getCol(record, colMap, "address"),
 			getCol(record, colMap, "city"),
 			catalog.NormalizeState(getCol(record, colMap, "state")),
