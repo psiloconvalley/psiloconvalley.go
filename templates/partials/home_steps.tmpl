@@ -1,38 +1,75 @@
 {{define "home-steps"}}
     <!-- HOW IT WORKS -->
-      <section class="steps-section">
+    <section class="steps-section" id="how-it-works">
         <p class="section-title">How it works</p>
-        <h2 class="section-headline">Four steps. From estimate to paid.</h2>
+        <h2 class="section-headline">Two ways to get paid. You pick.</h2>
 
-        <div class="steps-grid reveal-stagger">
-            <div class="step-card">
-                <div class="step-number">1</div>
-                <h3 class="step-title">Create estimate</h3>
-                <p class="step-desc">
-                    Build a professional estimate with line items, tax, and your branding. Takes under a minute.
-                </p>
+        <div class="steps-columns">
+
+            <!-- PATH A — Quick Invoice -->
+            <div class="steps-path">
+                <div class="steps-path-label">⚡ Job is done — send the bill</div>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">Create an invoice</h3>
+                        <p class="step-desc">
+                            Add your client, describe the work, set the price.
+                            Takes 60 seconds.
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">Send it</h3>
+                        <p class="step-desc">
+                            Email or share a link.
+                            Your client gets a professional document instantly.
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">Get paid</h3>
+                        <p class="step-desc">
+                            They pay by card.
+                            Money goes straight to your account.
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div class="step-card">
-                <div class="step-number">2</div>
-                <h3 class="step-title">Client responds</h3>
-                <p class="step-desc">
-                    Your client receives a link to accept, decline, or suggest changes — no login required.
-                </p>
+
+            <div class="steps-divider">or</div>
+
+            <!-- PATH B — Quote First -->
+            <div class="steps-path">
+                <div class="steps-path-label">📋 Need approval first — send a quote</div>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">Send a quote</h3>
+                        <p class="step-desc">
+                            Agree on the price before you start.
+                            Client approves with one tap — no account needed.
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">Do the work</h3>
+                        <p class="step-desc">
+                            You have it in writing.
+                            No surprises for either side.
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">Convert and collect</h3>
+                        <p class="step-desc">
+                            One tap turns the approved quote into an invoice.
+                            Send it. Get paid.
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div class="step-card">
-                <div class="step-number">3</div>
-                <h3 class="step-title">Convert to invoice</h3>
-                <p class="step-desc">
-                    One click converts an accepted estimate into a professional invoice. No re-entering data.
-                </p>
-            </div>
-            <div class="step-card">
-                <div class="step-number">4</div>
-                <h3 class="step-title">Get paid</h3>
-                <p class="step-desc">
-                    Send the invoice, collect payment via Stripe, and set up automatic reminders for overdue clients.
-                </p>
-            </div>
+
         </div>
-    </section> 
+    </section>
 {{end}}
