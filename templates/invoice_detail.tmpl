@@ -433,6 +433,31 @@
             tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             .invoice-footer-split { page-break-inside: avoid !important; }
         }
+	        .pay-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+        }
+        .pay-option:hover {
+            border-color: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        .pay-option input[type="radio"] {
+            accent-color: #4ade80;
+        }
+        .pay-option:has(input:checked) {
+            border-color: rgba(74,222,128,0.4);
+            background: rgba(74,222,128,0.08);
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -763,57 +788,147 @@
                     </div>
                 </div>
                 {{end}}
-            {{else}}
+		        {{else}}
                 {{/* ── Invoice Status Panel ── */}}
                 {{if .User}}
                 <div class="status-panel">
-                    <div class="status-panel-title">Change Invoice Status</div>
+                    <div class="status-panel-title">{{.T.InvoicesStatusPanel}}</div>
+
+                    {{/* ── Paid: show method + undo ── */}}
+                    {{if eq .Invoice.Status "paid"}}
+                    <div style="margin-bottom:12px;">
+                        <span style="font-size:13px; color:rgba(255,255,255,0.5);">{{.T.InvoicesPaidVia}}</span>
+                        <strong style="font-size:13px; color:#4ade80; margin-left:6px; text-transform:capitalize;">
+                            {{if .Invoice.PaymentMethod}}{{.Invoice.PaymentMethod}}{{else}}—{{end}}
+                        </strong>
+                    </div>
+                    {{if eq .Invoice.PaymentMethod "card"}}
+                    <div style="font-size:12px; color:#fbbf24; margin-bottom:12px;">
+                        ⚠ {{.T.InvoicesUndoWarningCard}}
+                    </div>
+                    {{end}}
                     <div class="status-actions">
-                        {{if eq .Invoice.Status "draft"}}
                         <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
                             {{.csrfField}}
                             <input type="hidden" name="status" value="sent">
-                            <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">Mark as Sent</button>
+                            <button type="submit" class="status-btn" style="background:#1e3a5f; color:#93c5fd;">↩ {{.T.InvoicesUndoPayment}}</button>
                         </form>
-                        {{end}}
+                    </div>
 
-                        {{if eq .Invoice.Status "sent"}}
+                    {{/* ── Void: reopen as draft ── */}}
+                    {{else if eq .Invoice.Status "void"}}
+                    <div class="status-actions">
                         <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
                             {{.csrfField}}
-                            <input type="hidden" name="status" value="paid">
-                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
+                            <input type="hidden" name="status" value="draft">
+                            <button type="submit" class="status-btn" style="background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6);">↩ {{.T.InvoicesReopenDraft}}</button>
                         </form>
+                    </div>
+
+                    {{/* ── Draft: mark sent or void ── */}}
+                    {{else if eq .Invoice.Status "draft"}}
+                    <div class="status-actions">
                         <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
                             {{.csrfField}}
-                            <input type="hidden" name="status" value="overdue">
-                            <button type="submit" class="status-btn" style="background:#fef9c3; color:#854d0e;">Mark Overdue</button>
+                            <input type="hidden" name="status" value="sent">
+                            <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">{{.T.InvoicesMarkSent}}</button>
                         </form>
-                        {{end}}
-
-                        {{if eq .Invoice.Status "overdue"}}
-                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
-                            {{.csrfField}}
-                            <input type="hidden" name="status" value="paid">
-                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
-                        </form>
-                        {{end}}
-
-                        {{if and (ne .Invoice.Status "void") (ne .Invoice.Status "paid")}}
                         <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
                             {{.csrfField}}
                             <input type="hidden" name="status" value="void">
-                            <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">Void</button>
+                            <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">{{.T.InvoicesVoid}}</button>
                         </form>
-                        {{end}}
                     </div>
+
+                    {{/* ── Sent: mark paid, overdue, or void ── */}}
+                    {{else if eq .Invoice.Status "sent"}}
+                    <div class="status-actions">
+                        <button type="button" class="status-btn" style="background:#dcfce7; color:#15803d;" onclick="openDetailPaidModal()">{{.T.InvoicesMarkPaid}}</button>
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="overdue">
+                            <button type="submit" class="status-btn" style="background:#fef9c3; color:#854d0e;">{{.T.InvoicesMarkOverdue}}</button>
+                        </form>
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="void">
+                            <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">{{.T.InvoicesVoid}}</button>
+                        </form>
+                    </div>
+
+                    {{/* ── Overdue: mark paid or void ── */}}
+                    {{else if eq .Invoice.Status "overdue"}}
+                    <div class="status-actions">
+                        <button type="button" class="status-btn" style="background:#dcfce7; color:#15803d;" onclick="openDetailPaidModal()">{{.T.InvoicesMarkPaid}}</button>
+                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+                            {{.csrfField}}
+                            <input type="hidden" name="status" value="void">
+                            <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">{{.T.InvoicesVoid}}</button>
+                        </form>
+                    </div>
+                    {{end}}
+
                 </div>
                 {{end}}
             {{end}}
+                       {{end}}
         </section>
         {{end}} 
        </div>
 </div>
 
+<!-- ═══════════ MARK AS PAID MODAL (detail page) ═══════════ -->
+<div id="detail-paid-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:500;">
+    <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+        <div style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">{{.T.InvoicesMarkPaid}}</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:20px; line-height:1.5;">{{.T.InvoicesPaidWith}}</div>
+        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
+            {{.csrfField}}
+            <input type="hidden" name="status" value="paid">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:20px;">
+                <label class="pay-option">
+                    <input type="radio" name="payment_method" value="cash" checked>
+                    <span>💵 {{.T.InvoicesPayCash}}</span>
+                </label>
+                <label class="pay-option">
+                    <input type="radio" name="payment_method" value="zelle">
+                    <span>⚡ {{.T.InvoicesPayZelle}}</span>
+                </label>
+                <label class="pay-option">
+                    <input type="radio" name="payment_method" value="venmo">
+                    <span>📱 {{.T.InvoicesPayVenmo}}</span>
+                </label>
+                <label class="pay-option">
+                    <input type="radio" name="payment_method" value="check">
+                    <span>📝 {{.T.InvoicesPayCheck}}</span>
+                </label>
+                <label class="pay-option">
+                    <input type="radio" name="payment_method" value="card">
+                    <span>💳 {{.T.InvoicesPayCard}}</span>
+                </label>
+                <label class="pay-option">
+                    <input type="radio" name="payment_method" value="other">
+                    <span>📦 {{.T.InvoicesPayOther}}</span>
+                </label>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button type="button" onclick="closeDetailPaidModal()" style="flex:1; padding:11px; border:1px solid rgba(255,255,255,0.15); background:transparent; color:rgba(255,255,255,0.6); border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">{{.T.InvoicesPayCancel}}</button>
+                <button type="submit" style="flex:1; padding:11px; background:#15803d; color:white; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer;">{{.T.InvoicesPayConfirm}}</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function openDetailPaidModal() {
+    document.getElementById('detail-paid-overlay').style.display = 'block';
+}
+function closeDetailPaidModal() {
+    document.getElementById('detail-paid-overlay').style.display = 'none';
+}
+document.getElementById('detail-paid-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeDetailPaidModal();
+});
+</script>
 <!-- ═══════════ DELETE CONFIRMATION MODAL ═══════════ -->
 <div id="delete-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:500;">
     <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:16px; padding:32px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
