@@ -47,6 +47,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.total_cents,
 			i.currency,
 			i.status,
+			i.payment_method,
 			i.document_type,
 			i.show_logo,
 			i.show_title,
@@ -103,6 +104,7 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.TotalCents,
 		&currency,
 		&inv.Status,
+		&inv.PaymentMethod,
 		&inv.DocumentType,
 		&inv.ShowLogo,
 		&inv.ShowTitle,
@@ -204,7 +206,7 @@ func (r *InvoiceRepo) ListInvoices(
 
 	q := `SELECT id, user_id, client_name, invoice_number,
 	        issue_date, due_date, tax_rate_bps,
-	        subtotal_cents, total_cents, currency, status, document_type, created_at
+		subtotal_cents, total_cents, currency, status, payment_method, document_type, created_at
 	      FROM invoices `
 
 	var args []any
@@ -232,7 +234,7 @@ func (r *InvoiceRepo) ListInvoices(
 			&inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,
 			&inv.IssueDate, &dueDate, &inv.TaxRateBps,
 			&inv.SubtotalCents, &inv.TotalCents, &currency,
-			&inv.Status, &inv.DocumentType, &inv.CreatedAt,
+			&inv.Status, &inv.PaymentMethod, &inv.DocumentType, &inv.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -265,7 +267,7 @@ func (r *InvoiceRepo) ListEstimates(
 
 	q := `SELECT id, user_id, client_name, invoice_number,
 	             issue_date, due_date, tax_rate_bps,
-	             subtotal_cents, total_cents, currency, status, document_type, created_at
+		     subtotal_cents, total_cents, currency, status, payment_method, document_type, created_at
 	      FROM invoices
 	      WHERE user_id = $1 AND document_type = 'estimate'
 	      ORDER BY created_at DESC LIMIT $2 OFFSET $3`
@@ -286,7 +288,7 @@ func (r *InvoiceRepo) ListEstimates(
 			&inv.ID, &uID, &inv.ClientName, &inv.InvoiceNumber,
 			&inv.IssueDate, &dueDate, &inv.TaxRateBps,
 			&inv.SubtotalCents, &inv.TotalCents, &currency,
-			&inv.Status, &inv.DocumentType, &inv.CreatedAt,
+			&inv.Status, &inv.PaymentMethod, &inv.DocumentType, &inv.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

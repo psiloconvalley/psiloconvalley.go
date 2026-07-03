@@ -88,6 +88,7 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 	ctx context.Context,
 	id int64,
 	newStatus string,
+	paymentMethod string,
 	userID int64,
 ) error {
 	validStatuses := map[string]bool{
@@ -121,9 +122,10 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 	}
 
 	_, err = r.db.ExecContext(ctx,
-		`UPDATE invoices SET status = $1, updated_at = NOW()
-		 WHERE id = $2 AND user_id = $3`,
-		newStatus, id, userID,
+		`UPDATE invoices 
+		 SET status = $1, payment_method = $2, updated_at = NOW()
+		 WHERE id = $3 AND user_id = $4`,
+		newStatus, paymentMethod, id, userID,
 	)
 	return err
 }

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
-	"net/url"
 
 	"github.com/go-chi/chi/v5"
 
@@ -29,10 +29,10 @@ func (h *Handlers) InvoiceSendGet(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-if !h.canSendInvoice(r) {
-    http.Redirect(w, r, "/pricing?reason=email-pro", http.StatusSeeOther)
-    return
-}
+	if !h.canSendInvoice(r) {
+		http.Redirect(w, r, "/pricing?reason=email-pro", http.StatusSeeOther)
+		return
+	}
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
@@ -60,10 +60,10 @@ func (h *Handlers) InvoiceSendPost(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-if !h.canSendInvoice(r) {
-    http.Redirect(w, r, "/pricing?reason=send-limit", http.StatusSeeOther)
-    return
-}
+	if !h.canSendInvoice(r) {
+		http.Redirect(w, r, "/pricing?reason=send-limit", http.StatusSeeOther)
+		return
+	}
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
 	inv, items, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
@@ -137,18 +137,18 @@ if !h.canSendInvoice(r) {
 	// ── Send via Resend ───────────────────────────────────────────────
 	pdfFilename := fmt.Sprintf("invoice-%s.pdf", inv.InvoiceNumber)
 
-if err := h.App.Mailer.SendInvoice(toEmail, emailData, pdfBytes, pdfFilename); err != nil {
-	slog.Error("invoice email send failed", "err", err, "invoice_id", id, "user_id", user.ID)
-    http.Error(w, "Failed to send email. Please try again.", http.StatusInternalServerError)
-    return
-}
-// ── Increment monthly send counter ───────────────────────────────
-h.App.UsageRepo.Increment(r.Context(), user.ID, "sends")
+	if err := h.App.Mailer.SendInvoice(toEmail, emailData, pdfBytes, pdfFilename); err != nil {
+		slog.Error("invoice email send failed", "err", err, "invoice_id", id, "user_id", user.ID)
+		http.Error(w, "Failed to send email. Please try again.", http.StatusInternalServerError)
+		return
+	}
+	// ── Increment monthly send counter ───────────────────────────────
+	h.App.UsageRepo.Increment(r.Context(), user.ID, "sends")
 
 	// ── Auto-advance status draft → sent ─────────────────────────────
 	if inv.Status == "draft" && inv.UserID != nil {
 		if err := h.App.InvRepo.UpdateInvoiceStatus(
-			r.Context(), id, "sent", *inv.UserID,
+			r.Context(), id, "sent", "", *inv.UserID,
 		); err != nil {
 			// Non-fatal — email already sent successfully
 			slog.Warn("invoice status update after send failed", "err", err, "invoice_id", id)
@@ -169,12 +169,11 @@ h.App.UsageRepo.Increment(r.Context(), user.ID, "sends")
 		h.scheduleReminders(r.Context(), inv.ID, *inv.DueDate)
 	}
 
-http.Redirect(w, r,
-	fmt.Sprintf("/invoices/%d?sent=true&to=%s", id, url.QueryEscape(toEmail)),
-	http.StatusSeeOther,
-)
+	http.Redirect(w, r,
+		fmt.Sprintf("/invoices/%d?sent=true&to=%s", id, url.QueryEscape(toEmail)),
+		http.StatusSeeOther,
+	)
 }
-
 
 // scheduleReminders queues reminder jobs based on the invoice due date.
 // Jobs are inserted into scheduled_jobs and the engine picks them up
@@ -186,11 +185,11 @@ func (h *Handlers) scheduleReminders(ctx context.Context, invoiceID int64, dueDa
 	}
 
 	schedule := []reminder{
-		{-3 * 24 * time.Hour, "due_soon"},     // 3 days before
-		{0, "due_today"},                        // day of
-		{3 * 24 * time.Hour, "overdue"},         // 3 days after
-		{7 * 24 * time.Hour, "overdue"},         // 7 days after
-		{14 * 24 * time.Hour, "overdue"},        // 14 days after
+		{-3 * 24 * time.Hour, "due_soon"}, // 3 days before
+		{0, "due_today"},                  // day of
+		{3 * 24 * time.Hour, "overdue"},   // 3 days after
+		{7 * 24 * time.Hour, "overdue"},   // 7 days after
+		{14 * 24 * time.Hour, "overdue"},  // 14 days after
 	}
 
 	for _, r := range schedule {

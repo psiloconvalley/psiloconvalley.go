@@ -135,7 +135,12 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 
 	newStatus := r.FormValue("status")
 
-	if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, user.ID); err != nil {
+	paymentMethod := ""
+	if newStatus == "paid" {
+		paymentMethod = strings.ToLower(strings.TrimSpace(r.FormValue("payment_method")))
+	}
+
+	if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), id, newStatus, paymentMethod, user.ID); err != nil {
 		http.Error(w, "Failed to update status", http.StatusInternalServerError)
 		return
 	}

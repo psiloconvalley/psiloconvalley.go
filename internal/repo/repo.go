@@ -107,6 +107,7 @@ type InvoiceStore interface {
 		ctx context.Context,
 		id int64,
 		newStatus string,
+		paymentMethod string,
 		userID int64,
 	) error
 	UpdateEstimateStatus(

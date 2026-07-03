@@ -37,7 +37,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		slog.Error ("stripe webhook signature invalid", "err", err)
+		slog.Error("stripe webhook signature invalid", "err", err)
 		http.Error(w, "Invalid webhook signature", http.StatusBadRequest)
 		return
 	}
@@ -56,7 +56,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 		if invoiceIDStr := cs.Metadata["invoice_id"]; invoiceIDStr != "" {
 			invoiceID, err := strconv.ParseInt(invoiceIDStr, 10, 64)
 			if err != nil {
-			    slog.Warn("stripe connect invalid invoice_id in metadata", "invoice_id_str", invoiceIDStr, "event_id", event.ID)
+				slog.Warn("stripe connect invalid invoice_id in metadata", "invoice_id_str", invoiceIDStr, "event_id", event.ID)
 				w.WriteHeader(http.StatusOK)
 				return
 			}
@@ -64,7 +64,7 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			userIDStr := cs.Metadata["user_id"]
 			userID, _ := strconv.ParseInt(userIDStr, 10, 64)
 
-			if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), invoiceID, "paid", userID); err != nil {
+			if err := h.App.InvRepo.UpdateInvoiceStatus(r.Context(), invoiceID, "paid", "card", userID); err != nil {
 				slog.Error("stripe connect failed to mark invoice paid", "err", err, "invoice_id", invoiceID)
 				http.Error(w, "Failed to update invoice status", http.StatusInternalServerError)
 				return
@@ -77,9 +77,9 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 				EntityID:   audit.EntityIDPtr(invoiceID),
 				IPAddress:  audit.IPFromRequest(r),
 				Metadata: map[string]any{
-					"source":                    "stripe_webhook",
-					"stripe_event_id":           event.ID,
-					"stripe_event_type":         event.Type,
+					"source":                     "stripe_webhook",
+					"stripe_event_id":            event.ID,
+					"stripe_event_type":          event.Type,
 					"stripe_checkout_session_id": cs.ID,
 				},
 			})
@@ -125,11 +125,11 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 			EntityID:   audit.EntityIDPtr(userID),
 			IPAddress:  audit.IPFromRequest(r),
 			Metadata: map[string]any{
-				"source":                    "stripe_webhook",
-				"stripe_event_id":           event.ID,
-				"stripe_event_type":         event.Type,
+				"source":                     "stripe_webhook",
+				"stripe_event_id":            event.ID,
+				"stripe_event_type":          event.Type,
 				"stripe_checkout_session_id": cs.ID,
-				"plan":                      newPlan,
+				"plan":                       newPlan,
 			},
 		})
 

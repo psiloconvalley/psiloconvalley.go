@@ -50,7 +50,7 @@ func NewRecurringHandler(
 		// Clone the invoice
 		newInv := *templateInv
 		newInv.ID = 0
-				// Generate sequential invoice number for the owner
+		// Generate sequential invoice number for the owner
 		if templateInv.UserID != nil {
 			num, err := userRepo.NextInvoiceNumber(ctx, *templateInv.UserID)
 			if err != nil {
@@ -91,7 +91,6 @@ func NewRecurringHandler(
 				invoiceURL += "?access=" + token
 			}
 
-
 			dueDate := ""
 			if newInv.DueDate != nil {
 				dueDate = newInv.DueDate.Format("January 2, 2006")
@@ -117,11 +116,11 @@ func NewRecurringHandler(
 				log.Printf("[recurring] failed to auto-send invoice %d: %v", newID, err)
 				// Don't return error — invoice was created, just email failed
 
-							} else {
+			} else {
 				log.Printf("[recurring] auto-sent invoice %d to %s", newID, templateInv.ClientEmail)
 				// Mark as sent
 				if templateInv.UserID != nil {
-					_ = invRepo.UpdateInvoiceStatus(ctx, newID, "sent", *templateInv.UserID)
+					_ = invRepo.UpdateInvoiceStatus(ctx, newID, "sent", "", *templateInv.UserID)
 				}
 				// Schedule reminders if enabled and due date exists
 				if templateInv.AutoReminders && newInv.DueDate != nil {
@@ -159,7 +158,7 @@ func NewRecurringHandler(
 				}
 			}
 		}
-			
+
 		// Update schedule: advance next_run_at and set last_run_at
 		now := time.Now()
 		sched.LastRunAt = &now

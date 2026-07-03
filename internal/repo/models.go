@@ -47,24 +47,24 @@ type Client struct {
 }
 
 type User struct {
-	ID               int64
-	Email            string
-	PasswordHash     string
-	Plan             string
-	Provider         string
-	GoogleID         string
-	Name             string
-	AvatarURL        string
-	StripeCustomerID string
-	StripeConnectID  string
-	NextInvoiceSeq   int
-	NextEstimateSeq  int
-	Language         string
+	ID                  int64
+	Email               string
+	PasswordHash        string
+	Plan                string
+	Provider            string
+	GoogleID            string
+	Name                string
+	AvatarURL           string
+	StripeCustomerID    string
+	StripeConnectID     string
+	NextInvoiceSeq      int
+	NextEstimateSeq     int
+	Language            string
 	PasswordAlgo        string
 	MagicToken          string
 	MagicTokenExpiresAt *time.Time
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 	FailedLoginAttempts int
 	LockedUntil         *time.Time
 }
@@ -110,6 +110,7 @@ func (u *User) CheckPassword(plain string) bool {
 func (u *User) NeedsRehash() bool {
 	return u.PasswordAlgo != "argon2id"
 }
+
 // IsLocked returns true if the account is currently locked out.
 func (u *User) IsLocked() bool {
 	if u.LockedUntil == nil {
@@ -164,27 +165,27 @@ func (u *User) DisplayName() string {
 }
 
 type Invoice struct {
-	ID                int64
-	BusinessProfileID *int64
-	ClientID          *int64
-	UserID            *int64
-	AnonymousToken    string
-	LogoURL           string
-	CompanyName       string
-	CompanyEmail      string
-	CompanyPhone      string
-	CompanyAddress    string
-	CompanyCity       string
-	CompanyZip        string
-	CompanyState      string
-	CompanyCountry    string
-	ClientName        string
-	ClientEmail       string
-	ClientAddress     string
-	ClientCity        string
-	ClientZip         string
-	ClientState       string
-	ClientCountry     string
+	ID                  int64
+	BusinessProfileID   *int64
+	ClientID            *int64
+	UserID              *int64
+	AnonymousToken      string
+	LogoURL             string
+	CompanyName         string
+	CompanyEmail        string
+	CompanyPhone        string
+	CompanyAddress      string
+	CompanyCity         string
+	CompanyZip          string
+	CompanyState        string
+	CompanyCountry      string
+	ClientName          string
+	ClientEmail         string
+	ClientAddress       string
+	ClientCity          string
+	ClientZip           string
+	ClientState         string
+	ClientCountry       string
 	InvoiceNumber       string
 	IssueDate           time.Time
 	DueDate             *time.Time
@@ -197,6 +198,7 @@ type Invoice struct {
 	TotalCents          int64
 	Currency            string
 	Status              string
+	PaymentMethod       string
 	DocumentType        string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
@@ -279,31 +281,32 @@ type ClientScorecard struct {
 	Score            int
 }
 type Expense struct {
-	ID           int64
-	UserID       int64
-	AmountCents  int64
-	Currency     string
-	Category     string
-	Description  string
-	Vendor       string
-	ExpenseDate  time.Time
-	ReceiptURL   string
-	ClientID     *int64
-	ClientName   string // populated by JOIN, not stored
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID          int64
+	UserID      int64
+	AmountCents int64
+	Currency    string
+	Category    string
+	Description string
+	Vendor      string
+	ExpenseDate time.Time
+	ReceiptURL  string
+	ClientID    *int64
+	ClientName  string // populated by JOIN, not stored
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type ExpenseSummary struct {
-	TotalCents       int64
-	CategoryTotals   []CategoryTotal
-	MonthlyNetCents  int64 // paid invoice revenue minus expenses
+	TotalCents      int64
+	CategoryTotals  []CategoryTotal
+	MonthlyNetCents int64 // paid invoice revenue minus expenses
 }
 
 type CategoryTotal struct {
 	Category   string
 	TotalCents int64
 }
+
 // AuditLog records every action that touches financial or personal data.
 // This table is append-only — rows are never updated or deleted.
 // Required for HIPAA compliance and enterprise security audits.

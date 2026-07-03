@@ -12,12 +12,10 @@ import (
 	"testing"
 	"time"
 
-
+	"github.com/go-chi/chi/v5"
 	"psiloconvalley/internal/app"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/repo"
-	"github.com/go-chi/chi/v5"
-
 )
 
 // =====================================================================
@@ -31,9 +29,9 @@ import (
 
 type fakeInvoiceStore struct {
 	// Seed these per-test to control what the fake returns
-	invoice    *repo.Invoice
-	itemsErr   error
-	deleteErr  error
+	invoice      *repo.Invoice
+	itemsErr     error
+	deleteErr    error
 	deleteCalled bool
 }
 
@@ -73,7 +71,7 @@ func (f *fakeInvoiceStore) InvoiceNumberExists(ctx context.Context, number strin
 func (f *fakeInvoiceStore) UpdateInvoice(ctx context.Context, inv *repo.Invoice, items []repo.InvoiceItem) error {
 	return nil
 }
-func (f *fakeInvoiceStore) UpdateInvoiceStatus(ctx context.Context, id int64, newStatus string, userID int64) error {
+func (f *fakeInvoiceStore) UpdateInvoiceStatus(ctx context.Context, id int64, newStatus string, paymentMethod string, userID int64) error {
 	return nil
 }
 func (f *fakeInvoiceStore) EnsurePublicToken(ctx context.Context, invoiceID int64) (string, error) {
@@ -120,6 +118,7 @@ func (f *fakeInvoiceStore) UpdateEstimateStatus(ctx context.Context, id int64, u
 
 	return nil
 }
+
 // Helpers
 // makeDeleteRequest builds a fake POST to /invoices/{id}/delete
 // with a logged-in user injected into the context.
@@ -161,6 +160,7 @@ func makeHandlers(store *fakeInvoiceStore) *Handlers {
 	a.AuditRepo = repo.NewAuditRepo(nil) // nil db — Log() will fail silently, which is fine for tests
 	return &Handlers{App: a}
 }
+
 // =====================================================================
 // Tests — InvoiceDeletePost
 // =====================================================================
