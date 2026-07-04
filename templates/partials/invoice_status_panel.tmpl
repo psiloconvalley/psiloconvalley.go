@@ -47,18 +47,35 @@
         </form>
     </div>
 
-        {{else if eq .Invoice.Status "sent"}}
+    {{else if eq .Invoice.Status "sent"}}
     <div class="status-actions">
         <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
             {{.csrfField}}
             <input type="hidden" name="status" value="paid">
-            <select name="payment_method" style="padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; background:white; color:#0d1422; font-family:inherit;">
-                <option value="cash">{{.T.InvoicesPayCash}}</option>
-                <option value="zelle">{{.T.InvoicesPayZelle}}</option>
-                <option value="venmo">{{.T.InvoicesPayVenmo}}</option>
-                <option value="check">{{.T.InvoicesPayCheck}}</option>
-                <option value="card">{{.T.InvoicesPayCard}}</option>
-                <option value="other">{{.T.InvoicesPayOther}}</option>
+            <select name="payment_method" style="
+                padding:10px 14px;
+                border:1px solid #e2e8f0;
+                border-radius:8px;
+                font-size:13px;
+                font-weight:600;
+                font-family:inherit;
+                background:#ffffff;
+                color:#0f172a;
+                appearance:none;
+                -webkit-appearance:none;
+                background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>');
+                background-repeat:no-repeat;
+                background-position:right 12px center;
+                padding-right:32px;
+                cursor:pointer;
+                min-height:40px;
+            ">
+                <option value="cash">💵 {{.T.InvoicesPayCash}}</option>
+                <option value="zelle">⚡ {{.T.InvoicesPayZelle}}</option>
+                <option value="venmo">📱 {{.T.InvoicesPayVenmo}}</option>
+                <option value="check">📝 {{.T.InvoicesPayCheck}}</option>
+                <option value="card">💳 {{.T.InvoicesPayCard}}</option>
+                <option value="other">📦 {{.T.InvoicesPayOther}}</option>
             </select>
             <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">{{.T.InvoicesMarkPaid}}</button>
         </form>
@@ -73,19 +90,36 @@
             <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">{{.T.InvoicesVoid}}</button>
         </form>
     </div>
-    
-           {{else if eq .Invoice.Status "overdue"}}
+
+    {{else if eq .Invoice.Status "overdue"}}
     <div class="status-actions">
         <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
             {{.csrfField}}
             <input type="hidden" name="status" value="paid">
-            <select name="payment_method" style="padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; background:white; color:#0d1422; font-family:inherit;">
-                <option value="cash">{{.T.InvoicesPayCash}}</option>
-                <option value="zelle">{{.T.InvoicesPayZelle}}</option>
-                <option value="venmo">{{.T.InvoicesPayVenmo}}</option>
-                <option value="check">{{.T.InvoicesPayCheck}}</option>
-                <option value="card">{{.T.InvoicesPayCard}}</option>
-                <option value="other">{{.T.InvoicesPayOther}}</option>
+            <select name="payment_method" style="
+                padding:10px 14px;
+                border:1px solid #e2e8f0;
+                border-radius:8px;
+                font-size:13px;
+                font-weight:600;
+                font-family:inherit;
+                background:#ffffff;
+                color:#0f172a;
+                appearance:none;
+                -webkit-appearance:none;
+                background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>');
+                background-repeat:no-repeat;
+                background-position:right 12px center;
+                padding-right:32px;
+                cursor:pointer;
+                min-height:40px;
+            ">
+                <option value="cash">💵 {{.T.InvoicesPayCash}}</option>
+                <option value="zelle">⚡ {{.T.InvoicesPayZelle}}</option>
+                <option value="venmo">📱 {{.T.InvoicesPayVenmo}}</option>
+                <option value="check">📝 {{.T.InvoicesPayCheck}}</option>
+                <option value="card">💳 {{.T.InvoicesPayCard}}</option>
+                <option value="other">📦 {{.T.InvoicesPayOther}}</option>
             </select>
             <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">{{.T.InvoicesMarkPaid}}</button>
         </form>
@@ -95,7 +129,7 @@
             <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">{{.T.InvoicesVoid}}</button>
         </form>
     </div>
-       {{end}}
+    {{end}}
 
 </div>
 {{end}}
