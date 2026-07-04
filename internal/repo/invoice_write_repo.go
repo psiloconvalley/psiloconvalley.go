@@ -112,17 +112,13 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 		"draft":   {"sent": true, "void": true},
 		"sent":    {"paid": true, "overdue": true, "void": true},
 		"overdue": {"paid": true, "void": true},
-		"paid":    {"sent": true},
-		"void":    {"draft": true},
+		"paid":    {},
+		"void":    {},
 	}
+
 	allowed, ok := validTransitions[currentStatus]
 	if !ok || !allowed[newStatus] {
 		return fmt.Errorf("cannot transition from %s to %s", currentStatus, newStatus)
-	}
-
-	// Clear payment method when undoing paid status
-	if newStatus != "paid" {
-		paymentMethod = ""
 	}
 
 	_, err = r.db.ExecContext(ctx,

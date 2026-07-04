@@ -162,11 +162,7 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 		EntityType: audit.EntityInvoice,
 		EntityID:   audit.EntityIDPtr(id),
 		IPAddress:  audit.IPFromRequest(r),
-		Metadata: map[string]any{
-			"previous_status": inv.Status,
-			"new_status":      newStatus,
-			"payment_method":  paymentMethod,
-		},
+		Metadata:   map[string]any{"new_status": newStatus},
 	})
 	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
 }

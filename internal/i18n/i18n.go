@@ -264,15 +264,6 @@ type T struct {
 	InvoicesPayOther          string
 	InvoicesPayConfirm        string
 	InvoicesPayCancel         string
-	InvoicesUndoPayment     string
-	InvoicesReopenDraft     string
-	InvoicesPaidVia         string
-	InvoicesStatusPanel     string
-	InvoicesMarkSent        string
-	InvoicesMarkOverdue     string
-	InvoicesVoid            string
-	InvoicesUndoWarningCard string
-
 
 	// Estimates list page
 	EstimatesListTitle             string
