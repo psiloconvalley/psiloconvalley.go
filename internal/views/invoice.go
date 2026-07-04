@@ -41,6 +41,7 @@ type InvoicePage struct {
 	ClientID       int64
 	InvoiceNumber  string
 	Status         string
+	PaymentMethod  string
 	IssueDate      string
 	DueDate        string
 	Currency       string
@@ -122,6 +123,7 @@ type InvoiceListRow struct {
 	InvoiceNumber string
 	ClientName    string
 	Status        string
+	PaymentMethod string
 	IssueDate     string
 	DueDate       string
 	Total         string
@@ -192,6 +194,7 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		ClientID:       ptrToInt64(inv.ClientID),
 		InvoiceNumber:  inv.InvoiceNumber,
 		Status:         inv.Status,
+		PaymentMethod:  inv.PaymentMethod,
 		IssueDate:      formatDate(inv.IssueDate),
 		DueDate:        formatDatePtr(inv.DueDate),
 		Currency:       inv.Currency,
@@ -261,6 +264,7 @@ func MapInvoiceList(invoices []repo.Invoice) []InvoiceListRow {
 			InvoiceNumber: inv.InvoiceNumber,
 			ClientName:    inv.ClientName,
 			Status:        inv.Status,
+			PaymentMethod: inv.PaymentMethod,
 			IssueDate:     formatDate(inv.IssueDate),
 			DueDate:       formatDatePtr(inv.DueDate),
 			Total:         formatMoney(inv.TotalCents, sym),

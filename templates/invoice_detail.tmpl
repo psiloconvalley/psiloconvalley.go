@@ -764,51 +764,8 @@
                 </div>
                 {{end}}
             {{else}}
-                {{/* ── Invoice Status Panel ── */}}
-                {{if .User}}
-                <div class="status-panel">
-                    <div class="status-panel-title">Change Invoice Status</div>
-                    <div class="status-actions">
-                        {{if eq .Invoice.Status "draft"}}
-                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
-                            {{.csrfField}}
-                            <input type="hidden" name="status" value="sent">
-                            <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">Mark as Sent</button>
-                        </form>
-                        {{end}}
-
-                        {{if eq .Invoice.Status "sent"}}
-                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
-                            {{.csrfField}}
-                            <input type="hidden" name="status" value="paid">
-                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
-                        </form>
-                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
-                            {{.csrfField}}
-                            <input type="hidden" name="status" value="overdue">
-                            <button type="submit" class="status-btn" style="background:#fef9c3; color:#854d0e;">Mark Overdue</button>
-                        </form>
-                        {{end}}
-
-                        {{if eq .Invoice.Status "overdue"}}
-                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
-                            {{.csrfField}}
-                            <input type="hidden" name="status" value="paid">
-                            <button type="submit" class="status-btn" style="background:#dcfce7; color:#15803d;">Mark as Paid</button>
-                        </form>
-                        {{end}}
-
-                        {{if and (ne .Invoice.Status "void") (ne .Invoice.Status "paid")}}
-                        <form method="POST" action="/invoices/{{.Invoice.ID}}/status">
-                            {{.csrfField}}
-                            <input type="hidden" name="status" value="void">
-                            <button type="submit" class="status-btn" style="background:#fee2e2; color:#dc2626;">Void</button>
-                        </form>
-                        {{end}}
-                    </div>
-                </div>
-                {{end}}
-            {{end}}
+			 {{template "invoice-status-panel" .}}
+                          {{end}}
         </section>
         {{end}} 
        </div>

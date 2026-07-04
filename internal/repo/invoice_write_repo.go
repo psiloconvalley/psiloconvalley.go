@@ -108,17 +108,22 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 		return fmt.Errorf("invoice not found: %w", err)
 	}
 
-	validTransitions := map[string]map[string]bool{
+		validTransitions := map[string]map[string]bool{
 		"draft":   {"sent": true, "void": true},
 		"sent":    {"paid": true, "overdue": true, "void": true},
 		"overdue": {"paid": true, "void": true},
-		"paid":    {},
-		"void":    {},
+		"paid":    {"sent": true},
+		"void":    {"draft": true},
 	}
 
 	allowed, ok := validTransitions[currentStatus]
 	if !ok || !allowed[newStatus] {
 		return fmt.Errorf("cannot transition from %s to %s", currentStatus, newStatus)
+	}
+
+	// Clear payment method when undoing paid status
+	if newStatus != "paid" {
+		paymentMethod = ""
 	}
 
 	_, err = r.db.ExecContext(ctx,
@@ -127,6 +132,7 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 		 WHERE id = $3 AND user_id = $4`,
 		newStatus, paymentMethod, id, userID,
 	)
+	return err
 	return err
 }
 func (r *InvoiceRepo) DeleteDraftInvoice(
