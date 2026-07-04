@@ -47,6 +47,7 @@ type App struct {
 	AuditRepo  *repo.AuditRepo
 	UsageRepo  *repo.UsageRepo
 	PasskeyRepo *repo.PasskeyRepo
+	AddressRepo *repo.AddressRepo
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
@@ -128,6 +129,7 @@ func NewApp(db *sql.DB) *App {
 
 
 	return &App{
+		AddressRepo:       repo.NewAddressRepo(db),
 		db:                db,
 		Templates:         t,
 		InvRepo:           invRepo,

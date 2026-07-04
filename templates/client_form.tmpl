@@ -214,31 +214,36 @@
                 <div class="section-title">{{.T.ClientFormSectionAddress}}</div>
                 <div class="form-group">
                     <label>{{.T.ClientFormStreetAddress}}</label>
-                    <input type="text" name="address"
+		          <input type="text" name="address"
+                           data-address-autocomplete
                            value="{{if .Client}}{{.Client.Address}}{{end}}">
                 </div>
                 <div class="grid-3">
                     <div class="form-group">
                         <label>{{.T.ClientFormCity}}</label>
                         <input type="text" name="city"
+                               data-address-city
                                value="{{if .Client}}{{.Client.City}}{{end}}">
                     </div>
                     <div class="form-group">
                         <label>{{.T.ClientFormStateRegion}}</label>
                         <input type="text" name="state"
+                               data-address-state
                                value="{{if .Client}}{{.Client.State}}{{end}}">
                     </div>
                     <div class="form-group">
                         <label>{{.T.ClientFormZipPostal}}</label>
                         <input type="text" name="zip"
+                               data-address-zip
                                value="{{if .Client}}{{.Client.Zip}}{{end}}">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>{{.T.ClientFormCountry}}</label>
                     <input type="text" name="country"
+                           data-address-country
                            value="{{if .Client}}{{.Client.Country}}{{end}}">
-                </div>
+                     </div>
             </div>
 
             <div class="section">
@@ -256,6 +261,7 @@
                     {{if eq .Mode "edit"}}{{.T.ClientFormSaveChanges}}{{else}}{{.T.ClientFormSaveClient}}{{end}}
                 </button>
             </div>
+	    <script src="/static/js/address-autocomplete.js"></script>
         </form>
     </div>
 </div>

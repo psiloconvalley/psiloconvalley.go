@@ -73,6 +73,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
+	// Address autocomplete API
+		r.Get("/api/addresses", h.AddressAutocompleteGet)
 	// Passkey registration (requires login)
 		r.Post("/passkeys/register/begin", h.PasskeyRegistrationBegin)
 		r.Post("/passkeys/register/finish", h.PasskeyRegistrationFinish)
