@@ -708,6 +708,103 @@ type T struct {
 	HomeICPHandymen      string
 	HomeICPPhotographers string
 	HomeICPFreelancers   string
+
+	// Home — steps section
+	HomeStepsTitle          string
+	HomeStepsHeadline       string
+	HomeStepsPathALabel     string
+	HomeStepsA1Title        string
+	HomeStepsA1Desc         string
+	HomeStepsA2Title        string
+	HomeStepsA2Desc         string
+	HomeStepsA3Title        string
+	HomeStepsA3Desc         string
+	HomeStepsDivider        string
+	HomeStepsPathBLabel     string
+	HomeStepsB1Title        string
+	HomeStepsB1Desc         string
+	HomeStepsB2Title        string
+	HomeStepsB2Desc         string
+	HomeStepsB3Title        string
+	HomeStepsB3Desc         string
+
+	// Home — features section
+	HomeFeat1Title string
+	HomeFeat1Desc  string
+	HomeFeat2Title string
+	HomeFeat2Desc  string
+	HomeFeat3Title string
+	HomeFeat3Desc  string
+	HomeFeat4Title string
+	HomeFeat4Desc  string
+	HomeFeat5Title string
+	HomeFeat5Desc  string
+	HomeFeat6Title string
+	HomeFeat6Desc  string
+	HomeFeat7Title string
+	HomeFeat7Desc  string
+	HomeFeat8Title string
+	HomeFeat8Desc  string
+	HomeFeat9Title string
+	HomeFeat9Desc  string
+	HomeFeat10Title string
+	HomeFeat10Desc  string
+
+	// Home — security section
+	HomeSecEyebrow     string
+	HomeSecTitle       string
+	HomeSecTitleEm     string
+	HomeSecSub         string
+	HomeSecCard1Title  string
+	HomeSecCard1Desc   string
+	HomeSecCard2Title  string
+	HomeSecCard2Desc   string
+	HomeSecCard3Title  string
+	HomeSecCard3Desc   string
+	HomeSecCard4Title  string
+	HomeSecCard4Desc   string
+	HomeSecCard5Title  string
+	HomeSecCard5Desc   string
+	HomeSecCard6Title  string
+	HomeSecCard6Desc   string
+	HomeSecProofLabel  string
+	HomeSecProofDesc   string
+	HomeSecCTA         string
+
+	// Home — CTA + pricing section
+	HomeCtaTitle       string
+	HomeCtaSub         string
+	HomeCtaStart       string
+	HomeCtaPricing     string
+	HomePricingLabel   string
+	HomePricingTitle   string
+	HomePricingSub     string
+	HomePlanFreeLabel  string
+	HomePlanFreePrice  string
+	HomePlanFreeUnit   string
+	HomePlanFreeF1     string
+	HomePlanFreeF2     string
+	HomePlanFreeF3     string
+	HomePlanFreeF4     string
+	HomePlanFreeF5     string
+	HomePlanGrowLabel  string
+	HomePlanGrowPrice  string
+	HomePlanGrowUnit   string
+	HomePlanGrowF1     string
+	HomePlanGrowF2     string
+	HomePlanGrowF3     string
+	HomePlanGrowF4     string
+	HomePlanGrowF5     string
+	HomePlanProLabel   string
+	HomePlanProPrice   string
+	HomePlanProUnit    string
+	HomePlanProF1      string
+	HomePlanProF2      string
+	HomePlanProF3      string
+	HomePlanProF4      string
+	HomePlanProF5      string
+	HomePricingViewAll string
+
 	// Profile — Passkey section
 	ProfilePasskeyTitle         string
 	ProfilePasskeySubtitle      string
