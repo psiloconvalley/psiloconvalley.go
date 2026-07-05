@@ -1,67 +1,59 @@
 {{define "home-cta-pricing"}}
     <!-- FINAL CTA -->
     <section class="final-cta">
-        <h2>Ready to get paid?</h2>
-        <p>Send your first invoice or quote — free, in under a minute.</p>
+        <h2>{{.T.HomeCtaTitle}}</h2>
+        <p>{{.T.HomeCtaSub}}</p>
         <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-            <a href="/register" class="btn-primary">
-                Start Free →
-            </a>
-            <a href="/pricing" class="btn-secondary">
-                See Pricing
-            </a>
+            <a href="/register" class="btn-primary">{{.T.HomeCtaStart}}</a>
+            <a href="/pricing" class="btn-secondary">{{.T.HomeCtaPricing}}</a>
         </div>
     </section>
 
     <!-- PRICING CTA -->
     <section class="pricing-cta">
-        <div class="section-label">Simple Pricing</div>
-        <h2>Free to start. Upgrade when you're ready.</h2>
-        <p class="pricing-sub">
-            No trial. No credit card. Start free, then upgrade when you need more.
-        </p>
+        <div class="section-label">{{.T.HomePricingLabel}}</div>
+        <h2>{{.T.HomePricingTitle}}</h2>
+        <p class="pricing-sub">{{.T.HomePricingSub}}</p>
 
         <div class="pricing-grid">
             <div class="plan-card">
-                <div class="plan-label">Free</div>
-                <div class="plan-price">$0</div>
-                <div class="plan-unit">forever</div>
+                <div class="plan-label">{{.T.HomePlanFreeLabel}}</div>
+                <div class="plan-price">{{.T.HomePlanFreePrice}}</div>
+                <div class="plan-unit">{{.T.HomePlanFreeUnit}}</div>
                 <ul class="plan-features">
-                    <li>5 invoices / month</li>
-                    <li>3 estimates / month</li>
-                    <li>5 saved clients</li>
-                    <li>3 email sends / month</li>
-                    <li>PDF download</li>
+                    <li>{{.T.HomePlanFreeF1}}</li>
+                    <li>{{.T.HomePlanFreeF2}}</li>
+                    <li>{{.T.HomePlanFreeF3}}</li>
+                    <li>{{.T.HomePlanFreeF4}}</li>
+                    <li>{{.T.HomePlanFreeF5}}</li>
                 </ul>
             </div>
             <div class="plan-card growth">
-                <div class="plan-label">Growth</div>
-                <div class="plan-price">$8.88</div>
-                <div class="plan-unit">/ month — founding rate</div>
+                <div class="plan-label">{{.T.HomePlanGrowLabel}}</div>
+                <div class="plan-price">{{.T.HomePlanGrowPrice}}</div>
+                <div class="plan-unit">{{.T.HomePlanGrowUnit}}</div>
                 <ul class="plan-features">
-                    <li>15 invoices / month</li>
-                    <li>15 estimates / month</li>
-                    <li>15 clients</li>
-                    <li>Stripe card payments</li>
-                    <li>Expense tracking</li>
+                    <li>{{.T.HomePlanGrowF1}}</li>
+                    <li>{{.T.HomePlanGrowF2}}</li>
+                    <li>{{.T.HomePlanGrowF3}}</li>
+                    <li>{{.T.HomePlanGrowF4}}</li>
+                    <li>{{.T.HomePlanGrowF5}}</li>
                 </ul>
             </div>
             <div class="plan-card pro">
-                <div class="plan-label">Pro</div>
-                <div class="plan-price">$18.88</div>
-                <div class="plan-unit">/ month</div>
+                <div class="plan-label">{{.T.HomePlanProLabel}}</div>
+                <div class="plan-price">{{.T.HomePlanProPrice}}</div>
+                <div class="plan-unit">{{.T.HomePlanProUnit}}</div>
                 <ul class="plan-features">
-                    <li>Unlimited everything</li>
-                    <li>Recurring automation</li>
-                    <li>Auto payment reminders</li>
-                    <li>Advanced templates</li>
-                    <li>Priority support</li>
+                    <li>{{.T.HomePlanProF1}}</li>
+                    <li>{{.T.HomePlanProF2}}</li>
+                    <li>{{.T.HomePlanProF3}}</li>
+                    <li>{{.T.HomePlanProF4}}</li>
+                    <li>{{.T.HomePlanProF5}}</li>
                 </ul>
             </div>
         </div>
 
-        <a href="/pricing" class="btn-primary">
-            View Full Pricing →
-        </a>
+        <a href="/pricing" class="btn-primary">{{.T.HomePricingViewAll}}</a>
     </section>
 {{end}}

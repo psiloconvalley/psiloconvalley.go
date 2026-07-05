@@ -3,37 +3,35 @@
     <section class="hero">
 
         <div class="hero-eyebrow">
-            <span>Quotes</span>
+            <span>{{.T.HomeEyebrowQuotes}}</span>
             <span>·</span>
-            <span>Invoices</span>
+            <span>{{.T.HomeEyebrowInvoices}}</span>
             <span>·</span>
-            <span>Payments</span>
+            <span>{{.T.HomeEyebrowPayments}}</span>
             <span>·</span>
-            <span>Get Paid</span>
+            <span>{{.T.HomeEyebrowGetPaid}}</span>
         </div>
 
         <h1>
-            You did the work.<br>
-            <em>Now get paid for it.</em>
+            {{.T.HomeHeroLine1}}<br>
+            <em>{{.T.HomeHeroLine2}}</em>
         </h1>
 
         <p class="hero-sub">
-            Send a professional invoice or quote in minutes.
-            Your client pays by card — money goes straight to you.
-            Built for independent businesses that run on reputation.
+            {{.T.HomeHeroSub}}
         </p>
 
         <div class="hero-cta">
             <a href="/register" class="btn-primary">
-                Start Free →
+                {{.T.HomeHeroCTA}}
             </a>
             <a href="#how-it-works" class="btn-secondary">
-                See how it works ↓
+                {{.T.HomeHeroSecondaryCTA}}
             </a>
         </div>
 
         <p class="hero-note">
-            <strong>Free to start.</strong> No credit card required.
+            <strong>{{.T.HomeHeroNoteBold}}</strong> {{.T.HomeHeroNote}}
         </p>
 
     </section>
@@ -42,24 +40,24 @@
     <div class="trust-bar">
         <div class="trust-inner">
             <div class="trust-item">
-                <div class="trust-value">60s</div>
-                <div class="trust-label">To send</div>
+                <div class="trust-value">{{.T.HomeTrustSend}}</div>
+                <div class="trust-label">{{.T.HomeTrustSendLabel}}</div>
             </div>
             <div class="trust-item">
-                <div class="trust-value">$0</div>
-                <div class="trust-label">To start</div>
+                <div class="trust-value">{{.T.HomeTrustStart}}</div>
+                <div class="trust-label">{{.T.HomeTrustStartLabel}}</div>
             </div>
             <div class="trust-item">
-                <div class="trust-value">PDF</div>
-                <div class="trust-label">Instant download</div>
+                <div class="trust-value">{{.T.HomeTrustPDF}}</div>
+                <div class="trust-label">{{.T.HomeTrustPDFLabel}}</div>
             </div>
             <div class="trust-item">
-                <div class="trust-value">No</div>
-                <div class="trust-label">Trackers</div>
+                <div class="trust-value">{{.T.HomeTrustTrackers}}</div>
+                <div class="trust-label">{{.T.HomeTrustTrackLabel}}</div>
             </div>
             <div class="trust-item">
-                <div class="trust-value">Stripe</div>
-                <div class="trust-label">Card payments</div>
+                <div class="trust-value">{{.T.HomeTrustStripe}}</div>
+                <div class="trust-label">{{.T.HomeTrustStripeLabel}}</div>
             </div>
         </div>
     </div>
@@ -69,35 +67,35 @@
         <div class="icp-inner">
             <div class="icp-item">
                 <span class="icp-icon">🔨</span>
-                <span>Contractors</span>
+                <span>{{.T.HomeICPContractors}}</span>
             </div>
             <div class="icp-item">
                 <span class="icp-icon">🏊</span>
-                <span>Pool Services</span>
+                <span>{{.T.HomeICPPool}}</span>
             </div>
             <div class="icp-item">
                 <span class="icp-icon">🌿</span>
-                <span>Landscapers</span>
+                <span>{{.T.HomeICPLandscapers}}</span>
             </div>
             <div class="icp-item">
                 <span class="icp-icon">🖌️</span>
-                <span>Painters</span>
+                <span>{{.T.HomeICPPainters}}</span>
             </div>
             <div class="icp-item">
                 <span class="icp-icon">⚡</span>
-                <span>Electricians</span>
+                <span>{{.T.HomeICPElectricians}}</span>
             </div>
             <div class="icp-item">
                 <span class="icp-icon">🔧</span>
-                <span>Handymen</span>
+                <span>{{.T.HomeICPHandymen}}</span>
             </div>
             <div class="icp-item">
                 <span class="icp-icon">📸</span>
-                <span>Photographers</span>
+                <span>{{.T.HomeICPPhotographers}}</span>
             </div>
             <div class="icp-item">
                 <span class="icp-icon">💻</span>
-                <span>Freelancers</span>
+                <span>{{.T.HomeICPFreelancers}}</span>
             </div>
         </div>
     </div>

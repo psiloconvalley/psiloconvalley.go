@@ -4,92 +4,63 @@
         <div class="sec-home-inner">
 
             <div class="sec-home-header">
-                <div class="sec-home-eyebrow">Security</div>
-                <h2 class="sec-home-title">Your business data stays yours.<br><em>Full stop.</em></h2>
-                <p class="sec-home-sub">
-                    Your invoices contain real information — client names, amounts, job details.
-                    We built this to protect it.
-                </p>
+                <div class="sec-home-eyebrow">{{.T.HomeSecEyebrow}}</div>
+                <h2 class="sec-home-title">{{.T.HomeSecTitle}}<br><em>{{.T.HomeSecTitleEm}}</em></h2>
+                <p class="sec-home-sub">{{.T.HomeSecSub}}</p>
             </div>
 
             <div class="sec-home-grid">
                 <div class="sec-home-card">
                     <div class="sec-home-card-top">
                         <div class="sec-home-icon">🔐</div>
-                        <h4>Your password is uncrackable</h4>
+                        <h4>{{.T.HomeSecCard1Title}}</h4>
                     </div>
-                    <p>
-                        We use the strongest password protection available.
-                        Even we cannot see your password. Nobody can.
-                    </p>
+                    <p>{{.T.HomeSecCard1Desc}}</p>
                 </div>
-
                 <div class="sec-home-card">
                     <div class="sec-home-card-top">
                         <div class="sec-home-icon">💳</div>
-                        <h4>We never touch your card</h4>
+                        <h4>{{.T.HomeSecCard2Title}}</h4>
                     </div>
-                    <p>
-                        Payments go through Stripe directly.
-                        We never see or store card numbers. Ever.
-                    </p>
+                    <p>{{.T.HomeSecCard2Desc}}</p>
                 </div>
-
                 <div class="sec-home-card">
                     <div class="sec-home-card-top">
                         <div class="sec-home-icon">🚫</div>
-                        <h4>No trackers. No exceptions.</h4>
+                        <h4>{{.T.HomeSecCard3Title}}</h4>
                     </div>
-                    <p>
-                        No Google Analytics. No Facebook Pixel. No ad networks.
-                        Your data belongs to you — not advertisers.
-                    </p>
+                    <p>{{.T.HomeSecCard3Desc}}</p>
                 </div>
-
                 <div class="sec-home-card">
                     <div class="sec-home-card-top">
                         <div class="sec-home-icon">⏱️</div>
-                        <h4>Locks out attackers automatically</h4>
+                        <h4>{{.T.HomeSecCard4Title}}</h4>
                     </div>
-                    <p>
-                        Too many failed login attempts?
-                        The account locks. Hackers get nowhere.
-                    </p>
+                    <p>{{.T.HomeSecCard4Desc}}</p>
                 </div>
-
                 <div class="sec-home-card">
                     <div class="sec-home-card-top">
                         <div class="sec-home-icon">🔑</div>
-                        <h4>Login with your face</h4>
+                        <h4>{{.T.HomeSecCard5Title}}</h4>
                     </div>
-                    <p>
-                        Face ID and Touch ID supported.
-                        Faster than a password and impossible to steal.
-                    </p>
+                    <p>{{.T.HomeSecCard5Desc}}</p>
                 </div>
-
                 <div class="sec-home-card">
                     <div class="sec-home-card-top">
                         <div class="sec-home-icon">🔒</div>
-                        <h4>Client links are private</h4>
+                        <h4>{{.T.HomeSecCard6Title}}</h4>
                     </div>
-                    <p>
-                        Every shared invoice or quote uses a unique private link.
-                        Only the person you sent it to can open it.
-                    </p>
+                    <p>{{.T.HomeSecCard6Desc}}</p>
                 </div>
             </div>
 
             <div class="sec-home-proof">
-                <div class="sec-home-proof-label">What protects every account</div>
-                <p>
-                    Uncrackable passwords, automatic lockout, private client links,
-                    Stripe payments, Face ID login, and zero third-party trackers.
-                </p>
+                <div class="sec-home-proof-label">{{.T.HomeSecProofLabel}}</div>
+                <p>{{.T.HomeSecProofDesc}}</p>
             </div>
 
             <div class="sec-home-cta">
-                <a href="/security" class="btn-secondary">Read our full security overview →</a>
+                <a href="/security" class="btn-secondary">{{.T.HomeSecCTA}}</a>
             </div>
 
         </div>

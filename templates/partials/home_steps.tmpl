@@ -1,71 +1,53 @@
 {{define "home-steps"}}
     <!-- HOW IT WORKS -->
     <section class="steps-section" id="how-it-works">
-        <p class="section-title">How it works</p>
-        <h2 class="section-headline">Two ways to get paid. You pick.</h2>
+        <p class="section-title">{{.T.HomeStepsTitle}}</p>
+        <h2 class="section-headline">{{.T.HomeStepsHeadline}}</h2>
 
         <div class="steps-columns">
 
-            <!-- PATH A — Quick Invoice -->
+            <!-- PATH A -->
             <div class="steps-path">
-                <div class="steps-path-label">⚡ Job is done — send the bill</div>
+                <div class="steps-path-label">{{.T.HomeStepsPathALabel}}</div>
                 <div class="steps-grid">
                     <div class="step-card">
                         <div class="step-number">1</div>
-                        <h3 class="step-title">Create an invoice</h3>
-                        <p class="step-desc">
-                            Add your client, describe the work, set the price.
-                            Takes 60 seconds.
-                        </p>
+                        <h3 class="step-title">{{.T.HomeStepsA1Title}}</h3>
+                        <p class="step-desc">{{.T.HomeStepsA1Desc}}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">2</div>
-                        <h3 class="step-title">Send it</h3>
-                        <p class="step-desc">
-                            Email or share a link.
-                            Your client gets a professional document instantly.
-                        </p>
+                        <h3 class="step-title">{{.T.HomeStepsA2Title}}</h3>
+                        <p class="step-desc">{{.T.HomeStepsA2Desc}}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">3</div>
-                        <h3 class="step-title">Get paid</h3>
-                        <p class="step-desc">
-                            They pay by card.
-                            Money goes straight to your account.
-                        </p>
+                        <h3 class="step-title">{{.T.HomeStepsA3Title}}</h3>
+                        <p class="step-desc">{{.T.HomeStepsA3Desc}}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="steps-divider">or</div>
+            <div class="steps-divider">{{.T.HomeStepsDivider}}</div>
 
-            <!-- PATH B — Quote First -->
+            <!-- PATH B -->
             <div class="steps-path">
-                <div class="steps-path-label">📋 Need approval first — send a quote</div>
+                <div class="steps-path-label">{{.T.HomeStepsPathBLabel}}</div>
                 <div class="steps-grid">
                     <div class="step-card">
                         <div class="step-number">1</div>
-                        <h3 class="step-title">Send a quote</h3>
-                        <p class="step-desc">
-                            Agree on the price before you start.
-                            Client approves with one tap — no account needed.
-                        </p>
+                        <h3 class="step-title">{{.T.HomeStepsB1Title}}</h3>
+                        <p class="step-desc">{{.T.HomeStepsB1Desc}}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">2</div>
-                        <h3 class="step-title">Do the work</h3>
-                        <p class="step-desc">
-                            You have it in writing.
-                            No surprises for either side.
-                        </p>
+                        <h3 class="step-title">{{.T.HomeStepsB2Title}}</h3>
+                        <p class="step-desc">{{.T.HomeStepsB2Desc}}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">3</div>
-                        <h3 class="step-title">Convert and collect</h3>
-                        <p class="step-desc">
-                            One tap turns the approved quote into an invoice.
-                            Send it. Get paid.
-                        </p>
+                        <h3 class="step-title">{{.T.HomeStepsB3Title}}</h3>
+                        <p class="step-desc">{{.T.HomeStepsB3Desc}}</p>
                     </div>
                 </div>
             </div>

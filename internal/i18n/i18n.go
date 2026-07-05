@@ -678,6 +678,36 @@ type T struct {
 	HomeDashClientsSub   string
 	HomeDashSettings     string
 	HomeDashSettingsSub  string
+	// Home — public marketing page
+	HomeEyebrowQuotes    string
+	HomeEyebrowInvoices  string
+	HomeEyebrowPayments  string
+	HomeEyebrowGetPaid   string
+	HomeHeroLine1        string
+	HomeHeroLine2        string
+	HomeHeroSub          string
+	HomeHeroCTA          string
+	HomeHeroSecondaryCTA string
+	HomeHeroNote         string
+	HomeHeroNoteBold     string
+	HomeTrustSend        string
+	HomeTrustSendLabel   string
+	HomeTrustStart       string
+	HomeTrustStartLabel  string
+	HomeTrustPDF         string
+	HomeTrustPDFLabel    string
+	HomeTrustTrackers    string
+	HomeTrustTrackLabel  string
+	HomeTrustStripe      string
+	HomeTrustStripeLabel string
+	HomeICPContractors   string
+	HomeICPPool          string
+	HomeICPLandscapers   string
+	HomeICPPainters      string
+	HomeICPElectricians  string
+	HomeICPHandymen      string
+	HomeICPPhotographers string
+	HomeICPFreelancers   string
 	// Profile — Passkey section
 	ProfilePasskeyTitle         string
 	ProfilePasskeySubtitle      string
