@@ -647,7 +647,7 @@ var es = T{
 	PricingProMaxStripe:        "Acepta pagos con tarjeta vía Stripe",
 	PricingProMaxExpenses:      "Control de gastos",
 	PricingProMaxReports:       "Reportes ilimitados",
-	PricingProMaxRecurring:     "Automatización de facturas recurrentes",
+	PricingProMaxRecurring:     "Automatización recurrente",
 	PricingProMaxReminders:     "Recordatorios automáticos de pago",
 	PricingProMaxTemplates:     "Plantillas avanzadas",
 	PricingProMaxSupport:       "Soporte prioritario del fundador",

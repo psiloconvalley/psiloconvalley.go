@@ -85,6 +85,7 @@
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingFreeClients}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingFreeEmails}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingFreePDF}}</span></li>
+                <li><span class="feat-yes">✓</span><span>Public business page + QR</span></li>
                 <li><span class="feat-no">✗</span><span>{{.T.PricingFreeNoStripe}}</span></li>
                 <li><span class="feat-no">✗</span><span>{{.T.PricingFreeNoExpenses}}</span></li>
                 <li><span class="feat-no">✗</span><span>{{.T.PricingFreeNoReports}}</span></li>
@@ -117,6 +118,8 @@
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProStripe}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProExpenses}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProReports}}</span></li>
+                <li><span class="feat-yes">✓</span><span>Public business page + QR</span></li>
+                <li><span class="feat-yes">✓</span><span>Smart address autocomplete</span></li>
                 <li><span class="feat-no">✗</span><span>{{.T.PricingProRecurring}}</span></li>
                 <li><span class="feat-no">✗</span><span>{{.T.PricingProReminders}}</span></li>
                 <li><span class="feat-no">✗</span><span>{{.T.PricingProTemplates}}</span></li>
@@ -145,7 +148,8 @@
         </div>
 
         {{/* ── PRO MAX ── */}}
-        <div class="pricing-card pro">
+        <div class="pricing-card promax">
+            <div class="popular-badge promax-badge">{{.T.PricingProMaxBadge}}</div>
             <div class="plan-name">{{.T.PricingProMaxTitle}}</div>
             <div class="price">
                 <div class="amount">$28.88</div>
@@ -163,6 +167,8 @@
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxRecurring}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxReminders}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxTemplates}}</span></li>
+                <li><span class="feat-yes">✓</span><span>Public business page + QR</span></li>
+                <li><span class="feat-yes">✓</span><span>Google-powered address autocomplete</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxSupport}}</span></li>
             </ul>
             {{if .User}}
