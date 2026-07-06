@@ -92,7 +92,28 @@
         <div class="controls">
             <form method="POST" action="/profile" enctype="multipart/form-data">
                 {{.csrfField}}
-
+  {{if and .Profile .Profile.Slug}}
+                <div class="section" style="background:rgba(74,222,128,0.04); border:1px solid rgba(74,222,128,0.15); border-radius:12px; padding:20px 24px; margin-bottom:24px;">
+                    <div class="section-title" style="color:#4ade80;">🔗 Your Public Page</div>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" readonly
+                               value="{{$.BaseURL}}/biz/{{.Profile.Slug}}"
+                               id="public-url"
+                               style="flex:1; min-width:200px; padding:10px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; font-size:13px; font-family:monospace;">
+                        <button type="button" onclick="copyPublicURL()"
+                                style="padding:10px 18px; background:#fff; color:#0a0f1a; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;">
+                            Copy Link
+                        </button>
+                        <a href="/biz/{{.Profile.Slug}}" target="_blank"
+                           style="padding:10px 18px; background:transparent; color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;">
+                            Preview →
+                        </a>
+                    </div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:10px;">
+                        Share this link with clients. They can request quotes and pay invoices.
+                    </div>
+                </div>
+                {{end}}
                 <div class="section">
                     <div class="section-title">{{.T.ProfileSectionLogo}}</div>
                     <div class="form-group" style="margin-bottom: 0;">
@@ -430,6 +451,17 @@
 
 <script src="/static/js/password-toggle.js" defer></script>
 <script src="/static/js/address-autocomplete.js"></script>
+<script>
+function copyPublicURL() {
+    var input = document.getElementById('public-url');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(function() {
+        var btn = event.target;
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy Link'; }, 2000);
+    });
+}
+</script>
 
 </body>
 </html>

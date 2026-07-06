@@ -26,6 +26,7 @@ type BusinessProfile struct {
 	TaxID     string
 	Currency  string
 	LogoURL   string
+	Slug      string
 	CreatedAt time.Time
 }
 
@@ -319,4 +320,13 @@ type AuditLog struct {
 	IPAddress  string
 	Metadata   map[string]any
 	CreatedAt  time.Time
+}
+type QuoteRequest struct {
+	ID                int64
+	BusinessProfileID int64
+	ClientName        string
+	ClientPhone       string
+	Description       string
+	Status            string
+	CreatedAt         time.Time
 }

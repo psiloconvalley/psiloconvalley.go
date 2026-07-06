@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{.Profile.Name}} | PsiloConValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{.Profile.Name}} — {{.Location}}. Request a quote or pay an invoice.">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="{{.BaseURL}}/biz/{{.Slug}}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{.Profile.Name}} | PsiloConValley">
+    <meta property="og:description" content="{{.Profile.Name}} — {{.Location}}. Request a quote or pay an invoice.">
+    <meta property="og:url" content="{{.BaseURL}}/biz/{{.Slug}}">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    {{template "public-profile-styles" .}}
+</head>
+<body>
+
+<div class="pp-wrap">
+
+    <!-- ── Business Card ── -->
+    <div class="pp-card">
+        {{if .Profile.LogoURL}}
+        <img src="{{.Profile.LogoURL}}" alt="{{.Profile.Name}}" class="pp-logo">
+        {{end}}
+        <div class="pp-name">{{.Profile.Name}}</div>
+        {{if .Location}}
+        <div class="pp-location">📍 {{.Location}}</div>
+        {{end}}
+        {{if .DisplayPhone}}
+        <div class="pp-contact">📞 <a href="tel:{{.Profile.Phone}}">{{.DisplayPhone}}</a></div>
+        {{end}}
+        {{if .Profile.Email}}
+        <div class="pp-contact">📧 <a href="mailto:{{.Profile.Email}}">{{.Profile.Email}}</a></div>
+        {{end}}
+    </div>
+
+    <!-- ── Request a Quote ── -->
+    <div class="pp-section">
+        <div class="pp-section-title">
+            <span class="pp-section-icon">💬</span>
+            Request a Quote
+        </div>
+
+        {{if .QuoteSuccess}}
+        <div class="pp-success">{{.QuoteSuccess}}</div>
+        {{end}}
+
+        {{if .QuoteError}}
+        <div class="pp-error">{{.QuoteError}}</div>
+        {{end}}
+
+        {{if not .QuoteSuccess}}
+        <form method="POST" action="/biz/{{.Slug}}/quote">
+            {{.csrfField}}
+            <input type="text" name="client_name" class="pp-input"
+                   placeholder="Your name" required>
+            <input type="tel" name="client_phone" class="pp-input"
+                   placeholder="Phone number">
+            <textarea name="description" class="pp-textarea"
+                      placeholder="What do you need done?"></textarea>
+            <button type="submit" class="pp-btn pp-btn-green">Send Request</button>
+        </form>
+        {{end}}
+    </div>
+
+    <!-- ── Pay an Invoice ── -->
+    <div class="pp-section">
+        <div class="pp-section-title">
+            <span class="pp-section-icon">💳</span>
+            Pay an Invoice
+        </div>
+
+        {{if .InvoiceError}}
+        <div class="pp-error">Invoice not found. Please check your invoice number and phone.</div>
+        {{end}}
+
+        <form method="POST" action="/biz/{{.Slug}}/invoice">
+            {{.csrfField}}
+            <input type="text" name="invoice_number" class="pp-input"
+                   placeholder="Invoice number (e.g. INV-0042)" required>
+            <input type="tel" name="client_phone" class="pp-input"
+                   placeholder="Your phone number">
+            <button type="submit" class="pp-btn pp-btn-primary">Find Invoice</button>
+        </form>
+    </div>
+
+    <!-- ── Branding Footer ── -->
+    <div class="pp-branding">
+        <div class="pp-branding-text">Professional invoicing by PsiloConValley</div>
+        <a href="/register" class="pp-branding-link">Create Your Business Page →</a>
+    </div>
+
+</div>
+
+</body>
+</html>

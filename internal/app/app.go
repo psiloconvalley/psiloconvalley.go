@@ -49,6 +49,7 @@ type App struct {
 	UsageRepo  *repo.UsageRepo
 	PasskeyRepo *repo.PasskeyRepo
 	AddressService *address.Service
+	QuoteRequestRepo *repo.QuoteRequestRepo
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
@@ -150,6 +151,7 @@ func NewApp(db *sql.DB) *App {
 		ExpenseRepo:       repo.NewExpenseRepo(db),
 		AuditRepo: 	   repo.NewAuditRepo(db),
 		UsageRepo:  	   repo.NewUsageRepo(db),
+		QuoteRequestRepo: repo.NewQuoteRequestRepo(db),
 		PasskeyRepo: repo.NewPasskeyRepo(db),
 	}
 }

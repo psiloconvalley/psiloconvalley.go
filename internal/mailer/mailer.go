@@ -897,3 +897,18 @@ func (m *Mailer) SendMagicLink(toEmail, link string) error {
 	log.Printf("[mailer] magic link sent to %s", toEmail)
 	return nil
 }
+
+// SendNotification sends a plain-text email notification.
+// Used for quote requests and other system notifications.
+func (m *Mailer) SendNotification(toEmail, subject, body string) error {
+	if m.client == nil {
+		return nil
+	}
+	_, err := m.client.Emails.Send(&resend.SendEmailRequest{
+		From:    m.from,
+		To:      []string{toEmail},
+		Subject: subject,
+		Text:    body,
+	})
+	return err
+}

@@ -69,6 +69,10 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	// ── Public estimate response routes ───────────────────────────
 	r.Get("/estimates/{id}/respond", h.EstimateRespondGet)
 	r.Post("/estimates/{id}/respond", h.EstimateRespondPost)
+	// ── Public business profile ──────────────────────────────────────
+	r.Get("/biz/{slug}", h.PublicProfileGet)
+	r.Post("/biz/{slug}/quote", h.PublicQuotePost)
+	r.Post("/biz/{slug}/invoice", h.PublicInvoiceLookupPost)
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)

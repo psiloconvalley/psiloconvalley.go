@@ -47,6 +47,7 @@ h.App.Render(w, r, "profile.tmpl", map[string]any{
    "PasswordError":   r.URL.Query().Get("pw_error"),
    "Passkeys":        passkeys,
    "PasskeyDeleted":  r.URL.Query().Get("passkey_deleted") == "true",
+   "BaseURL":         h.App.BaseURL,
 })
 }
 
