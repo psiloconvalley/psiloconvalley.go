@@ -26,12 +26,20 @@
         {{if .Location}}
         <div class="pp-location">📍 {{.Location}}</div>
         {{end}}
-        {{if .DisplayPhone}}
-        <div class="pp-contact">📞 <a href="tel:{{.Profile.Phone}}">{{.DisplayPhone}}</a></div>
-        {{end}}
-        {{if .Profile.Email}}
-        <div class="pp-contact">📧 <a href="mailto:{{.Profile.Email}}">{{.Profile.Email}}</a></div>
-        {{end}}
+        <div class="pp-contact-row">
+            {{if .DisplayPhone}}
+            <a href="tel:{{.Profile.Phone}}" class="pp-contact-btn">
+                <span class="pp-contact-icon">📞</span>
+                {{.DisplayPhone}}
+            </a>
+            {{end}}
+            {{if .Profile.Email}}
+            <a href="mailto:{{.Profile.Email}}" class="pp-contact-btn">
+                <span class="pp-contact-icon">📧</span>
+                {{.Profile.Email}}
+            </a>
+            {{end}}
+        </div>
     </div>
 
     <!-- ── Request a Quote ── -->
@@ -42,7 +50,7 @@
         </div>
 
         {{if .QuoteSuccess}}
-        <div class="pp-success">{{.QuoteSuccess}}</div>
+        <div class="pp-success">✓ {{.QuoteSuccess}}</div>
         {{end}}
 
         {{if .QuoteError}}
@@ -50,15 +58,28 @@
         {{end}}
 
         {{if not .QuoteSuccess}}
-        <form method="POST" action="/biz/{{.Slug}}/quote">
+        <form method="POST" action="/biz/{{.Slug}}/quote" autocomplete="on">
             {{.csrfField}}
-            <input type="text" name="client_name" class="pp-input"
-                   placeholder="Your name" required>
-            <input type="tel" name="client_phone" class="pp-input"
-                   placeholder="Phone number">
-            <textarea name="description" class="pp-textarea"
-                      placeholder="What do you need done?"></textarea>
-            <button type="submit" class="pp-btn pp-btn-green">Send Request</button>
+            <div class="pp-field">
+                <label class="pp-label" for="qr-name">Your Name</label>
+                <input type="text" name="client_name" id="qr-name" class="pp-input"
+                       placeholder="John Smith"
+                       autocomplete="name"
+                       required>
+            </div>
+            <div class="pp-field">
+                <label class="pp-label" for="qr-phone">Phone Number</label>
+                <input type="tel" name="client_phone" id="qr-phone" class="pp-input"
+                       placeholder="(555) 123-4567"
+                       autocomplete="tel"
+                       inputmode="tel">
+            </div>
+            <div class="pp-field">
+                <label class="pp-label" for="qr-desc">What do you need?</label>
+                <textarea name="description" id="qr-desc" class="pp-textarea"
+                          placeholder="Describe the work you need done..."></textarea>
+            </div>
+            <button type="submit" class="pp-btn pp-btn-green">Send Request →</button>
         </form>
         {{end}}
     </div>
@@ -74,20 +95,29 @@
         <div class="pp-error">Invoice not found. Please check your invoice number and phone.</div>
         {{end}}
 
-        <form method="POST" action="/biz/{{.Slug}}/invoice">
+        <form method="POST" action="/biz/{{.Slug}}/invoice" autocomplete="on">
             {{.csrfField}}
-            <input type="text" name="invoice_number" class="pp-input"
-                   placeholder="Invoice number (e.g. INV-0042)" required>
-            <input type="tel" name="client_phone" class="pp-input"
-                   placeholder="Your phone number">
-            <button type="submit" class="pp-btn pp-btn-green">Find Invoice</button>
+            <div class="pp-field">
+                <label class="pp-label" for="inv-num">Invoice Number</label>
+                <input type="text" name="invoice_number" id="inv-num" class="pp-input"
+                       placeholder="INV-0042"
+                       required>
+            </div>
+            <div class="pp-field">
+                <label class="pp-label" for="inv-phone">Your Phone Number</label>
+                <input type="tel" name="client_phone" id="inv-phone" class="pp-input"
+                       placeholder="(555) 123-4567"
+                       autocomplete="tel"
+                       inputmode="tel">
+            </div>
+            <button type="submit" class="pp-btn pp-btn-green">Find Invoice →</button>
         </form>
     </div>
 
     <!-- ── Branding Footer ── -->
     <div class="pp-branding">
         <div class="pp-branding-text">Professional invoicing by PsiloConValley</div>
-    <a href="/register" class="pp-branding-link">Create Your Business Page →</a>
+        <a href="/register" class="pp-branding-link">Create Your Business Page →</a>
     </div>
 
 </div>
