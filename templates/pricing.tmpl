@@ -102,7 +102,7 @@
         </div>
 
         {{/* ── PRO ── */}}
-        <div class="pricing-card growth">
+        <div class="pricing-card popular">
             <div class="popular-badge">Most Popular</div>
             <div class="plan-name">{{.T.PricingProTitle}}</div>
             <div class="price">
@@ -137,12 +137,12 @@
                     <form method="POST" action="/checkout" class="cta-form">
                         {{.csrfField}}
                         <input type="hidden" name="plan" value="pro">
-                        <button type="submit" class="btn btn-growth">{{.T.PricingProUpgrade}}</button>
+                        <button type="submit" class="btn btn-pro">{{.T.PricingProUpgrade}}</button>
                     </form>
                 {{end}}
             {{else}}
                 <div class="cta-actions">
-                    <a href="/register" class="btn btn-growth">{{.T.PricingProCtaRegister}}</a>
+                    <a href="/register" class="btn btn-pro">{{.T.PricingProCtaRegister}}</a>
                 </div>
             {{end}}
         </div>
