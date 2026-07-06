@@ -103,6 +103,48 @@
             Scan to visit this page
         </div>
     </div>
+     {{if or .Profile.ZelleID .Profile.VenmoHandle .Profile.CashAppHandle}}
+    <!-- ── Quick Pay ── -->
+    <div class="pp-section">
+        <div class="pp-section-title">
+            <span>💸</span> Quick Pay
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            {{if .Profile.ZelleID}}
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px;">
+                <div>
+                    <div style="font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); margin-bottom:2px;">Zelle</div>
+                    <div style="font-size:14px; color:#fff;">{{.Profile.ZelleID}}</div>
+                </div>
+                <button type="button" onclick="copyText('{{.Profile.ZelleID}}', this)"
+                        style="padding:8px 14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:6px; color:rgba(255,255,255,0.6); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;">
+                    Copy
+                </button>
+            </div>
+            {{end}}
+            {{if .Profile.VenmoHandle}}
+            <a href="https://venmo.com/{{.Profile.VenmoHandle}}" target="_blank" rel="noopener"
+               style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; text-decoration:none; color:inherit;">
+                <div>
+                    <div style="font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); margin-bottom:2px;">Venmo</div>
+                    <div style="font-size:14px; color:#fff;">{{.Profile.VenmoHandle}}</div>
+                </div>
+                <span style="font-size:13px; color:#4ade80; font-weight:600;">Open →</span>
+            </a>
+            {{end}}
+            {{if .Profile.CashAppHandle}}
+            <a href="https://cash.app/{{.Profile.CashAppHandle}}" target="_blank" rel="noopener"
+               style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; text-decoration:none; color:inherit;">
+                <div>
+                    <div style="font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); margin-bottom:2px;">Cash App</div>
+                    <div style="font-size:14px; color:#fff;">{{.Profile.CashAppHandle}}</div>
+                </div>
+                <span style="font-size:13px; color:#4ade80; font-weight:600;">Open →</span>
+            </a>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
     <!-- ── Branding ── -->
     <div class="pp-branding">
         <div class="pp-branding-text">Professional invoicing by PsiloConValley</div>
@@ -110,6 +152,13 @@
     </div>
 
 </div>
-
+<script>
+function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    });
+}
+</script>
 </body>
 </html>

@@ -90,11 +90,15 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 			}
 			return c
 		}(),
+		ZelleID:       strings.TrimSpace(r.FormValue("zelle_id")),
+		VenmoHandle:   strings.TrimSpace(r.FormValue("venmo_handle")),
+		CashAppHandle: strings.TrimSpace(r.FormValue("cashapp_handle")),
 	}
 
 	// Preserve existing logo by default
 	if existing != nil {
 		p.LogoURL = existing.LogoURL
+		p.Slug = existing.Slug
 	}
 
 	// ============================================================

@@ -202,6 +202,32 @@
                         </div>
                     </div>
                 </div>
+  <div class="section">
+                    <div class="section-title">💸 Quick Pay Links</div>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:14px;">
+                        Add your payment handles so clients can pay you directly from your public page.
+                    </div>
+                    <div class="form-group">
+                        <label>Zelle (email or phone)</label>
+                        <input type="text" name="zelle_id"
+                               value="{{if .Profile}}{{.Profile.ZelleID}}{{end}}"
+                               placeholder="your@email.com or (555) 123-4567">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Venmo @handle</label>
+                            <input type="text" name="venmo_handle"
+                                   value="{{if .Profile}}{{.Profile.VenmoHandle}}{{end}}"
+                                   placeholder="@your-username">
+                        </div>
+                        <div class="form-group">
+                            <label>Cash App $tag</label>
+                            <input type="text" name="cashapp_handle"
+                                   value="{{if .Profile}}{{.Profile.CashAppHandle}}{{end}}"
+                                   placeholder="$yourtag">
+                        </div>
+                    </div>
+                </div>
 
                 <div class="section">
                     <div class="section-title">{{.T.ProfileSectionPayment}}</div>

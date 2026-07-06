@@ -27,6 +27,9 @@ type BusinessProfile struct {
 	Currency  string
 	LogoURL   string
 	Slug      string
+	ZelleID       string
+	VenmoHandle   string
+	CashAppHandle string
 	CreatedAt time.Time
 }
 
