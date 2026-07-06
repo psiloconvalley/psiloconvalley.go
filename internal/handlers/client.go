@@ -30,7 +30,10 @@ func (h *Handlers) ClientsList(w http.ResponseWriter, r *http.Request) {
 	h.App.Render(w, r, "clients_list.tmpl", map[string]any{
 		"Clients":      clients,
 		"ClientCount":  count,
-		"AtLimit": !isPro(user.Plan) && count >= clientLimitFor(user.Plan),
+		"AtLimit": !catalog.IsUnlimited(user.ID, user.Plan) && count >= func() int {
+			if catalog.IsPro(user.Plan) { return catalog.ProClientLimit }
+			return catalog.FreeClientLimit
+		}(),
 		"CanAddClient": h.canAddClient(r),
 		"saved":        r.URL.Query().Get("saved") == "true",
 	})

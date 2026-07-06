@@ -38,7 +38,7 @@ type App struct {
 	Mailer        *mailer.Mailer
 	BaseURL       string
 	StripePrice   string
-	StripeGrowthPrice string
+	StripeProMaxPrice string
 	SchedulerRepo *repo.SchedulerRepo
 	Scheduler     *scheduler.Scheduler
 	LogoStore     logo.Store
@@ -101,8 +101,8 @@ func NewApp(db *sql.DB) *App {
 	}
 
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
-	stripeGrowthPrice := os.Getenv("STRIPE_GROWTH_PRICE_ID")
 	stripePrice := os.Getenv("STRIPE_PRICE_ID")
+	stripeProMaxPrice := os.Getenv("STRIPE_PROMAX_PRICE_ID")
 
 	schedRepo := repo.NewSchedulerRepo(db)
 	sched := scheduler.New(schedRepo, 60*time.Second)
@@ -142,7 +142,7 @@ func NewApp(db *sql.DB) *App {
 		Mailer:            mailer.New(),
 		BaseURL:           baseURL,
 		StripePrice:       stripePrice,
-		StripeGrowthPrice: stripeGrowthPrice,
+		StripeProMaxPrice: stripeProMaxPrice,
 		SchedulerRepo:     schedRepo,
 		Scheduler:         sched,
 		LogoStore:         newLogoStore(baseURL),

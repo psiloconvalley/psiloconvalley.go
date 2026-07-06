@@ -1,4 +1,7 @@
 // internal/handlers/limits.go
+// Plan limit enforcement — the single source of truth for quota checks.
+// All plan constants and helpers live in internal/catalog/plans.go.
+// This file only contains the handler-level enforcement logic.
 package handlers
 
 import (
@@ -6,169 +9,96 @@ import (
 	"net/http"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
 )
 
-// ── Plan limits ──────────────────────────────────────────────────────
-// All business rules in one place. A product decision to change any
-// tier limit is a one-line diff.
-//
-// Locked pricing matrix (June 2025):
-//   Feature        Free    Growth($8.88)   Pro($18.88)
-//   Invoices       5/mo    15/mo           Unlimited
-//   Sends          3/mo    15/mo           Unlimited
-//   Clients        5       15              Unlimited
-//   Estimates      3/mo    15/mo           Unlimited
-//   Reports        0       1/mo            Unlimited
-//   Expenses       ✗       ✓               ✓
-//   Recurring      ✗       ✗               ✓
-//   Reminders      ✗       ✗               ✓
-//   Stripe pay     ✗       ✓               ✓
-//   Adv templates  ✗       ✗               ✓
-
-const (
-	freeInvoiceLimit  = 5
-	freeSendLimit     = 3
-	freeClientLimit   = 5
-	freeEstimateLimit = 3
-	freeReportLimit   = 0
-
-	growthInvoiceLimit  = 15
-	growthSendLimit     = 15
-	growthClientLimit   = 15
-	growthEstimateLimit = 15
-	growthReportLimit   = 1
-)
-
-// ── Plan helpers ─────────────────────────────────────────────────────
-
-func isPro(plan string) bool    { return plan == "pro" }
-func isGrowth(plan string) bool { return plan == "growth" }
-func isPaid(plan string) bool   { return plan == "growth" || plan == "pro" }
-
-func clientLimitFor(plan string) int {
-	if isPro(plan) {
-		return 0
-	}
-	if isGrowth(plan) {
-		return growthClientLimit
-	}
-	return freeClientLimit
-}
-
-func invoiceLimitFor(plan string) int {
-	if isPro(plan) {
-		return 0
-	}
-	if isGrowth(plan) {
-		return growthInvoiceLimit
-	}
-	return freeInvoiceLimit
-}
-
 // ── Core metering helper ─────────────────────────────────────────────
-//
-// usageAllowed is the single source of truth for monthly quota checks.
-//
 // Failure posture: fail-open on meter read errors.
 // Quota checks are commercial controls, not security boundaries.
-// A broken meter must never block a legitimate paying user.
-//
-// Returns true if the action is allowed.
-func (h *Handlers) usageAllowed(r *http.Request, feature string, freeLimit, growthLimit int) bool {
+func (h *Handlers) usageAllowed(r *http.Request, feature string, freeLimit, proLimit int) bool {
 	user := auth.GetUser(r)
 	if user == nil {
 		return false
 	}
-	if isPro(user.Plan) {
+	if catalog.IsUnlimited(user.ID, user.Plan) {
 		return true
 	}
 
 	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, feature)
 	if err != nil {
-		// Fail open — meter read error must never block a legitimate user.
-		// Quota checks are commercial controls, not security boundaries.
-		// The warning log ensures the underlying issue is visible in Railway.
 		slog.Warn("usage meter read failed, allowing user",
 			"feature", feature,
 			"user_id", user.ID,
 			"err", err,
 		)
-		return true
+		return true // fail open
 	}
 
 	limit := freeLimit
-	if isGrowth(user.Plan) {
-		limit = growthLimit
+	if catalog.IsPro(user.Plan) {
+		limit = proLimit
+	}
+	if limit == 0 {
+		return true // 0 = unlimited for this feature at this tier
 	}
 	return count < limit
 }
 
 // ── Client limit ─────────────────────────────────────────────────────
-// Uses ClientRepo.CountByUserID (not UsageRepo) — total count, not monthly.
-// Same fail-open posture as usageAllowed.
-
 func (h *Handlers) canAddClient(r *http.Request) bool {
 	user := auth.GetUser(r)
 	if user == nil {
 		return false
 	}
-	if isPro(user.Plan) {
+	if catalog.IsUnlimited(user.ID, user.Plan) {
 		return true
 	}
 
 	count, err := h.App.ClientRepo.CountByUserID(r.Context(), user.ID)
 	if err != nil {
 		slog.Warn("client count read failed, allowing user",
-			"user_id", user.ID,
-			"err", err,
-		)
+			"user_id", user.ID, "err", err)
 		return true
 	}
 
-	limit := freeClientLimit
-	if isGrowth(user.Plan) {
-		limit = growthClientLimit
+	limit := catalog.FreeClientLimit
+	if catalog.IsPro(user.Plan) {
+		limit = catalog.ProClientLimit
 	}
 	return count < limit
 }
 
 // ── Metered feature gates ────────────────────────────────────────────
-// Each function is a thin wrapper around usageAllowed.
-// Policy lives in usageAllowed — not here.
 
-// hasReachedLimit returns true when the user cannot create another invoice.
-// Inverted style kept for backwards compatibility with existing callers.
 func (h *Handlers) hasReachedLimit(r *http.Request) bool {
 	user := auth.GetUser(r)
 	if user == nil {
 		return auth.AnonLimitReached(r)
 	}
-	return !h.usageAllowed(r, "invoices", freeInvoiceLimit, growthInvoiceLimit)
+	return !h.usageAllowed(r, "invoices", catalog.FreeInvoiceLimit, catalog.ProInvoiceLimit)
 }
 
 func (h *Handlers) canSendInvoice(r *http.Request) bool {
-	return h.usageAllowed(r, "sends", freeSendLimit, growthSendLimit)
+	return h.usageAllowed(r, "sends", catalog.FreeSendLimit, catalog.ProSendLimit)
 }
 
 func (h *Handlers) canCreateEstimate(r *http.Request) bool {
-	return h.usageAllowed(r, "estimates", freeEstimateLimit, growthEstimateLimit)
+	return h.usageAllowed(r, "estimates", catalog.FreeEstimateLimit, catalog.ProEstimateLimit)
 }
 
 func (h *Handlers) canViewReport(r *http.Request) bool {
-	return h.usageAllowed(r, "reports", freeReportLimit, growthReportLimit)
+	return h.usageAllowed(r, "reports", catalog.FreeReportLimit, catalog.ProReportLimit)
 }
 
 // ── Feature gates (boolean, no counting) ─────────────────────────────
-// These are entitlement checks, not quota checks.
-// Fail-closed is correct here — plan must be confirmed.
 
 func (h *Handlers) canAccessExpenses(r *http.Request) bool {
 	user := auth.GetUser(r)
 	if user == nil {
 		return false
 	}
-	return isPaid(user.Plan)
+	return catalog.IsPaid(user.Plan)
 }
 
 func (h *Handlers) canAccessRecurring(r *http.Request) bool {
@@ -176,7 +106,7 @@ func (h *Handlers) canAccessRecurring(r *http.Request) bool {
 	if user == nil {
 		return false
 	}
-	return isPro(user.Plan)
+	return catalog.HasAutomation(user.ID, user.Plan)
 }
 
 func (h *Handlers) canAccessStripePayments(r *http.Request) bool {
@@ -184,36 +114,29 @@ func (h *Handlers) canAccessStripePayments(r *http.Request) bool {
 	if user == nil {
 		return false
 	}
-	return isPaid(user.Plan)
+	return catalog.IsPaid(user.Plan)
 }
 
 // ── Invoice access control ────────────────────────────────────────────
-// These are security/authorization boundaries.
-// Fail-closed is correct here — uncertain access must be denied.
 
 func (h *Handlers) canAccessInvoice(r *http.Request, inv *repo.Invoice) bool {
 	if inv == nil {
 		return false
 	}
-
 	user := auth.GetUser(r)
-
 	if inv.UserID != nil {
 		if user == nil {
 			return false
 		}
 		return user.ID == *inv.UserID
 	}
-
 	if user != nil {
 		return false
 	}
-
 	anonToken, ok := auth.GetAnonymousToken(r)
 	if !ok || anonToken == "" || inv.AnonymousToken == "" {
 		return false
 	}
-
 	return anonToken == inv.AnonymousToken
 }
 
@@ -221,25 +144,21 @@ func (h *Handlers) canViewInvoice(r *http.Request, inv *repo.Invoice) bool {
 	if inv == nil {
 		return false
 	}
-
 	user := auth.GetUser(r)
 	if inv.UserID != nil && user != nil && user.ID == *inv.UserID {
 		return true
 	}
-
 	if inv.AnonymousToken != "" {
 		anonToken, ok := auth.GetAnonymousToken(r)
 		if ok && anonToken == inv.AnonymousToken {
 			return true
 		}
 	}
-
 	if inv.PublicToken != "" {
 		accessToken := r.URL.Query().Get("access")
 		if accessToken != "" && accessToken == inv.PublicToken {
 			return true
 		}
 	}
-
 	return false
 }

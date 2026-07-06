@@ -108,10 +108,15 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 
 		// Determine plan from metadata — default to "pro" for backwards compat
 		newPlan := cs.Metadata["plan"]
-		if newPlan != "growth" && newPlan != "pro" {
+		switch newPlan {
+		case "pro", "promax":
+			// valid — keep as-is
+		case "growth":
+			newPlan = "pro" // legacy compatibility
+		default:
 			newPlan = "pro"
 		}
-
+	
 		if err := h.App.UserRepo.UpdateUserPlan(r.Context(), userID, newPlan); err != nil {
 			slog.Error("stripe plan upgrade failed", "err", err, "user_id", userID, "plan", newPlan)
 			http.Error(w, "Failed to update user plan", http.StatusInternalServerError)

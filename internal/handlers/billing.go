@@ -51,8 +51,10 @@ func (h *Handlers) CheckoutPost(w http.ResponseWriter, r *http.Request) {
 
 	var priceID string
 	switch plan {
-	case "growth":
-		priceID = h.App.StripeGrowthPrice
+	case "promax":
+		priceID = h.App.StripeProMaxPrice
+	case "pro":
+		priceID = h.App.StripePrice
 	default:
 		plan = "pro"
 		priceID = h.App.StripePrice

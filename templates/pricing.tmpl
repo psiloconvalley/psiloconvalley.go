@@ -3,14 +3,14 @@
 <head>
     <title>Pricing | Psiloconvalley</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free invoicing to start. Growth at $8.88/mo. Pro at $18.88/mo. Scale when you are ready.">
+    <meta name="description" content="Free invoicing to start. Pro at $18.88/mo. Pro Max at $28.88/mo unlimited.">
     <meta name="robots" content="index,follow">
     <link rel="canonical" href="https://psiloconvalley.com/pricing">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="PsiloConValley">
     <meta property="og:url" content="https://psiloconvalley.com/pricing">
     <meta property="og:title" content="Pricing | PsiloConValley">
-    <meta property="og:description" content="Free invoicing to start. Growth at $8.88/mo founding rate. Pro at $18.88/mo unlimited.">
+    <meta property="og:description" content="Free invoicing to start. Pro at $18.88/mo. Pro Max at $28.88/mo unlimited.">
     <meta property="og:image" content="https://psiloconvalley.com/og/default.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -100,50 +100,9 @@
             {{end}}
         </div>
 
-        {{/* ── GROWTH ── */}}
-        <div class="pricing-card growth">
-            <div class="popular-badge">{{.T.PricingGrowthBadge}}</div>
-            <div class="plan-name">{{.T.PricingGrowthTitle}}</div>
-            <div class="price">
-                <div class="amount">$8.88</div>
-                <div class="unit">{{.T.PricingGrowthUnit}}</div>
-            </div>
-            <div class="founding-tag">{{.T.PricingGrowthFoundingTag}}</div>
-            <div class="subtext">{{.T.PricingGrowthSub}}</div>
-            <ul class="features">
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthInvoices}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthEstimates}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthClients}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthEmails}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthStripe}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthExpenses}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingGrowthReports}}</span></li>
-            </ul>
-            {{if .User}}
-                {{if eq .User.Plan "growth"}}
-                    <form method="POST" action="/billing/portal" class="cta-form">
-                        {{.csrfField}}
-                        <button type="submit" class="btn btn-secondary">{{.T.PricingGrowthManageBilling}}</button>
-                    </form>
-                    <div class="plan-state">{{.T.PricingGrowthCurrentPlan}}</div>
-                {{else if eq .User.Plan "pro"}}
-                    <div class="plan-state">{{.T.PricingGrowthAlreadyPro}}</div>
-                {{else}}
-                    <form method="POST" action="/checkout" class="cta-form">
-                        {{.csrfField}}
-                        <input type="hidden" name="plan" value="growth">
-                        <button type="submit" class="btn btn-growth">{{.T.PricingGrowthUpgrade}}</button>
-                    </form>
-                {{end}}
-            {{else}}
-                <div class="cta-actions">
-                    <a href="/register" class="btn btn-growth">{{.T.PricingGrowthCtaRegister}}</a>
-                </div>
-            {{end}}
-        </div>
-
         {{/* ── PRO ── */}}
-        <div class="pricing-card pro">
+        <div class="pricing-card growth">
+            <div class="popular-badge">Most Popular</div>
             <div class="plan-name">{{.T.PricingProTitle}}</div>
             <div class="price">
                 <div class="amount">$18.88</div>
@@ -158,28 +117,71 @@
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProStripe}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProExpenses}}</span></li>
                 <li><span class="feat-yes">✓</span><span>{{.T.PricingProReports}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingProRecurring}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingProReminders}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingProTemplates}}</span></li>
-                <li><span class="feat-yes">✓</span><span>{{.T.PricingProSupport}}</span></li>
+                <li><span class="feat-no">✗</span><span>{{.T.PricingProRecurring}}</span></li>
+                <li><span class="feat-no">✗</span><span>{{.T.PricingProReminders}}</span></li>
+                <li><span class="feat-no">✗</span><span>{{.T.PricingProTemplates}}</span></li>
             </ul>
             {{if .User}}
-                {{if eq .User.Plan "pro"}}
+                {{if or (eq .User.Plan "pro") (eq .User.Plan "growth")}}
                     <form method="POST" action="/billing/portal" class="cta-form">
                         {{.csrfField}}
                         <button type="submit" class="btn btn-secondary">{{.T.PricingProManageBilling}}</button>
                     </form>
                     <div class="plan-state">{{.T.PricingProCurrentPlan}}</div>
+                {{else if eq .User.Plan "promax"}}
+                    <div class="plan-state">{{.T.PricingProMaxAlreadyMax}}</div>
                 {{else}}
                     <form method="POST" action="/checkout" class="cta-form">
                         {{.csrfField}}
                         <input type="hidden" name="plan" value="pro">
-                        <button type="submit" class="btn btn-primary">{{.T.PricingProUpgrade}}</button>
+                        <button type="submit" class="btn btn-growth">{{.T.PricingProUpgrade}}</button>
                     </form>
                 {{end}}
             {{else}}
                 <div class="cta-actions">
-                    <a href="/register" class="btn btn-primary">{{.T.PricingProCtaRegister}}</a>
+                    <a href="/register" class="btn btn-growth">{{.T.PricingProCtaRegister}}</a>
+                </div>
+            {{end}}
+        </div>
+
+        {{/* ── PRO MAX ── */}}
+        <div class="pricing-card pro">
+            <div class="plan-name">{{.T.PricingProMaxTitle}}</div>
+            <div class="price">
+                <div class="amount">$28.88</div>
+                <div class="unit">{{.T.PricingProMaxUnit}}</div>
+            </div>
+            <div class="subtext">{{.T.PricingProMaxSub}}</div>
+            <ul class="features">
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxInvoices}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxEstimates}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxClients}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxEmails}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxStripe}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxExpenses}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxReports}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxRecurring}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxReminders}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxTemplates}}</span></li>
+                <li><span class="feat-yes">✓</span><span>{{.T.PricingProMaxSupport}}</span></li>
+            </ul>
+            {{if .User}}
+                {{if eq .User.Plan "promax"}}
+                    <form method="POST" action="/billing/portal" class="cta-form">
+                        {{.csrfField}}
+                        <button type="submit" class="btn btn-secondary">{{.T.PricingProMaxManageBilling}}</button>
+                    </form>
+                    <div class="plan-state">{{.T.PricingProMaxCurrentPlan}}</div>
+                {{else}}
+                    <form method="POST" action="/checkout" class="cta-form">
+                        {{.csrfField}}
+                        <input type="hidden" name="plan" value="promax">
+                        <button type="submit" class="btn btn-primary">{{.T.PricingProMaxUpgrade}}</button>
+                    </form>
+                {{end}}
+            {{else}}
+                <div class="cta-actions">
+                    <a href="/register" class="btn btn-primary">{{.T.PricingProMaxCtaRegister}}</a>
                     <a href="/login" class="btn btn-secondary">{{.T.PricingProCtaLogin}}</a>
                 </div>
             {{end}}

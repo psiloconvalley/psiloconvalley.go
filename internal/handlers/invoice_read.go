@@ -110,8 +110,12 @@ func (h *Handlers) InvoicesList(w http.ResponseWriter, r *http.Request) {
 		"Invoices":     invoices,
 		"User":         user,
 		"MonthlyCount": monthlyCount,
-		"MonthlyLimit": invoiceLimitFor(user.Plan),
-		"IsPro":        user.Plan == "pro",
+		"MonthlyLimit": func() int {
+			if catalog.IsUnlimited(user.ID, user.Plan) { return 0 }
+			if catalog.IsPro(user.Plan) { return catalog.ProInvoiceLimit }
+			return catalog.FreeInvoiceLimit
+		}(),
+		"IsPro": catalog.IsUnlimited(user.ID, user.Plan),
 		"Deleted":      r.URL.Query().Get("deleted") == "true",
 	})
 }

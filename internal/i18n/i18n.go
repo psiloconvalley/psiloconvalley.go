@@ -655,7 +655,27 @@ type T struct {
 	PricingProUpgrade       string
 	PricingProCtaRegister   string
 	PricingProCtaLogin      string
-
+	// Pricing page — Pro Max card
+	PricingProMaxBadge         string
+	PricingProMaxTitle         string
+	PricingProMaxUnit          string
+	PricingProMaxSub           string
+	PricingProMaxInvoices      string
+	PricingProMaxEstimates     string
+	PricingProMaxClients       string
+	PricingProMaxEmails        string
+	PricingProMaxStripe        string
+	PricingProMaxExpenses      string
+	PricingProMaxReports       string
+	PricingProMaxRecurring     string
+	PricingProMaxReminders     string
+	PricingProMaxTemplates     string
+	PricingProMaxSupport       string
+	PricingProMaxManageBilling string
+	PricingProMaxCurrentPlan   string
+	PricingProMaxUpgrade       string
+	PricingProMaxCtaRegister   string
+	PricingProMaxAlreadyMax    string
 	// Pricing page — Enterprise callout
 	PricingEntTitle string
 	PricingEntSub   string
@@ -666,6 +686,7 @@ type T struct {
 	HomeDashPlanFree     string
 	HomeDashPlanGrowth   string
 	HomeDashPlanPro      string
+	HomeDashPlanProMax   string
 	HomeDashRevenue      string
 	HomeDashOutstanding  string
 	HomeDashOverdue      string
