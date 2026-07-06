@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	qrcode  "github.com/skip2/go-qrcode"
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
 )
@@ -229,4 +229,32 @@ func buildLocation(city, state string) string {
 }
 
 // Suppress unused import warnings
-var _ = strconv.FormatInt
+// PublicProfileQR serves a QR code PNG for the business profile URL.
+// GET /biz/{slug}/qr.png
+func (h *Handlers) PublicProfileQR(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+	if slug == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Verify the slug exists
+	_, err := h.App.BizRepo.GetBySlug(r.Context(), slug)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	profileURL := h.App.BaseURL + "/biz/" + slug
+
+	png, err := qrcode.Encode(profileURL, qrcode.Medium, 512)
+	if err != nil {
+		slog.Error("qr code generation failed", "err", err, "slug", slug)
+		http.Error(w, "QR generation failed", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.Write(png)
+}

@@ -73,6 +73,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Get("/biz/{slug}", h.PublicProfileGet)
 	r.Post("/biz/{slug}/quote", h.PublicQuotePost)
 	r.Post("/biz/{slug}/invoice", h.PublicInvoiceLookupPost)
+	r.Get("/biz/{slug}/qr.png", h.PublicProfileQR)
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
