@@ -134,25 +134,30 @@
                     <div class="section-title">{{.T.ProfileSectionAddress}}</div>
                     <div class="form-group">
                         <label>{{.T.ProfileStreetAddress}}</label>
-                        <input type="text" name="address" value="{{if .Profile}}{{.Profile.Address}}{{end}}">
+		    <input type="text" name="address" value="{{if .Profile}}{{.Profile.Address}}{{end}}"
+       data-address-autocomplete>
                     </div>
                     <div class="grid-3">
                         <div class="form-group">
                             <label>{{.T.ProfileCity}}</label>
-                            <input type="text" name="city" value="{{if .Profile}}{{.Profile.City}}{{end}}">
+			<input type="text" name="city" value="{{if .Profile}}{{.Profile.City}}{{end}}"
+       data-address-city>
                         </div>
                         <div class="form-group">
                             <label>{{.T.ProfileStateRegion}}</label>
-                            <input type="text" name="state" value="{{if .Profile}}{{.Profile.State}}{{end}}">
+			<input type="text" name="state" value="{{if .Profile}}{{.Profile.State}}{{end}}"
+       data-address-state>
                         </div>
                         <div class="form-group">
                             <label>{{.T.ProfileZipPostal}}</label>
-                            <input type="text" name="zip" value="{{if .Profile}}{{.Profile.Zip}}{{end}}">
+			<input type="text" name="zip" value="{{if .Profile}}{{.Profile.Zip}}{{end}}"
+       data-address-zip>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>{{.T.ProfileCountry}}</label>
-                        <input type="text" name="country" value="{{if .Profile}}{{.Profile.Country}}{{end}}">
+		    <input type="text" name="country" value="{{if .Profile}}{{.Profile.Country}}{{end}}"
+       data-address-country>
                     </div>
                 </div>
 
@@ -424,6 +429,7 @@
 {{template "profile-scripts" .}}
 
 <script src="/static/js/password-toggle.js" defer></script>
+<script src="/static/js/address-autocomplete.js"></script>
 
 </body>
 </html>

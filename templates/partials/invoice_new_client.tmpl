@@ -87,19 +87,22 @@
                     <div class="grid-3" style="margin-top:16px;">
                         <div>
                             <label>{{.T.InvoiceNewAddress}}</label>
-                            <input type="text" name="client_address" id="client_address"
-                                   value="{{field .Invoice.ClientAddress}}"
-                                   placeholder="{{.T.InvoiceNewPlaceholderClAddr}}">
-                        </div>
+			    <input type="text" name="client_address" id="client_address"
+       				   value="{{field .Invoice.ClientAddress}}"
+       				   placeholder="{{.T.InvoiceNewPlaceholderClAddr}}"
+       				   data-address-autocomplete>
+                                                   </div>
                         <div>
                             <label>{{.T.InvoiceNewCity}}</label>
-                            <input type="text" name="client_city" id="client_city"
+				   <input type="text" name="client_city" id="client_city"
+       					  data-address-city
                                    value="{{field .Invoice.ClientCity}}"
                                    placeholder="{{.T.InvoiceNewPlaceholderClCity}}">
                         </div>
                         <div>
                             <label>{{.T.InvoiceNewZip}}</label>
-                            <input type="text" name="client_zip" id="client_zip"
+				   <input type="text" name="client_zip" id="client_zip"
+      	 			 	  data-address-zip
                                    value="{{field .Invoice.ClientZip}}"
                                    placeholder="{{.T.InvoiceNewPlaceholderClZip}}"
                                    inputmode="numeric">
@@ -109,13 +112,15 @@
                     <div class="grid-2" style="margin-top:16px;">
                         <div>
                             <label>{{.T.InvoiceNewCountry}}</label>
-                            <input type="text" name="client_country" id="client_country"
+				   <input type="text" name="client_country" id="client_country"
+       					  data-address-country
                                    value="{{field .Invoice.ClientCountry}}"
                                    placeholder="{{.T.InvoiceNewPlaceholderCountry}}">
                         </div>
                         <div>
                             <label>{{.T.InvoiceNewStateRegion}}</label>
-                            <select name="client_state" id="client_state">
+				<select name="client_state" id="client_state"
+        				data-address-state>
                                 <option value="">{{.T.InvoiceNewSelectState}}</option>
                                 {{range .USStates}}
                                 <option value="{{.Name}}" {{if eq $.Invoice.ClientState .Name}}selected{{end}}>{{.Name}}</option>

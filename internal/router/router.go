@@ -1,4 +1,3 @@
-// internal/router/router.go
 package router
 
 import (
@@ -75,6 +74,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Use(auth.RequireAuth)
 	// Address autocomplete API
 		r.Get("/api/addresses", h.AddressAutocompleteGet)
+		r.Get("/api/addresses/place", h.AddressPlaceDetailsGet)
 	// Passkey registration (requires login)
 		r.Post("/passkeys/register/begin", h.PasskeyRegistrationBegin)
 		r.Post("/passkeys/register/finish", h.PasskeyRegistrationFinish)

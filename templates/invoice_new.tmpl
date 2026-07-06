@@ -104,14 +104,16 @@
                     <div class="grid-3" style="margin-top:16px;">
                         <div>
                             <label>{{.T.InvoiceNewAddress}}</label>
-                            <input type="text" name="company_address"
-                                   value="{{field .Invoice.CompanyAddress}}"
-                                   placeholder="{{.T.InvoiceNewPlaceholderCoAddr}}"
-                                   autocomplete="street-address">
+				<input type="text" name="company_address"
+       				value="{{field .Invoice.CompanyAddress}}"
+       				placeholder="{{.T.InvoiceNewPlaceholderCoAddr}}"
+       				autocomplete="street-address"
+       				data-address-autocomplete>
                         </div>
                         <div>
                             <label>{{.T.InvoiceNewCity}}</label>
-                            <input type="text" name="company_city"
+				<input type="text" name="company_city"
+       				       data-address-city
                                    value="{{field .Invoice.CompanyCity}}"
                                    placeholder="{{.T.InvoiceNewPlaceholderCoCity}}"
                                    autocomplete="address-level2">
@@ -129,14 +131,16 @@
                     <div class="grid-2" style="margin-top:16px;">
                         <div>
                             <label>{{.T.InvoiceNewCountry}}</label>
-                            <input type="text" name="company_country"
+				   <input type="text" name="company_country"
+       					data-address-country
                                    value="{{field .Invoice.CompanyCountry}}"
                                    placeholder="{{.T.InvoiceNewPlaceholderCountry}}"
                                    autocomplete="country-name">
                         </div>
                         <div>
                             <label>{{.T.InvoiceNewStateRegion}}</label>
-                            <select name="company_state" autocomplete="address-level1">
+				<select name="company_state" autocomplete="address-level1"
+        				data-address-state>
                                 <option value="">{{.T.InvoiceNewSelectState}}</option>
                                 {{range .USStates}}
                                 <option value="{{.Name}}" {{if eq $.Invoice.CompanyState .Name}}selected{{end}}>{{.Name}}</option>
@@ -176,6 +180,6 @@
 </div>
 
 {{template "invoice-new-scripts" .}}
-
+<script src="/static/js/address-autocomplete.js"></script>
 </body>
 </html>

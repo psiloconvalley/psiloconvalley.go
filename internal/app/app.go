@@ -24,6 +24,7 @@ import (
 	schedulerhandlers "psiloconvalley/internal/scheduler/handlers"
 	"psiloconvalley/internal/util"
 	"psiloconvalley/internal/service"
+	"psiloconvalley/internal/address"
 )
 
 type App struct {
@@ -47,7 +48,7 @@ type App struct {
 	AuditRepo  *repo.AuditRepo
 	UsageRepo  *repo.UsageRepo
 	PasskeyRepo *repo.PasskeyRepo
-	AddressRepo *repo.AddressRepo
+	AddressService *address.Service
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
@@ -129,7 +130,7 @@ func NewApp(db *sql.DB) *App {
 
 
 	return &App{
-		AddressRepo:       repo.NewAddressRepo(db),
+		AddressService:    address.New(db),
 		db:                db,
 		Templates:         t,
 		InvRepo:           invRepo,
