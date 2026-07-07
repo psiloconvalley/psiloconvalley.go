@@ -11,7 +11,7 @@
         }
 
         .sec-home-inner {
-            max-width: 860px;
+            max-width: 960px;
             margin: 0 auto;
         }
 
@@ -21,18 +21,30 @@
         }
 
         .sec-home-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(74,222,128,0.75);
+            color: rgba(74,222,128,0.7);
             margin-bottom: 14px;
         }
 
+        .sec-home-eyebrow::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #4ade80;
+            border-radius: 2px;
+        }
+
         .sec-home-title {
-            font-size: clamp(30px, 4vw, 42px);
+            font-size: clamp(32px, 5vw, 52px);
             font-weight: 800;
-            letter-spacing: -1.4px;
+            letter-spacing: -2px;
             line-height: 1.12;
             color: #ffffff;
             margin-bottom: 16px;
