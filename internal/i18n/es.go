@@ -578,6 +578,8 @@ var es = T{
 	// Pricing page — hero
 	PricingEyebrow:   "Precios Simples",
 	PricingHeroTitle: "Empieza Gratis. Escala Después.",
+	PricingHeroLine1: "Empieza Gratis.",
+	PricingHeroLine2: "Escala Después.",
 	PricingHeroSub:   "Tres niveles diseñados para donde estás hoy. Sin cargos ocultos. Cancela cuando quieras.",
 
 	// Pricing page — Free card

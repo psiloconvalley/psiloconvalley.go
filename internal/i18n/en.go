@@ -579,6 +579,8 @@ var en = T{
 	// Pricing page — hero
 	PricingEyebrow:   "Simple Pricing",
 	PricingHeroTitle: "Start Free. Scale Up.",
+	PricingHeroLine1: "Start Free.",
+	PricingHeroLine2: "Scale Up.",
 	PricingHeroSub:   "Three tiers built for where you are right now. No hidden fees. Cancel anytime.",
 
 	// Pricing page — Free card

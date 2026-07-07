@@ -599,6 +599,8 @@ type T struct {
 	// Pricing page — hero
 	PricingEyebrow   string
 	PricingHeroTitle string
+	PricingHeroLine1 string
+	PricingHeroLine2 string
 	PricingHeroSub   string
 
 	// Pricing page — Free card
