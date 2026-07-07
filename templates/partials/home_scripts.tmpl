@@ -12,11 +12,29 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
     revealObserver.observe(el);
 });
+
+// ── Trust Bar Stagger Animation ──────────────────────────────────
+const trustObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const items = entry.target.querySelectorAll('.trust-item');
+            items.forEach((item, i) => {
+                setTimeout(() => {
+                    item.classList.add('visible');
+                }, 150 * i);
+            });
+            trustObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.3 });
+
+const trustBar = document.getElementById('trust-bar');
+if (trustBar) trustObserver.observe(trustBar);
 // ── Live Invoice Demo ─────────────────────────────────────────────
 const demoItems = [
-    { desc: 'Website Redesign', qty: 1, price: 3500 },
-    { desc: 'SEO Optimization', qty: 1, price: 1200 },
-    { desc: 'Monthly Hosting', qty: 12, price: 49 },
+    { desc: 'Pool cleaning — weekly service', qty: 4, price: 45 },
+    { desc: 'Filter replacement', qty: 1, price: 85 },
+    { desc: 'Chemical balance treatment', qty: 1, price: 35 },
 ];
 
 function runInvoiceDemo() {

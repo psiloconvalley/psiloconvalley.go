@@ -43,5 +43,40 @@
             color: rgba(255,255,255,0.35);
         }
 
+
+        /* ── Trust bar entrance animation ── */
+        .trust-item {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .trust-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Social proof ── */
+        .social-proof {
+            padding: 48px 24px;
+            text-align: center;
+        }
+        .social-proof-inner {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .social-proof-quote {
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 500;
+            font-style: italic;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .social-proof-author {
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(74,222,128,0.7);
+            letter-spacing: 0.5px;
+        }
 </style>
 {{end}}
