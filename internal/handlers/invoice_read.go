@@ -158,7 +158,7 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 	showBranding := true
 	if inv.UserID != nil {
 		if owner, err := h.App.UserRepo.GetByID(*inv.UserID); err == nil && owner != nil {
-			if owner.Plan == "pro" || owner.Plan == "growth" {
+			if catalog.IsPaid(owner.Plan) {
 				showBranding = false
 			}
 		}

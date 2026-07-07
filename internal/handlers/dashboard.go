@@ -89,7 +89,7 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 
 	clientCount, _ := h.App.ClientRepo.CountByUserID(r.Context(), user.ID)
 	hasClient := clientCount > 0
-	// ── Expense stats (Growth/Pro only) ──────────────────────────────
+	// ── Expense stats (Pro/Pro Max only) ──────────────────────────────
 	var monthlyExpenses int64
 	var netProfitCents int64
 	if canAccessExpenses(user) {

@@ -17,6 +17,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/pdf"
 	"psiloconvalley/internal/service"
 	"psiloconvalley/internal/views"
@@ -87,7 +88,7 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 	showBranding := true
 	if inv.UserID != nil {
 		if owner, err := h.App.UserRepo.GetByID(*inv.UserID); err == nil && owner != nil {
-			if owner.Plan == "pro" || owner.Plan == "growth" {
+			if catalog.IsPaid(owner.Plan) {
 				showBranding = false
 			}
 		}
