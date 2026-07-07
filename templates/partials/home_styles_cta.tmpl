@@ -11,9 +11,9 @@
         }
 
         .final-cta h2 {
-            font-size: clamp(28px, 4vw, 40px);
-            font-weight: 700;
-            letter-spacing: -1px;
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 800;
+            letter-spacing: -2px;
             margin-bottom: 16px;
         }
 
@@ -22,8 +22,9 @@
             color: rgba(255,255,255,0.5);
             margin-bottom: 32px;
         }
-	        /* ═══════════════════════════════════════════════════════════════
-           PRICING CTA
+
+        /* ═══════════════════════════════════════════════════════════════
+           PRICING CTA — homepage bottom
            ═══════════════════════════════════════════════════════════════ */
         .pricing-cta {
             text-align: center;
@@ -32,18 +33,30 @@
         }
 
         .pricing-cta .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
+            color: rgba(74,222,128,0.7);
             margin-bottom: 16px;
         }
 
+        .pricing-cta .section-label::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #4ade80;
+            border-radius: 2px;
+        }
+
         .pricing-cta h2 {
-            font-size: clamp(28px, 4vw, 40px);
-            font-weight: 700;
-            letter-spacing: -1px;
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 800;
+            letter-spacing: -2px;
             margin-bottom: 12px;
         }
 
@@ -55,28 +68,49 @@
             margin-left: auto;
             margin-right: auto;
         }
-	.pricing-cta .pricing-grid {
+
+        .pricing-cta .pricing-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
             max-width: 960px;
             margin: 0 auto 40px;
         }
-	 .pricing-cta .plan-card.growth {
-            border-color: rgba(74,222,128,0.3);
-            background: rgba(74,222,128,0.04);
-        }
+
         .pricing-cta .plan-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 32px 24px;
             text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
         }
 
-        .pricing-cta .plan-card.pro {
-            border-color: rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.06);
+        .pricing-cta .plan-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+            border-color: rgba(255,255,255,0.14);
+        }
+
+        .pricing-cta .plan-card.popular {
+            border: 1.5px solid rgba(74,222,128,0.4);
+            background: rgba(74,222,128,0.04);
+            transform: scale(1.03);
+        }
+
+        .pricing-cta .plan-card.popular:hover {
+            transform: scale(1.03) translateY(-3px);
+            border-color: rgba(74,222,128,0.55);
+        }
+
+        .pricing-cta .plan-card.promax {
+            border: 1.5px solid rgba(251,191,36,0.3);
+            background: rgba(251,191,36,0.03);
+        }
+
+        .pricing-cta .plan-card.promax:hover {
+            border-color: rgba(251,191,36,0.5);
         }
 
         .pricing-cta .plan-label {
@@ -88,24 +122,44 @@
             margin-bottom: 12px;
         }
 
+        .pricing-cta .plan-card.popular .plan-label {
+            color: #4ade80;
+        }
+
+        .pricing-cta .plan-card.promax .plan-label {
+            color: #fbbf24;
+        }
+
         .pricing-cta .plan-price {
-            font-size: 36px;
+            font-size: 40px;
             font-weight: 800;
+            letter-spacing: -1px;
             margin-bottom: 6px;
         }
 
         .pricing-cta .plan-unit {
-            font-size: 14px;
+            font-size: 13px;
             color: rgba(255,255,255,0.4);
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .pricing-cta .plan-features {
             list-style: none;
-            font-size: 14px;
-            color: rgba(255,255,255,0.65);
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
             line-height: 2;
+            text-align: left;
+            padding: 0 8px;
         }
-		
+
+        @media (max-width: 768px) {
+            .pricing-cta .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            .pricing-cta .plan-card.popular {
+                transform: none;
+            }
+        }
 </style>
 {{end}}
