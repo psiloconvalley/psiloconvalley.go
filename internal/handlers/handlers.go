@@ -27,7 +27,14 @@ func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
 
 	// Anon users get the marketing page — no DB call needed
 	if user == nil {
-		h.App.Render(w, r, "home.tmpl", nil)
+		h.App.Render(w, r, "home.tmpl", map[string]any{
+			"Meta": app.DefaultMeta(
+				"PSILOCONVALLEY — Invoices & Estimates in Minutes",
+				"Professional invoicing for independent contractors. English & Spanish. Free to start.",
+				"Send estimates, get approval, convert to invoice, and get paid. Free to start.",
+				"https://psiloconvalley.com",
+			),
+		})
 		return
 	}
 
@@ -35,27 +42,59 @@ func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.App.InvRepo.GetDashboardStats(r.Context(), user.ID)
 	if err != nil {
 		slog.Error("home stats query failed", "user_id", user.ID, "err", err)
-		stats = &repo.DashboardStats{} // degrade gracefully — show zeros
+		stats = &repo.DashboardStats{}
 	}
 
 	h.App.Render(w, r, "home.tmpl", map[string]any{
 		"Stats": stats,
+		"Meta": app.DefaultMeta(
+			"PSILOCONVALLEY — Invoices & Estimates in Minutes",
+			"Professional invoicing for independent contractors. English & Spanish. Free to start.",
+			"Send estimates, get approval, convert to invoice, and get paid. Free to start.",
+			"https://psiloconvalley.com",
+		),
 	})
 }
 func (h *Handlers) Research(w http.ResponseWriter, r *http.Request) {
-	h.App.Render(w, r, "research.tmpl", nil)
+	h.App.Render(w, r, "research.tmpl", map[string]any{
+		"Meta": app.DefaultMeta(
+			"Roadmap & Changelog | PSILOCONVALLEY",
+			"What we are building next at psiloconvalley. Public roadmap, changelog, and shipped features for independent contractors.",
+			"Public roadmap and changelog for psiloconvalley invoicing platform.",
+			"https://psiloconvalley.com/research",
+		),
+	})
 }
 func (h *Handlers) SecurityPage(w http.ResponseWriter, r *http.Request) {
-	h.App.Render(w, r, "security.tmpl", nil)
+	h.App.Render(w, r, "security.tmpl", map[string]any{
+		"Meta": app.DefaultMeta(
+			"Security | PSILOCONVALLEY",
+			"How psiloconvalley protects your business data, client information, and payments. Argon2id, HMAC sessions, CSRF protection, and audit logs.",
+			"Enterprise-grade security for your invoicing data. Argon2id, HMAC sessions, CSRF, audit logs.",
+			"https://psiloconvalley.com/security",
+		),
+	})
 }
-
 func (h *Handlers) ToolsHub(w http.ResponseWriter, r *http.Request) {
-	h.App.Render(w, r, "tools_hub.tmpl", nil)
+	h.App.Render(w, r, "tools_hub.tmpl", map[string]any{
+		"Meta": app.DefaultMeta(
+			"How It Works | PSILOCONVALLEY",
+			"Send quotes, create invoices, accept card payments, and manage your clients. Professional tools for independent businesses. Free to start.",
+			"Professional invoicing and quoting tools for independent businesses. Free to start.",
+			"https://psiloconvalley.com/tools",
+		),
+	})
 }
 func (h *Handlers) EnterprisePage(w http.ResponseWriter, r *http.Request) {
-	h.App.Render(w, r, "enterprise.tmpl", nil)
+	h.App.Render(w, r, "enterprise.tmpl", map[string]any{
+		"Meta": app.DefaultMeta(
+			"Enterprise | PSILOCONVALLEY",
+			"Secure, audit-logged invoicing for agencies, contractors, and professional services. Built on an enterprise security foundation.",
+			"Audit logs, HMAC sessions, CSRF protection, and Argon2id password security. Professional invoicing you can trust.",
+			"https://psiloconvalley.com/enterprise",
+		),
+	})
 }
-
 func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "ok")
 }

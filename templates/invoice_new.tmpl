@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Lang}}">
 <head>
+{{template "page-head-no-title" .}}
 <title>
         {{if eq .DocumentType "estimate"}}
             {{if eq .Mode "edit"}}{{.T.InvoiceNewEditEstimate}}{{else}}{{.T.InvoiceNewCreateEstimate}}{{end}}
@@ -10,8 +11,6 @@
             {{else}}{{.T.InvoiceNewCreateInvoice}}{{end}}
         {{end}} — PSILOCONVALLEY
 </title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Create professional invoices in seconds.">
 
     {{template "invoice-new-layout-styles" .}}
     {{template "invoice-new-form-styles" .}}

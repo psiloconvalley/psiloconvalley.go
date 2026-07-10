@@ -13,6 +13,7 @@ import (
 	billingportalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	checkoutsession "github.com/stripe/stripe-go/v81/checkout/session"
 
+	"psiloconvalley/internal/app"
 	"psiloconvalley/internal/auth"
 )
 
@@ -26,6 +27,12 @@ func (h *Handlers) PricingGet(w http.ResponseWriter, r *http.Request) {
 		"CheckoutCanceled": r.URL.Query().Get("canceled") == "1",
 		"AlreadyPro":       r.URL.Query().Get("already") == "1",
 		"Reason":           r.URL.Query().Get("reason"),
+		"Meta": app.DefaultMeta(
+			"Pricing | PSILOCONVALLEY",
+			"Free invoicing to start. Pro at $18.88/mo. Pro Max at $28.88/mo unlimited invoices.",
+			"Simple, transparent pricing for professional invoicing. Free to start.",
+			"https://psiloconvalley.com/pricing",
+		),
 	})
 }
 

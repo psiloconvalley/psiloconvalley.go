@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"psiloconvalley/internal/app"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/service"
@@ -175,6 +176,8 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	ogImage := fmt.Sprintf("%s/og/invoice/%d.jpg", h.App.BaseURL, invoiceView.ID)
+
 	h.App.Render(w, r, service.InvoiceTemplateName(invoiceView.TemplateID), map[string]any{
 		"Invoice":       invoiceView,
 		"IsLoggedIn":    user != nil,
@@ -186,6 +189,15 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		"AccessToken":   r.URL.Query().Get("access"),
 		"ShowBranding":  showBranding,
 		"ShareURL":      shareURL,
+		"Meta": app.PageMeta{
+			Title:       invoiceView.InvoiceNumber + " — " + invoiceView.ClientName,
+			Description: invoiceView.CompanyName + " invoice " + invoiceView.InvoiceNumber,
+			TwitterDesc: "Invoice from " + invoiceView.CompanyName,
+			Canonical:   fmt.Sprintf("%s/invoices/%d", h.App.BaseURL, invoiceView.ID),
+			OGImage:     ogImage,
+			Robots:      "noindex,nofollow",
+			IsPublic:    true,
+		},
 	})
 }
 

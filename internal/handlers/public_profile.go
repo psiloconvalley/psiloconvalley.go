@@ -15,7 +15,8 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	qrcode  "github.com/skip2/go-qrcode"
+	qrcode "github.com/skip2/go-qrcode"
+	"psiloconvalley/internal/app"
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
 )
@@ -39,12 +40,28 @@ func (h *Handlers) PublicProfileGet(w http.ResponseWriter, r *http.Request) {
 		displayPhone = catalog.FormatPhone(displayPhone)
 	}
 
+	location := buildLocation(profile.City, profile.State)
+
+	ogImage := "https://psiloconvalley.com/og/default.jpg"
+	if profile.LogoURL != "" {
+		ogImage = profile.LogoURL
+	}
+
 	h.App.Render(w, r, "public_profile.tmpl", map[string]any{
 		"Profile":      profile,
 		"DisplayPhone": displayPhone,
-		"Location":     buildLocation(profile.City, profile.State),
+		"Location":     location,
 		"BaseURL":      h.App.BaseURL,
 		"Slug":         slug,
+		"Meta": app.PageMeta{
+			Title:       profile.Name + " | PSILOCONVALLEY",
+			Description: profile.Name + " — " + location + ". Request a quote or pay an invoice.",
+			TwitterDesc: profile.Name + " — Request a quote or pay an invoice.",
+			Canonical:   h.App.BaseURL + "/biz/" + slug,
+			OGImage:     ogImage,
+			Robots:      "index,follow",
+			IsPublic:    true,
+		},
 	})
 }
 

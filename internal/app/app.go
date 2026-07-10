@@ -217,7 +217,9 @@ func (a *App) Render(w http.ResponseWriter, r *http.Request, name string, data m
 	if data == nil {
 		data = map[string]any{}
 	}
-
+	if _, ok := data["Meta"]; !ok {
+		data["Meta"] = AuthMeta("PSILOCONVALLEY")
+	}
 	user := auth.GetUser(r)
 	data["User"] = user
 	data["GoogleEnabled"] = auth.GoogleOAuthEnabled()

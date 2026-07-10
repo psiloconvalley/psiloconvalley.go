@@ -1,16 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Lang}}">
 <head>
-    <title>{{.Profile.Name}} | PSILOCONVALLEY</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{.Profile.Name}} — {{.Location}}. Request a quote or pay an invoice.">
-    <meta name="robots" content="index,follow">
-    <link rel="canonical" href="{{.BaseURL}}/biz/{{.Slug}}">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="{{.Profile.Name}} | PSILOCONVALLEY">
-    <meta property="og:description" content="{{.Profile.Name}} — {{.Location}}. Request a quote or pay an invoice.">
-    <meta property="og:url" content="{{.BaseURL}}/biz/{{.Slug}}">
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    {{template "page-head" .}}
     {{template "public-profile-styles" .}}
 </head>
 <body>

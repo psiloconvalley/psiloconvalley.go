@@ -1,31 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Lang}}">
 <head>
-    <title>PSILOCONVALLEY — Invoices & Estimates in Minutes</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Send estimates, get approval, convert to invoice, and get paid. The complete deal flow for independent businesses. Free to start.">
-    <meta name="robots" content="index,follow">
-    <link rel="canonical" href="https://psiloconvalley.com">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://psiloconvalley.com/og/default.jpg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://psiloconvalley.com/og/default.jpg">
-    <meta property="og:site_name" content="PSILOCONVALLEY">
-    <meta property="og:url" content="https://psiloconvalley.com">
-    <meta property="og:title" content="PSILOCONVALLEY — Invoices & Estimates in Minutes">
-    <meta property="og:description" content="Send estimates, get approval, convert to invoice, and get paid. Free to start.">
-    <meta property="og:image" content="https://psiloconvalley.com/og/default.jpg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://psiloconvalley.com/og/default.jpg">
-    <meta name="twitter:title" content="PSILOCONVALLEY — Invoices & Estimates in Minutes">
-    <meta name="twitter:description" content="Send estimates, get approval, convert to invoice, get paid. Free to start.">
-   {{template "nav-styles" .}}
-   {{template "home-styles" .}}
-  </head>
+    {{template "page-head" .}}
+    {{template "nav-styles" .}}
+    {{template "home-styles" .}}
+</head>
 
 <body>
 {{template "nav" .}}

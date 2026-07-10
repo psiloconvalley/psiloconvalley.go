@@ -1,0 +1,56 @@
+{{define "page-head"}}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    {{if not .Meta.SkipTitle}}<title>{{.Meta.Title}}</title>{{end}}
+    <meta name="robots" content="{{.Meta.Robots}}">
+
+    {{if .Meta.IsPublic}}
+    <meta name="description"  content="{{.Meta.Description}}">
+    <link rel="canonical"     href="{{.Meta.Canonical}}">
+
+    <!-- Open Graph -->
+    <meta property="og:type"         content="website">
+    <meta property="og:site_name"    content="PSILOCONVALLEY">
+    <meta property="og:url"          content="{{.Meta.Canonical}}">
+    <meta property="og:title"        content="{{.Meta.Title}}">
+    <meta property="og:description"  content="{{.Meta.Description}}">
+    <meta property="og:image"        content="{{if .Meta.OGImage}}{{.Meta.OGImage}}{{else}}https://psiloconvalley.com/og/default.jpg{{end}}">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="{{.Meta.Title}}">
+    <meta name="twitter:description" content="{{if .Meta.TwitterDesc}}{{.Meta.TwitterDesc}}{{else}}{{.Meta.Description}}{{end}}">
+    <meta name="twitter:image"       content="{{if .Meta.OGImage}}{{.Meta.OGImage}}{{else}}https://psiloconvalley.com/og/default.jpg{{end}}">
+    {{end}}
+{{end}}
+
+{{define "page-head-no-title"}}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <meta name="robots" content="{{.Meta.Robots}}">
+
+    {{if .Meta.IsPublic}}
+    <meta name="description"  content="{{.Meta.Description}}">
+    <link rel="canonical"     href="{{.Meta.Canonical}}">
+
+    <!-- Open Graph -->
+    <meta property="og:type"         content="website">
+    <meta property="og:site_name"    content="PSILOCONVALLEY">
+    <meta property="og:url"          content="{{.Meta.Canonical}}">
+    <meta property="og:title"        content="{{.Meta.Title}}">
+    <meta property="og:description"  content="{{.Meta.Description}}">
+    <meta property="og:image"        content="{{if .Meta.OGImage}}{{.Meta.OGImage}}{{else}}https://psiloconvalley.com/og/default.jpg{{end}}">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="{{.Meta.Title}}">
+    <meta name="twitter:description" content="{{if .Meta.TwitterDesc}}{{.Meta.TwitterDesc}}{{else}}{{.Meta.Description}}{{end}}">
+    <meta name="twitter:image"       content="{{if .Meta.OGImage}}{{.Meta.OGImage}}{{else}}https://psiloconvalley.com/og/default.jpg{{end}}">
+    {{end}}
+{{end}}
