@@ -1,0 +1,63 @@
+{{define "tax-summary-styles"}}
+<style>
+    .tax-page { max-width: 800px; margin: 48px auto; padding: 0 24px; }
+    .tax-header { margin-bottom: 32px; }
+    .tax-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .tax-header .sub { color: rgba(255,255,255,0.5); font-size: 14px; }
+    .tax-controls { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+    .tax-controls select {
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 14px;
+    }
+    .tax-controls .btn-pdf {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #4ade80; color: #000; font-weight: 600;
+        padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;
+    }
+    .tax-controls .btn-pdf:hover { background: #22c55e; }
+
+    .tax-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    .tax-card {
+        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px; padding: 20px;
+    }
+    .tax-card .label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .tax-card .value { font-size: 24px; font-weight: 700; font-family: 'SF Mono', monospace; }
+    .tax-card .value.green { color: #4ade80; }
+    .tax-card .value.red { color: #f87171; }
+    .tax-card .value.yellow { color: #fbbf24; }
+    .tax-card .detail { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+    .tax-section { margin-bottom: 32px; }
+    .tax-section-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .tax-table { width: 100%; border-collapse: collapse; }
+    .tax-table th { text-align: left; font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .tax-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; }
+    .tax-table .mono { font-family: 'SF Mono', monospace; }
+    .tax-table .right { text-align: right; }
+
+    .tax-disclaimer {
+        margin-top: 32px; padding: 16px; background: rgba(251,191,36,0.08);
+        border: 1px solid rgba(251,191,36,0.2); border-radius: 8px;
+        font-size: 13px; color: rgba(255,255,255,0.6);
+    }
+
+    @media (max-width: 640px) {
+        .tax-grid { grid-template-columns: 1fr; }
+        .tax-controls { flex-direction: column; align-items: stretch; }
+    }
+
+    /* PDF-specific: white background for print */
+    @media print {
+        body { background: #fff; color: #000; }
+        .tax-card { border-color: #ddd; }
+        .tax-card .label { color: #666; }
+        .tax-card .value.green { color: #16a34a; }
+        .tax-card .value.red { color: #dc2626; }
+        .tax-card .value.yellow { color: #d97706; }
+        .tax-table th { color: #666; }
+        .tax-disclaimer { background: #fffbeb; border-color: #fbbf24; color: #666; }
+        .btn-pdf, .tax-controls select, .nav { display: none; }
+    }
+</style>
+{{end}}

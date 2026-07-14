@@ -2,14 +2,16 @@
 package handlers
 
 import (
+	"context"
 	"encoding/csv"
 	"fmt"
-	"strings"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/pdf"
 	"psiloconvalley/internal/util"
 )
 
@@ -241,4 +243,129 @@ func (h *Handlers) ClientScorecardGet(w http.ResponseWriter, r *http.Request) {
 		"Cards":       cards,
 		"HasPaidPlan": hasPaidPlan,
 	})
+}
+
+// ── Tax Summary ───────────────────────────────────────────────────────────
+
+// TaxSummaryGet renders the annual tax summary page.
+// Supports ?year=2024 — defaults to current year.
+// Shows paid invoice revenue + expense breakdown by category.
+func (h *Handlers) TaxSummaryGet(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	year := time.Now().Year()
+	if y := r.URL.Query().Get("year"); y != "" {
+		if parsed, err := fmt.Sscanf(y, "%d", &year); parsed != 1 || err != nil {
+			year = time.Now().Year()
+		}
+	}
+
+	data, err := h.buildTaxSummary(r, user.ID, year)
+	if err != nil {
+		slog.Error("tax summary failed", "user_id", user.ID, "err", err)
+		http.Error(w, "Failed to load tax summary", http.StatusInternalServerError)
+		return
+	}
+
+	h.App.Render(w, r, "tax_summary.tmpl", data)
+}
+
+// TaxSummaryPDFGet renders the tax summary as a downloadable PDF.
+func (h *Handlers) TaxSummaryPDFGet(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	year := time.Now().Year()
+	if y := r.URL.Query().Get("year"); y != "" {
+		if parsed, err := fmt.Sscanf(y, "%d", &year); parsed != 1 || err != nil {
+			year = time.Now().Year()
+		}
+	}
+
+	data, err := h.buildTaxSummary(r, user.ID, year)
+	if err != nil {
+		slog.Error("tax summary pdf failed", "user_id", user.ID, "err", err)
+		http.Error(w, "Failed to generate tax summary", http.StatusInternalServerError)
+		return
+	}
+
+	// Render HTML to buffer
+	var buf strings.Builder
+	if err := h.App.Templates.ExecuteTemplate(&buf, "tax_summary.tmpl", data); err != nil {
+		slog.Error("tax summary pdf template failed", "user_id", user.ID, "err", err)
+		http.Error(w, "Failed to render tax summary", http.StatusInternalServerError)
+		return
+	}
+
+	// Convert to PDF via Chromium
+	pdfCtx, pdfCancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer pdfCancel()
+
+	pdfBytes, err := pdf.Generate(pdfCtx, buf.String())
+	if err != nil {
+		slog.Error("tax summary pdf generate failed", "user_id", user.ID, "err", err)
+		http.Error(w, "Failed to generate PDF", http.StatusInternalServerError)
+		return
+	}
+
+	filename := fmt.Sprintf("tax-summary-%d.pdf", year)
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	_, _ = w.Write(pdfBytes)
+}
+
+// buildTaxSummary assembles the data map for the tax summary page and PDF.
+// Extracted so both handlers share the same data logic.
+func (h *Handlers) buildTaxSummary(r *http.Request, userID int64, year int) (map[string]any, error) {
+	// ── Paid revenue for the year ─────────────────────────────────────
+	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
+
+	invoices, err := h.App.InvRepo.ListInvoicesForReport(r.Context(), userID, start, end, "paid")
+	if err != nil {
+		return nil, fmt.Errorf("tax summary invoices: %w", err)
+	}
+
+	var revenueCents, taxCollectedCents int64
+	for _, inv := range invoices {
+		revenueCents += inv.TotalCents
+		taxCollectedCents += inv.TaxCents
+	}
+
+	// ── Expense breakdown for the year ───────────────────────────────
+	expSummary, err := h.App.ExpenseRepo.SummaryByYear(r.Context(), userID, year)
+	if err != nil {
+		return nil, fmt.Errorf("tax summary expenses: %w", err)
+	}
+
+	netCents := revenueCents - expSummary.TotalCents
+
+	// ── Year selector — current year + 3 previous ────────────────────
+	currentYear := time.Now().Year()
+	var years []int
+	for y := currentYear; y >= currentYear-3; y-- {
+		years = append(years, y)
+	}
+
+	return map[string]any{
+		"Year":             year,
+		"Years":            years,
+		"Invoices":         invoices,
+		"InvoiceCount":     len(invoices),
+		"Revenue":          util.Money(revenueCents),
+		"RevenueCents":     revenueCents,
+		"TaxCollected":     util.Money(taxCollectedCents),
+		"ExpenseTotal":     util.Money(expSummary.TotalCents),
+		"ExpenseTotalCents": expSummary.TotalCents,
+		"ExpenseCategories": expSummary.Categories,
+		"NetIncome":        util.Money(netCents),
+		"NetIncomeCents":   netCents,
+	}, nil
 }

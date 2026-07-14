@@ -182,3 +182,56 @@ func (r *ExpenseRepo) YearTotal(ctx context.Context, userID int64) (int64, error
 	}
 	return total.Int64, nil
 }
+
+// ExpenseYearSummary holds totals for a tax year summary.
+type ExpenseYearSummary struct {
+	TotalCents int64
+	Categories []CategoryTotal
+}
+
+// SummaryByYear returns expense totals grouped by category for a given calendar year.
+// Used by the tax summary report. Parameterized by year — works for any past year.
+func (r *ExpenseRepo) SummaryByYear(ctx context.Context, userID int64, year int) (*ExpenseYearSummary, error) {
+	// Total for the year
+	var total sql.NullInt64
+	err := r.db.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(amount_cents), 0)
+		FROM expenses
+		WHERE user_id = $1
+		AND EXTRACT(YEAR FROM expense_date) = $2
+	`, userID, year).Scan(&total)
+	if err != nil {
+		return nil, fmt.Errorf("expense year total: %w", err)
+	}
+
+	// Category breakdown for the year
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT category, COALESCE(SUM(amount_cents), 0) AS total
+		FROM expenses
+		WHERE user_id = $1
+		AND EXTRACT(YEAR FROM expense_date) = $2
+		GROUP BY category
+		ORDER BY total DESC
+	`, userID, year)
+	if err != nil {
+		return nil, fmt.Errorf("expense year categories: %w", err)
+	}
+	defer rows.Close()
+
+	var cats []CategoryTotal
+	for rows.Next() {
+		var ct CategoryTotal
+		if err := rows.Scan(&ct.Category, &ct.TotalCents); err != nil {
+			return nil, fmt.Errorf("scan expense category: %w", err)
+		}
+		cats = append(cats, ct)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &ExpenseYearSummary{
+		TotalCents: total.Int64,
+		Categories: cats,
+	}, nil
+}

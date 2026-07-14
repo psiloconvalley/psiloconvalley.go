@@ -435,6 +435,19 @@ type T struct {
 	ReportsThTotal        string
 	ReportsEmptyTitle     string
 	ReportsEmptySub       string
+	// Tax Summary
+	TaxSummaryTitle        string
+	TaxSummarySubtitle     string
+	TaxSummaryYear         string
+	TaxSummaryRevenue      string
+	TaxSummaryExpenses     string
+	TaxSummaryNet          string
+	TaxSummaryInvoices     string
+	TaxSummaryPaidInvoices string
+	TaxSummaryCategories   string
+	TaxSummaryDownloadPDF  string
+	TaxSummaryDisclaimer   string
+	TaxSummaryNoExpenses   string
 
 	// Invoice New — Mode titles
 	InvoiceNewCreateInvoice    string

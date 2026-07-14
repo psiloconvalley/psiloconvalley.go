@@ -416,6 +416,19 @@ var en = T{
 	ReportsThTotal:        "Total",
 	ReportsEmptyTitle:     "No invoices in this period",
 	ReportsEmptySub:       "Try a different date range or status filter.",
+	// Tax Summary
+	TaxSummaryTitle:        "Tax Summary",
+	TaxSummarySubtitle:     "Annual income and expense summary for tax preparation.",
+	TaxSummaryYear:         "Tax Year",
+	TaxSummaryRevenue:      "Gross Revenue",
+	TaxSummaryExpenses:     "Total Expenses",
+	TaxSummaryNet:          "Net Income",
+	TaxSummaryInvoices:     "Total Invoices",
+	TaxSummaryPaidInvoices: "Paid Invoices",
+	TaxSummaryCategories:   "Expenses by Category",
+	TaxSummaryDownloadPDF:  "Download PDF",
+	TaxSummaryDisclaimer:   "This summary is for reference only. Consult a tax professional for filing.",
+	TaxSummaryNoExpenses:   "No expenses recorded for this year.",
 
 	// Invoice New — Mode titles
 	InvoiceNewCreateInvoice:    "Create Invoice",

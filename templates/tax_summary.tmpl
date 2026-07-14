@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+<head>
+    {{template "page-head" .}}
+    {{template "nav-styles" .}}
+    {{template "app-styles" .}}
+    {{template "tax-summary-styles" .}}
+</head>
+<body>
+
+{{template "nav" .}}
+
+<div class="tax-page">
+
+    <div class="tax-header">
+        <h1>{{.T.TaxSummaryTitle}}</h1>
+        <div class="sub">{{.T.TaxSummarySubtitle}}</div>
+    </div>
+
+    <div class="tax-controls">
+        <form method="get" action="/reports/tax-summary">
+            <select name="year" onchange="this.form.submit()">
+                {{range .Years}}
+                <option value="{{.}}" {{if eq . $.Year}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </form>
+        <a href="/reports/tax-summary.pdf?year={{.Year}}" class="btn-pdf">
+            📄 {{.T.TaxSummaryDownloadPDF}}
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="tax-grid">
+        <div class="tax-card">
+            <div class="label">{{.T.TaxSummaryRevenue}}</div>
+            <div class="value green">{{.Revenue}}</div>
+            <div class="detail">{{.InvoiceCount}} {{.T.TaxSummaryPaidInvoices}}</div>
+        </div>
+        <div class="tax-card">
+            <div class="label">{{.T.TaxSummaryExpenses}}</div>
+            <div class="value red">{{.ExpenseTotal}}</div>
+            <div class="detail">{{if .ExpenseCategories}}{{len .ExpenseCategories}} categories{{else}}—{{end}}</div>
+        </div>
+        <div class="tax-card">
+            <div class="label">{{.T.TaxSummaryNet}}</div>
+            <div class="value {{if ge .NetIncomeCents 0}}green{{else}}red{{end}}">{{.NetIncome}}</div>
+            <div class="detail">{{.T.TaxSummaryRevenue}} − {{.T.TaxSummaryExpenses}}</div>
+        </div>
+    </div>
+
+    <!-- Expense Categories -->
+    <div class="tax-section">
+        <div class="tax-section-title">{{.T.TaxSummaryCategories}}</div>
+        {{if .ExpenseCategories}}
+        <table class="tax-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .ExpenseCategories}}
+                <tr>
+                    <td>{{.Category}}</td>
+                    <td class="right mono">{{money .TotalCents}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <div style="text-align:center; padding:24px; color:rgba(255,255,255,0.4);">
+            {{.T.TaxSummaryNoExpenses}}
+        </div>
+        {{end}}
+    </div>
+
+    <div class="tax-disclaimer">
+        ⚠️ {{.T.TaxSummaryDisclaimer}}
+    </div>
+
+</div>
+
+</body>
+</html>

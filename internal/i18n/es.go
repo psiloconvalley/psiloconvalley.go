@@ -415,6 +415,19 @@ var es = T{
 	ReportsThTotal:        "Total",
 	ReportsEmptyTitle:     "Sin facturas en este período",
 	ReportsEmptySub:       "Intenta un rango de fechas o filtro de estado diferente.",
+	// Tax Summary
+	TaxSummaryTitle:        "Resumen fiscal",
+	TaxSummarySubtitle:     "Resumen anual de ingresos y gastos para la preparación de impuestos.",
+	TaxSummaryYear:         "Año fiscal",
+	TaxSummaryRevenue:      "Ingresos brutos",
+	TaxSummaryExpenses:     "Gastos totales",
+	TaxSummaryNet:          "Ingresos netos",
+	TaxSummaryInvoices:     "Total de facturas",
+	TaxSummaryPaidInvoices: "Facturas pagadas",
+	TaxSummaryCategories:   "Gastos por categoría",
+	TaxSummaryDownloadPDF:  "Descargar PDF",
+	TaxSummaryDisclaimer:   "Este resumen es solo de referencia. Consulta a un profesional fiscal para presentar tu declaración.",
+	TaxSummaryNoExpenses:   "No se registraron gastos para este año.",
 
 	// Invoice New — Mode titles
 	InvoiceNewCreateInvoice:    "Crear Factura",
