@@ -126,6 +126,8 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/reports/clients", h.ClientScorecardGet)
 		r.Get("/reports/tax-summary", h.TaxSummaryGet)
 		r.Get("/reports/tax-summary.pdf", h.TaxSummaryPDFGet)
+		// Quote requests
+		r.Post("/quote-requests/{id}/view", h.QuoteRequestMarkViewed)
 		// Expense tracking
 		r.Get("/expenses", h.ExpensesList)
 		r.Get("/expenses/new", h.ExpenseNewGet)

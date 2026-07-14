@@ -55,6 +55,10 @@ var en = T{
 	DashboardQuoteEmpty:       "No quote requests yet",
 	DashboardQuoteEmptySub:    "When someone requests a quote from your public page, it will appear here.",
 	DashboardQuoteViewAll:     "View All Quotes",
+	DashboardQuoteCall:        "Call",
+	DashboardQuoteMarkViewed:  "Mark as Viewed",
+	DashboardQuoteViewed:      "viewed",
+	DashboardQuoteReceived:    "Received",
 	DashboardThDue:      "Due",
 	DashboardThTotal:    "Total",
 

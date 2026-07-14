@@ -59,6 +59,10 @@ type T struct {
 	DashboardQuoteEmpty       string
 	DashboardQuoteEmptySub    string
 	DashboardQuoteViewAll     string
+	DashboardQuoteCall        string
+	DashboardQuoteMarkViewed  string
+	DashboardQuoteViewed      string
+	DashboardQuoteReceived    string
 	DashboardThDue      string
 	DashboardThTotal    string
 

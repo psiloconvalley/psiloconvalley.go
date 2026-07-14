@@ -55,6 +55,10 @@ var es = T{
 	DashboardQuoteEmpty:       "Sin solicitudes de cotización",
 	DashboardQuoteEmptySub:    "Cuando alguien solicite una cotización desde tu página pública, aparecerá aquí.",
 	DashboardQuoteViewAll:     "Ver todas las cotizaciones",
+	DashboardQuoteCall:        "Llamar",
+	DashboardQuoteMarkViewed:  "Marcar como visto",
+	DashboardQuoteViewed:      "visto",
+	DashboardQuoteReceived:    "Recibido",
 	DashboardThDue:      "Vence",
 	DashboardThTotal:    "Total",
 

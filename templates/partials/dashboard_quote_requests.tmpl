@@ -12,36 +12,60 @@
     </div>
 
     {{if .QuoteRequests}}
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>{{.T.DashboardQuoteFrom}}</th>
-                    <th>Phone</th>
-                    <th>{{.T.DashboardThStatus}}</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{range .QuoteRequests}}
-                <tr>
-                    <td><strong>{{.ClientName}}</strong></td>
-                    <td class="mono">{{if .ClientPhone}}{{.ClientPhone}}{{else}}<span style="opacity:0.4">—</span>{{end}}</td>
-                    <td>
-                        {{if eq .Status "new"}}
-                        <span class="badge badge-sent">{{$.T.DashboardQuoteRequestsNew}}</span>
-                        {{else}}
-                        <span class="badge badge-paid">{{.Status}}</span>
-                        {{end}}
-                    </td>
-                    <td style="max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+    <div class="quote-card-list">
+        {{range .QuoteRequests}}
+        <details class="quote-card {{if eq .Status "new"}}quote-card--new{{end}}">
+            <summary class="quote-card-summary">
+                <div class="quote-card-left">
+                    <div class="quote-card-name">{{.ClientName}}</div>
+                    <div class="quote-card-preview">
                         {{if .Description}}{{.Description}}{{else}}<span style="opacity:0.4">—</span>{{end}}
-                    </td>
-                </tr>
+                    </div>
+                </div>
+                <div class="quote-card-right">
+                    {{if eq .Status "new"}}
+                    <span class="badge badge-sent">{{$.T.DashboardQuoteRequestsNew}}</span>
+                    {{else}}
+                    <span class="badge badge-paid">{{$.T.DashboardQuoteViewed}}</span>
+                    {{end}}
+                    <span class="quote-card-chevron">›</span>
+                </div>
+            </summary>
+
+            <div class="quote-card-body">
+                {{if .Description}}
+                <div class="quote-card-field">
+                    <div class="quote-card-field-label">Description</div>
+                    <div class="quote-card-field-value">{{.Description}}</div>
+                </div>
                 {{end}}
-            </tbody>
-        </table>
+
+                <div class="quote-card-field">
+                    <div class="quote-card-field-label">{{$.T.DashboardQuoteReceived}}</div>
+                    <div class="quote-card-field-value">{{.CreatedAt.Format "Jan 2, 2006 3:04 PM"}}</div>
+                </div>
+
+                <div class="quote-card-actions">
+                    {{if .ClientPhone}}
+                    <a href="tel:{{.ClientPhone}}" class="quote-btn quote-btn--call">
+                        📞 {{$.T.DashboardQuoteCall}} {{.ClientPhone}}
+                    </a>
+                    {{end}}
+
+                    {{if eq .Status "new"}}
+                    <form method="POST" action="/quote-requests/{{.ID}}/view" style="display:inline;">
+                        {{$.csrfField}}
+                        <button type="submit" class="quote-btn quote-btn--viewed">
+                            ✓ {{$.T.DashboardQuoteMarkViewed}}
+                        </button>
+                    </form>
+                    {{end}}
+                </div>
+            </div>
+        </details>
+        {{end}}
     </div>
+
     {{else}}
     <div class="table-wrap">
         <div class="empty">
@@ -52,4 +76,112 @@
     </div>
     {{end}}
 </div>
+
+<style>
+.quote-card-list { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+
+.quote-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+.quote-card--new { border-color: rgba(74,222,128,0.2); }
+.quote-card[open] { border-color: rgba(255,255,255,0.15); }
+
+.quote-card-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    list-style: none;
+    gap: 12px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.quote-card-summary::-webkit-details-marker { display: none; }
+.quote-card-summary:hover { background: rgba(255,255,255,0.03); }
+
+.quote-card-left { flex: 1; min-width: 0; }
+.quote-card-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+.quote-card-preview {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+}
+
+.quote-card-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.quote-card-chevron {
+    font-size: 18px;
+    color: rgba(255,255,255,0.3);
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+details[open] .quote-card-chevron { transform: rotate(90deg); }
+
+.quote-card-body {
+    padding: 0 16px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 0;
+}
+
+.quote-card-field { margin-top: 12px; }
+.quote-card-field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 4px;
+}
+.quote-card-field-value { font-size: 14px; line-height: 1.5; }
+
+.quote-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.quote-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+.quote-btn--call {
+    background: rgba(74,222,128,0.15);
+    color: #4ade80;
+    border: 1px solid rgba(74,222,128,0.25);
+}
+.quote-btn--call:hover { background: rgba(74,222,128,0.25); }
+.quote-btn--viewed {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.quote-btn--viewed:hover { background: rgba(255,255,255,0.1); }
+
+@media (max-width: 480px) {
+    .quote-card-actions { flex-direction: column; }
+    .quote-btn { justify-content: center; width: 100%; }
+    .quote-card-preview { max-width: 180px; }
+}
+</style>
 {{end}}
