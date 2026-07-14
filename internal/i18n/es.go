@@ -46,6 +46,15 @@ var es = T{
 	DashboardThEstimate: "Presupuesto",
 	DashboardThClient:   "Cliente",
 	DashboardThStatus:   "Estado",
+	DashboardThAmount:   "Monto",
+	// Dashboard — quote requests
+	DashboardQuoteRequests:    "Solicitudes de cotización",
+	DashboardQuoteRequestsNew: "nueva",
+	DashboardQuoteFrom:        "De",
+	DashboardQuoteNoPhone:     "Sin teléfono",
+	DashboardQuoteEmpty:       "Sin solicitudes de cotización",
+	DashboardQuoteEmptySub:    "Cuando alguien solicite una cotización desde tu página pública, aparecerá aquí.",
+	DashboardQuoteViewAll:     "Ver todas las cotizaciones",
 	DashboardThDue:      "Vence",
 	DashboardThTotal:    "Total",
 

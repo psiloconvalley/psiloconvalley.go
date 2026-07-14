@@ -50,6 +50,15 @@ type T struct {
 	DashboardThEstimate string
 	DashboardThClient   string
 	DashboardThStatus   string
+	DashboardThAmount   string
+	// Dashboard — quote requests
+	DashboardQuoteRequests    string
+	DashboardQuoteRequestsNew string
+	DashboardQuoteFrom        string
+	DashboardQuoteNoPhone     string
+	DashboardQuoteEmpty       string
+	DashboardQuoteEmptySub    string
+	DashboardQuoteViewAll     string
 	DashboardThDue      string
 	DashboardThTotal    string
 

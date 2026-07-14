@@ -46,6 +46,15 @@ var en = T{
 	DashboardThEstimate: "Estimate",
 	DashboardThClient:   "Client",
 	DashboardThStatus:   "Status",
+	DashboardThAmount:   "Amount",
+	// Dashboard — quote requests
+	DashboardQuoteRequests:    "Quote Requests",
+	DashboardQuoteRequestsNew: "new",
+	DashboardQuoteFrom:        "From",
+	DashboardQuoteNoPhone:     "No phone provided",
+	DashboardQuoteEmpty:       "No quote requests yet",
+	DashboardQuoteEmptySub:    "When someone requests a quote from your public page, it will appear here.",
+	DashboardQuoteViewAll:     "View All Quotes",
 	DashboardThDue:      "Due",
 	DashboardThTotal:    "Total",
 

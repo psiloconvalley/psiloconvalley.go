@@ -1,0 +1,55 @@
+{{define "dashboard-quote-requests"}}
+<div class="section">
+    <div class="section-header">
+        <div class="section-title">
+            📩 {{.T.DashboardQuoteRequests}}
+            {{if .NewQuoteCount}}
+            <span class="badge badge-new" style="margin-left:8px; background:rgba(74,222,128,0.15); color:#4ade80; font-size:11px; padding:2px 8px; border-radius:4px;">
+                {{.NewQuoteCount}} {{.T.DashboardQuoteRequestsNew}}
+            </span>
+            {{end}}
+        </div>
+    </div>
+
+    {{if .QuoteRequests}}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>{{.T.DashboardQuoteFrom}}</th>
+                    <th>Phone</th>
+                    <th>{{.T.DashboardThStatus}}</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .QuoteRequests}}
+                <tr>
+                    <td><strong>{{.ClientName}}</strong></td>
+                    <td class="mono">{{if .ClientPhone}}{{.ClientPhone}}{{else}}<span style="opacity:0.4">—</span>{{end}}</td>
+                    <td>
+                        {{if eq .Status "new"}}
+                        <span class="badge badge-sent">{{$.T.DashboardQuoteRequestsNew}}</span>
+                        {{else}}
+                        <span class="badge badge-paid">{{.Status}}</span>
+                        {{end}}
+                    </td>
+                    <td style="max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        {{if .Description}}{{.Description}}{{else}}<span style="opacity:0.4">—</span>{{end}}
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    {{else}}
+    <div class="table-wrap">
+        <div class="empty">
+            <div class="empty-icon">📩</div>
+            <div class="empty-title">{{.T.DashboardQuoteEmpty}}</div>
+            <div class="empty-sub">{{.T.DashboardQuoteEmptySub}}</div>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{end}}

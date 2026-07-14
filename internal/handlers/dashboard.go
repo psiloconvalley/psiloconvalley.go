@@ -110,7 +110,27 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	passkeys, _ := h.App.PasskeyRepo.GetByUserID(r.Context(), user.ID)
-	
+
+	// ── Quote requests from public profile ─────────────────────────
+	quoteRequests, err := h.App.QuoteRequestRepo.ListByUserID(r.Context(), user.ID)
+	if err != nil {
+		slog.Warn("dashboard quote requests query failed", "user_id", user.ID, "err", err)
+		quoteRequests = nil
+	}
+
+	newQuoteCount := 0
+	for _, qr := range quoteRequests {
+		if qr.Status == "new" {
+			newQuoteCount++
+		}
+	}
+
+	// Cap quote requests at 5 for display
+	displayQuotes := quoteRequests
+	if len(displayQuotes) > 5 {
+		displayQuotes = displayQuotes[:5]
+	}
+
 	h.App.Render(w, r, "dashboard.tmpl", map[string]any{
 		"User":            user,
 		"Revenue":         util.Money(stats.RevenueCents),
@@ -133,5 +153,7 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		"OnboardingDone":  onboardingDone,
 		"OnboardingSteps": onboardingSteps,
 		"ShowPasskeyNudge": len(passkeys) == 0,
+		"QuoteRequests":    displayQuotes,
+		"NewQuoteCount":    newQuoteCount,
 	})
 }
