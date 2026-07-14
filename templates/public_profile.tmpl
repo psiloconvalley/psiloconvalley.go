@@ -39,6 +39,37 @@
         {{end}}
     </div>
 
+    <!-- ── Endorsements (trust before action) ── -->
+    {{if .Endorsements}}
+    <div style="margin-bottom:16px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7);">
+                {{.T.EndorseWhatClients}}
+            </div>
+            {{if .AvgRating}}
+            <div style="font-size:11px; color:rgba(255,255,255,0.35);">
+                ⭐ {{printf "%.1f" .AvgRating}} · {{.EndorsementCount}} {{if gt .EndorsementCount 1}}{{.T.EndorseEndorsements}}{{else}}{{.T.EndorseEndorsement}}{{end}}
+            </div>
+            {{end}}
+        </div>
+        {{range .Endorsements}}
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:16px; margin-bottom:8px;">
+            <div style="font-size:12px; letter-spacing:1px; margin-bottom:8px;">
+                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{else}}<span style="opacity:0.15;">★</span>{{end}}{{end}}
+            </div>
+            {{if .Body}}
+            <div style="font-size:14px; color:rgba(255,255,255,0.8); line-height:1.5; margin-bottom:8px;">
+                "{{.Body}}"
+            </div>
+            {{end}}
+            <div style="font-size:11px; color:rgba(255,255,255,0.3);">
+                {{.EndorserName}}{{if .EndorserLocation}} · {{.EndorserLocation}}{{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+
     <!-- ── Request a Quote ── -->
     <div class="pp-section">
         <div class="pp-section-title">
@@ -75,61 +106,34 @@
         {{end}}
     </div>
 
-    <!-- ── Pay an Invoice ── -->
-    <div class="pp-section">
-        <div class="pp-section-title">
+    <!-- ── Pay an Invoice (collapsed) ── -->
+    <details class="pp-section" style="cursor:pointer;">
+        <summary class="pp-section-title" style="list-style:none; -webkit-tap-highlight-color:transparent; user-select:none;">
             <span>💳</span> Pay an Invoice
-        </div>
+            <span style="margin-left:auto; font-size:14px; color:rgba(255,255,255,0.25); transition:transform 0.2s;">›</span>
+        </summary>
 
-        {{if .InvoiceError}}
-        <div class="pp-error">Invoice not found. Check your number and phone.</div>
-        {{end}}
+        <div style="padding-top:12px;">
+            {{if .InvoiceError}}
+            <div class="pp-error">Invoice not found. Check your number and phone.</div>
+            {{end}}
 
-        <form method="POST" action="/biz/{{.Slug}}/invoice" autocomplete="on">
-            {{.csrfField}}
-            <div class="pp-field">
-                <label class="pp-label" for="inv-num">Invoice Number</label>
-                <input type="text" name="invoice_number" id="inv-num" class="pp-input"
-                       placeholder="INV-0042" required>
-            </div>
-            <div class="pp-field">
-                <label class="pp-label" for="inv-phone">Your Phone</label>
-                <input type="tel" name="client_phone" id="inv-phone" class="pp-input"
-                       placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel">
-            </div>
-            <button type="submit" class="pp-btn pp-btn-green">Find Invoice</button>
-        </form>
-    </div>
-  <!-- ── Endorsements ── -->
-    {{if .Endorsements}}
-    <div style="margin-bottom:12px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-            <div style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7);">
-                {{.T.EndorseWhatClients}}
-            </div>
-            {{if .AvgRating}}
-            <div style="font-size:11px; color:rgba(255,255,255,0.35);">
-                ⭐ {{printf "%.1f" .AvgRating}} · {{.EndorsementCount}} {{if gt .EndorsementCount 1}}{{.T.EndorseEndorsements}}{{else}}{{.T.EndorseEndorsement}}{{end}}
-            </div>
-            {{end}}
+            <form method="POST" action="/biz/{{.Slug}}/invoice" autocomplete="on">
+                {{.csrfField}}
+                <div class="pp-field">
+                    <label class="pp-label" for="inv-num">Invoice Number</label>
+                    <input type="text" name="invoice_number" id="inv-num" class="pp-input"
+                           placeholder="INV-0042" required>
+                </div>
+                <div class="pp-field">
+                    <label class="pp-label" for="inv-phone">Your Phone</label>
+                    <input type="tel" name="client_phone" id="inv-phone" class="pp-input"
+                           placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel">
+                </div>
+                <button type="submit" class="pp-btn pp-btn-green">Find Invoice</button>
+            </form>
         </div>
-        {{range .Endorsements}}
-        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:16px; margin-bottom:8px;">
-            <div style="font-size:12px; letter-spacing:1px; margin-bottom:8px;">
-                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{else}}<span style="opacity:0.15;">★</span>{{end}}{{end}}
-            </div>
-            {{if .Body}}
-            <div style="font-size:14px; color:rgba(255,255,255,0.8); line-height:1.5; margin-bottom:8px;">
-                "{{.Body}}"
-            </div>
-            {{end}}
-            <div style="font-size:11px; color:rgba(255,255,255,0.3);">
-                {{.EndorserName}}{{if .EndorserLocation}} · {{.EndorserLocation}}{{end}}
-            </div>
-        </div>
-        {{end}}
-    </div>
-    {{end}}
+    </details>
 
   <!-- ── QR Code ── -->
     <div style="text-align:center; margin-top:24px;">
