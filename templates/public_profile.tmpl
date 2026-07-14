@@ -17,6 +17,11 @@
         {{if .Location}}
         <div class="pp-location">📍 {{.Location}}</div>
         {{end}}
+        {{if .Profile.ServiceAreas}}
+        <div class="pp-location" style="color:rgba(255,255,255,0.5); font-size:13px;">
+            🗺️ Serving: {{.Profile.ServiceAreas}}
+        </div>
+        {{end}}
         {{if .DisplayPhone}}
         <div class="pp-contact">📞 <a href="tel:{{.Profile.Phone}}">{{.DisplayPhone}}</a></div>
         {{end}}

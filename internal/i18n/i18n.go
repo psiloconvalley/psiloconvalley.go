@@ -63,6 +63,9 @@ type T struct {
 	DashboardQuoteMarkViewed  string
 	DashboardQuoteViewed      string
 	DashboardQuoteReceived    string
+	// Profile — service areas
+	ProfileServiceAreas     string
+	ProfileServiceAreasHint string
 	DashboardThDue      string
 	DashboardThTotal    string
 

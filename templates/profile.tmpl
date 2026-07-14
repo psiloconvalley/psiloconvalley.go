@@ -230,6 +230,16 @@
                 </div>
 
                 <div class="section">
+                    <div class="section-title">🗺️ {{.T.ProfileServiceAreas}}</div>
+                    <div class="form-group">
+                        <input type="text" name="service_areas"
+                               value="{{if .Profile}}{{.Profile.ServiceAreas}}{{end}}"
+                               placeholder="San Antonio, Helotes, Leon Valley, Boerne">
+                        <div class="hint">{{.T.ProfileServiceAreasHint}}</div>
+                    </div>
+                </div>
+
+                <div class="section">
                     <div class="section-title">{{.T.ProfileSectionPayment}}</div>
                     {{if .StripeConnected}}
                     <div class="success-banner">✅ {{.T.ProfileStripeConnected}}</div>

@@ -30,6 +30,7 @@ type BusinessProfile struct {
 	ZelleID       string
 	VenmoHandle   string
 	CashAppHandle string
+	ServiceAreas  string
 	CreatedAt time.Time
 }
 

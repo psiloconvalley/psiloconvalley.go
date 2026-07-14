@@ -59,6 +59,9 @@ var es = T{
 	DashboardQuoteMarkViewed:  "Marcar como visto",
 	DashboardQuoteViewed:      "visto",
 	DashboardQuoteReceived:    "Recibido",
+	// Profile — service areas
+	ProfileServiceAreas:     "Áreas de servicio",
+	ProfileServiceAreasHint: "Lista de ciudades o áreas donde trabajas, separadas por comas. Se muestra en tu página pública.",
 	DashboardThDue:      "Vence",
 	DashboardThTotal:    "Total",
 

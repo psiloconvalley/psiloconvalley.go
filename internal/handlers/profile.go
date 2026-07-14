@@ -93,6 +93,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		ZelleID:       strings.TrimSpace(r.FormValue("zelle_id")),
 		VenmoHandle:   strings.TrimSpace(r.FormValue("venmo_handle")),
 		CashAppHandle: strings.TrimSpace(r.FormValue("cashapp_handle")),
+		ServiceAreas:  strings.TrimSpace(r.FormValue("service_areas")),
 	}
 
 	// Preserve existing logo by default

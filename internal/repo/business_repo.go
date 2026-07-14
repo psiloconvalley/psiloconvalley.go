@@ -16,10 +16,11 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 	var p BusinessProfile
 	var city, state, zip, country, email, phone, taxID, currency, logoURL, slug sql.NullString
 	var zelleID, venmoHandle, cashappHandle sql.NullString
+	var serviceAreas sql.NullString
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, name, email, address, city, state, zip, country,
 		       phone, tax_id, currency, logo_url, slug,
-		       zelle_id, venmo_handle, cashapp_handle, created_at
+		       zelle_id, venmo_handle, cashapp_handle, service_areas, created_at
 		FROM business_profiles
 		WHERE user_id = $1
 		LIMIT 1
@@ -27,7 +28,7 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 		&p.ID, &p.UserID, &p.Name, &email, &p.Address,
 		&city, &state, &zip, &country,
 		&phone, &taxID, &currency, &logoURL, &slug,
-		&zelleID, &venmoHandle, &cashappHandle, &p.CreatedAt,
+		&zelleID, &venmoHandle, &cashappHandle, &serviceAreas, &p.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -45,6 +46,7 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 	if zelleID.Valid       { p.ZelleID       = zelleID.String }
 	if venmoHandle.Valid   { p.VenmoHandle   = venmoHandle.String }
 	if cashappHandle.Valid { p.CashAppHandle = cashappHandle.String }
+	if serviceAreas.Valid  { p.ServiceAreas  = serviceAreas.String }
 	return &p, nil
 }
 
@@ -54,10 +56,11 @@ func (r *BusinessRepo) GetBySlug(ctx context.Context, slug string) (*BusinessPro
 	var p BusinessProfile
 	var city, state, zip, country, email, phone, taxID, currency, logoURL sql.NullString
 	var zelleID, venmoHandle, cashappHandle sql.NullString
+	var serviceAreas sql.NullString
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, user_id, name, email, address, city, state, zip, country,
 		       phone, tax_id, currency, logo_url, slug,
-		       zelle_id, venmo_handle, cashapp_handle, created_at
+		       zelle_id, venmo_handle, cashapp_handle, service_areas, created_at
 		FROM business_profiles
 		WHERE slug = $1
 		LIMIT 1
@@ -65,7 +68,7 @@ func (r *BusinessRepo) GetBySlug(ctx context.Context, slug string) (*BusinessPro
 		&p.ID, &p.UserID, &p.Name, &email, &p.Address,
 		&city, &state, &zip, &country,
 		&phone, &taxID, &currency, &logoURL, &p.Slug,
-		&zelleID, &venmoHandle, &cashappHandle, &p.CreatedAt,
+		&zelleID, &venmoHandle, &cashappHandle, &serviceAreas, &p.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -82,6 +85,7 @@ func (r *BusinessRepo) GetBySlug(ctx context.Context, slug string) (*BusinessPro
 	if zelleID.Valid       { p.ZelleID       = zelleID.String }
 	if venmoHandle.Valid   { p.VenmoHandle   = venmoHandle.String }
 	if cashappHandle.Valid { p.CashAppHandle = cashappHandle.String }
+	if serviceAreas.Valid  { p.ServiceAreas  = serviceAreas.String }
 	return &p, nil
 }
 
@@ -99,10 +103,10 @@ func (r *BusinessRepo) Upsert(ctx context.Context, p *BusinessProfile) error {
 		INSERT INTO business_profiles
 			(user_id, name, email, address, city, state, zip,
 			 country, phone, tax_id, currency, logo_url, slug,
-			 zelle_id, venmo_handle, cashapp_handle)
+			 zelle_id, venmo_handle, cashapp_handle, service_areas)
 		VALUES
 			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
-			 $14, $15, $16)
+			 $14, $15, $16, $17)
 		ON CONFLICT (user_id) DO UPDATE SET
 			name           = EXCLUDED.name,
 			email          = EXCLUDED.email,
@@ -121,12 +125,13 @@ func (r *BusinessRepo) Upsert(ctx context.Context, p *BusinessProfile) error {
 			END,
 			zelle_id       = EXCLUDED.zelle_id,
 			venmo_handle   = EXCLUDED.venmo_handle,
-			cashapp_handle = EXCLUDED.cashapp_handle
+			cashapp_handle = EXCLUDED.cashapp_handle,
+			service_areas  = EXCLUDED.service_areas
 	`,
 		p.UserID, p.Name, p.Email, p.Address,
 		p.City, p.State, p.Zip, p.Country,
 		p.Phone, p.TaxID, p.Currency, p.LogoURL, p.Slug,
-		p.ZelleID, p.VenmoHandle, p.CashAppHandle,
+		p.ZelleID, p.VenmoHandle, p.CashAppHandle, p.ServiceAreas,
 	)
 	return err
 }
