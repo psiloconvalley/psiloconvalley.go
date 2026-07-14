@@ -455,6 +455,40 @@ type T struct {
 	TaxSummaryDownloadPDF  string
 	TaxSummaryDisclaimer   string
 	TaxSummaryNoExpenses   string
+	// Endorsements
+	EndorseTitle           string
+	EndorsePrompt          string
+	EndorseRating          string
+	EndorseMessage         string
+	EndorseMessageHint     string
+	EndorseName            string
+	EndorseCity            string
+	EndorseCityHint        string
+	EndorseSubmit          string
+	EndorseDecline         string
+	EndorseThankYou        string
+	EndorseThankYouSub     string
+	EndorseDeclinedTitle   string
+	EndorseDeclinedSub     string
+	EndorseErrorRating     string
+	EndorseErrorName       string
+	EndorseRequestBtn      string
+	EndorseRequestSent     string
+	EndorseRequestResent   string
+	EndorseAlreadyReceived string
+	EndorseNoEmail         string
+	EndorsementsTitle      string
+	EndorsementsSub        string
+	EndorsementsLive       string
+	EndorsementsPending    string
+	EndorsementsEmpty      string
+	EndorsementsEmptySub   string
+	EndorsementsDelete     string
+	EndorsementsCopyLink   string
+	EndorseWhatClients     string
+	EndorseAvg             string
+	EndorseEndorsement     string
+	EndorseEndorsements    string
 
 	// Invoice New — Mode titles
 	InvoiceNewCreateInvoice    string

@@ -50,6 +50,47 @@ func (r *BusinessRepo) GetByUserID(ctx context.Context, userID int64) (*Business
 	return &p, nil
 }
 
+// GetByID fetches a business profile by its primary key.
+// Used when another record stores business_profile_id directly.
+func (r *BusinessRepo) GetByID(ctx context.Context, id int64) (*BusinessProfile, error) {
+	var p BusinessProfile
+	var city, state, zip, country, email, phone, taxID, currency, logoURL, slug sql.NullString
+	var zelleID, venmoHandle, cashappHandle sql.NullString
+	var serviceAreas sql.NullString
+
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id, user_id, name, email, address, city, state, zip, country,
+		       phone, tax_id, currency, logo_url, slug,
+		       zelle_id, venmo_handle, cashapp_handle, service_areas, created_at
+		FROM business_profiles
+		WHERE id = $1
+		LIMIT 1
+	`, id).Scan(
+		&p.ID, &p.UserID, &p.Name, &email, &p.Address,
+		&city, &state, &zip, &country,
+		&phone, &taxID, &currency, &logoURL, &slug,
+		&zelleID, &venmoHandle, &cashappHandle, &serviceAreas, &p.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if email.Valid         { p.Email         = email.String }
+	if city.Valid          { p.City          = city.String }
+	if state.Valid         { p.State         = state.String }
+	if zip.Valid           { p.Zip           = zip.String }
+	if country.Valid       { p.Country       = country.String }
+	if phone.Valid         { p.Phone         = phone.String }
+	if taxID.Valid         { p.TaxID         = taxID.String }
+	if currency.Valid      { p.Currency      = currency.String }
+	if logoURL.Valid       { p.LogoURL       = logoURL.String }
+	if slug.Valid          { p.Slug          = slug.String }
+	if zelleID.Valid       { p.ZelleID       = zelleID.String }
+	if venmoHandle.Valid   { p.VenmoHandle   = venmoHandle.String }
+	if cashappHandle.Valid { p.CashAppHandle = cashappHandle.String }
+	if serviceAreas.Valid  { p.ServiceAreas  = serviceAreas.String }
+	return &p, nil
+}
+
 // GetBySlug fetches a business profile by its public slug.
 // Used for the public profile page — no auth required.
 func (r *BusinessRepo) GetBySlug(ctx context.Context, slug string) (*BusinessProfile, error) {

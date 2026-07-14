@@ -1,0 +1,141 @@
+{{define "og_endorse.tmpl"}}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    width: 1200px;
+    height: 630px;
+    background: #0a0f1a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+.card {
+    width: 1200px;
+    height: 630px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 100px;
+    position: relative;
+}
+/* Gradient accent bar */
+.accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #4ade80, #22d3ee, #818cf8);
+}
+/* Stars */
+.stars {
+    font-size: 40px;
+    letter-spacing: 4px;
+    margin-bottom: 28px;
+}
+/* Quote */
+.quote {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+    color: rgba(255,255,255,0.92);
+    margin-bottom: 32px;
+    max-width: 900px;
+}
+/* Attribution */
+.attribution {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.endorser-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+}
+.endorser-location {
+    font-size: 18px;
+    color: rgba(255,255,255,0.45);
+}
+.divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255,255,255,0.2);
+}
+/* Business name — bottom right */
+.business {
+    position: absolute;
+    bottom: 48px;
+    right: 80px;
+    text-align: right;
+}
+.business-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: -0.3px;
+}
+.business-brand {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    margin-top: 4px;
+}
+/* Subtle grid pattern */
+.grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+}
+/* Green glow accent */
+.glow {
+    position: absolute;
+    top: -200px;
+    left: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(74,222,128,0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div class="card">
+    <div class="accent"></div>
+    <div class="grid"></div>
+    <div class="glow"></div>
+
+    <div class="stars">
+        {{range seq 1 5}}{{if le . $.Rating}}⭐{{end}}{{end}}
+    </div>
+
+    {{if .Body}}
+    <div class="quote">"{{.Body}}"</div>
+    {{end}}
+
+    <div class="attribution">
+        <div class="endorser-name">{{.EndorserName}}</div>
+        {{if .EndorserLocation}}
+        <div class="divider"></div>
+        <div class="endorser-location">{{.EndorserLocation}}</div>
+        {{end}}
+    </div>
+
+    <div class="business">
+        <div class="business-name">{{.BusinessName}}</div>
+        <div class="business-brand">psiloconvalley</div>
+    </div>
+</div>
+</body>
+</html>
+{{end}}

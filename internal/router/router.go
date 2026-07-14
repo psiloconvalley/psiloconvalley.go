@@ -74,6 +74,11 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.Post("/biz/{slug}/quote", h.PublicQuotePost)
 	r.Post("/biz/{slug}/invoice", h.PublicInvoiceLookupPost)
 	r.Get("/biz/{slug}/qr.png", h.PublicProfileQR)
+
+	// Endorsements — public client-facing
+	r.Get("/endorse/{token}", h.EndorsementFormGet)
+	r.Post("/endorse/{token}", h.EndorsementSubmitPost)
+	r.Post("/endorse/{token}/decline", h.EndorsementDeclinePost)
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
@@ -128,6 +133,11 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/reports/tax-summary.pdf", h.TaxSummaryPDFGet)
 		// Quote requests
 		r.Post("/quote-requests/{id}/view", h.QuoteRequestMarkViewed)
+
+		// Endorsements — owner management
+		r.Post("/invoices/{id}/endorse", h.EndorsementRequestPost)
+		r.Get("/endorsements", h.EndorsementsListGet)
+		r.Post("/endorsements/{id}/delete", h.EndorsementDeletePost)
 		// Expense tracking
 		r.Get("/expenses", h.ExpensesList)
 		r.Get("/expenses/new", h.ExpenseNewGet)

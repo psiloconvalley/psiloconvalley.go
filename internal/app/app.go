@@ -49,7 +49,8 @@ type App struct {
 	UsageRepo  *repo.UsageRepo
 	PasskeyRepo *repo.PasskeyRepo
 	AddressService *address.Service
-	QuoteRequestRepo *repo.QuoteRequestRepo
+	QuoteRequestRepo  *repo.QuoteRequestRepo
+	EndorsementRepo   *repo.EndorsementRepo
 }
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
@@ -65,6 +66,13 @@ func NewApp(db *sql.DB) *App {
 		"mul":          func(a, b int) int { return a * b },
 		"hasPrefix":    strings.HasPrefix,
 		"hasSuffix":    strings.HasSuffix,
+		"seq": func(start, end int) []int {
+			s := make([]int, 0, end-start+1)
+			for i := start; i <= end; i++ {
+				s = append(s, i)
+			}
+			return s
+		},
 	}
 	// Two-pass parse: root templates + partials subdirectory.
 	// Add additional ParseGlob calls here for new subdirectories.
@@ -151,8 +159,9 @@ func NewApp(db *sql.DB) *App {
 		ExpenseRepo:       repo.NewExpenseRepo(db),
 		AuditRepo: 	   repo.NewAuditRepo(db),
 		UsageRepo:  	   repo.NewUsageRepo(db),
-		QuoteRequestRepo: repo.NewQuoteRequestRepo(db),
-		PasskeyRepo: repo.NewPasskeyRepo(db),
+		QuoteRequestRepo:  repo.NewQuoteRequestRepo(db),
+		EndorsementRepo:   repo.NewEndorsementRepo(db),
+		PasskeyRepo:       repo.NewPasskeyRepo(db),
 	}
 }
 	

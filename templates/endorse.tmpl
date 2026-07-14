@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+<head>
+    {{template "page-head-no-title" .}}
+    <title>{{if .Submitted}}{{if .T}}{{.T.EndorseThankYou}}{{else}}Thank You{{end}}{{else if .Declined}}{{if .T}}{{.T.EndorseDeclinedTitle}}{{else}}No Problem{{end}}{{else}}{{if .T}}{{.T.EndorseTitle}}{{else}}Leave an Endorsement{{end}}{{end}} | PSILOCONVALLEY</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+        }
+        .brand {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+        .biz-name {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        .prompt {
+            font-size: 15px;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        /* Star rating */
+        .stars {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        .stars input { display: none; }
+        .stars label {
+            font-size: 40px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.2);
+            transition: color 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .stars input:checked ~ label,
+        .stars label:hover,
+        .stars label:hover ~ label {
+            color: #fbbf24;
+        }
+        /* Form fields */
+        .field { margin-bottom: 16px; }
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .field input,
+        .field textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e6edf3;
+            font-family: inherit;
+            font-size: 15px;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .field input:focus,
+        .field textarea:focus {
+            border-color: rgba(74,222,128,0.5);
+        }
+        .field textarea { resize: vertical; min-height: 100px; }
+        .field .hint {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 4px;
+        }
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            background: #4ade80;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 14px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s ease;
+        }
+        .btn-primary:hover { background: #22c55e; }
+        .btn-decline {
+            width: 100%;
+            background: transparent;
+            color: rgba(255,255,255,0.3);
+            border: none;
+            font-size: 13px;
+            padding: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            text-decoration: underline;
+        }
+        .btn-decline:hover { color: rgba(255,255,255,0.5); }
+        /* States */
+        .state-icon { font-size: 48px; margin-bottom: 16px; }
+        .state-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .state-sub { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+        /* Error */
+        .error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 8px;
+            color: #f87171;
+            font-size: 13px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+        }
+        /* Submitted endorsement display */
+        .submitted-stars { font-size: 28px; margin-bottom: 12px; }
+        .submitted-quote {
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+        .submitted-name {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+        }
+        @media (max-width: 480px) {
+            .card { padding: 28px 20px; }
+            .stars label { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="brand">psiloconvalley</div>
+
+    {{if .Submitted}}
+    <!-- ── Submitted state ── -->
+    <div class="state-icon">🎉</div>
+    <div class="state-title">Thank you!</div>
+    <div class="state-sub" style="margin-bottom:28px;">
+        {{if .T}}{{.T.EndorseThankYouSub}}{{else}}Your endorsement has been published.{{end}}
+    </div>
+    {{if .Endorsement}}
+    <div style="background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.2); border-radius:12px; padding:20px;">
+        <div class="submitted-stars">
+            {{range $i := (seq 1 5)}}{{if le $i $.Endorsement.Rating}}⭐{{end}}{{end}}
+        </div>
+        {{if .Endorsement.Body}}
+        <div class="submitted-quote">"{{.Endorsement.Body}}"</div>
+        {{end}}
+        <div class="submitted-name">
+            {{.Endorsement.EndorserName}}{{if .Endorsement.EndorserLocation}} · {{.Endorsement.EndorserLocation}}{{end}}
+        </div>
+    </div>
+    {{end}}
+
+    {{else if .Declined}}
+    <!-- ── Declined state ── -->
+    <div class="state-icon">👋</div>
+    <div class="state-title">{{.T.EndorseDeclinedTitle}}</div>
+    <div class="state-sub">
+        {{.T.EndorseDeclinedSub}}
+    </div>
+
+    {{else}}
+    <!-- ── Endorsement form ── -->
+    {{if .Business}}
+    <div class="biz-name">{{.Business.Name}}</div>
+    {{end}}
+    <div class="prompt">{{.T.EndorsePrompt}}</div>
+
+    {{if .Error}}
+    <div class="error">{{.Error}}</div>
+    {{end}}
+
+    <form method="POST" action="/endorse/{{.Token}}">
+        {{.csrfField}}
+
+        <!-- Star rating — CSS only, no JS -->
+        <div class="field">
+            <label>{{.T.EndorseRating}}</label>
+            <div class="stars">
+                <input type="radio" name="rating" id="s5" value="5">
+                <label for="s5" title="5 stars">★</label>
+                <input type="radio" name="rating" id="s4" value="4">
+                <label for="s4" title="4 stars">★</label>
+                <input type="radio" name="rating" id="s3" value="3">
+                <label for="s3" title="3 stars">★</label>
+                <input type="radio" name="rating" id="s2" value="2">
+                <label for="s2" title="2 stars">★</label>
+                <input type="radio" name="rating" id="s1" value="1">
+                <label for="s1" title="1 star">★</label>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>{{.T.EndorseMessage}} <span style="color:rgba(255,255,255,0.3)">({{.T.EndorseMessageHint}})</span></label>
+            <textarea name="body" placeholder="I've used this service for 2 years..."></textarea>
+        </div>
+
+        <div class="field">
+            <label>{{.T.EndorseName}}</label>
+            <input type="text" name="endorser_name" placeholder="Maria L." required autocomplete="name">
+        </div>
+
+        <div class="field">
+            <label>{{.T.EndorseCity}} <span style="color:rgba(255,255,255,0.3)">(optional)</span></label>
+            <input type="text" name="endorser_location" placeholder="Helotes, TX" autocomplete="address-level2">
+            <div class="hint">{{.T.EndorseCityHint}}</div>
+        </div>
+
+        <button type="submit" class="btn-primary">{{.T.EndorseSubmit}}</button>
+    </form>
+
+    <form method="POST" action="/endorse/{{.Token}}/decline">
+        {{.csrfField}}
+        <button type="submit" class="btn-decline">{{.T.EndorseDecline}}</button>
+    </form>
+    {{end}}
+
+</div>
+</body>
+</html>

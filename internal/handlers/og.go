@@ -275,3 +275,53 @@ func serveDefaultOGFallback(w http.ResponseWriter, r *http.Request) {
 	}
 	http.ServeFile(w, r, path)
 }
+
+// OGEndorseImage generates a shareable OG card for a submitted endorsement.
+// Route: GET /og/endorse/{token}.jpg
+// Shows stars, quote, endorser name + location, business name.
+// Falls back to default if token not found or endorsement not submitted.
+func (h *Handlers) OGEndorseImage(w http.ResponseWriter, r *http.Request) {
+	token := strings.TrimSuffix(chi.URLParam(r, "token"), ".jpg")
+	if token == "" {
+		serveDefaultOGFallback(w, r)
+		return
+	}
+
+	endorsement, err := h.App.EndorsementRepo.GetByToken(r.Context(), token)
+	if err != nil || endorsement == nil || endorsement.Status != "submitted" {
+		serveDefaultOGFallback(w, r)
+		return
+	}
+
+	// Load business profile for the business name
+	biz, err := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+	if err != nil || biz == nil {
+		serveDefaultOGFallback(w, r)
+		return
+	}
+
+	type ogEndorseData struct {
+		EndorserName     string
+		EndorserLocation string
+		Rating           int
+		Body             string
+		BusinessName     string
+	}
+
+	data := ogEndorseData{
+		EndorserName:     endorsement.EndorserName,
+		EndorserLocation: endorsement.EndorserLocation,
+		Rating:           endorsement.Rating,
+		Body:             endorsement.Body,
+		BusinessName:     biz.Name,
+	}
+
+	imgBytes, err := h.renderOGTemplate("og_endorse.tmpl", data, r)
+	if err != nil {
+		slog.Error("og endorse render failed", "token", token, "err", err)
+		serveDefaultOGFallback(w, r)
+		return
+	}
+
+	serveJPEG(w, imgBytes)
+}

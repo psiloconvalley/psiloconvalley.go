@@ -325,6 +325,24 @@ type AuditLog struct {
 	Metadata   map[string]any
 	CreatedAt  time.Time
 }
+// Endorsement is a client testimonial tied to a paid invoice.
+// Requested by the business owner, submitted by the client via token link.
+// Goes live immediately on submission — no moderation required.
+// Owner can delete if needed.
+type Endorsement struct {
+	ID                int64
+	BusinessProfileID int64
+	InvoiceID         *int64
+	EndorserName      string
+	EndorserLocation  string
+	Rating            int
+	Body              string
+	Token             string
+	Status            string // pending / submitted / declined
+	RequestedAt       time.Time
+	SubmittedAt       *time.Time
+}
+
 type QuoteRequest struct {
 	ID                int64
 	BusinessProfileID int64

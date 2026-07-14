@@ -47,12 +47,19 @@ func (h *Handlers) PublicProfileGet(w http.ResponseWriter, r *http.Request) {
 		ogImage = profile.LogoURL
 	}
 
+	// Load public endorsements for display
+	endorsements, _ := h.App.EndorsementRepo.ListSubmittedBySlug(r.Context(), slug)
+	avgRating, endorsementCount, _ := h.App.EndorsementRepo.AverageRating(r.Context(), profile.ID)
+
 	h.App.Render(w, r, "public_profile.tmpl", map[string]any{
-		"Profile":      profile,
-		"DisplayPhone": displayPhone,
-		"Location":     location,
-		"BaseURL":      h.App.BaseURL,
-		"Slug":         slug,
+		"Profile":          profile,
+		"DisplayPhone":     displayPhone,
+		"Location":         location,
+		"BaseURL":          h.App.BaseURL,
+		"Slug":             slug,
+		"Endorsements":     endorsements,
+		"AvgRating":        avgRating,
+		"EndorsementCount": endorsementCount,
 		"Meta": app.PageMeta{
 			Title:       profile.Name + " | PSILOCONVALLEY",
 			Description: profile.Name + " — " + location + ". Request a quote or pay an invoice.",
@@ -170,15 +177,37 @@ func (h *Handlers) renderPublicProfile(
 		displayPhone = catalog.FormatPhone(displayPhone)
 	}
 
+	location := buildLocation(profile.City, profile.State)
+
+	ogImage := "https://psiloconvalley.com/og/default.jpg"
+	if profile.LogoURL != "" {
+		ogImage = profile.LogoURL
+	}
+
+	endorsements, _ := h.App.EndorsementRepo.ListSubmittedBySlug(r.Context(), slug)
+	avgRating, endorsementCount, _ := h.App.EndorsementRepo.AverageRating(r.Context(), profile.ID)
+
 	h.App.Render(w, r, "public_profile.tmpl", map[string]any{
-		"Profile":      profile,
-		"DisplayPhone": displayPhone,
-		"Location":     buildLocation(profile.City, profile.State),
-		"BaseURL":      h.App.BaseURL,
-		"Slug":         slug,
-		"QuoteError":   quoteError,
-		"QuoteSuccess": quoteSuccess,
-		"InvoiceError": invoiceError,
+		"Profile":          profile,
+		"DisplayPhone":     displayPhone,
+		"Location":         location,
+		"BaseURL":          h.App.BaseURL,
+		"Slug":             slug,
+		"QuoteError":       quoteError,
+		"QuoteSuccess":     quoteSuccess,
+		"InvoiceError":     invoiceError,
+		"Endorsements":     endorsements,
+		"AvgRating":        avgRating,
+		"EndorsementCount": endorsementCount,
+		"Meta": app.PageMeta{
+			Title:       profile.Name + " | PSILOCONVALLEY",
+			Description: profile.Name + " — " + location + ". Request a quote or pay an invoice.",
+			TwitterDesc: profile.Name + " — Request a quote or pay an invoice.",
+			Canonical:   h.App.BaseURL + "/biz/" + slug,
+			OGImage:     ogImage,
+			Robots:      "index,follow",
+			IsPublic:    true,
+		},
 	})
 }
 

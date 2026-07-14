@@ -17,6 +17,13 @@ func TestAllTemplatesParse(t *testing.T) {
 		"mul":          func(a, b int) int { return a * b },
 		"hasPrefix":    strings.HasPrefix,
 		"hasSuffix":    strings.HasSuffix,
+		"seq": func(start, end int) []int {
+			s := make([]int, 0, end-start+1)
+			for i := start; i <= end; i++ {
+				s = append(s, i)
+			}
+			return s
+		},
 	}
 
 	tmpl, err := template.New("").Funcs(funcs).ParseGlob("../../templates/*.tmpl")

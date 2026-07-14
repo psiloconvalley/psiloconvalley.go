@@ -22,6 +22,14 @@
             <input type="hidden" name="status" value="sent">
             <button type="submit" class="status-btn" style="background:#dbeafe; color:#1d4ed8;">↩ {{.T.InvoicesUndoPayment}}</button>
         </form>
+        {{if .Invoice.ClientEmail}}
+        <form method="POST" action="/invoices/{{.Invoice.ID}}/endorse">
+            {{.csrfField}}
+            <button type="submit" class="status-btn" style="background:rgba(74,222,128,0.15); color:#4ade80; border:1px solid rgba(74,222,128,0.25);">
+                ⭐ {{.T.EndorseRequestBtn}}
+            </button>
+        </form>
+        {{end}}
     </div>
 
     {{else if eq .Invoice.Status "void"}}

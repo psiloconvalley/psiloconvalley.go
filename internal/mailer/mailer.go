@@ -912,3 +912,126 @@ func (m *Mailer) SendNotification(toEmail, subject, body string) error {
 	})
 	return err
 }
+
+// =====================================================================
+// SendEndorsementRequest
+// Sends a personal endorsement request to a client after a paid invoice.
+// Sounds like it comes from the business — delivered by psiloconvalley.
+// =====================================================================
+
+type EndorsementRequestData struct {
+	ClientName   string
+	BusinessName string
+	EndorseURL   string
+}
+
+func (m *Mailer) SendEndorsementRequest(toEmail string, data EndorsementRequestData) error {
+	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
+		log.Printf("[mailer] skipping endorsement request — no API key (would have sent to %s)", toEmail)
+		return nil
+	}
+
+	subject := fmt.Sprintf("Quick question from %s", data.BusinessName)
+
+	body := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%%;">
+
+          <tr>
+            <td style="padding:0 0 24px 0;text-align:center;">
+              <p style="margin:0;font-size:14px;font-weight:700;letter-spacing:1px;color:#1f2937;">PSILOCONVALLEY</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+
+              <div style="height:4px;background:linear-gradient(90deg,#4ade80,#22d3ee,#818cf8);"></div>
+
+              <table width="100%%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:40px 40px 32px;">
+
+                    <p style="margin:0 0 28px 0;font-size:15px;color:#374151;line-height:1.7;">
+                      Hi %s,
+                    </p>
+
+                    <p style="margin:0 0 28px 0;font-size:15px;color:#374151;line-height:1.7;">
+                      <strong>%s</strong> wanted to reach out. If you've been happy with the service,
+                      would you mind leaving a quick endorsement? It takes about 30 seconds
+                      and means a lot to a small business.
+                    </p>
+
+                    <table cellpadding="0" cellspacing="0" width="100%%" style="margin-bottom:32px;">
+                      <tr>
+                        <td align="center">
+                          <a href="%s"
+                             style="display:inline-block;padding:16px 40px;
+                                    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+                                    font-size:15px;font-weight:700;
+                                    color:#000000;text-decoration:none;
+                                    background:#4ade80;border-radius:8px;
+                                    letter-spacing:0.3px;">
+                            Leave an Endorsement →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;text-align:center;">
+                      No account needed. Takes 30 seconds.<br>
+                      If you'd rather not, simply ignore this email.
+                    </p>
+
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:20px 40px;border-top:1px solid #f3f4f6;">
+                    <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;">
+                      Sent via <a href="https://psiloconvalley.com" style="color:#6b7280;text-decoration:none;font-weight:600;">psiloconvalley</a>
+                      on behalf of %s.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+		data.ClientName,
+		data.BusinessName,
+		data.EndorseURL,
+		data.BusinessName,
+	)
+
+	_, err := m.client.Emails.Send(&resend.SendEmailRequest{
+		From:    m.from,
+		To:      []string{toEmail},
+		Subject: subject,
+		Html:    body,
+	})
+	if err != nil {
+		log.Printf("[mailer] endorsement request send error: %v", err)
+		return err
+	}
+
+	log.Printf("[mailer] endorsement request sent to %s for %s", toEmail, data.BusinessName)
+	return nil
+}
