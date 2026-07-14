@@ -102,26 +102,28 @@
     </div>
   <!-- ── Endorsements ── -->
     {{if .Endorsements}}
-    <div class="pp-section">
-        <div class="pp-section-title">
-            <span>⭐</span> {{.T.EndorseWhatClients}}
+    <div style="margin-bottom:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7);">
+                {{.T.EndorseWhatClients}}
+            </div>
             {{if .AvgRating}}
-            <span style="margin-left:auto; font-size:12px; color:rgba(255,255,255,0.5);">
-                {{printf "%.1f" .AvgRating}} avg · {{.EndorsementCount}} endorsement{{if gt .EndorsementCount 1}}s{{end}}
-            </span>
+            <div style="font-size:11px; color:rgba(255,255,255,0.35);">
+                ⭐ {{printf "%.1f" .AvgRating}} · {{.EndorsementCount}} {{if gt .EndorsementCount 1}}{{.T.EndorseEndorsements}}{{else}}{{.T.EndorseEndorsement}}{{end}}
+            </div>
             {{end}}
         </div>
         {{range .Endorsements}}
-        <div style="padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div style="font-size:16px; margin-bottom:6px;">
-                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{else}}☆{{end}}{{end}}
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:16px; margin-bottom:8px;">
+            <div style="font-size:12px; letter-spacing:1px; margin-bottom:8px;">
+                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{else}}<span style="opacity:0.15;">★</span>{{end}}{{end}}
             </div>
             {{if .Body}}
-            <div style="font-size:14px; color:rgba(255,255,255,0.8); line-height:1.6; font-style:italic; margin-bottom:6px;">
+            <div style="font-size:14px; color:rgba(255,255,255,0.8); line-height:1.5; margin-bottom:8px;">
                 "{{.Body}}"
             </div>
             {{end}}
-            <div style="font-size:12px; color:rgba(255,255,255,0.35);">
+            <div style="font-size:11px; color:rgba(255,255,255,0.3);">
                 {{.EndorserName}}{{if .EndorserLocation}} · {{.EndorserLocation}}{{end}}
             </div>
         </div>
