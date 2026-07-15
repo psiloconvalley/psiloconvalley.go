@@ -6,6 +6,9 @@
 </head>
 <body>
 
+<div class="pp-cosmos"></div>
+<canvas id="pp-stars"></canvas>
+
 <div class="pp-wrap">
 
     <!-- ── Business Card ── -->
@@ -14,13 +17,17 @@
         <img src="{{.Profile.LogoURL}}" alt="{{.Profile.Name}}" class="pp-logo">
         {{end}}
         <div class="pp-name">{{.Profile.Name}}</div>
+        {{if and .AvgRating .Endorsements}}
+        <div class="pp-hero-rating">
+            <span class="pp-hero-star">⭐</span>
+            {{printf "%.1f" .AvgRating}} · {{.EndorsementCount}} {{if gt .EndorsementCount 1}}{{.T.EndorseEndorsements}}{{else}}{{.T.EndorseEndorsement}}{{end}}
+        </div>
+        {{end}}
         {{if .Location}}
         <div class="pp-location">📍 {{.Location}}</div>
         {{end}}
         {{if .Profile.ServiceAreas}}
-        <div class="pp-location" style="color:rgba(255,255,255,0.5); font-size:13px;">
-            🗺️ Serving: {{.Profile.ServiceAreas}}
-        </div>
+        <div class="pp-service-areas">🗺️ Serving: {{.Profile.ServiceAreas}}</div>
         {{end}}
         {{if .DisplayPhone}}
         <div class="pp-contact">📞 <a href="tel:{{.Profile.Phone}}">{{.DisplayPhone}}</a></div>
@@ -41,43 +48,30 @@
 
     <!-- ── Endorsements (trust before action) ── -->
     {{if .Endorsements}}
-    <div style="margin-bottom:16px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-            <div style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7);">
-                {{.T.EndorseWhatClients}}
-            </div>
-            {{if .AvgRating}}
-            <div style="font-size:11px; color:rgba(255,255,255,0.35);">
-                ⭐ {{printf "%.1f" .AvgRating}} · {{.EndorsementCount}} {{if gt .EndorsementCount 1}}{{.T.EndorseEndorsements}}{{else}}{{.T.EndorseEndorsement}}{{end}}
-            </div>
-            {{end}}
-        </div>
+    <div class="pp-endorse-section">
+        <div class="pp-endorse-label">{{.T.EndorseWhatClients}}</div>
         {{range .Endorsements}}
-        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:16px; margin-bottom:8px;">
-            <div style="font-size:12px; letter-spacing:1px; margin-bottom:8px;">
-                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{else}}<span style="opacity:0.15;">★</span>{{end}}{{end}}
+        <div class="pp-endorse-card">
+            <div class="pp-stars">
+                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}<span class="pp-star-filled">⭐</span>{{else}}<span class="pp-star-empty">★</span>{{end}}{{end}}
             </div>
             {{if .Body}}
-            <div style="font-size:14px; color:rgba(255,255,255,0.8); line-height:1.5; margin-bottom:8px;">
-                "{{.Body}}"
-            </div>
+            <div class="pp-endorse-body">{{.Body}}</div>
             {{end}}
-            <div style="font-size:11px; color:rgba(255,255,255,0.3);">
-                {{.EndorserName}}{{if .EndorserLocation}} · {{.EndorserLocation}}{{end}}
-            </div>
+            <div class="pp-endorse-byline">{{.EndorserName}}{{if .EndorserLocation}} · {{.EndorserLocation}}{{end}}</div>
         </div>
         {{end}}
     </div>
     {{end}}
 
-    <!-- ── Request a Quote (collapsed) ── -->
-    <details class="pp-section" style="cursor:pointer;"{{if or .QuoteError .QuoteSuccess}} open{{end}}>
-        <summary class="pp-section-title" style="list-style:none; -webkit-tap-highlight-color:transparent; user-select:none; margin-bottom:0;">
+    <!-- ── Request a Quote ── -->
+    <details class="pp-section"{{if or .QuoteError .QuoteSuccess}} open{{end}}>
+        <summary class="pp-section-title">
             <span>💬</span> Request a Quote
-            <span style="margin-left:auto; font-size:14px; color:rgba(255,255,255,0.25);">›</span>
+            <span class="pp-section-chevron">›</span>
         </summary>
 
-        <div style="padding-top:10px;">
+        <div style="padding-top:16px;">
             {{if .QuoteSuccess}}
             <div class="pp-success">✓ {{.QuoteSuccess}}</div>
             {{end}}
@@ -109,14 +103,14 @@
         </div>
     </details>
 
-    <!-- ── Pay an Invoice (collapsed) ── -->
-    <details class="pp-section" style="cursor:pointer;"{{if .InvoiceError}} open{{end}}>
-        <summary class="pp-section-title" style="list-style:none; -webkit-tap-highlight-color:transparent; user-select:none; margin-bottom:0;">
+    <!-- ── Pay an Invoice ── -->
+    <details class="pp-section"{{if .InvoiceError}} open{{end}}>
+        <summary class="pp-section-title">
             <span>💳</span> Pay an Invoice
-            <span style="margin-left:auto; font-size:14px; color:rgba(255,255,255,0.25);">›</span>
+            <span class="pp-section-chevron">›</span>
         </summary>
 
-        <div style="padding-top:10px;">
+        <div style="padding-top:16px;">
             {{if .InvoiceError}}
             <div class="pp-error">Invoice not found. Check your number and phone.</div>
             {{end}}
@@ -138,22 +132,21 @@
         </div>
     </details>
 
-  <!-- ── QR Code ── -->
-    <div style="text-align:center; margin-top:24px;">
-        <img src="/biz/{{.Slug}}/qr.png" alt="QR Code" width="160" height="160"
-             style="border-radius:12px; background:#fff; padding:8px;">
-        <div style="font-size:11px; color:rgba(255,255,255,0.3); margin-top:8px;">
-            Scan to visit this page
-        </div>
+    <!-- ── QR Code ── -->
+    <div class="pp-qr-wrap">
+        <img src="/biz/{{.Slug}}/qr.png" alt="QR Code" width="160" height="160" class="pp-qr-img">
+        <div class="pp-qr-label">Scan to visit this page</div>
     </div>
 
-        <!-- ── Branding ── -->
+    <!-- ── Branding ── -->
     <div class="pp-branding">
+        <div class="pp-branding-divider"></div>
         <div class="pp-branding-text">Professional invoicing by psiloconvalley</div>
         <a href="/register" class="pp-branding-link">Create Your Business Page →</a>
     </div>
 
 </div>
+
 <script>
 function copyText(text, btn) {
     navigator.clipboard.writeText(text).then(function() {
@@ -161,6 +154,52 @@ function copyText(text, btn) {
         setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
     });
 }
+
+(function() {
+    var c = document.getElementById('pp-stars');
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    var stars = [];
+    var count = 80;
+
+    function resize() {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+    }
+
+    function init() {
+        resize();
+        stars = [];
+        for (var i = 0; i < count; i++) {
+            stars.push({
+                x: Math.random() * c.width,
+                y: Math.random() * c.height,
+                r: Math.random() * 1.2 + 0.3,
+                a: Math.random(),
+                d: Math.random() * 0.008 + 0.002,
+                dir: Math.random() > 0.5 ? 1 : -1
+            });
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        for (var i = 0; i < stars.length; i++) {
+            var s = stars[i];
+            s.a += s.d * s.dir;
+            if (s.a >= 1 || s.a <= 0.1) s.dir *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,' + s.a * 0.6 + ')';
+            ctx.fill();
+        }
+        requestAnimationFrame(draw);
+    }
+
+    init();
+    window.addEventListener('resize', init);
+    draw();
+})();
 </script>
 </body>
 </html>
