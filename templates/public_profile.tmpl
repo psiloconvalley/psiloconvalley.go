@@ -70,8 +70,7 @@
             <span>💬</span> Request a Quote
             <span class="pp-section-chevron">›</span>
         </summary>
-
-        <div style="padding-top:16px;">
+        <div class="pp-section-content">
             {{if .QuoteSuccess}}
             <div class="pp-success">✓ {{.QuoteSuccess}}</div>
             {{end}}
@@ -109,8 +108,7 @@
             <span>💳</span> Pay an Invoice
             <span class="pp-section-chevron">›</span>
         </summary>
-
-        <div style="padding-top:16px;">
+        <div class="pp-section-content">
             {{if .InvoiceError}}
             <div class="pp-error">Invoice not found. Check your number and phone.</div>
             {{end}}
@@ -160,7 +158,7 @@ function copyText(text, btn) {
     if (!c) return;
     var ctx = c.getContext('2d');
     var stars = [];
-    var count = 80;
+    var count = 120;
 
     function resize() {
         c.width = window.innerWidth;
@@ -174,9 +172,9 @@ function copyText(text, btn) {
             stars.push({
                 x: Math.random() * c.width,
                 y: Math.random() * c.height,
-                r: Math.random() * 1.2 + 0.3,
+                r: Math.random() * 0.8 + 0.2,
                 a: Math.random(),
-                d: Math.random() * 0.008 + 0.002,
+                d: Math.random() * 0.01 + 0.003,
                 dir: Math.random() > 0.5 ? 1 : -1
             });
         }
@@ -187,11 +185,17 @@ function copyText(text, btn) {
         for (var i = 0; i < stars.length; i++) {
             var s = stars[i];
             s.a += s.d * s.dir;
-            if (s.a >= 1 || s.a <= 0.1) s.dir *= -1;
+            if (s.a >= 1 || s.a <= 0.05) s.dir *= -1;
             ctx.beginPath();
             ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,255,255,' + s.a * 0.6 + ')';
+            ctx.fillStyle = 'rgba(255,255,255,' + s.a * 0.5 + ')';
             ctx.fill();
+            if (s.r > 0.6) {
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(74,222,128,' + s.a * 0.03 + ')';
+                ctx.fill();
+            }
         }
         requestAnimationFrame(draw);
     }
@@ -200,6 +204,14 @@ function copyText(text, btn) {
     window.addEventListener('resize', init);
     draw();
 })();
+
+document.querySelectorAll('.pp-btn').forEach(function(btn) {
+    btn.addEventListener('pointerdown', function(e) {
+        var rect = btn.getBoundingClientRect();
+        btn.style.setProperty('--x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+        btn.style.setProperty('--y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+    });
+});
 </script>
 </body>
 </html>
