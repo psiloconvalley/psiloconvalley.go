@@ -42,7 +42,7 @@ func (h *Handlers) PublicProfileGet(w http.ResponseWriter, r *http.Request) {
 
 	location := buildLocation(profile.City, profile.State)
 
-	ogImage := "https://psiloconvalley.com/og/default.jpg"
+	ogImage := h.App.BaseURL + "/og/default.jpg"
 	if profile.LogoURL != "" {
 		ogImage = profile.LogoURL
 	}
@@ -179,7 +179,7 @@ func (h *Handlers) renderPublicProfile(
 
 	location := buildLocation(profile.City, profile.State)
 
-	ogImage := "https://psiloconvalley.com/og/default.jpg"
+	ogImage := h.App.BaseURL + "/og/default.jpg"
 	if profile.LogoURL != "" {
 		ogImage = profile.LogoURL
 	}

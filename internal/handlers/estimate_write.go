@@ -160,7 +160,7 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 		DocumentType:        "estimate",
 	}
 
-	service.NormalizeTemplateFields(inv, user.Plan == "pro")
+	service.NormalizeTemplateFields(inv, catalog.IsPaid(user.Plan))
 
 	estimateID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, "")
 	if err != nil {
@@ -275,7 +275,7 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 	inv.TaxRateBps = int64(taxRatePct * 100)
 	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
 	inv.DiscountAmountCents = int64(math.Round(discountAmt * 100))
-	service.NormalizeTemplateFields(inv, user.Plan == "pro")
+	service.NormalizeTemplateFields(inv, catalog.IsPaid(user.Plan))
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		slog.Error("estimate update failed", "err", err)

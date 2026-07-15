@@ -31,7 +31,7 @@ func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
 				"PSILOCONVALLEY — Invoices & Estimates in Minutes",
 				"Professional invoicing for independent contractors. English & Spanish. Free to start.",
 				"Send estimates, get approval, convert to invoice, and get paid. Free to start.",
-				"https://psiloconvalley.com",
+				h.App.BaseURL,
 			),
 		})
 		return
@@ -50,7 +50,7 @@ func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
 			"PSILOCONVALLEY — Invoices & Estimates in Minutes",
 			"Professional invoicing for independent contractors. English & Spanish. Free to start.",
 			"Send estimates, get approval, convert to invoice, and get paid. Free to start.",
-			"https://psiloconvalley.com",
+			h.App.BaseURL,
 		),
 	})
 }
@@ -60,7 +60,7 @@ func (h *Handlers) Research(w http.ResponseWriter, r *http.Request) {
 			"Roadmap & Changelog | PSILOCONVALLEY",
 			"What we are building next at psiloconvalley. Public roadmap, changelog, and shipped features for independent contractors.",
 			"Public roadmap and changelog for psiloconvalley invoicing platform.",
-			"https://psiloconvalley.com/research",
+			h.App.BaseURL+"/research",
 		),
 	})
 }
@@ -70,7 +70,7 @@ func (h *Handlers) SecurityPage(w http.ResponseWriter, r *http.Request) {
 			"Security | PSILOCONVALLEY",
 			"How psiloconvalley protects your business data, client information, and payments. Argon2id, HMAC sessions, CSRF protection, and audit logs.",
 			"Enterprise-grade security for your invoicing data. Argon2id, HMAC sessions, CSRF, audit logs.",
-			"https://psiloconvalley.com/security",
+			h.App.BaseURL+"/security",
 		),
 	})
 }
@@ -80,7 +80,7 @@ func (h *Handlers) ToolsHub(w http.ResponseWriter, r *http.Request) {
 			"How It Works | PSILOCONVALLEY",
 			"Send quotes, create invoices, accept card payments, and manage your clients. Professional tools for independent businesses. Free to start.",
 			"Professional invoicing and quoting tools for independent businesses. Free to start.",
-			"https://psiloconvalley.com/tools",
+			h.App.BaseURL+"/tools",
 		),
 	})
 }
@@ -90,7 +90,7 @@ func (h *Handlers) EnterprisePage(w http.ResponseWriter, r *http.Request) {
 			"Enterprise | PSILOCONVALLEY",
 			"Secure, audit-logged invoicing for agencies, contractors, and professional services. Built on an enterprise security foundation.",
 			"Audit logs, HMAC sessions, CSRF protection, and Argon2id password security. Professional invoicing you can trust.",
-			"https://psiloconvalley.com/enterprise",
+			h.App.BaseURL+"/enterprise",
 		),
 	})
 }

@@ -95,7 +95,7 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.Notes = strings.TrimSpace(r.FormValue("notes"))
 	inv.PaymentDetails = strings.TrimSpace(r.FormValue("payment_details"))
 
-	service.NormalizeTemplateFields(inv, user.Plan == "pro")
+	service.NormalizeTemplateFields(inv, catalog.IsPaid(user.Plan))
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		http.Error(w, "Update failed", http.StatusInternalServerError)

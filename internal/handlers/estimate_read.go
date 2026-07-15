@@ -26,7 +26,7 @@ func (h *Handlers) EstimatesList(w http.ResponseWriter, r *http.Request) {
 	h.App.Render(w, r, "estimates_list.tmpl", map[string]any{
 		"Estimates": estimates,
 		"User":      user,
-		"IsPro":     user.Plan == "pro",
+		"IsPro":     catalog.IsPaid(user.Plan),
 		"Deleted":   r.URL.Query().Get("deleted") == "true",
 		"Converted": r.URL.Query().Get("converted") == "true",
 	})

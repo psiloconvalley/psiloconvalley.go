@@ -252,7 +252,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		Status:              "draft",
 	}
 
-	service.NormalizeTemplateFields(inv, user != nil && user.Plan == "pro")
+	service.NormalizeTemplateFields(inv, user != nil && catalog.IsPaid(user.Plan))
 
 	invoiceID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, anonymousToken)
 	if err != nil {

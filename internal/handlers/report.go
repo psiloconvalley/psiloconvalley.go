@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/pdf"
 	"psiloconvalley/internal/util"
 )
@@ -236,7 +237,7 @@ func (h *Handlers) ClientScorecardGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasPaidPlan := user.Plan == "growth" || user.Plan == "pro"
+	hasPaidPlan := catalog.IsPaid(user.Plan)
 
 	h.App.Render(w, r, "scorecard.tmpl", map[string]any{
 		"User":        user,

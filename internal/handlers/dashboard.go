@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/util"
 )
@@ -146,7 +147,7 @@ func (h *Handlers) DashboardGet(w http.ResponseWriter, r *http.Request) {
 		"NetProfitCents":  netProfitCents,
 		"HasExpenses":     canAccessExpenses(user),
 		"ActiveRecurring": activeRecurring,
-		"IsPro":           user.Plan == "pro",
+		"IsPro":           catalog.IsPaid(user.Plan),
 		"HasProfile":      hasProfile,
 		"HasClient":       hasClient,
 		"HasInvoice":      hasInvoice,

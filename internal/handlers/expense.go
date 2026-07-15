@@ -20,7 +20,7 @@ import (
 
 // canAccessExpenses returns true if the user's plan includes expense tracking.
 func canAccessExpenses(user *repo.User) bool {
-	return user.Plan == "growth" || user.Plan == "pro"
+	return catalog.IsPaid(user.Plan)
 }
 
 func (h *Handlers) ExpensesList(w http.ResponseWriter, r *http.Request) {

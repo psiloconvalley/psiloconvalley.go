@@ -31,7 +31,7 @@ func (h *Handlers) PricingGet(w http.ResponseWriter, r *http.Request) {
 			"Pricing | PSILOCONVALLEY",
 			"Free invoicing to start. Pro at $18.88/mo. Pro Max at $28.88/mo unlimited invoices.",
 			"Simple, transparent pricing for professional invoicing. Free to start.",
-			"https://psiloconvalley.com/pricing",
+			h.App.BaseURL+"/pricing",
 		),
 	})
 }
