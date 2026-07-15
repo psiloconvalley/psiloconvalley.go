@@ -195,18 +195,33 @@
     }
 
     .pp-stars {
-        font-size: 18px;
-        letter-spacing: 3px;
-        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin-bottom: 10px;
         line-height: 1;
     }
 
+    .pp-star-filled,
+    .pp-star-empty {
+        display: inline-block;
+        font-size: 13px;
+        transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+    }
+
     .pp-star-filled {
-        filter: drop-shadow(0 0 4px rgba(251,191,36,0.7));
+        filter: drop-shadow(0 0 3px rgba(251,191,36,0.45));
+    }
+
+    .pp-endorse-card:hover .pp-star-filled {
+        transform: translateY(-1px) scale(1.06);
+        filter: drop-shadow(0 0 5px rgba(74,222,128,0.22))
+                drop-shadow(0 0 4px rgba(251,191,36,0.45));
     }
 
     .pp-star-empty {
-        opacity: 0.12;
+        opacity: 0.14;
+        font-size: 12px;
     }
 
     .pp-endorse-body {
