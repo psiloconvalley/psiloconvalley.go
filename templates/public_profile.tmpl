@@ -209,12 +209,12 @@ function copyText(text, btn) {
 
             ctx.beginPath();
             ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(74,222,128,' + n.a * 0.5 + ')';
+            ctx.fillStyle = 'rgba(74,222,128,' + n.a * 0.85 + ')';
             ctx.fill();
 
             ctx.beginPath();
             ctx.arc(n.x, n.y, n.r * 3, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(74,222,128,' + n.a * 0.06 + ')';
+            ctx.fillStyle = 'rgba(74,222,128,' + n.a * 0.14 + ')';
             ctx.fill();
 
             for (var j = i + 1; j < nodes.length; j++) {
@@ -223,12 +223,12 @@ function copyText(text, btn) {
                 var dy = n.y - n2.y;
                 var dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < linkDist) {
-                    var alpha = (1 - dist / linkDist) * 0.15 * Math.min(n.a, n2.a);
+                    var alpha = (1 - dist / linkDist) * 0.35 * Math.min(n.a, n2.a);
                     ctx.beginPath();
                     ctx.moveTo(n.x, n.y);
                     ctx.lineTo(n2.x, n2.y);
                     ctx.strokeStyle = 'rgba(74,222,128,' + alpha + ')';
-                    ctx.lineWidth = 0.5;
+                    ctx.lineWidth = 0.8;
                     ctx.stroke();
                 }
             }
