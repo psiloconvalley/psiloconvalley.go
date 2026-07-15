@@ -3,7 +3,7 @@ package handlers
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"strconv"
@@ -114,7 +114,7 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	if invoiceNumber == "" {
 		num, err := h.App.UserRepo.NextEstimateNumber(r.Context(), user.ID)
 		if err != nil {
-			log.Printf("[estimate] failed to generate estimate number: %v", err)
+			slog.Error("estimate number generation failed", "err", err)
 			invoiceNumber = fmt.Sprintf("EST-%d", time.Now().UnixNano())
 		} else {
 			invoiceNumber = num
@@ -164,12 +164,12 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	estimateID, err := h.App.InvRepo.CreateInvoice(r.Context(), inv, items, "")
 	if err != nil {
-		log.Printf("[estimate] create error: %v", err)
+		slog.Error("estimate create failed", "err", err)
 		http.Error(w, "Failed to create estimate", http.StatusInternalServerError)
 		return
 	}
 	if err := h.App.UsageRepo.Increment(r.Context(), user.ID, "estimates"); err != nil {
-    		log.Printf("[estimate] usage increment error: %v", err)
+    		slog.Warn("estimate usage increment failed", "err", err)
 	}
 	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     audit.UserIDPtr(user.ID),
@@ -278,7 +278,7 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 	service.NormalizeTemplateFields(inv, user.Plan == "pro")
 
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
-		log.Printf("[estimate] update error: %v", err)
+		slog.Error("estimate update failed", "err", err)
 		http.Error(w, "Failed to update estimate", http.StatusInternalServerError)
 		return
 	}
@@ -319,7 +319,7 @@ func (h *Handlers) EstimateStatusPost(w http.ResponseWriter, r *http.Request) {
 
 	newStatus := r.FormValue("status")
 	if err := h.App.InvRepo.UpdateEstimateStatus(r.Context(), id, user.ID, newStatus); err != nil {
-		log.Printf("[estimate] status update error: %v", err)
+		slog.Error("estimate status update failed", "err", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -371,12 +371,12 @@ func (h *Handlers) EstimateDeletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.App.InvRepo.DeleteDraftInvoice(r.Context(), id, user.ID); err != nil {
-		log.Printf("[estimate] delete error: %v", err)
+		slog.Error("estimate delete failed", "err", err)
 		http.Error(w, "Could not delete estimate", http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("[estimate] draft estimate %d deleted by user %d", id, user.ID)
+	slog.Info("estimate deleted", "estimate_id", id, "user_id", user.ID)
 	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     audit.UserIDPtr(user.ID),
 		Action:     audit.ActionEstimateDeleted,
@@ -419,7 +419,7 @@ func (h *Handlers) EstimateConvertPost(w http.ResponseWriter, r *http.Request) {
 		Items:    items,
 	})
 	if err != nil {
-		log.Printf("[estimate] convert error: %v", err)
+		slog.Error("estimate convert failed", "err", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

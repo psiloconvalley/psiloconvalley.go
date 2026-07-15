@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"html/template"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -57,27 +57,26 @@ func (h *Handlers) InvoicePDFGet(w http.ResponseWriter, r *http.Request) {
 				mime := http.DetectContentType(b)
 				invoiceView.LogoURL = template.URL("data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b))
 			} else {
-				log.Printf("[pdf] logo read from disk error for invoice %d: %v", id, err)
+				slog.Warn("pdf logo read from disk failed", "invoice_id", id, "err", err)
 			}
 		} else if strings.HasPrefix(logoStr, "http") {
 			// Remote (SupabaseStore)
 			client := &http.Client{Timeout: 10 * time.Second}
 			resp, err := client.Get(logoStr)
 			if err != nil {
-				log.Printf("[pdf] logo fetch error for invoice %d: %v", id, err)
+				slog.Warn("pdf logo fetch failed", "invoice_id", id, "err", err)
 			} else {
 				defer resp.Body.Close()
 				if resp.StatusCode != http.StatusOK {
-					log.Printf("[pdf] logo fetch non-200 for invoice %d: status=%d url=%s",
-						id, resp.StatusCode, logoStr)
+					slog.Warn("pdf logo fetch non-200", "invoice_id", id, "status", resp.StatusCode, "url", logoStr)
 				} else {
 					b, err := io.ReadAll(resp.Body)
 					if err != nil {
-						log.Printf("[pdf] logo read error for invoice %d: %v", id, err)
+						slog.Warn("pdf logo read failed", "invoice_id", id, "err", err)
 					} else {
 						mime := http.DetectContentType(b)
 						invoiceView.LogoURL = template.URL("data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b))
-						log.Printf("[pdf] logo inlined as base64 for invoice %d (%d bytes)", id, len(b))
+						slog.Info("pdf logo inlined", "invoice_id", id, "bytes", len(b))
 					}
 				}
 			}

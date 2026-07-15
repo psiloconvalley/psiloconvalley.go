@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -23,7 +23,7 @@ func (h *Handlers) ProfileGet(w http.ResponseWriter, r *http.Request) {
 
 	profile, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Printf("profile fetch error: %v", err)
+		slog.Error("profile fetch failed", "err", err)
 		http.Error(w, "Could not load profile", http.StatusInternalServerError)
 		return
 	}
@@ -60,7 +60,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 
 	// Max upload size: 2MB
 	if err := r.ParseMultipartForm(2 << 20); err != nil {
-		log.Printf("multipart parse error: %v", err)
+		slog.Error("profile multipart parse failed", "err", err)
 
 		h.App.Render(w, r, "profile.tmpl", map[string]any{
 			"Error":      "Upload too large or invalid form data",
@@ -114,7 +114,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		// Read all bytes — needed for content-type detection and processing
 		rawBytes, err := io.ReadAll(file)
 		if err != nil {
-			log.Printf("logo read error: %v", err)
+			slog.Error("logo read failed", "err", err)
 			h.App.Render(w, r, "profile.tmpl", map[string]any{
 				"Profile":    p,
 				"Error":      "Could not read uploaded file.",
@@ -126,7 +126,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		// Process: validate, resize, encode to PNG
 		processed, err := logo.Process(rawBytes)
 		if err != nil {
-			log.Printf("logo process error: %v", err)
+			slog.Error("logo process failed", "err", err)
 			h.App.Render(w, r, "profile.tmpl", map[string]any{
 				"Profile":    p,
 				"Error":      "Invalid image: " + err.Error(),
@@ -138,13 +138,13 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 		// Store and get public URL
 		publicURL, err := h.App.LogoStore.Save(user.ID, processed)
 		if err != nil {
-			log.Printf("logo store error: %v", err)
+			slog.Error("logo store failed", "err", err)
 			http.Error(w, "Could not save logo", http.StatusInternalServerError)
 			return
 		}
 
 		p.LogoURL = publicURL
-		log.Printf("[logo] saved for user %d: %s", user.ID, p.LogoURL)
+		slog.Info("logo saved", "user_id", user.ID, "url", p.LogoURL)
 	}
 
 	// ============================================================
@@ -159,7 +159,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.App.BizRepo.Upsert(r.Context(), p); err != nil {
-		log.Printf("profile upsert error: %v", err)
+		slog.Error("profile upsert failed", "err", err)
 
 		h.App.Render(w, r, "profile.tmpl", map[string]any{
 			"Profile":    p,
@@ -173,7 +173,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 	lang := strings.TrimSpace(r.FormValue("language"))
 	if lang != "" {
 		if err := h.App.UserRepo.UpdateLanguage(r.Context(), user.ID, lang); err != nil {
-			log.Printf("language update error: %v", err)
+			slog.Error("language update failed", "err", err)
 		}
 	}
 
@@ -225,7 +225,7 @@ func (h *Handlers) ChangePasswordPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.App.UserRepo.UpdatePassword(r.Context(), user.ID, newPass); err != nil {
-		log.Printf("[profile] password update error: %v", err)
+		slog.Error("password update failed", "err", err)
 		http.Redirect(w, r, "/profile?pw_error=failed", http.StatusSeeOther)
 		return
 	}

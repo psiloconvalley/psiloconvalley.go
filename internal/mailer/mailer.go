@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/resend/resend-go/v2"
@@ -23,7 +23,7 @@ type Mailer struct {
 func New() *Mailer {
 	apiKey := os.Getenv("RESEND_API_KEY")
 	if apiKey == "" {
-		log.Println("[mailer] WARNING: RESEND_API_KEY not set — emails will not send")
+		slog.Warn("RESEND_API_KEY not set, emails will not send")
 	}
 
 	from := os.Getenv("EMAIL_FROM")
@@ -66,7 +66,7 @@ func (m *Mailer) SendInvoice(
 	pdfFilename string,
 ) error {
 	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
-		log.Printf("[mailer] skipping send — no API key (would have sent to %s)", toEmail)
+		slog.Warn("invoice email skipped, no API key", "to", toEmail)
 		return nil
 	}
 
@@ -101,8 +101,7 @@ func (m *Mailer) SendInvoice(
 		return fmt.Errorf("resend send: %w", err)
 	}
 
-	log.Printf("[mailer] invoice %s sent to %s (id=%s)",
-		data.InvoiceNumber, toEmail, resp.Id)
+	slog.Info("invoice email sent", "invoice_number", data.InvoiceNumber, "to", toEmail, "resend_id", resp.Id)
 	return nil
 }
 
@@ -276,7 +275,7 @@ type ReminderEmailData struct {
 
 func (m *Mailer) SendReminder(toEmail string, data ReminderEmailData) error {
 	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
-		log.Printf("[mailer] skipping reminder — no API key (would have sent to %s)", toEmail)
+		slog.Warn("reminder email skipped, no API key", "to", toEmail)
 		return nil
 	}
 
@@ -299,8 +298,7 @@ func (m *Mailer) SendReminder(toEmail string, data ReminderEmailData) error {
 		return fmt.Errorf("resend send reminder: %w", err)
 	}
 
-	log.Printf("[mailer] reminder sent for %s to %s (type=%s, id=%s)",
-		data.InvoiceNumber, toEmail, data.ReminderType, resp.Id)
+	slog.Info("reminder email sent", "invoice_number", data.InvoiceNumber, "to", toEmail, "type", data.ReminderType, "resend_id", resp.Id)
 	return nil
 }
 
@@ -526,7 +524,7 @@ type EstimateResponseEmailData struct {
 
 func (m *Mailer) SendEstimateResponse(toEmail string, data EstimateResponseEmailData) error {
 	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
-		log.Printf("[mailer] skipping estimate response — no API key")
+		slog.Warn("estimate response email skipped, no API key")
 		return nil
 	}
 
@@ -622,7 +620,7 @@ func (m *Mailer) SendEstimateResponse(toEmail string, data EstimateResponseEmail
 		Html:    body,
 	})
 	if err != nil {
-		log.Printf("[mailer] estimate response email error: %v", err)
+		slog.Error("estimate response email failed", "err", err)
 	}
 	return err
 
@@ -645,7 +643,7 @@ type EstimateEmailData struct {
 
 func (m *Mailer) SendEstimate(toEmail string, data EstimateEmailData) error {
 	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
-		log.Printf("[mailer] skipping estimate send — no API key (would have sent to %s)", toEmail)
+		slog.Warn("estimate email skipped, no API key", "to", toEmail)
 		return nil
 	}
 
@@ -752,11 +750,11 @@ func (m *Mailer) SendEstimate(toEmail string, data EstimateEmailData) error {
 		Html:    body,
 	})
 	if err != nil {
-		log.Printf("[mailer] estimate send error: %v", err)
+		slog.Error("estimate email failed", "err", err)
 		return err
 	}
 
-	log.Printf("[mailer] estimate %s sent to %s", data.EstimateNumber, toEmail)
+	slog.Info("estimate email sent", "estimate_number", data.EstimateNumber, "to", toEmail)
 	return nil
 }
 
@@ -764,7 +762,7 @@ func (m *Mailer) SendEstimate(toEmail string, data EstimateEmailData) error {
 // SendMagicLink sends a one-time login link to the user's email.
 func (m *Mailer) SendMagicLink(toEmail, link string) error {
 	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
-		log.Printf("[mailer] skipping magic link — no API key (would have sent to %s)", toEmail)
+		slog.Warn("magic link email skipped, no API key", "to", toEmail)
 		return nil
 	}
 
@@ -890,11 +888,11 @@ func (m *Mailer) SendMagicLink(toEmail, link string) error {
 		Html:    body,
 	})
 	if err != nil {
-		log.Printf("[mailer] magic link send error: %v", err)
+		slog.Error("magic link email failed", "err", err)
 		return err
 	}
 
-	log.Printf("[mailer] magic link sent to %s", toEmail)
+	slog.Info("magic link email sent", "to", toEmail)
 	return nil
 }
 
@@ -927,7 +925,7 @@ type EndorsementRequestData struct {
 
 func (m *Mailer) SendEndorsementRequest(toEmail string, data EndorsementRequestData) error {
 	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
-		log.Printf("[mailer] skipping endorsement request — no API key (would have sent to %s)", toEmail)
+		slog.Warn("endorsement request email skipped, no API key", "to", toEmail)
 		return nil
 	}
 
@@ -1028,10 +1026,10 @@ func (m *Mailer) SendEndorsementRequest(toEmail string, data EndorsementRequestD
 		Html:    body,
 	})
 	if err != nil {
-		log.Printf("[mailer] endorsement request send error: %v", err)
+		slog.Error("endorsement request email failed", "err", err)
 		return err
 	}
 
-	log.Printf("[mailer] endorsement request sent to %s for %s", toEmail, data.BusinessName)
+	slog.Info("endorsement request email sent", "to", toEmail, "business", data.BusinessName)
 	return nil
 }

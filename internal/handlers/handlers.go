@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"time"
@@ -108,12 +107,7 @@ func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log to Railway (backup)
-	log.Printf(
-		"\n[ANOMALY REPORT] %s\nFROM: %s\nCONTENT: %s\n-------------------",
-		time.Now().Format("2006-01-02 15:04:05"),
-		fromEmail,
-		report,
-	)
+	slog.Info("anomaly report received", "from", fromEmail, "content", report)
 
 	// Email to yourself via Resend
 	go func() {
@@ -125,7 +119,7 @@ func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 		if key := h.App.Mailer.APIKey(); key != "" {
 			client = resend.NewClient(key)
 		} else {
-			log.Println("[feedback] no Resend API key, skipping email")
+			slog.Warn("feedback email skipped, no API key")
 			return
 		}
 
@@ -148,9 +142,9 @@ func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 			Html:    body,
 		})
 		if err != nil {
-			log.Printf("[feedback] email error: %v", err)
+			slog.Error("feedback email failed", "err", err)
 		} else {
-			log.Printf("[feedback] emailed to psiloconvalleypsiloconvalley@gmail.com")
+			slog.Info("feedback email sent")
 		}
 	}()
 

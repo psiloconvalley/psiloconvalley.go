@@ -4,7 +4,7 @@ package pdf
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"regexp"
 	"sync"
@@ -76,7 +76,7 @@ func Init() {
 			context.Background(),
 			opts...,
 		)
-		log.Println("[pdf] Chrome allocator initialized")
+		slog.Info("chromium allocator initialized")
 	})
 }
 
@@ -85,7 +85,7 @@ func Init() {
 func Shutdown() {
 	if allocCancel != nil {
 		allocCancel()
-		log.Println("[pdf] Chrome allocator shut down")
+		slog.Info("chromium allocator shut down")
 	}
 }
 

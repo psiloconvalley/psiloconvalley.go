@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"html/template"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -247,7 +248,7 @@ if user != nil && user.Language != "" {
 	data["Lang"] = lang
 	var buf bytes.Buffer
 	if err := a.Templates.ExecuteTemplate(&buf, name, data); err != nil {
-		log.Printf("template error [%s]: %v", name, err)
+		slog.Error("template render failed", "template", name, "err", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}

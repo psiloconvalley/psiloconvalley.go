@@ -5,7 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func (r *AuditRepo) Log(ctx context.Context, entry AuditLog) {
 	if entry.Metadata != nil {
 		b, err := json.Marshal(entry.Metadata)
 		if err != nil {
-			log.Printf("[audit] failed to marshal metadata for action %s: %v", entry.Action, err)
+			slog.Error("audit metadata marshal failed", "action", entry.Action, "err", err)
 		} else {
 			metadataJSON = b
 		}
@@ -45,8 +45,7 @@ func (r *AuditRepo) Log(ctx context.Context, entry AuditLog) {
 		metadataJSON,
 	)
 	if err != nil {
-		log.Printf("[audit] failed to write audit log: action=%s entity=%s/%v err=%v",
-			entry.Action, entry.EntityType, entry.EntityID, err)
+		slog.Error("audit log write failed", "action", entry.Action, "entity_type", entry.EntityType, "entity_id", entry.EntityID, "err", err)
 	}
 }
 // ListByUser returns the most recent audit entries for a given user.
@@ -143,7 +142,7 @@ func scanAuditLogs(rows *sql.Rows) ([]AuditLog, error) {
 
 		if metadataRaw != nil {
 			if err := json.Unmarshal(metadataRaw, &entry.Metadata); err != nil {
-				log.Printf("[audit] failed to unmarshal metadata for log %d: %v", entry.ID, err)
+				slog.Warn("audit metadata unmarshal failed", "log_id", entry.ID, "err", err)
 			}
 		}
 

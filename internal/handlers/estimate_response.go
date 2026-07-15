@@ -3,7 +3,7 @@ package handlers
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -113,14 +113,14 @@ func (h *Handlers) EstimateRespondPost(w http.ResponseWriter, r *http.Request) {
 		ClientName: clientName,
 	}
 	if err := h.App.EstRespRepo.Create(r.Context(), resp); err != nil {
-		log.Printf("[estimate] response save error: %v", err)
+		slog.Error("estimate response save failed", "err", err)
 	}
 
 	// Update status for accept/reject via repo — no raw SQL in handlers.
 	if action == "accepted" || action == "rejected" {
 		if inv.UserID != nil {
 			if err := h.App.InvRepo.UpdateEstimateStatus(r.Context(), id, *inv.UserID, action); err != nil {
-				log.Printf("[estimate] failed to update status for estimate %d: %v", id, err)
+				slog.Error("estimate status update failed", "estimate_id", id, "err", err)
 			}
 		}
 	}
@@ -140,7 +140,7 @@ func (h *Handlers) EstimateRespondPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	log.Printf("[estimate] client responded to estimate %d: action=%s", id, action)
+	slog.Info("estimate client response received", "estimate_id", id, "action", action)
 	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     nil, // public action — no logged-in user
 		Action:     audit.ActionEstimateResponded,

@@ -4,7 +4,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"math"
 	"strings"
 	"time"
@@ -177,7 +177,7 @@ func (s *InvoiceService) GenerateInvoiceNumber(ctx context.Context, userID *int6
 	if userID != nil {
 		num, err := s.UserRepo.NextInvoiceNumber(ctx, *userID)
 		if err != nil {
-			log.Printf("[invoice_service] failed to generate invoice number for user %d: %v", *userID, err)
+			slog.Error("invoice number generation failed", "user_id", *userID, "err", err)
 			return fmt.Sprintf("INV-%d", time.Now().UnixNano()), nil
 		}
 		return num, nil
@@ -227,8 +227,7 @@ func (s *InvoiceService) CreateRecurringSchedule(ctx context.Context, p Schedule
 		return fmt.Errorf("schedule first recurring job: %w", err)
 	}
 
-	log.Printf("[invoice_service] recurring schedule %d created for invoice %d (first run job %d at %s)",
-		schedID, p.InvoiceID, jobID, nextRun.Format("2006-01-02"))
+	slog.Info("recurring schedule created", "schedule_id", schedID, "invoice_id", p.InvoiceID, "job_id", jobID, "next_run", nextRun.Format("2006-01-02"))
 
 	return nil
 }
@@ -268,11 +267,9 @@ func (s *InvoiceService) ScheduleReminders(ctx context.Context, invoiceID int64,
 		}
 		_, err := s.SchedulerRepo.CreateJob(ctx, "send_reminder", payload, runAt)
 		if err != nil {
-			log.Printf("[invoice_service] failed to schedule %s reminder for invoice %d: %v",
-				rem.reminderType, invoiceID, err)
+			slog.Error("reminder schedule failed", "type", rem.reminderType, "invoice_id", invoiceID, "err", err)
 		} else {
-			log.Printf("[invoice_service] scheduled %s reminder for invoice %d at %s",
-				rem.reminderType, invoiceID, runAt.Format("2006-01-02 15:04"))
+			slog.Info("reminder scheduled", "type", rem.reminderType, "invoice_id", invoiceID, "run_at", runAt.Format("2006-01-02 15:04"))
 		}
 	}
 
@@ -284,11 +281,11 @@ func (s *InvoiceService) ScheduleReminders(ctx context.Context, invoiceID int64,
 func (s *InvoiceService) CancelReminders(ctx context.Context, invoiceID int64) {
 	cancelled, err := s.SchedulerRepo.CancelJobsForInvoice(ctx, invoiceID)
 	if err != nil {
-		log.Printf("[invoice_service] failed to cancel reminders for invoice %d: %v", invoiceID, err)
+		slog.Error("reminder cancellation failed", "invoice_id", invoiceID, "err", err)
 		return
 	}
 	if cancelled > 0 {
-		log.Printf("[invoice_service] cancelled %d pending reminders for invoice %d", cancelled, invoiceID)
+		slog.Info("reminders cancelled", "count", cancelled, "invoice_id", invoiceID)
 	}
 }
 
@@ -356,11 +353,10 @@ func (s *InvoiceService) ConvertEstimateToInvoice(
 	}
 
 	if err := s.InvRepo.UpdateEstimateStatus(ctx, p.Estimate.ID, p.UserID, "converted"); err != nil {
-		log.Printf("[invoice_service] failed to mark estimate %d as converted: %v", p.Estimate.ID, err)
+		slog.Error("estimate conversion mark failed", "estimate_id", p.Estimate.ID, "err", err)
 	}
 
-	log.Printf("[invoice_service] estimate %d converted to invoice %d by user %d",
-		p.Estimate.ID, newID, p.UserID)
+	slog.Info("estimate converted to invoice", "estimate_id", p.Estimate.ID, "invoice_id", newID, "user_id", p.UserID)
 
 	return newID, nil
 }

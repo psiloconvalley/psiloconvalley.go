@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"psiloconvalley/internal/mailer"
@@ -40,7 +40,7 @@ func NewReminderHandler(
 
 		// Don't send reminders for paid or void invoices
 		if inv.Status == "paid" || inv.Status == "void" {
-			log.Printf("[reminder] skipping invoice %d — status is %s", p.InvoiceID, inv.Status)
+			slog.Warn("reminder skipped, invoice not in sendable status", "invoice_id", p.InvoiceID, "status", inv.Status)
 			return nil
 		}
 
@@ -73,7 +73,7 @@ func NewReminderHandler(
 		// Build invoice URL
 		token, err := invRepo.EnsurePublicToken(ctx, inv.ID)
 		if err != nil {
-			log.Printf("[reminder] failed to ensure public token for invoice %d: %v", inv.ID, err)
+			slog.Error("reminder public token failed", "invoice_id", inv.ID, "err", err)
 		}
 		invoiceURL := fmt.Sprintf("%s/invoices/%d", baseURL, inv.ID)
 		if token != "" {
@@ -96,8 +96,7 @@ func NewReminderHandler(
 			return fmt.Errorf("send reminder for invoice %d: %w", p.InvoiceID, err)
 		}
 
-		log.Printf("[reminder] sent %s reminder for invoice %d to %s",
-			p.ReminderType, p.InvoiceID, inv.ClientEmail)
+		slog.Info("reminder sent", "type", p.ReminderType, "invoice_id", p.InvoiceID, "to", inv.ClientEmail)
 		return nil
 	}
 }

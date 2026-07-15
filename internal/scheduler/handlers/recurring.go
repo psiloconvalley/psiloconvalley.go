@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"psiloconvalley/internal/mailer"
@@ -37,7 +37,7 @@ func NewRecurringHandler(
 			return fmt.Errorf("fetch schedule %d: %w", p.ScheduleID, err)
 		}
 		if !sched.Active {
-			log.Printf("[recurring] schedule %d is inactive, skipping", p.ScheduleID)
+			slog.Warn("recurring schedule inactive, skipping", "schedule_id", p.ScheduleID)
 			return nil
 		}
 
@@ -54,7 +54,7 @@ func NewRecurringHandler(
 		if templateInv.UserID != nil {
 			num, err := userRepo.NextInvoiceNumber(ctx, *templateInv.UserID)
 			if err != nil {
-				log.Printf("[recurring] failed to generate invoice number: %v", err)
+				slog.Error("recurring invoice number generation failed", "err", err)
 				newInv.InvoiceNumber = fmt.Sprintf("REC-%d", time.Now().UnixNano())
 			} else {
 				newInv.InvoiceNumber = num
@@ -77,14 +77,13 @@ func NewRecurringHandler(
 			return fmt.Errorf("create recurring invoice from template %d: %w", sched.TemplateInvoiceID, err)
 		}
 
-		log.Printf("[recurring] created invoice %d from template %d (schedule %d)",
-			newID, sched.TemplateInvoiceID, sched.ID)
+		slog.Info("recurring invoice created", "invoice_id", newID, "template_id", sched.TemplateInvoiceID, "schedule_id", sched.ID)
 
 		// Auto-send if enabled
 		if sched.SendAutomatically && templateInv.ClientEmail != "" {
 			token, err := invRepo.EnsurePublicToken(ctx, newID)
 			if err != nil {
-				log.Printf("[recurring] failed to ensure public token for invoice %d: %v", newID, err)
+				slog.Error("recurring public token failed", "invoice_id", newID, "err", err)
 			}
 			invoiceURL := fmt.Sprintf("%s/invoices/%d", baseURL, newID)
 			if token != "" {
@@ -113,11 +112,11 @@ func NewRecurringHandler(
 			}
 
 			if err := m.SendInvoice(templateInv.ClientEmail, emailData, nil, ""); err != nil {
-				log.Printf("[recurring] failed to auto-send invoice %d: %v", newID, err)
+				slog.Error("recurring auto-send failed", "invoice_id", newID, "err", err)
 				// Don't return error — invoice was created, just email failed
 
 			} else {
-				log.Printf("[recurring] auto-sent invoice %d to %s", newID, templateInv.ClientEmail)
+				slog.Info("recurring invoice auto-sent", "invoice_id", newID, "to", templateInv.ClientEmail)
 				// Mark as sent
 				if templateInv.UserID != nil {
 					_ = invRepo.UpdateInvoiceStatus(ctx, newID, "sent", "", *templateInv.UserID)
@@ -148,11 +147,14 @@ func NewRecurringHandler(
 						}
 						_, err := schedRepo.CreateJob(ctx, "send_reminder", payload, runAt)
 						if err != nil {
-							log.Printf("[recurring] failed to schedule %s reminder for invoice %d: %v",
-								rem.reminderType, newID, err)
+							slog.Error("recurring reminder schedule failed",
+								"type", rem.reminderType,
+								"invoice_id", newID,
+								"err", err)
 						} else {
-							log.Printf("[recurring] scheduled %s reminder for recurring invoice %d",
-								rem.reminderType, newID)
+							slog.Info("recurring reminder scheduled",
+								"type", rem.reminderType,
+								"invoice_id", newID)
 						}
 					}
 				}
@@ -174,8 +176,7 @@ func NewRecurringHandler(
 			return fmt.Errorf("schedule next recurring job for schedule %d: %w", sched.ID, err)
 		}
 
-		log.Printf("[recurring] next run for schedule %d at %s",
-			sched.ID, sched.NextRunAt.Format("2006-01-02 15:04"))
+		slog.Info("recurring next run scheduled", "schedule_id", sched.ID, "next_run", sched.NextRunAt.Format("2006-01-02 15:04"))
 
 		return nil
 	}

@@ -5,7 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -42,6 +42,6 @@ func InitDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("database ping failed: %w", err)
 	}
 
-	log.Println("Database connected")
+	slog.Info("database connected")
 	return db, nil
 }

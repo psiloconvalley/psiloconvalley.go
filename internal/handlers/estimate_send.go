@@ -3,7 +3,7 @@ package handlers
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -87,7 +87,7 @@ func (h *Handlers) EstimateSendPost(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.App.InvRepo.EnsurePublicToken(r.Context(), id)
 	if err != nil {
-		log.Printf("[estimate] failed to ensure public token for estimate %d: %v", id, err)
+		slog.Error("estimate public token failed", "estimate_id", id, "err", err)
 	}
 
 	respondURL := fmt.Sprintf("%s/estimates/%d/respond", h.App.BaseURL, id)
@@ -114,7 +114,7 @@ func (h *Handlers) EstimateSendPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.App.Mailer.SendEstimate(toEmail, emailData); err != nil {
-		log.Printf("[estimate] email send error: %v", err)
+		slog.Error("estimate email send failed", "err", err)
 		http.Error(w, "Failed to send estimate email. Please try again.", http.StatusInternalServerError)
 		return
 	}
@@ -122,11 +122,11 @@ func (h *Handlers) EstimateSendPost(w http.ResponseWriter, r *http.Request) {
 	// Advance status draft → sent via repo — no raw SQL in handlers.
 	if inv.Status == "draft" {
 		if err := h.App.InvRepo.UpdateEstimateStatus(r.Context(), id, user.ID, "sent"); err != nil {
-			log.Printf("[estimate] failed to advance status to sent for estimate %d: %v", id, err)
+			slog.Error("estimate status advance failed", "estimate_id", id, "err", err)
 		}
 	}
 
-	log.Printf("[estimate] estimate %s sent to %s by user %d", inv.InvoiceNumber, toEmail, user.ID)
+	slog.Info("estimate sent", "estimate_number", inv.InvoiceNumber, "to", toEmail, "user_id", user.ID)
 	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     audit.UserIDPtr(user.ID),
 		Action:     audit.ActionEstimateSent,

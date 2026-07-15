@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -39,7 +40,7 @@ func InitDB() {
 	}
 
 	DB = conn
-	log.Println("✅ Database connected")
+	slog.Info("database connected")
 }
 
 func CloseDB() {

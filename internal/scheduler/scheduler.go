@@ -4,7 +4,7 @@ package scheduler
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"time"
 
 	"psiloconvalley/internal/repo"
@@ -53,14 +53,14 @@ func (s *Scheduler) Register(jobType string, fn HandlerFunc) {
 // Start runs the scheduler loop. Call this in a goroutine.
 // It blocks until ctx is cancelled.
 func (s *Scheduler) Start(ctx context.Context) {
-	log.Printf("[scheduler] started — tick every %s", s.interval)
+	slog.Info("scheduler started", "interval", s.interval)
 	ticker := time.NewTicker(s.interval)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("[scheduler] shutting down")
+			slog.Info("scheduler shutting down")
 			return
 		case <-ticker.C:
 			s.tick(ctx)
@@ -72,7 +72,7 @@ func (s *Scheduler) Start(ctx context.Context) {
 func (s *Scheduler) tick(ctx context.Context) {
 	jobs, err := s.repo.FetchNextJobs(ctx, 10)
 	if err != nil {
-		log.Printf("[scheduler] fetch error: %v", err)
+		slog.Error("scheduler fetch failed", "err", err)
 		return
 	}
 
@@ -83,11 +83,11 @@ func (s *Scheduler) tick(ctx context.Context) {
 
 // execute runs a single job
 func (s *Scheduler) execute(ctx context.Context, job repo.ScheduledJob) {
-	log.Printf("[scheduler] executing job id=%d type=%s", job.ID, job.JobType)
+	slog.Info("scheduler executing job", "job_id", job.ID, "job_type", job.JobType)
 
 	// Mark as running
 	if err := s.repo.MarkRunning(ctx, job.ID); err != nil {
-		log.Printf("[scheduler] failed to mark job %d running: %v", job.ID, err)
+		slog.Error("scheduler mark running failed", "job_id", job.ID, "err", err)
 		return
 	}
 	_ = s.repo.LogEvent(ctx, job.ID, "started", "")
@@ -96,7 +96,7 @@ func (s *Scheduler) execute(ctx context.Context, job repo.ScheduledJob) {
 	handler, ok := s.handlers[job.JobType]
 	if !ok {
 		reason := "no handler registered for job type: " + job.JobType
-		log.Printf("[scheduler] job %d: %s", job.ID, reason)
+		slog.Warn("scheduler job skipped", "job_id", job.ID, "reason", reason)
 		_ = s.repo.MarkFailed(ctx, job.ID, reason, nil)
 		_ = s.repo.LogEvent(ctx, job.ID, "failed", reason)
 		return
@@ -105,7 +105,7 @@ func (s *Scheduler) execute(ctx context.Context, job repo.ScheduledJob) {
 	// Execute handler
 	err := handler(ctx, job.Payload)
 	if err != nil {
-		log.Printf("[scheduler] job %d failed (attempt %d): %v", job.ID, job.Attempts+1, err)
+		slog.Error("scheduler job failed", "job_id", job.ID, "attempt", job.Attempts+1, "err", err)
 		_ = s.repo.LogEvent(ctx, job.ID, "error", err.Error())
 
 		// Decide: retry or permanent fail
@@ -113,7 +113,7 @@ func (s *Scheduler) execute(ctx context.Context, job repo.ScheduledJob) {
 		if newAttempts >= job.MaxAttempts {
 			_ = s.repo.MarkFailed(ctx, job.ID, err.Error(), nil)
 			_ = s.repo.LogEvent(ctx, job.ID, "failed", "max attempts reached")
-			log.Printf("[scheduler] job %d permanently failed", job.ID)
+			slog.Error("scheduler job permanently failed", "job_id", job.ID)
 			return
 		}
 
@@ -122,14 +122,14 @@ func (s *Scheduler) execute(ctx context.Context, job repo.ScheduledJob) {
 		next := time.Now().Add(backoff)
 		_ = s.repo.MarkFailed(ctx, job.ID, err.Error(), &next)
 		_ = s.repo.LogEvent(ctx, job.ID, "retrying", backoff.String())
-		log.Printf("[scheduler] job %d will retry in %s", job.ID, backoff)
+		slog.Warn("scheduler job retry scheduled", "job_id", job.ID, "backoff", backoff)
 		return
 	}
 
 	// Success
 	_ = s.repo.MarkComplete(ctx, job.ID)
 	_ = s.repo.LogEvent(ctx, job.ID, "completed", "")
-	log.Printf("[scheduler] job %d completed successfully", job.ID)
+	slog.Info("scheduler job completed", "job_id", job.ID)
 }
 
 // backoffDuration returns how long to wait before retrying
