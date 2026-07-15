@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<div class="pp-cosmos"></div>
+<div class="pp-cosmos"><div class="pp-cosmos-mid"></div></div>
 <canvas id="pp-stars"></canvas>
 
 <div class="pp-wrap">
@@ -157,8 +157,11 @@ function copyText(text, btn) {
     var c = document.getElementById('pp-stars');
     if (!c) return;
     var ctx = c.getContext('2d');
-    var stars = [];
-    var count = 120;
+    var nodes = [];
+    var count = 90;
+    var linkDist = 120;
+    var mouse = { x: -1000, y: -1000 };
+    var mouseRadius = 150;
 
     function resize() {
         c.width = window.innerWidth;
@@ -167,14 +170,16 @@ function copyText(text, btn) {
 
     function init() {
         resize();
-        stars = [];
+        nodes = [];
         for (var i = 0; i < count; i++) {
-            stars.push({
+            nodes.push({
                 x: Math.random() * c.width,
                 y: Math.random() * c.height,
-                r: Math.random() * 0.4 + 0.1,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                r: Math.random() * 1.5 + 0.5,
                 a: Math.random(),
-                d: Math.random() * 0.01 + 0.003,
+                d: Math.random() * 0.008 + 0.002,
                 dir: Math.random() > 0.5 ? 1 : -1
             });
         }
@@ -182,23 +187,64 @@ function copyText(text, btn) {
 
     function draw() {
         ctx.clearRect(0, 0, c.width, c.height);
-        for (var i = 0; i < stars.length; i++) {
-            var s = stars[i];
-            s.a += s.d * s.dir;
-            if (s.a >= 1 || s.a <= 0.05) s.dir *= -1;
+
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            n.x += n.vx;
+            n.y += n.vy;
+            n.a += n.d * n.dir;
+            if (n.a >= 1 || n.a <= 0.1) n.dir *= -1;
+
+            if (n.x < 0) n.x = c.width;
+            if (n.x > c.width) n.x = 0;
+            if (n.y < 0) n.y = c.height;
+            if (n.y > c.height) n.y = 0;
+
+            var dm = Math.hypot(n.x - mouse.x, n.y - mouse.y);
+            if (dm < mouseRadius) {
+                var push = (1 - dm / mouseRadius) * 0.8;
+                n.x += (n.x - mouse.x) / dm * push;
+                n.y += (n.y - mouse.y) / dm * push;
+            }
+
             ctx.beginPath();
-            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,255,255,' + s.a * 0.5 + ')';
+            ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(74,222,128,' + n.a * 0.5 + ')';
             ctx.fill();
-            if (s.r > 0.6) {
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(74,222,128,' + s.a * 0.03 + ')';
-                ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, n.r * 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(74,222,128,' + n.a * 0.06 + ')';
+            ctx.fill();
+
+            for (var j = i + 1; j < nodes.length; j++) {
+                var n2 = nodes[j];
+                var dx = n.x - n2.x;
+                var dy = n.y - n2.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < linkDist) {
+                    var alpha = (1 - dist / linkDist) * 0.15 * Math.min(n.a, n2.a);
+                    ctx.beginPath();
+                    ctx.moveTo(n.x, n.y);
+                    ctx.lineTo(n2.x, n2.y);
+                    ctx.strokeStyle = 'rgba(74,222,128,' + alpha + ')';
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
             }
         }
         requestAnimationFrame(draw);
     }
+
+    c.addEventListener('pointermove', function(e) {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    c.addEventListener('pointerleave', function() {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    });
 
     init();
     window.addEventListener('resize', init);
