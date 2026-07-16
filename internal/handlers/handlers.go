@@ -8,6 +8,7 @@ import (
 
 	"psiloconvalley/internal/app"
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/repo"
 	"github.com/resend/resend-go/v2"
 
@@ -45,7 +46,8 @@ func (h *Handlers) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.App.Render(w, r, "home.tmpl", map[string]any{
-		"Stats": stats,
+		"Stats":  stats,
+		"IsPro":  catalog.IsPaid(user.Plan),
 		"Meta": app.DefaultMeta(
 			"PSILOCONVALLEY — Invoices & Estimates in Minutes",
 			"Professional invoicing for independent contractors. English & Spanish. Free to start.",

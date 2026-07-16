@@ -10,9 +10,7 @@
         <div class="stat-card">
             <div class="stat-label">{{.T.HomeDashPlan}}</div>
             <div class="stat-value">
-                {{if eq .User.Plan "pro"}}{{.T.HomeDashPlanPro}}
-                {{else if eq .User.Plan "growth"}}{{.T.HomeDashPlanPro}}
-                {{else}}{{.T.HomeDashPlanFree}}{{end}}
+                {{if .IsPro}}{{.T.HomeDashPlanPro}}{{else}}{{.T.HomeDashPlanFree}}{{end}}
             </div>
         </div>
         <div class="stat-card">

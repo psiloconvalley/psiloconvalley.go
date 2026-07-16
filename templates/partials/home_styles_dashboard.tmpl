@@ -1,121 +1,149 @@
 {{define "home-styles-dashboard"}}
 <style>
-        /* ═══════════════════════════════════════════════════════════════
-           FOOTER
-           ═══════════════════════════════════════════════════════════════ */
-        footer {
-            text-align: center;
-            padding: 40px 24px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.3);
-            border-top: 1px solid rgba(255,255,255,0.06);
-        }
+    footer {
+        text-align: center;
+        padding: 40px 24px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.3);
+        border-top: 1px solid rgba(255,255,255,0.06);
+    }
 
-        footer a {
-            color: rgba(255,255,255,0.5);
-            text-decoration: none;
-        }
-        footer a:hover { color: #fff; }
+    footer a {
+        color: rgba(255,255,255,0.5);
+        text-decoration: none;
+    }
 
-        /* ═══════════════════════════════════════════════════════════════
-           LOGGED-IN DASHBOARD VIEW
-           ═══════════════════════════════════════════════════════════════ */
-        .dashboard {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 60px 24px 100px;
-        }
+    footer a:hover { color: #fff; }
 
-        .dash-header {
-            margin-bottom: 48px;
-        }
+    /* ── Logged-in command center ── */
+    .dashboard {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 60px 24px 100px;
+    }
 
-        .dash-greeting {
-            font-size: 14px;
-            color: rgba(255,255,255,0.5);
-            margin-bottom: 8px;
-        }
+    .dash-header {
+        margin-bottom: 48px;
+        border-left: 2px solid rgba(255,255,255,0.15);
+        padding-left: 24px;
+    }
 
-        .dash-title {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
+    .dash-greeting {
+        font-size: 14px;
+        color: rgba(255,255,255,0.45);
+        margin-bottom: 6px;
+        font-family: monospace;
+    }
 
-        .dash-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 48px;
-        }
+    .dash-title {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: #ffffff;
+    }
 
-        .stat-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 24px;
-        }
+    .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 40px;
+    }
 
-        .stat-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255,255,255,0.4);
-            margin-bottom: 8px;
-        }
+    .stat-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 24px;
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease;
+    }
 
-        .stat-value {
-            font-size: 28px;
-            font-weight: 800;
-        }
+    .stat-card:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(255,255,255,0.14);
+    }
 
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
+    .stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 10px;
+    }
 
-        .action-card {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 24px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.2s;
-        }
-        .action-card:hover {
-            border-color: rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.06);
-            transform: translateY(-2px);
-        }
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: #ffffff;
+        font-variant-numeric: tabular-nums;
+    }
 
-        .action-icon {
-            font-size: 32px;
-        }
+    /* ── Quick action cards ── */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+    }
 
-        .action-text h3 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+    .action-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 22px;
+        text-decoration: none;
+        color: #ffffff;
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease,
+            transform 0.25s ease,
+            box-shadow 0.25s ease;
+    }
 
-        .action-text p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.5);
-        }
+    .action-card:hover {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.16);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
 
-        @media (max-width: 640px) {
-            .hero { padding: 60px 20px 60px; }
-            .hero-cta { flex-direction: column; }
-            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
-            .trust-inner { gap: 24px; }
-            .steps-section, .features-section { padding: 60px 20px; }
-	    .pricing-cta .pricing-grid { grid-template-columns: 1fr; }
-        }
+    .action-card:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    .action-icon {
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+
+    .action-text h3 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: #ffffff;
+    }
+
+    .action-text p {
+        font-size: 13px;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.4;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+        .hero { padding: 60px 20px 60px; }
+        .hero-cta { flex-direction: column; }
+        .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+        .trust-inner { gap: 24px; }
+        .steps-section, .features-section { padding: 60px 20px; }
+        .pricing-cta .pricing-grid { grid-template-columns: 1fr; }
+        .dash-title { font-size: 24px; }
+        .stat-value { font-size: 22px; }
+    }
 </style>
 {{end}}
