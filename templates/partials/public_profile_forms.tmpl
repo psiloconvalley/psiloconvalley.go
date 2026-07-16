@@ -1,0 +1,155 @@
+{{define "public-profile-forms"}}
+<style>
+    .pp-field {
+        margin-bottom: 14px;
+    }
+
+    .pp-label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--pp-text-label);
+    }
+
+    .pp-input,
+    .pp-textarea {
+        width: 100%;
+        min-height: 48px;
+        padding: 13px 16px;
+        border: 1px solid var(--pp-border-input);
+        border-radius: var(--pp-radius-md);
+        background: var(--pp-surface-input);
+        color: var(--pp-text);
+        font-size: 15px;
+        line-height: 1.45;
+        font-family: inherit;
+        outline: none;
+        transition:
+            border-color var(--pp-dur) ease,
+            background var(--pp-dur) ease,
+            box-shadow var(--pp-dur) ease;
+    }
+
+    .pp-input:hover,
+    .pp-textarea:hover {
+        border-color: var(--pp-border-default);
+        background: var(--pp-surface-input-focus);
+    }
+
+    .pp-input:focus,
+    .pp-input:focus-visible,
+    .pp-textarea:focus,
+    .pp-textarea:focus-visible {
+        border-color: var(--pp-green-glow-byline);
+        background: var(--pp-surface-input-focus);
+        box-shadow: 0 0 20px var(--pp-green-glow-focus);
+    }
+
+    .pp-input::placeholder,
+    .pp-textarea::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+
+    .pp-textarea {
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    .pp-btn {
+        position: relative;
+        width: 100%;
+        min-height: 52px;
+        margin-top: 8px;
+        padding: 15px;
+        border: none;
+        border-radius: var(--pp-radius-md);
+        overflow: hidden;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        transition:
+            transform var(--pp-dur) ease,
+            box-shadow var(--pp-dur) ease,
+            filter var(--pp-dur) ease;
+    }
+
+    .pp-btn-green {
+        background: linear-gradient(135deg, var(--pp-green) 0%, var(--pp-green-strong) 100%);
+        color: var(--pp-green-text);
+        box-shadow: var(--pp-shadow-button);
+    }
+
+    .pp-btn-green:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--pp-shadow-button-hover);
+    }
+
+    .pp-btn-green:active {
+        transform: translateY(0) scale(0.98);
+        box-shadow: var(--pp-shadow-button-active);
+    }
+
+    .pp-btn:focus-visible {
+        outline: 2px solid var(--pp-border-green-strong);
+        outline-offset: 3px;
+    }
+
+    .pp-btn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+            circle at var(--x, 50%) var(--y, 50%),
+            var(--pp-surface-ripple),
+            transparent 60%
+        );
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .pp-btn:active::after {
+        opacity: 1;
+    }
+
+    .pp-success,
+    .pp-error {
+        margin-bottom: 16px;
+        padding: 14px 18px;
+        border-radius: var(--pp-radius-md);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .pp-success {
+        background: var(--pp-surface-success);
+        border: 1px solid var(--pp-border-green);
+        color: var(--pp-green);
+    }
+
+    .pp-error {
+        background: var(--pp-surface-danger);
+        border: 1px solid var(--pp-border-danger);
+        color: var(--pp-red-text);
+    }
+
+    @keyframes pp-expand {
+        from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            max-height: 500px;
+            transform: translateY(0);
+        }
+    }
+</style>
+{{end}}

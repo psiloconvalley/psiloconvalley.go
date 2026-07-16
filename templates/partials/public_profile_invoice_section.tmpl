@@ -1,0 +1,31 @@
+{{define "public-profile-invoice-section"}}
+    <!-- ── Pay an Invoice ── -->
+    <details class="pp-section"{{if .InvoiceError}} open{{end}}>
+        <summary class="pp-section-title">
+            <span class="pp-section-icon" aria-hidden="true">💳</span>
+            <span class="pp-section-heading">Pay an Invoice</span>
+            <span class="pp-section-chevron" aria-hidden="true">›</span>
+        </summary>
+
+        <div class="pp-section-content">
+            {{if .InvoiceError}}
+            <div class="pp-error">Invoice not found. Check your number and phone.</div>
+            {{end}}
+
+            <form method="POST" action="/biz/{{.Slug}}/invoice" autocomplete="on">
+                {{.csrfField}}
+                <div class="pp-field">
+                    <label class="pp-label" for="inv-num">Invoice Number</label>
+                    <input type="text" name="invoice_number" id="inv-num" class="pp-input"
+                           placeholder="INV-0042" required>
+                </div>
+                <div class="pp-field">
+                    <label class="pp-label" for="inv-phone">Your Phone</label>
+                    <input type="tel" name="client_phone" id="inv-phone" class="pp-input"
+                           placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel">
+                </div>
+                <button type="submit" class="pp-btn pp-btn-green">Find Invoice</button>
+            </form>
+        </div>
+    </details>
+{{end}}

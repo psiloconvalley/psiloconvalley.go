@@ -64,71 +64,9 @@
     </div>
     {{end}}
 
-    <!-- ── Request a Quote ── -->
-    <details class="pp-section"{{if or .QuoteError .QuoteSuccess}} open{{end}}>
-        <summary class="pp-section-title">
-            <span>💬</span> Request a Quote
-            <span class="pp-section-chevron">›</span>
-        </summary>
-        <div class="pp-section-content">
-            {{if .QuoteSuccess}}
-            <div class="pp-success">✓ {{.QuoteSuccess}}</div>
-            {{end}}
-            {{if .QuoteError}}
-            <div class="pp-error">{{.QuoteError}}</div>
-            {{end}}
+    {{template "public-profile-quote-section" .}}
 
-            {{if not .QuoteSuccess}}
-            <form method="POST" action="/biz/{{.Slug}}/quote" autocomplete="on">
-                {{.csrfField}}
-                <div class="pp-field">
-                    <label class="pp-label" for="qr-name">Your Name</label>
-                    <input type="text" name="client_name" id="qr-name" class="pp-input"
-                           placeholder="John Smith" autocomplete="name" required>
-                </div>
-                <div class="pp-field">
-                    <label class="pp-label" for="qr-phone">Phone</label>
-                    <input type="tel" name="client_phone" id="qr-phone" class="pp-input"
-                           placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel">
-                </div>
-                <div class="pp-field">
-                    <label class="pp-label" for="qr-desc">What do you need?</label>
-                    <textarea name="description" id="qr-desc" class="pp-textarea"
-                              placeholder="Describe the work..."></textarea>
-                </div>
-                <button type="submit" class="pp-btn pp-btn-green">Send Request</button>
-            </form>
-            {{end}}
-        </div>
-    </details>
-
-    <!-- ── Pay an Invoice ── -->
-    <details class="pp-section"{{if .InvoiceError}} open{{end}}>
-        <summary class="pp-section-title">
-            <span>💳</span> Pay an Invoice
-            <span class="pp-section-chevron">›</span>
-        </summary>
-        <div class="pp-section-content">
-            {{if .InvoiceError}}
-            <div class="pp-error">Invoice not found. Check your number and phone.</div>
-            {{end}}
-
-            <form method="POST" action="/biz/{{.Slug}}/invoice" autocomplete="on">
-                {{.csrfField}}
-                <div class="pp-field">
-                    <label class="pp-label" for="inv-num">Invoice Number</label>
-                    <input type="text" name="invoice_number" id="inv-num" class="pp-input"
-                           placeholder="INV-0042" required>
-                </div>
-                <div class="pp-field">
-                    <label class="pp-label" for="inv-phone">Your Phone</label>
-                    <input type="tel" name="client_phone" id="inv-phone" class="pp-input"
-                           placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel">
-                </div>
-                <button type="submit" class="pp-btn pp-btn-green">Find Invoice</button>
-            </form>
-        </div>
-    </details>
+    {{template "public-profile-invoice-section" .}}
 
     <!-- ── QR Code ── -->
     <div class="pp-qr-wrap">

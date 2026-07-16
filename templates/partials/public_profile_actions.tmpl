@@ -1,21 +1,39 @@
 {{define "public-profile-actions"}}
 <style>
     .pp-section {
+        position: relative;
+        margin-bottom: 12px;
         background: var(--pp-surface-section);
         border: 1px solid var(--pp-border-default);
         border-radius: var(--pp-radius-lg);
-        padding: 20px;
-        margin-bottom: 12px;
         backdrop-filter: blur(var(--pp-blur-lg));
         -webkit-backdrop-filter: blur(var(--pp-blur-lg));
-        transition: all var(--pp-dur) ease;
-        cursor: pointer;
+        transition:
+            background var(--pp-dur) ease,
+            border-color var(--pp-dur) ease,
+            box-shadow var(--pp-dur) ease,
+            transform var(--pp-dur-fast) ease;
+    }
+
+    .pp-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20px;
+        right: 20px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--pp-border-default), transparent);
+        opacity: 0.7;
+        transition:
+            opacity var(--pp-dur) ease,
+            background var(--pp-dur) ease;
     }
 
     .pp-section:hover {
         background: var(--pp-surface-section-hover);
         border-color: var(--pp-border-green-soft);
         box-shadow: var(--pp-shadow-section-hover);
+        transform: translateY(-1px);
     }
 
     .pp-section[open] {
@@ -24,14 +42,20 @@
         box-shadow: var(--pp-shadow-section-open);
     }
 
+    .pp-section[open]::before {
+        opacity: 1;
+        background: linear-gradient(90deg, transparent, var(--pp-border-green-mid), transparent);
+    }
+
     .pp-section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 18px 20px;
         font-size: 16px;
         font-weight: 700;
         color: var(--pp-text);
-        margin-bottom: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
         cursor: pointer;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
@@ -42,14 +66,52 @@
         display: none;
     }
 
+    .pp-section-title:focus-visible {
+        outline: 2px solid var(--pp-border-green-mid);
+        outline-offset: 4px;
+        border-radius: var(--pp-radius-md);
+    }
+
+    .pp-section-icon {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--pp-radius-md);
+        background: var(--pp-surface-rating);
+        border: 1px solid var(--pp-border-rating);
+        transition:
+            background var(--pp-dur) ease,
+            border-color var(--pp-dur) ease,
+            box-shadow var(--pp-dur) ease,
+            transform var(--pp-dur-fast) ease;
+    }
+
+    .pp-section:hover .pp-section-icon,
+    .pp-section[open] .pp-section-icon {
+        border-color: var(--pp-border-green-mid);
+        background: var(--pp-surface-branding-hover);
+        box-shadow: 0 0 20px var(--pp-green-glow-soft);
+        transform: scale(1.02);
+    }
+
+    .pp-section-heading {
+        flex: 1 1 auto;
+        min-width: 0;
+        line-height: 1.2;
+    }
+
     .pp-section-chevron {
         margin-left: auto;
+        flex: 0 0 auto;
         font-size: 18px;
         color: var(--pp-text-faint);
+        display: inline-block;
         transition:
             transform var(--pp-dur) var(--pp-ease),
-            color var(--pp-dur);
-        display: inline-block;
+            color var(--pp-dur) ease;
     }
 
     .pp-section[open] .pp-section-chevron {
@@ -58,139 +120,13 @@
     }
 
     .pp-section-content {
-        overflow: hidden;
+        padding: 0 20px 20px;
+    }
+
+    .pp-section[open] .pp-section-content {
+        padding-top: 16px;
+        border-top: 1px solid var(--pp-border-default);
         animation: pp-expand 0.35s var(--pp-ease);
-    }
-
-    .pp-field {
-        margin-bottom: 12px;
-    }
-
-    .pp-label {
-        display: block;
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--pp-text-label);
-        margin-bottom: 6px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-    }
-
-    .pp-input,
-    .pp-textarea {
-        width: 100%;
-        padding: 13px 16px;
-        border: 1px solid var(--pp-border-input);
-        border-radius: var(--pp-radius-md);
-        font-size: 15px;
-        font-family: inherit;
-        background: var(--pp-surface-input);
-        color: var(--pp-text);
-        outline: none;
-        transition: all var(--pp-dur) ease;
-    }
-
-    .pp-input:focus,
-    .pp-textarea:focus {
-        border-color: var(--pp-green-glow-byline);
-        background: var(--pp-surface-input-focus);
-        box-shadow: 0 0 20px var(--pp-green-glow-focus);
-    }
-
-    .pp-input::placeholder,
-    .pp-textarea::placeholder {
-        color: rgba(255,255,255,0.2);
-    }
-
-    .pp-textarea {
-        resize: vertical;
-        min-height: 80px;
-    }
-
-    .pp-btn {
-        width: 100%;
-        padding: 15px;
-        border: none;
-        border-radius: var(--pp-radius-md);
-        font-size: 15px;
-        font-weight: 800;
-        font-family: inherit;
-        cursor: pointer;
-        transition: all var(--pp-dur) ease;
-        margin-top: 8px;
-        letter-spacing: 0.5px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .pp-btn-green {
-        background: linear-gradient(135deg, var(--pp-green) 0%, var(--pp-green-strong) 100%);
-        color: var(--pp-green-text);
-        box-shadow: var(--pp-shadow-button);
-    }
-
-    .pp-btn-green:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--pp-shadow-button-hover);
-    }
-
-    .pp-btn-green:active {
-        transform: translateY(0) scale(0.98);
-        box-shadow: var(--pp-shadow-button-active);
-    }
-
-    .pp-btn::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-            circle at var(--x, 50%) var(--y, 50%),
-            var(--pp-surface-ripple),
-            transparent 60%
-        );
-        opacity: 0;
-        transition: opacity 0.4s;
-    }
-
-    .pp-btn:active::after {
-        opacity: 1;
-    }
-
-    .pp-success {
-        background: var(--pp-surface-success);
-        border: 1px solid var(--pp-border-green);
-        color: var(--pp-green);
-        padding: 14px 18px;
-        border-radius: var(--pp-radius-md);
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 14px;
-        text-align: center;
-    }
-
-    .pp-error {
-        background: var(--pp-surface-danger);
-        border: 1px solid var(--pp-border-danger);
-        color: var(--pp-red-text);
-        padding: 14px 18px;
-        border-radius: var(--pp-radius-md);
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 14px;
-        text-align: center;
-    }
-
-    @keyframes pp-expand {
-        from {
-            opacity: 0;
-            max-height: 0;
-            transform: translateY(-8px);
-        }
-        to {
-            opacity: 1;
-            max-height: 500px;
-            transform: translateY(0);
-        }
     }
 </style>
 {{end}}
