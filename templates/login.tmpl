@@ -4,206 +4,7 @@
     {{template "page-head" .}}
     {{template "nav-styles" .}}
     {{template "base-styles" .}}
-
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: #0a0f1a;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .auth-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 400px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 40px 32px;
-        }
-
-        .auth-title {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
-        }
-
-        .auth-subtitle {
-            color: rgba(255,255,255,0.4);
-            font-size: 13px;
-            font-weight: 400;
-            margin-bottom: 28px;
-        }
-
-        .error-banner {
-            background: rgba(220,38,38,0.1);
-            border: 1px solid rgba(220,38,38,0.2);
-            color: #fca5a5;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-
-        .limit-banner {
-            background: rgba(234,179,8,0.08);
-            border: 1px solid rgba(234,179,8,0.2);
-            color: #fde68a;
-            padding: 12px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255,255,255,0.45);
-            margin-bottom: 6px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 14px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .form-group input::placeholder {
-            color: rgba(255,255,255,0.2);
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background: #fff;
-            color: #0a0f1a;
-            border: none;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 4px;
-            transition: opacity 0.2s;
-        }
-
-        .submit-btn:hover { opacity: 0.85; }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 24px 0;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: rgba(255,255,255,0.08);
-        }
-
-        .divider span {
-            padding: 0 14px;
-            font-size: 11px;
-            color: rgba(255,255,255,0.25);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .oauth-btn {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: rgba(255,255,255,0.3);
-            font-family: inherit;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: not-allowed;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .oauth-btn.oauth-active {
-            cursor: pointer;
-            color: rgba(255,255,255,0.8);
-            border-color: rgba(255,255,255,0.15);
-        }
-
-        .oauth-btn.oauth-active:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.3);
-            color: #fff;
-        }
-
-        .oauth-badge {
-            font-size: 9px;
-            background: rgba(255,255,255,0.08);
-            padding: 2px 8px;
-            border-radius: 999px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 13px;
-            color: rgba(255,255,255,0.35);
-        }
-
-        .auth-footer a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .auth-footer a:hover { text-decoration: underline; }
-
-        @media (max-width: 480px) {
-            .auth-card { padding: 32px 20px; }
-            .auth-title { font-size: 22px; }
-        }
-    </style>
+    {{template "auth-styles" .}}
 </head>
 <body>
 
@@ -221,7 +22,8 @@
         {{if .Error}}
         <div class="error-banner">{{.Error}}</div>
         {{end}}
-	 <form method="POST" action="/login">
+
+        <form method="POST" action="/login">
             {{.csrfField}}
             <div class="form-group">
                 <label>{{.T.LoginEmail}}</label>
@@ -239,11 +41,7 @@
             </div>
 
             <button type="submit" class="submit-btn">{{.T.LoginSubmit}}</button>
-            <div style="text-align:right; margin-top:12px;">
-                <a href="/forgot-password" style="font-size:13px; color:rgba(255,255,255,0.45); text-decoration:none; font-weight:500;">
-                    {{.T.LoginForgot}}
-                </a>
-            </div>
+            <a href="/forgot-password" class="auth-forgot">{{.T.LoginForgot}}</a>
         </form>
 
         <div class="divider"><span>{{.T.LoginOr}}</span></div>
@@ -270,8 +68,9 @@
             <span class="oauth-badge">{{.T.LoginGoogleSoon}}</span>
         </button>
         {{end}}
-	  <div id="passkey-login-section" style="display:none; margin-top: 8px;">
-            <button type="button" id="passkey-login-btn" class="oauth-btn oauth-active" style="width:100%; justify-content:center; gap: 10px;">
+
+        <div id="passkey-login-section" style="display:none; margin-top: 8px;">
+            <button type="button" id="passkey-login-btn" class="oauth-btn oauth-active">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
