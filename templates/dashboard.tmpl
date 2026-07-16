@@ -7,7 +7,6 @@
     {{template "dashboard-styles" .}}
     {{template "dashboard-onboarding-styles" .}}
     {{template "app-components" .}}
-
 </head>
 <body>
 
@@ -26,17 +25,18 @@
     {{if not .IsPro}}
     <div class="upgrade-banner">
         <div class="upgrade-text">
-	   <strong>{{.T.DashboardUpgradeTitle}}</strong> — {{.T.DashboardUpgradeBody}}
+            <strong>{{.T.DashboardUpgradeTitle}}</strong> — {{.T.DashboardUpgradeBody}}
         </div>
-     <a href="/pricing" class="btn-upgrade">{{.T.DashboardUpgradeCta}}</a>
+        <a href="/pricing" class="db-btn-upgrade">{{.T.DashboardUpgradeCta}}</a>
     </div>
     {{end}}
-       {{if .ShowPasskeyNudge}}
-    <div class="upgrade-banner" style="border-color: rgba(96,165,250,0.28); background: linear-gradient(180deg, rgba(37,99,235,0.10), rgba(17,24,39,0.72));">
+
+    {{if .ShowPasskeyNudge}}
+    <div class="passkey-banner">
         <div class="upgrade-text">
-	   <strong style="color:#93c5fd;">{{.T.DashboardPasskeyTitle}}</strong> — {{.T.DashboardPasskeyBody}}
+            <strong>{{.T.DashboardPasskeyTitle}}</strong> — {{.T.DashboardPasskeyBody}}
         </div>
-    <a href="/profile#passkey" class="btn-upgrade" style="background:#2563eb;">{{.T.DashboardPasskeyCta}}</a>
+        <a href="/profile#passkey" class="db-btn-passkey">{{.T.DashboardPasskeyCta}}</a>
     </div>
     {{end}}
 
@@ -64,19 +64,18 @@
             <div class="stat-sub">{{.TotalCount}} {{.T.InvoicesTotal}}</div>
         </div>
     </div>
+
     {{if .HasExpenses}}
     <div class="stats-grid stats-grid-two">
         <div class="stat-card">
-	    <div class="stat-label">💸 {{.T.DashboardExpensesMonth}}</div>
+            <div class="stat-label">💸 {{.T.DashboardExpensesMonth}}</div>
             <div class="stat-value red">{{.MonthlyExpenses}}</div>
             <div class="stat-sub">
-                <a href="/expenses" style="color:rgba(255,255,255,0.4);text-decoration:none;">
-                    {{.T.ViewExpenses}}
-                </a>
+                <a href="/expenses">{{.T.ViewExpenses}}</a>
             </div>
         </div>
         <div class="stat-card">
-	    <div class="stat-label">📊 {{.T.DashboardNetProfitMonth}}</div>
+            <div class="stat-label">📊 {{.T.DashboardNetProfitMonth}}</div>
             <div class="stat-value {{if gt .NetProfitCents 0}}green{{else}}red{{end}}">
                 {{.NetProfit}}
             </div>
@@ -85,7 +84,39 @@
     </div>
     {{end}}
 
-    {{/* ── Onboarding ── */}}
+    {{/* ── Quick Actions ── */}}
+    <div class="quick-actions">
+        <a href="/invoices/new" class="action-card">
+            <div class="action-icon">📄</div>
+            <div>
+                <div class="action-title">{{.T.DashboardNewInvoice}}</div>
+                <div class="action-sub">{{.T.DashboardNewInvoiceSub}}</div>
+            </div>
+        </a>
+        <a href="/invoices" class="action-card">
+            <div class="action-icon">📊</div>
+            <div>
+                <div class="action-title">{{.T.DashboardViewInvoices}}</div>
+                <div class="action-sub">{{.T.DashboardViewInvoicesSub}}</div>
+            </div>
+        </a>
+        <a href="/clients" class="action-card">
+            <div class="action-icon">👥</div>
+            <div>
+                <div class="action-title">{{.T.DashboardClients}}</div>
+                <div class="action-sub">{{.T.DashboardClientsSub}}</div>
+            </div>
+        </a>
+        <a href="/profile" class="action-card">
+            <div class="action-icon">⚙️</div>
+            <div>
+                <div class="action-title">{{.T.DashboardSettings}}</div>
+                <div class="action-sub">{{.T.DashboardSettingsSub}}</div>
+            </div>
+        </a>
+    </div>
+
+    {{/* ── Onboarding (new users only) ── */}}
     {{else if not .OnboardingDone}}
     {{template "dashboard-onboarding" .}}
     {{end}}
@@ -95,102 +126,6 @@
 
     {{/* ── Quote Requests ── */}}
     {{template "dashboard-quote-requests" .}}
-
-    {{/* ── Recent Invoices ── */}}
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">{{.T.DashboardRecentInvoices}}</div>
-            <a href="/invoices" class="section-link">{{.T.DashboardViewAll}}</a>
-        </div>
-
-	          {{if .RecentInvoices}}
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-			<th>{{.T.DashboardThInvoice}}</th>
-                        <th>{{.T.DashboardThClient}}</th>
-                        <th>{{.T.DashboardThStatus}}</th>
-                        <th>{{.T.DashboardThDue}}</th>
-                        <th class="right">{{.T.DashboardThTotal}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{range .RecentInvoices}}
-                    <tr>
-                        <td>
-                            <a href="/invoices/{{.ID}}" class="inv-link">
-                                {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
-                            </a>
-                        </td>
-                        <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
-                        <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
-                        <td style="color: rgba(255,255,255,0.5);">
-                            {{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}
-                        </td>
-                        <td class="right mono">{{money .TotalCents}}</td>
-                    </tr>
-                    {{end}}
-                </tbody>
-            </table>
-        </div>
-        {{else}}
-        <div class="table-wrap">
-            <div class="empty">
-                <div class="empty-icon">📭</div>
-                <div class="empty-title">{{.T.NoInvoicesYet}}</div>
-                <div class="empty-sub">{{.T.CreateFirstInvoice}}</div>
-            </div>
-        </div>
-        {{end}}
-    </div>
-
-    {{/* ── Recent Estimates ── */}}
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">{{.T.DashboardRecentEstimates}}</div>
-            <a href="/estimates" class="section-link">{{.T.DashboardViewAll}}</a>
-        </div>
-        {{if .RecentEstimates}}
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-		     	<th>{{.T.DashboardThEstimate}}</th>
-        		<th>{{.T.DashboardThClient}}</th>
-                        <th>{{.T.DashboardThStatus}}</th>
-                        <th class="right">{{.T.DashboardThTotal}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{range .RecentEstimates}}
-                    <tr>
-                        <td>
-                            <a href="/estimates/{{.ID}}" class="inv-link">
-                                {{if .InvoiceNumber}}{{.InvoiceNumber}}{{else}}—{{end}}
-                            </a>
-                        </td>
-                        <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
-                        <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
-                        <td style="color: rgba(255,255,255,0.5);">
-                            {{.IssueDate.Format "Jan 2, 2006"}}
-                        </td>
-                        <td class="right mono">{{money .TotalCents}}</td>
-                    </tr>
-                    {{end}}
-                </tbody>
-            </table>
-        </div>
-        {{else}}
-        <div class="table-wrap">
-            <div class="empty">
-                <div class="empty-icon">📋</div>
-                <div class="empty-title">{{.T.NoEstimatesYet}}</div>
-                <div class="empty-sub">{{.T.CreateFirstEstimate}}</div>
-            </div>
-        </div>
-        {{end}}
-    </div>
 
 </div>
 
