@@ -1,7 +1,7 @@
 {{define "public-profile-endorsements"}}
 <style>
     .pp-endorse-section {
-        margin-bottom: 24px;
+        margin-bottom: 28px;
     }
 
     .pp-endorse-label {
@@ -9,12 +9,15 @@
         font-weight: 800;
         letter-spacing: 2.5px;
         text-transform: uppercase;
-        color: var(--pp-text-muted);
-        margin-bottom: 14px;
+        color: var(--pp-text-secondary);
+        margin-bottom: 16px;
     }
 
     .pp-endorse-card {
         position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
         background: var(--pp-surface-endorsement);
         border: 1px solid var(--pp-border-default);
         border-left: 3px solid var(--pp-border-endorsement-accent);
@@ -23,10 +26,14 @@
         margin-bottom: 12px;
         backdrop-filter: blur(var(--pp-blur-lg));
         -webkit-backdrop-filter: blur(var(--pp-blur-lg));
-        transition: all var(--pp-dur) ease;
         opacity: 0;
         transform: translateY(12px);
         animation: pp-card-in 0.5s ease forwards;
+        transition:
+            background var(--pp-dur) ease,
+            border-color var(--pp-dur) ease,
+            box-shadow var(--pp-dur) ease,
+            transform var(--pp-dur) ease;
     }
 
     .pp-endorse-card:nth-child(2) { animation-delay: 0.1s; }
@@ -46,7 +53,6 @@
         display: flex;
         align-items: center;
         gap: 3px;
-        margin-bottom: 10px;
         line-height: 1;
     }
 
@@ -79,17 +85,24 @@
     .pp-endorse-body {
         font-size: 15px;
         color: var(--pp-text-body);
-        line-height: 1.65;
-        margin-bottom: 12px;
+        line-height: 1.7;
     }
 
     .pp-endorse-body::before { content: '\201C'; }
     .pp-endorse-body::after  { content: '\201D'; }
 
+    .pp-endorse-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 8px;
+        border-top: 1px solid var(--pp-border-divider);
+    }
+
     .pp-endorse-byline {
         font-size: 13px;
         font-weight: 700;
-        color: var(--pp-text-muted);
+        color: var(--pp-text-secondary);
         letter-spacing: 0.3px;
     }
 

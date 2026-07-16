@@ -46,23 +46,7 @@
         {{end}}
     </div>
 
-    <!-- ── Endorsements (trust before action) ── -->
-    {{if .Endorsements}}
-    <div class="pp-endorse-section">
-        <div class="pp-endorse-label">{{.T.EndorseWhatClients}}</div>
-        {{range .Endorsements}}
-        <div class="pp-endorse-card">
-            <div class="pp-stars">
-                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}<span class="pp-star-filled">⭐</span>{{else}}<span class="pp-star-empty">★</span>{{end}}{{end}}
-            </div>
-            {{if .Body}}
-            <div class="pp-endorse-body">{{.Body}}</div>
-            {{end}}
-            <div class="pp-endorse-byline">{{.EndorserName}}{{if .EndorserLocation}} · {{.EndorserLocation}}{{end}}</div>
-        </div>
-        {{end}}
-    </div>
-    {{end}}
+    {{template "public-profile-endorsements-section" .}}
 
     {{template "public-profile-quote-section" .}}
 
