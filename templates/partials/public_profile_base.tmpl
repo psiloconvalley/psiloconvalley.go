@@ -1,0 +1,29 @@
+{{define "public-profile-base"}}
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--pp-bg);
+        color: var(--pp-text);
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+    }
+
+    .pp-wrap {
+        position: relative;
+        z-index: 1;
+        max-width: var(--pp-max-width);
+        margin: 0 auto;
+        padding: 48px 20px 60px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+{{end}}

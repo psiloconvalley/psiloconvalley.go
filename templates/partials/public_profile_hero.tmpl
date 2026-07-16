@@ -1,0 +1,80 @@
+{{define "public-profile-hero"}}
+<style>
+    .pp-card {
+        text-align: center;
+        margin-bottom: 36px;
+        padding-bottom: 32px;
+        border-bottom: 1px solid var(--pp-border-divider);
+    }
+
+    .pp-logo {
+        width: 88px;
+        height: 88px;
+        border-radius: var(--pp-radius-logo);
+        object-fit: contain;
+        margin-bottom: 18px;
+        background: var(--pp-surface-logo);
+        padding: 8px;
+        box-shadow: var(--pp-shadow-logo);
+        border: 1px solid var(--pp-border-default);
+    }
+
+    .pp-name {
+        font-size: clamp(30px, 8vw, 42px);
+        font-weight: 900;
+        letter-spacing: -2px;
+        line-height: 1.05;
+        margin-bottom: 10px;
+        color: var(--pp-text);
+    }
+
+    .pp-hero-rating {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        padding: 6px 16px;
+        border-radius: var(--pp-radius-pill);
+        background: var(--pp-surface-rating);
+        border: 1px solid var(--pp-border-rating);
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--pp-green);
+    }
+
+    .pp-hero-star {
+        font-size: 16px;
+        filter: drop-shadow(0 0 4px var(--pp-green-glow-hero-star));
+    }
+
+    .pp-location {
+        font-size: 15px;
+        color: var(--pp-text-location);
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .pp-service-areas {
+        font-size: 13px;
+        color: var(--pp-text-muted);
+        margin-bottom: 8px;
+    }
+
+    .pp-contact {
+        font-size: 15px;
+        color: var(--pp-text-secondary);
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .pp-contact a {
+        color: var(--pp-text-link);
+        text-decoration: none;
+        transition: color var(--pp-dur-fast);
+    }
+
+    .pp-contact a:hover {
+        color: var(--pp-text);
+    }
+</style>
+{{end}}

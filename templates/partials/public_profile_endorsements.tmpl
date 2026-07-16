@@ -1,0 +1,108 @@
+{{define "public-profile-endorsements"}}
+<style>
+    .pp-endorse-section {
+        margin-bottom: 24px;
+    }
+
+    .pp-endorse-label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--pp-text-muted);
+        margin-bottom: 14px;
+    }
+
+    .pp-endorse-card {
+        position: relative;
+        background: var(--pp-surface-endorsement);
+        border: 1px solid var(--pp-border-default);
+        border-left: 3px solid var(--pp-border-endorsement-accent);
+        border-radius: var(--pp-radius-lg);
+        padding: 20px;
+        margin-bottom: 12px;
+        backdrop-filter: blur(var(--pp-blur-lg));
+        -webkit-backdrop-filter: blur(var(--pp-blur-lg));
+        transition: all var(--pp-dur) ease;
+        opacity: 0;
+        transform: translateY(12px);
+        animation: pp-card-in 0.5s ease forwards;
+    }
+
+    .pp-endorse-card:nth-child(2) { animation-delay: 0.1s; }
+    .pp-endorse-card:nth-child(3) { animation-delay: 0.2s; }
+    .pp-endorse-card:nth-child(4) { animation-delay: 0.3s; }
+    .pp-endorse-card:nth-child(5) { animation-delay: 0.4s; }
+
+    .pp-endorse-card:hover {
+        background: var(--pp-surface-endorsement-hover);
+        border-color: var(--pp-border-strong);
+        border-left-color: var(--pp-border-endorsement-accent-hover);
+        transform: translateY(-2px);
+        box-shadow: var(--pp-shadow-endorsement-hover);
+    }
+
+    .pp-stars {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        margin-bottom: 10px;
+        line-height: 1;
+    }
+
+    .pp-star-filled,
+    .pp-star-empty {
+        display: inline-block;
+        transition:
+            transform var(--pp-dur-fast) ease,
+            filter var(--pp-dur-fast) ease,
+            opacity var(--pp-dur-fast) ease;
+    }
+
+    .pp-star-filled {
+        font-size: 13px;
+        filter: drop-shadow(0 0 3px var(--pp-amber-glow));
+    }
+
+    .pp-endorse-card:hover .pp-star-filled {
+        transform: translateY(-1px) scale(1.06);
+        filter:
+            drop-shadow(0 0 5px var(--pp-green-glow-star))
+            drop-shadow(0 0 4px var(--pp-amber-glow));
+    }
+
+    .pp-star-empty {
+        font-size: 12px;
+        opacity: 0.14;
+    }
+
+    .pp-endorse-body {
+        font-size: 15px;
+        color: var(--pp-text-body);
+        line-height: 1.65;
+        margin-bottom: 12px;
+    }
+
+    .pp-endorse-body::before { content: '\201C'; }
+    .pp-endorse-body::after  { content: '\201D'; }
+
+    .pp-endorse-byline {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pp-text-muted);
+        letter-spacing: 0.3px;
+    }
+
+    .pp-endorse-byline::before {
+        content: '— ';
+        color: var(--pp-green-glow-byline);
+    }
+
+    @keyframes pp-card-in {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{{end}}

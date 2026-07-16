@@ -1,0 +1,66 @@
+{{define "public-profile-utility"}}
+<style>
+    .pp-qr-wrap {
+        text-align: center;
+        margin-top: 32px;
+    }
+
+    .pp-qr-img {
+        border-radius: var(--pp-radius-lg);
+        background: #ffffff;
+        padding: 10px;
+        box-shadow: var(--pp-shadow-qr);
+    }
+
+    .pp-qr-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--pp-text-faint);
+        margin-top: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .pp-branding {
+        text-align: center;
+        margin-top: auto;
+        padding-top: 32px;
+    }
+
+    .pp-branding-divider {
+        width: 40px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--pp-border-green-mid), transparent);
+        margin: 0 auto 20px;
+    }
+
+    .pp-branding-text {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pp-text-footer);
+        margin-bottom: 16px;
+        letter-spacing: 0.3px;
+        line-height: 1.5;
+    }
+
+    .pp-branding-link {
+        display: inline-block;
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--pp-green);
+        text-decoration: none;
+        padding: 10px 22px;
+        border: 1px solid var(--pp-border-green-mid);
+        border-radius: var(--pp-radius-pill);
+        background: var(--pp-surface-branding);
+        transition: all var(--pp-dur) ease;
+        letter-spacing: 0.2px;
+    }
+
+    .pp-branding-link:hover {
+        background: var(--pp-surface-branding-hover);
+        border-color: var(--pp-border-green-strong);
+        transform: translateY(-1px);
+        box-shadow: var(--pp-shadow-branding-hover);
+    }
+</style>
+{{end}}
