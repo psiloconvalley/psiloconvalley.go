@@ -733,6 +733,7 @@ var en = T{
 	HomeDashPlanFree:     "Free",
 	HomeDashPlanGrowth:   "Growth",
 	HomeDashPlanPro:      "Pro",
+	HomeDashPlanProMax:   "Pro Max",
 	HomeDashRevenue:      "Revenue",
 	HomeDashOutstanding:  "Outstanding",
 	HomeDashOverdue:      "Overdue",

@@ -727,4 +727,24 @@ var es = T{
 	PricingEntSub:   "Consultorios médicos, despachos legales y agencias — registros de auditoría, tiempo de sesión y soporte dedicado.",
 	PricingEntCta:   "Explora Enterprise →",
 
+
+	// Home dashboard (logged-in users)
+	HomeDashWelcome:      "Bienvenido,",
+	HomeDashPlan:         "Plan",
+	HomeDashPlanFree:     "Gratis",
+	HomeDashPlanGrowth:   "Growth",
+	HomeDashPlanPro:      "Pro",
+	HomeDashPlanProMax:   "Pro Max",
+	HomeDashRevenue:      "Ingresos",
+	HomeDashOutstanding:  "Por Cobrar",
+	HomeDashOverdue:      "Vencido",
+	HomeDashMonthly:      "Facturas Este Mes",
+	HomeDashNewInvoice:   "Nueva Factura",
+	HomeDashNewInvSub:    "Crea y envía una factura profesional",
+	HomeDashViewInvoices: "Ver Facturas",
+	HomeDashViewInvSub:   "Administra tu historial de facturas",
+	HomeDashClients:      "Clientes",
+	HomeDashClientsSub:   "Administra tu directorio de clientes",
+	HomeDashSettings:     "Configuración",
+	HomeDashSettingsSub:  "Perfil de negocio y preferencias",
 }
