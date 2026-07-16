@@ -27,12 +27,12 @@
             </div>
         </div>
         <div class="top-right">
-            <a class="btn-secondary" href="/clients/import">📤 {{.T.ClientsImport}}</a>
-            <a class="btn-secondary" href="/clients/export.csv">📥 {{.T.ClientsExport}}</a>
+            <a class="cl-btn-secondary" href="/clients/import">📤 {{.T.ClientsImport}}</a>
+            <a class="cl-btn-secondary" href="/clients/export.csv">📥 {{.T.ClientsExport}}</a>
             {{if .CanAddClient}}
-            <a class="btn" href="/clients/new">{{.T.ClientsNewClient}}</a>
+            <a class="cl-btn" href="/clients/new">{{.T.ClientsNewClient}}</a>
             {{else}}
-            <span class="btn-disabled">{{.T.ClientsNewClient}}</span>
+            <span class="cl-btn-disabled">{{.T.ClientsNewClient}}</span>
             {{end}}
         </div>
     </div>
@@ -103,7 +103,7 @@
         <h2>{{.T.ClientsEmptyTitle}}</h2>
         <p>{{.T.ClientsEmptyBody}}</p>
         {{if .CanAddClient}}
-        <a href="/clients/new" class="btn">{{.T.ClientsAddFirst}}</a>
+        <a href="/clients/new" class="cl-btn">{{.T.ClientsAddFirst}}</a>
         {{end}}
     </div>
     {{end}}
