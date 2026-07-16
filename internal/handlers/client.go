@@ -35,6 +35,7 @@ func (h *Handlers) ClientsList(w http.ResponseWriter, r *http.Request) {
 			return catalog.FreeClientLimit
 		}(),
 		"CanAddClient": h.canAddClient(r),
+		"IsUnlimited":  catalog.IsUnlimited(user.ID, user.Plan),
 		"saved":        r.URL.Query().Get("saved") == "true",
 	})
 }

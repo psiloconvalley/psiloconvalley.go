@@ -5,7 +5,6 @@
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
     {{template "clients-list-styles" .}}
-
 </head>
 <body>
 
@@ -19,7 +18,7 @@
             <div class="top-subtitle">
                 {{.ClientCount}} {{.T.ClientsSaved}}
                 {{if .User}}
-                    {{if eq .User.Plan "pro"}}
+                    {{if .IsUnlimited}}
                     · <span class="plan-badge pro">{{.T.ClientsProUnlimited}}</span>
                     {{else}}
                     · {{.ClientCount}}/5 {{.T.ClientsFreeSlotsUsed}}
@@ -28,8 +27,8 @@
             </div>
         </div>
         <div class="top-right">
-            <a class="btn btn-secondary" href="/clients/import" style="margin-right:8px;">📤 {{.T.ClientsImport}}</a>
-            <a class="btn btn-secondary" href="/clients/export.csv" style="margin-right:8px;">📥 {{.T.ClientsExport}}</a>
+            <a class="btn-secondary" href="/clients/import">📤 {{.T.ClientsImport}}</a>
+            <a class="btn-secondary" href="/clients/export.csv">📥 {{.T.ClientsExport}}</a>
             {{if .CanAddClient}}
             <a class="btn" href="/clients/new">{{.T.ClientsNewClient}}</a>
             {{else}}
@@ -70,21 +69,22 @@
                         <div class="client-email">{{.Email}}</div>
                         {{end}}
                     </td>
-                    <td style="color:rgba(255,255,255,0.6); font-size:14px;">
-                        {{if .City}}{{.City}}{{end}}
-                        {{if and .City .State}}, {{end}}
-                        {{if .State}}{{.State}}{{end}}
-                        {{if .Country}}<br><span style="color:rgba(255,255,255,0.3); font-size:12px;">{{.Country}}</span>{{end}}
+                    <td>
+                        <div class="client-location">
+                            {{if .City}}{{.City}}{{end}}{{if and .City .State}}, {{end}}{{if .State}}{{.State}}{{end}}
+                        </div>
+                        {{if .Country}}
+                        <div class="client-country">{{.Country}}</div>
+                        {{end}}
                     </td>
-                    <td style="color:rgba(255,255,255,0.5); font-size:14px; font-family:monospace;">
-                        {{if .Phone}}{{.Phone}}{{else}}—{{end}}
+                    <td>
+                        <div class="client-phone">{{if .Phone}}{{.Phone}}{{else}}—{{end}}</div>
                     </td>
                     <td>
                         <div class="actions-cell">
                             <a class="small-btn" href="/clients/{{.ID}}/edit">{{$.T.ClientsEdit}}</a>
                             <a class="small-btn" href="/invoices/new?client_id={{.ID}}">{{$.T.ClientsInvoice}}</a>
                             <form method="POST" action="/clients/{{.ID}}/delete"
-                                  style="display:inline;"
                                   onsubmit="return confirm('{{$.T.ClientsDeleteConfirm}}');">
                                 {{$.csrfField}}
                                 <button type="submit" class="small-btn danger">{{$.T.ClientsDelete}}</button>
