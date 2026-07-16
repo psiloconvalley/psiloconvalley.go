@@ -198,6 +198,25 @@ document.querySelectorAll('.pp-btn').forEach(function(btn) {
         btn.style.setProperty('--y', ((e.clientY - rect.top) / rect.height * 100) + '%');
     });
 });
+
+document.querySelectorAll('.pp-section').forEach(function(det) {
+    det.addEventListener('click', function(e) {
+        if (!e.target.closest('.pp-section-title')) return;
+        if (!det.open) return;
+        e.preventDefault();
+        var content = det.querySelector('.pp-section-content');
+        if (!content) { det.open = false; return; }
+        content.style.overflow = 'hidden';
+        content.animate([
+            { opacity: 1, maxHeight: content.scrollHeight + 'px', transform: 'translateY(0)' },
+            { opacity: 0, maxHeight: '0px', transform: 'translateY(-8px)' }
+        ], { duration: 250, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' })
+        .onfinish = function() {
+            det.open = false;
+            content.style.overflow = '';
+        };
+    });
+});
 </script>
 </body>
 </html>
