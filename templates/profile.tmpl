@@ -16,39 +16,17 @@
         <h1 class="page-title">{{.T.ProfileTitle}}</h1>
         <p class="page-subtitle">{{.T.ProfileSubtitle}}</p>
     </div>
+
     {{if .Welcome}}
-    <div style="
-        background: linear-gradient(135deg, rgba(74,222,128,0.08) 0%, rgba(34,197,94,0.04) 100%);
-        border: 1px solid rgba(74,222,128,0.2);
-        border-radius: 14px;
-        padding: 28px 32px;
-        margin-bottom: 24px;
-        display: flex;
-        align-items: flex-start;
-        gap: 20px;
-    ">
-        <div style="
-            font-size: 32px;
-            line-height: 1;
-            flex-shrink: 0;
-        ">🎉</div>
+    <div class="pr-welcome">
+        <div class="pr-welcome-icon">🎉</div>
         <div>
-            <div style="font-size: 18px; font-weight: 800; color: #4ade80; margin-bottom: 6px;">
-                {{.T.ProfileWelcomeTitle}}
-            </div>
-            <div style="font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6;">
-                {{.T.ProfileWelcomeBody}}
-            </div>
-            <div style="
-                margin-top: 14px;
-                display: flex;
-                gap: 16px;
-                font-size: 12px;
-                color: rgba(255,255,255,0.3);
-            ">
+            <div class="pr-welcome-title">{{.T.ProfileWelcomeTitle}}</div>
+            <div class="pr-welcome-body">{{.T.ProfileWelcomeBody}}</div>
+            <div class="pr-welcome-actions">
                 <span>{{.T.ProfileWelcomeStep}}</span>
                 <span>·</span>
-                <a href="/dashboard" style="color: rgba(255,255,255,0.4); text-decoration: none;">{{.T.ProfileWelcomeSkip}}</a>
+                <a href="/dashboard">{{.T.ProfileWelcomeSkip}}</a>
             </div>
         </div>
     </div>
@@ -60,74 +38,50 @@
     {{if .PasswordSaved}}
     <div class="success-banner">{{.T.ProfilePasswordSaved}}</div>
     {{end}}
-
     {{if .Error}}
     <div class="error-banner">{{.Error}}</div>
     {{end}}
+
     {{if .MagicLogin}}
-    <div style="
-        background: linear-gradient(135deg, rgba(129,140,248,0.08) 0%, rgba(99,102,241,0.04) 100%);
-        border: 1px solid rgba(129,140,248,0.2);
-        border-radius: 14px;
-        padding: 24px 28px;
-        margin-bottom: 24px;
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-    ">
-        <div style="font-size: 28px; flex-shrink: 0; line-height: 1;">🔐</div>
+    <div class="pr-magic-banner">
+        <div class="pr-magic-icon">🔐</div>
         <div>
-            <div style="font-size: 15px; font-weight: 800; color: #a5b4fc; margin-bottom: 6px;">
-                {{.T.ProfileMagicTitle}}
-            </div>
-            <div style="font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6;">
-                {{.T.ProfileMagicBody}}
-            </div>
+            <div class="pr-magic-title">{{.T.ProfileMagicTitle}}</div>
+            <div class="pr-magic-body">{{.T.ProfileMagicBody}}</div>
         </div>
     </div>
     {{end}}
 
     <div class="studio">
-        <!-- ═══════════ LEFT: FORM CONTROLS ═══════════ -->
         <div class="controls">
             <form method="POST" action="/profile" enctype="multipart/form-data">
                 {{.csrfField}}
-  {{if and .Profile .Profile.Slug}}
-                <div class="section" style="background:rgba(74,222,128,0.04); border:1px solid rgba(74,222,128,0.15); border-radius:12px; padding:20px 24px; margin-bottom:24px;">
-                    <div class="section-title" style="color:#4ade80;">🔗 Your Public Page</div>
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+
+                {{if and .Profile .Profile.Slug}}
+                <div class="pr-public-section">
+                    <div class="section-title section-title-green">🔗 {{.T.ProfilePublicPage}}</div>
+                    <div class="pr-public-row">
                         <input type="text" readonly
                                value="{{$.BaseURL}}/biz/{{.Profile.Slug}}"
                                id="public-url"
-                               style="flex:1; min-width:200px; padding:10px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; font-size:13px; font-family:monospace;">
-                        <button type="button" onclick="copyPublicURL()"
-                                style="padding:10px 18px; background:#fff; color:#0a0f1a; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;">
-                            Copy Link
+                               class="pr-url-input">
+                        <button type="button" onclick="copyPublicURL()" class="pr-copy-btn">
+                            {{.T.ProfileCopyLink}}
                         </button>
-                        <a href="/biz/{{.Profile.Slug}}" target="_blank"
-                           style="padding:10px 18px; background:transparent; color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;">
-                            Preview →
+                        <a href="/biz/{{.Profile.Slug}}" target="_blank" class="pr-preview-link">
+                            {{.T.ProfilePreview}}
                         </a>
                     </div>
-                    <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:10px;">
-                        Share this link with clients. They can request quotes and pay invoices.
-                    </div>
+                    <div class="pr-public-hint">{{.T.ProfilePublicPageHint}}</div>
                 </div>
                 {{end}}
+
                 <div class="section">
                     <div class="section-title">{{.T.ProfileSectionLogo}}</div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        {{if .Profile}}
-                            {{if .Profile.LogoURL}}
-                            <div style="margin-bottom: 12px;">
-                                <img
-                                    src="{{.Profile.LogoURL}}"
-                                    alt="Logo"
-                                    style="max-width:140px; max-height:60px; object-fit:contain; background:#fff; border:1px solid #eee; border-radius:8px; padding:10px;"
-                                >
-                            </div>
-                            {{end}}
-                        {{end}}
+                    <div class="form-group form-group-tight">
+                        {{if .Profile}}{{if .Profile.LogoURL}}
+                        <img src="{{.Profile.LogoURL}}" alt="Logo" class="pr-logo-preview">
+                        {{end}}{{end}}
                         <input type="file" name="logo" accept=".png,.jpg,.jpeg,.webp,.svg">
                         <div class="hint">{{.T.ProfileLogoHint}}</div>
                     </div>
@@ -155,30 +109,25 @@
                     <div class="section-title">{{.T.ProfileSectionAddress}}</div>
                     <div class="form-group">
                         <label>{{.T.ProfileStreetAddress}}</label>
-		    <input type="text" name="address" value="{{if .Profile}}{{.Profile.Address}}{{end}}"
-       data-address-autocomplete>
+                        <input type="text" name="address" value="{{if .Profile}}{{.Profile.Address}}{{end}}" data-address-autocomplete>
                     </div>
                     <div class="grid-3">
                         <div class="form-group">
                             <label>{{.T.ProfileCity}}</label>
-			<input type="text" name="city" value="{{if .Profile}}{{.Profile.City}}{{end}}"
-       data-address-city>
+                            <input type="text" name="city" value="{{if .Profile}}{{.Profile.City}}{{end}}" data-address-city>
                         </div>
                         <div class="form-group">
                             <label>{{.T.ProfileStateRegion}}</label>
-			<input type="text" name="state" value="{{if .Profile}}{{.Profile.State}}{{end}}"
-       data-address-state>
+                            <input type="text" name="state" value="{{if .Profile}}{{.Profile.State}}{{end}}" data-address-state>
                         </div>
                         <div class="form-group">
                             <label>{{.T.ProfileZipPostal}}</label>
-			<input type="text" name="zip" value="{{if .Profile}}{{.Profile.Zip}}{{end}}"
-       data-address-zip>
+                            <input type="text" name="zip" value="{{if .Profile}}{{.Profile.Zip}}{{end}}" data-address-zip>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>{{.T.ProfileCountry}}</label>
-		    <input type="text" name="country" value="{{if .Profile}}{{.Profile.Country}}{{end}}"
-       data-address-country>
+                        <input type="text" name="country" value="{{if .Profile}}{{.Profile.Country}}{{end}}" data-address-country>
                     </div>
                 </div>
 
@@ -202,26 +151,25 @@
                         </div>
                     </div>
                 </div>
-  <div class="section">
-		    <div class="section-title" style="color:#f59e0b;">💸 Quick Pay Links</div>
-                    <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:14px;">
-                        Add your payment handles so clients can pay you directly from your public page.
-                    </div>
+
+                <div class="section">
+                    <div class="section-title section-title-amber">💸 {{.T.ProfileQuickPay}}</div>
+                    <div class="section-sub">{{.T.ProfileQuickPaySub}}</div>
                     <div class="form-group">
-                        <label>Zelle (email or phone)</label>
+                        <label>{{.T.ProfileZelleLabel}}</label>
                         <input type="text" name="zelle_id"
                                value="{{if .Profile}}{{.Profile.ZelleID}}{{end}}"
                                placeholder="your@email.com or (555) 123-4567">
                     </div>
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Venmo @handle</label>
+                            <label>{{.T.ProfileVenmoLabel}}</label>
                             <input type="text" name="venmo_handle"
                                    value="{{if .Profile}}{{.Profile.VenmoHandle}}{{end}}"
                                    placeholder="@your-username">
                         </div>
                         <div class="form-group">
-                            <label>Cash App $tag</label>
+                            <label>{{.T.ProfileCashAppLabel}}</label>
                             <input type="text" name="cashapp_handle"
                                    value="{{if .Profile}}{{.Profile.CashAppHandle}}{{end}}"
                                    placeholder="$yourtag">
@@ -249,21 +197,21 @@
                     {{end}}
 
                     {{if .User.StripeConnectID}}
-                    <div style="display: flex; align-items: center; gap: 12px; padding: 14px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px;">
-                        <span style="font-size: 20px;">✅</span>
+                    <div class="pr-stripe-connected">
+                        <span class="pr-stripe-connected-icon">✅</span>
                         <div>
-                            <div style="font-weight: 700; font-size: 13px; color: #6ee7b7;">{{.T.ProfileStripeConnected}}</div>
-                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">{{.T.ProfileStripeConnectedSub}} Account: {{.User.StripeConnectID}}</div>
+                            <div class="pr-stripe-connected-name">{{.T.ProfileStripeConnected}}</div>
+                            <div class="pr-stripe-connected-sub">{{.T.ProfileStripeConnectedSub}} · {{.User.StripeConnectID}}</div>
                         </div>
                     </div>
                     {{else}}
-                    <div style="display: flex; align-items: center; gap: 14px; padding: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;">
-                        <span style="font-size: 24px;">💳</span>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 700; font-size: 13px; color: #fff;">{{.T.ProfileStripeAcceptCards}}</div>
-                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">{{.T.ProfileStripeAcceptCardsSub}}</div>
+                    <div class="pr-stripe-disconnected">
+                        <span class="pr-stripe-disconnected-icon">💳</span>
+                        <div class="pr-stripe-disconnected-body">
+                            <div class="pr-stripe-disconnected-name">{{.T.ProfileStripeAcceptCards}}</div>
+                            <div class="pr-stripe-disconnected-sub">{{.T.ProfileStripeAcceptCardsSub}}</div>
                         </div>
-                        <a href="/auth/stripe/connect" style="background: #635bff; color: white; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap;">{{.T.ProfileStripeConnect}}</a>
+                        <a href="/auth/stripe/connect" class="pr-stripe-btn">{{.T.ProfileStripeConnect}}</a>
                     </div>
                     {{end}}
                 </div>
@@ -278,27 +226,27 @@
                         </select>
                     </div>
                 </div>
+
                 <button type="submit" class="btn-primary">{{.T.ProfileSave}}</button>
             </form>
-        <!-- ═══════════ PASSKEY ═══════════ -->
-            <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);">
-	    <h2 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 24px;">{{.T.ProfileSectionSecurity}}</h2>
-		<div class="section-title">{{.T.ProfilePasskeyTitle}}</div>
-                <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">
-		{{.T.ProfilePasskeySubtitle}}
-                </p>
-		{{if .PasskeyDeleted}}
+
+            <div class="pr-divider" id="passkey">
+                <h2 class="pr-security-heading">{{.T.ProfileSectionSecurity}}</h2>
+                <div class="section-title">{{.T.ProfilePasskeyTitle}}</div>
+                <p class="hint">{{.T.ProfilePasskeySubtitle}}</p>
+
+                {{if .PasskeyDeleted}}
                 <div class="success-banner">{{.T.ProfilePasskeyDeleted}}</div>
                 {{end}}
 
                 {{if .Passkeys}}
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">{{.T.ProfilePasskeyListTitle}}</div>
+                <div class="pr-passkey-list">
+                    <div class="pr-passkey-list-label">{{.T.ProfilePasskeyListTitle}}</div>
                     {{range .Passkeys}}
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 8px;">
+                    <div class="pr-passkey-item">
                         <div>
-                            <div style="font-size: 13px; font-weight: 600; color: #fff;">{{.DeviceName}}</div>
-                            <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px;">
+                            <div class="pr-passkey-name">{{.DeviceName}}</div>
+                            <div class="pr-passkey-meta">
                                 {{$.T.ProfilePasskeyAddedOn}} {{.CreatedAt.Format "Jan 2, 2006"}}
                                 {{if .LastUsedAt}} · {{$.T.ProfilePasskeyLastUsed}} {{.LastUsedAt.Format "Jan 2, 2006"}}{{end}}
                             </div>
@@ -306,19 +254,18 @@
                         <form method="POST" action="/passkeys/{{.ID}}/delete"
                               onsubmit="return confirm('{{$.T.ProfilePasskeyDeleteConfirm}}');">
                             {{$.csrfField}}
-                            <button type="submit" style="background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-                                {{$.T.ProfilePasskeyDelete}}
-                            </button>
+                            <button type="submit" class="pr-passkey-delete">{{$.T.ProfilePasskeyDelete}}</button>
                         </form>
                     </div>
                     {{end}}
                 </div>
                 {{else}}
-                <p style="font-size: 12px; color: rgba(255,255,255,0.25); margin-bottom: 16px;">{{.T.ProfilePasskeyListEmpty}}</p>
+                <p class="pr-passkey-empty">{{.T.ProfilePasskeyListEmpty}}</p>
                 {{end}}
-                <div id="passkey-status" style="margin-bottom: 16px;"></div>
-                <button type="button" id="passkey-register-btn" class="btn-primary" style="width: auto;">
-		{{.T.ProfilePasskeyAdd}}
+
+                <div id="passkey-status" class="pr-passkey-status"></div>
+                <button type="button" id="passkey-register-btn" class="btn-primary-sm">
+                    {{.T.ProfilePasskeyAdd}}
                 </button>
             </div>
 
@@ -327,39 +274,29 @@
                 var btn = document.getElementById('passkey-register-btn');
                 var status = document.getElementById('passkey-status');
 
-                // Hide button if browser doesn't support WebAuthn
                 if (!window.PublicKeyCredential) {
                     btn.style.display = 'none';
-		    status.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3);">{{.T.ProfilePasskeyNoSupport}}</div>';
+                    status.innerHTML = '<span style="font-size:12px;color:rgba(255,255,255,0.3);">{{.T.ProfilePasskeyNoSupport}}</span>';
                     return;
                 }
 
                 btn.addEventListener('click', async function() {
                     btn.disabled = true;
-		btn.textContent = '{{.T.ProfilePasskeyRegistering}}';
+                    btn.textContent = '{{.T.ProfilePasskeyRegistering}}';
                     try {
-                        // 1. Get registration options from server
-                        var beginResp = await fetch('/passkeys/register/begin', {
-                            method: 'POST',
-                            credentials: 'same-origin'
-                        });
-			if (!beginResp.ok) throw new Error('{{.T.ProfilePasskeyErrorGeneric}}');
+                        var beginResp = await fetch('/passkeys/register/begin', { method: 'POST', credentials: 'same-origin' });
+                        if (!beginResp.ok) throw new Error('{{.T.ProfilePasskeyErrorGeneric}}');
                         var options = await beginResp.json();
 
-                        // 2. Decode base64url fields for the browser API
                         options.publicKey.challenge = base64urlToBuffer(options.publicKey.challenge);
                         options.publicKey.user.id = base64urlToBuffer(options.publicKey.user.id);
                         if (options.publicKey.excludeCredentials) {
                             options.publicKey.excludeCredentials = options.publicKey.excludeCredentials.map(function(c) {
-                                c.id = base64urlToBuffer(c.id);
-                                return c;
+                                c.id = base64urlToBuffer(c.id); return c;
                             });
                         }
 
-                        // 3. Trigger Face ID / Touch ID / PIN
                         var credential = await navigator.credentials.create(options);
-
-                        // 4. Encode response for server
                         var body = JSON.stringify({
                             id: credential.id,
                             rawId: bufferToBase64url(credential.rawId),
@@ -370,25 +307,22 @@
                             }
                         });
 
-                        // 5. Send to server
                         var finishResp = await fetch('/passkeys/register/finish', {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: body
+                            method: 'POST', credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json' }, body: body
                         });
 
                         if (finishResp.ok) {
-			    status.innerHTML = '<div style="color:#4ade80; font-size:13px; font-weight:700;">{{.T.ProfilePasskeySuccess}}</div>';
-			    btn.textContent = '{{.T.ProfilePasskeyAdded}}';
+                            status.innerHTML = '<span style="color:#4ade80;font-weight:700;">{{.T.ProfilePasskeySuccess}}</span>';
+                            btn.textContent = '{{.T.ProfilePasskeyAdded}}';
                             btn.disabled = true;
                         } else {
-			throw new Error('{{.T.ProfilePasskeyErrorGeneric}}');
+                            throw new Error('{{.T.ProfilePasskeyErrorGeneric}}');
                         }
                     } catch (e) {
-			status.innerHTML = '<div style="color:#fca5a5; font-size:13px;">{{.T.ProfilePasskeyErrorPrefix}} ' + e.message + '</div>';
+                        status.innerHTML = '<span style="color:#fca5a5;">{{.T.ProfilePasskeyErrorPrefix}} ' + e.message + '</span>';
                         btn.disabled = false;
-		    btn.textContent = '{{.T.ProfilePasskeyAdd}}';
+                        btn.textContent = '{{.T.ProfilePasskeyAdd}}';
                     }
                 });
 
@@ -410,8 +344,8 @@
                 }
             })();
             </script>
-            <!-- ═══════════ PASSWORD ═══════════ -->
-            <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);">
+
+            <div class="pr-divider">
                 <div class="section-title">
                     {{if .HasPassword}}{{.T.ProfileChangePassword}}{{else}}{{.T.ProfileSetPassword}}{{end}}
                 </div>
@@ -428,63 +362,39 @@
 
                 <form method="POST" action="/profile/password" autocomplete="off">
                     {{.csrfField}}
-
                     {{if .HasPassword}}
                     <div class="form-group">
                         <label>{{.T.ProfileCurrentPassword}}</label>
-                        <input
-                            type="password"
-                            name="current_password"
-                            autocomplete="current-password"
-                            placeholder="••••••••"
-                            required>
+                        <input type="password" name="current_password" autocomplete="current-password" placeholder="••••••••" required>
                     </div>
                     {{end}}
-
                     <div class="grid-2">
                         <div class="form-group">
                             <label>{{.T.ProfileNewPassword}}</label>
-                            <input
-                                type="password"
-                                name="new_password"
-                                id="new-password"
-                                autocomplete="new-password"
-                                placeholder="{{.T.ProfilePasswordMin}}"
-                                minlength="8"
-                                required>
+                            <input type="password" name="new_password" id="new-password" autocomplete="new-password" placeholder="{{.T.ProfilePasswordMin}}" minlength="8" required>
                         </div>
                         <div class="form-group">
                             <label>{{.T.ProfileConfirmPassword}}</label>
-                            <input
-                                type="password"
-                                name="confirm_password"
-                                id="confirm-password"
-                                autocomplete="new-password"
-                                placeholder="{{.T.ProfilePasswordRepeat}}"
-                                minlength="8"
-                                required>
+                            <input type="password" name="confirm_password" id="confirm-password" autocomplete="new-password" placeholder="{{.T.ProfilePasswordRepeat}}" minlength="8" required>
                         </div>
                     </div>
-
-                    <div id="pw-match-hint" style="font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:16px;min-height:18px;"></div>
-
+                    <div id="pw-match-hint" class="pr-pw-hint"></div>
                     <button type="submit" class="btn-primary" id="pw-submit-btn">
                         {{if .HasPassword}}{{.T.ProfileUpdatePassword}}{{else}}{{.T.ProfileSetPassword}}{{end}}
                     </button>
                 </form>
 
                 {{if .IsGoogleUser}}
-                <p style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:14px;line-height:1.6;">
-                    {{.T.ProfileGoogleSignIn}}
-                </p>
+                <p class="pr-google-note">{{.T.ProfileGoogleSignIn}}</p>
                 {{end}}
             </div>
         </div>
-{{template "profile-preview" .}}
+
+        {{template "profile-preview" .}}
     </div>
 </div>
-{{template "profile-scripts" .}}
 
+{{template "profile-scripts" .}}
 <script src="/static/js/password-toggle.js" defer></script>
 <script src="/static/js/address-autocomplete.js"></script>
 <script>
@@ -493,8 +403,9 @@ function copyPublicURL() {
     input.select();
     navigator.clipboard.writeText(input.value).then(function() {
         var btn = event.target;
-        btn.textContent = 'Copied!';
-        setTimeout(function() { btn.textContent = 'Copy Link'; }, 2000);
+        var orig = btn.textContent;
+        btn.textContent = '{{.T.ProfileCopied}}';
+        setTimeout(function() { btn.textContent = orig; }, 2000);
     });
 }
 </script>

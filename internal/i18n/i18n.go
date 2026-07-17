@@ -90,6 +90,8 @@ type T struct {
 
 
 	// Profile — Quick Pay Links section
+	ProfilePublicPage     string
+
 	ProfileQuickPay          string
 	ProfileQuickPaySub       string
 	ProfileZelleLabel        string

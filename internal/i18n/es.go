@@ -86,6 +86,8 @@ var es = T{
 
 
 	// Profile — Quick Pay Links section
+	ProfilePublicPage:     "Tu Página Pública",
+
 	ProfileQuickPay:          "Enlaces de Pago Rápido",
 	ProfileQuickPaySub:       "Agrega tus métodos de pago para que los clientes te paguen directamente desde tu página pública.",
 	ProfileZelleLabel:        "Zelle (correo o teléfono)",
