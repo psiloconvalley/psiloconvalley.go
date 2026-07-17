@@ -335,6 +335,30 @@ type T struct {
 	LoginEmail       string
 	LoginPassword    string
 	LoginSubmit      string
+
+	// Forgot password
+	ForgotTitle       string
+	ForgotSub         string
+	ForgotLabel       string
+	ForgotSubmit      string
+	ForgotSending     string
+	ForgotSecNote     string
+	ForgotBack        string
+	ForgotSuccessIcon string
+	ForgotSuccessTitle string
+	ForgotSuccessBody string
+	ForgotSuccessBack string
+
+	// Magic confirm
+	MagicConfirmTitle string
+	MagicConfirmSub   string
+	MagicInfoTitle    string
+	MagicInfoBody     string
+	MagicConfirmBtn   string
+	MagicConfirmWait  string
+	MagicFooterNote   string
+	MagicFooterLink   string
+
 	LoginForgot      string
 	LoginOr          string
 	LoginGoogle      string

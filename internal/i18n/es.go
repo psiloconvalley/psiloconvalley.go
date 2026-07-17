@@ -319,6 +319,30 @@ var es = T{
 	LoginEmail:       "Correo Electrónico",
 	LoginPassword:    "Contraseña",
 	LoginSubmit:      "Iniciar Sesión",
+
+	// Forgot password
+	ForgotTitle:        "Restablecer contraseña",
+	ForgotSub:          "Ingresa tu correo y te enviaremos un enlace seguro. No necesitas contraseña.",
+	ForgotLabel:        "Correo electrónico",
+	ForgotSubmit:       "Enviar enlace",
+	ForgotSending:      "Enviando…",
+	ForgotSecNote:      "Por seguridad, nunca revelamos si un correo está registrado. Los enlaces expiran en 15 minutos y solo funcionan una vez.",
+	ForgotBack:         "← Volver a iniciar sesión",
+	ForgotSuccessIcon:  "📬",
+	ForgotSuccessTitle: "Revisa tu bandeja de entrada",
+	ForgotSuccessBody:  "Si el correo está registrado, recibirás un enlace en un minuto. El enlace expira en 15 minutos y solo funciona una vez.",
+	ForgotSuccessBack:  "Volver a Iniciar Sesión",
+
+	// Magic confirm
+	MagicConfirmTitle: "Confirmar inicio de sesión seguro",
+	MagicConfirmSub:   "Casi listo. Haz clic abajo para continuar. Este paso adicional evita que escáneres de correo usen tu enlace antes que tú.",
+	MagicInfoTitle:    "¿Qué sigue?",
+	MagicInfoBody:     "Iniciarás sesión de forma segura. Tu contraseña anterior será eliminada. Serás llevado a tu perfil para establecer una nueva contraseña.",
+	MagicConfirmBtn:   "Continuar a mi Cuenta",
+	MagicConfirmWait:  "Continuando…",
+	MagicFooterNote:   "¿Solicitaste varios enlaces? Solo el más reciente funcionará.",
+	MagicFooterLink:   "Solicitar nuevo enlace",
+
 	LoginForgot:      "¿Olvidaste tu contraseña?",
 	LoginOr:          "o",
 	LoginGoogle:      "Continuar con Google",

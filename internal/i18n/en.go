@@ -320,6 +320,30 @@ var en = T{
 	LoginEmail:       "Email",
 	LoginPassword:    "Password",
 	LoginSubmit:      "Sign In",
+
+	// Forgot password
+	ForgotTitle:        "Reset your password",
+	ForgotSub:          "Enter your email and we'll send you a secure sign-in link. No password required.",
+	ForgotLabel:        "Email address",
+	ForgotSubmit:       "Send sign-in link",
+	ForgotSending:      "Sending…",
+	ForgotSecNote:      "For security, we never reveal whether an email is registered. Links expire after 15 minutes and work only once.",
+	ForgotBack:         "← Back to sign in",
+	ForgotSuccessIcon:  "📬",
+	ForgotSuccessTitle: "Check your inbox",
+	ForgotSuccessBody:  "If that email is registered, you'll receive a sign-in link within a minute. The link expires in 15 minutes and can only be used once.",
+	ForgotSuccessBack:  "Back to Sign In",
+
+	// Magic confirm
+	MagicConfirmTitle: "Confirm secure sign-in",
+	MagicConfirmSub:   "You're almost in. Click below to continue. This extra step prevents email scanners from burning your one-time link before you use it.",
+	MagicInfoTitle:    "What happens next",
+	MagicInfoBody:     "You'll be signed in securely. Your old password will be cleared. You'll be taken to your profile to set a new password.",
+	MagicConfirmBtn:   "Continue to Account",
+	MagicConfirmWait:  "Continuing…",
+	MagicFooterNote:   "Requested multiple links? Only the most recent email will work.",
+	MagicFooterLink:   "Request a new link",
+
 	LoginForgot:      "Forgot password?",
 	LoginOr:          "or",
 	LoginGoogle:      "Continue with Google",

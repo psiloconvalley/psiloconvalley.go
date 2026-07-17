@@ -308,5 +308,107 @@
             font-size: 24px;
         }
     }
+
+    /* ── Success state ── */
+    .auth-success {
+        text-align: center;
+        padding: 8px 0 16px;
+    }
+
+    .auth-success-icon {
+        font-size: 40px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .auth-success-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--auth-text);
+        margin-bottom: 10px;
+        letter-spacing: -0.3px;
+    }
+
+    .auth-success-body {
+        font-size: 13px;
+        color: var(--auth-text-muted);
+        line-height: 1.7;
+        margin-bottom: 24px;
+    }
+
+    /* ── Security note ── */
+    .auth-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 12px 14px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: var(--auth-radius-md);
+    }
+
+    .auth-note-icon {
+        font-size: 14px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .auth-note-text {
+        font-size: 12px;
+        color: var(--auth-text-hint);
+        line-height: 1.6;
+    }
+
+    /* ── Info card ── */
+    .auth-info {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--auth-radius-md);
+        padding: 16px 18px;
+        margin-bottom: 24px;
+    }
+
+    .auth-info-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--auth-text-muted);
+        margin-bottom: 10px;
+    }
+
+    .auth-info-body {
+        font-size: 13px;
+        color: var(--auth-text-label);
+        line-height: 1.7;
+    }
+
+    /* ── Submit as link ── */
+    .submit-link {
+        display: block;
+        width: 100%;
+        min-height: 52px;
+        padding: 15px;
+        border: none;
+        border-radius: var(--auth-radius-md);
+        text-align: center;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        background: linear-gradient(135deg, var(--auth-green) 0%, var(--auth-green-strong) 100%);
+        color: var(--auth-green-text);
+        box-shadow: 0 0 30px rgba(74,222,128,0.2), 0 4px 16px rgba(0,0,0,0.3);
+        transition:
+            transform var(--auth-dur) ease,
+            box-shadow var(--auth-dur) ease;
+    }
+
+    .submit-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 40px rgba(74,222,128,0.3), 0 8px 24px rgba(0,0,0,0.4);
+    }
 </style>
 {{end}}

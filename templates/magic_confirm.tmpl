@@ -2,121 +2,8 @@
 <html lang="{{.Lang}}">
 <head>
     {{template "page-head" .}}
-
     {{template "nav-styles" .}}
-
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: #0a0f1a;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .auth-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 460px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 40px 32px;
-        }
-
-        .auth-title {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-        }
-
-        .auth-subtitle {
-            color: rgba(255,255,255,0.45);
-            font-size: 13px;
-            line-height: 1.7;
-            margin-bottom: 24px;
-        }
-
-        .info-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px;
-            padding: 16px 18px;
-            margin-bottom: 24px;
-        }
-
-        .info-title {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.4);
-            margin-bottom: 10px;
-        }
-
-        .info-body {
-            font-size: 13px;
-            color: rgba(255,255,255,0.55);
-            line-height: 1.7;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background: #fff;
-            color: #0a0f1a;
-            border: none;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .submit-btn:hover { opacity: 0.85; }
-
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 13px;
-            color: rgba(255,255,255,0.35);
-            line-height: 1.7;
-        }
-
-        .auth-footer a {
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .auth-footer a:hover {
-            color: #fff;
-            text-decoration: underline;
-        }
-
-        @media (max-width: 480px) {
-            .auth-card { padding: 32px 20px; }
-            .auth-title { font-size: 22px; }
-        }
-    </style>
+    {{template "auth-styles" .}}
 </head>
 <body>
 
@@ -124,43 +11,32 @@
 
 <div class="auth-container">
     <div class="auth-card">
-        <h1 class="auth-title">Confirm secure sign-in</h1>
-        <p class="auth-subtitle">
-            You're almost in. Click below to continue.
-            This extra step prevents email scanners from burning your one-time link before you use it.
-        </p>
+        <h1 class="auth-title">{{.T.MagicConfirmTitle}}</h1>
+        <p class="auth-subtitle">{{.T.MagicConfirmSub}}</p>
 
-        <div class="info-card">
-            <div class="info-title">What happens next</div>
-            <div class="info-body">
-                • You'll be signed in securely<br>
-                • Your old password will be cleared<br>
-                • You'll be taken to your profile to set a new password
-            </div>
+        <div class="auth-info">
+            <div class="auth-info-title">{{.T.MagicInfoTitle}}</div>
+            <div class="auth-info-body">{{.T.MagicInfoBody}}</div>
         </div>
 
         <form method="POST" action="/auth/magic" id="magic-confirm-form">
             {{.csrfField}}
             <input type="hidden" name="token" value="{{.Token}}">
-            <button type="submit" class="submit-btn" id="magic-confirm-btn">
-                Continue to Account
-            </button>
+            <button type="submit" class="submit-btn" id="magic-confirm-btn">{{.T.MagicConfirmBtn}}</button>
         </form>
 
         <div class="auth-footer">
-            Requested multiple links? Only the <strong>most recent</strong> email will work.<br><br>
-            <a href="/forgot-password">Request a new link</a>
+            {{.T.MagicFooterNote}}<br><br>
+            <a href="/forgot-password">{{.T.MagicFooterLink}}</a>
         </div>
     </div>
 </div>
 
 <script>
-document.getElementById('magic-confirm-form') && document.getElementById('magic-confirm-form').addEventListener('submit', function() {
-    const btn = document.getElementById('magic-confirm-btn');
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Continuing…';
-    }
+var f = document.getElementById('magic-confirm-form');
+if (f) f.addEventListener('submit', function() {
+    var btn = document.getElementById('magic-confirm-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '{{.T.MagicConfirmWait}}'; }
 });
 </script>
 
