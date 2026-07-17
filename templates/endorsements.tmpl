@@ -44,7 +44,7 @@
 
         {{if gt .Rating 0}}
         <div class="en-card-stars">
-            {{range seq 1 5}}{{if le . $.Rating}}⭐{{end}}{{end}}
+            {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{end}}{{end}}
         </div>
         {{end}}
 
