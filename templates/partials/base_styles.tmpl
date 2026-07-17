@@ -133,7 +133,10 @@
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
         padding: 24px 20px;
-        transition: all 0.2s;
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease;
     }
 
     .card:hover {
@@ -190,7 +193,9 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.2s;
+        transition:
+            background 0.2s ease,
+            transform 0.2s ease;
         cursor: pointer;
         border: none;
         font-family: inherit;
@@ -212,7 +217,9 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.2s;
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease;
         cursor: pointer;
         font-family: inherit;
     }
