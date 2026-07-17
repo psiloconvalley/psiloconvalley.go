@@ -1,6 +1,8 @@
 # ============================================================================
-# PsiloConValley — Railway Production Dockerfile
-# Uses pre-built chrome-base image for fast deploys.
+# psiloconvalley — Railway Production Dockerfile
+# Optimized for Docker layer caching:
+# - Go source changes rebuild binary
+# - template/static/migration changes do NOT rebuild binary
 # Base image: ghcr.io/psiloconvalley/chrome-base:bookworm
 # ============================================================================
 
@@ -9,10 +11,13 @@ FROM golang:1.26-bookworm AS builder
 
 WORKDIR /src
 
+# Go module cache layer
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-COPY . .
+# Copy only Go source needed to build the binary
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build \
