@@ -485,6 +485,9 @@ type T struct {
 	EndorsementsEmptySub   string
 	EndorsementsDelete     string
 	EndorsementsCopyLink   string
+	EndorsementsDeclined   string
+	EndorsementsRequested  string
+	EndorsementsSubmitted  string
 	EndorseWhatClients     string
 	EndorseAvg             string
 	EndorseEndorsement     string

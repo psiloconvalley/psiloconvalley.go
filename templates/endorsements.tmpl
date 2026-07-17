@@ -4,122 +4,80 @@
     {{template "page-head" .}}
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
-    <style>
-        .page { max-width: 720px; margin: 48px auto; padding: 0 24px; }
-        .page-title { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
-        .page-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 24px; }
-        .stats { display: flex; gap: 16px; margin-bottom: 24px; }
-        .stat { font-size: 13px; color: rgba(255,255,255,0.5); }
-        .stat strong { color: #fff; }
-        .e-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 10px;
-        }
-        .e-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .e-card-name { font-weight: 700; font-size: 15px; }
-        .e-card-location { font-size: 12px; color: rgba(255,255,255,0.4); }
-        .e-card-stars { font-size: 18px; margin-bottom: 8px; }
-        .e-card-body { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; font-style: italic; margin-bottom: 10px; }
-        .e-card-meta { font-size: 11px; color: rgba(255,255,255,0.3); }
-        .e-card-actions { margin-top: 10px; }
-        .e-badge {
-            display: inline-block; font-size: 11px; font-weight: 600;
-            padding: 2px 8px; border-radius: 4px;
-        }
-        .e-badge-pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
-        .e-badge-submitted { background: rgba(74,222,128,0.15); color: #4ade80; }
-        .e-badge-declined { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); }
-        .e-copy-link {
-            font-size: 12px; color: rgba(255,255,255,0.4); cursor: pointer;
-            text-decoration: underline;
-        }
-        .btn-delete {
-            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
-            color: #f87171; font-size: 12px; font-weight: 600;
-            padding: 6px 12px; border-radius: 6px; cursor: pointer;
-        }
-        .btn-delete:hover { background: rgba(239,68,68,0.2); }
-        .empty { text-align: center; padding: 48px 20px; }
-        .empty-icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-        .empty-sub { font-size: 14px; color: rgba(255,255,255,0.4); }
-    </style>
+    {{template "endorsements-styles" .}}
 </head>
 <body>
 
 {{template "nav" .}}
 
 <div class="page">
-    <div class="page-title">⭐ {{.T.EndorsementsTitle}}</div>
-    <div class="page-sub">{{.T.EndorsementsSub}}</div>
+    <div class="page-header">
+        <div class="page-title">⭐ {{.T.EndorsementsTitle}}</div>
+        <div class="page-sub">{{.T.EndorsementsSub}}</div>
+    </div>
 
-    <div class="stats">
-        <div class="stat"><strong>{{.SubmittedCount}}</strong> {{.T.EndorsementsLive}}</div>
-        <div class="stat"><strong>{{.PendingCount}}</strong> {{.T.EndorsementsPending}}</div>
+    <div class="en-stats">
+        <div class="en-stat"><strong>{{.SubmittedCount}}</strong> {{.T.EndorsementsLive}}</div>
+        <div class="en-stat"><strong>{{.PendingCount}}</strong> {{.T.EndorsementsPending}}</div>
     </div>
 
     {{if .Endorsements}}
     {{range .Endorsements}}
-    <div class="e-card">
-        <div class="e-card-header">
+    <div class="en-card">
+        <div class="en-card-header">
             <div>
-                <div class="e-card-name">
+                <div class="en-card-name">
                     {{if .EndorserName}}{{.EndorserName}}{{else}}{{$.T.EndorsementsPending}}{{end}}
-                    {{if .EndorserLocation}}<span class="e-card-location"> · {{.EndorserLocation}}</span>{{end}}
+                    {{if .EndorserLocation}}<span class="en-card-location"> · {{.EndorserLocation}}</span>{{end}}
                 </div>
             </div>
             <div>
                 {{if eq .Status "pending"}}
-                <span class="e-badge e-badge-pending">pending</span>
+                <span class="en-badge en-badge-pending">{{$.T.EndorsementsPending}}</span>
                 {{else if eq .Status "submitted"}}
-                <span class="e-badge e-badge-submitted">live</span>
+                <span class="en-badge en-badge-submitted">{{$.T.EndorsementsLive}}</span>
                 {{else}}
-                <span class="e-badge e-badge-declined">declined</span>
+                <span class="en-badge en-badge-declined">{{$.T.EndorsementsDeclined}}</span>
                 {{end}}
             </div>
         </div>
 
         {{if gt .Rating 0}}
-        <div class="e-card-stars">
+        <div class="en-card-stars">
             {{range seq 1 5}}{{if le . $.Rating}}⭐{{end}}{{end}}
         </div>
         {{end}}
 
         {{if .Body}}
-        <div class="e-card-body">"{{.Body}}"</div>
+        <div class="en-card-body">{{.Body}}</div>
         {{end}}
 
-        <div class="e-card-meta">
-            Requested {{.RequestedAt.Format "Jan 2, 2006"}}
-            {{if .SubmittedAt}} · Submitted {{.SubmittedAt.Format "Jan 2, 2006"}}{{end}}
+        <div class="en-card-meta">
+            {{$.T.EndorsementsRequested}} {{.RequestedAt.Format "Jan 2, 2006"}}
+            {{if .SubmittedAt}} · {{$.T.EndorsementsSubmitted}} {{.SubmittedAt.Format "Jan 2, 2006"}}{{end}}
         </div>
 
-        {{if eq .Status "pending"}}
-        <div class="e-card-actions" style="margin-top:8px;">
-            <span class="e-copy-link" onclick="navigator.clipboard.writeText('{{$.BaseURL}}/endorse/{{.Token}}'); this.textContent='Copied!'">
+        <div class="en-card-actions">
+            {{if eq .Status "pending"}}
+            <button type="button" class="en-copy-link"
+                    onclick="navigator.clipboard.writeText('{{$.BaseURL}}/endorse/{{.Token}}'); this.textContent='✓ Copied'">
                 {{$.T.EndorsementsCopyLink}}
-            </span>
-        </div>
-        {{end}}
-
-        <div class="e-card-actions">
-            <form method="POST" action="/endorsements/{{.ID}}/delete" style="display:inline;"
+            </button>
+            {{end}}
+            <form method="POST" action="/endorsements/{{.ID}}/delete"
                   onsubmit="return confirm('{{$.T.EndorsementsDelete}}?')">
                 {{$.csrfField}}
-                <button type="submit" class="btn-delete">{{$.T.EndorsementsDelete}}</button>
+                <button type="submit" class="en-btn-delete">{{$.T.EndorsementsDelete}}</button>
             </form>
         </div>
     </div>
     {{end}}
 
     {{else}}
-    <div class="empty">
-        <div class="empty-icon">⭐</div>
-        <div class="empty-title">{{.T.EndorsementsEmpty}}</div>
-        <div class="empty-sub">{{.T.EndorsementsEmptySub}}</div>
+    <div class="en-empty">
+        <div class="en-empty-icon">⭐</div>
+        <div class="en-empty-title">{{.T.EndorsementsEmpty}}</div>
+        <div class="en-empty-sub">{{.T.EndorsementsEmptySub}}</div>
     </div>
     {{end}}
 </div>
