@@ -17,13 +17,13 @@
     </div>
 
     <div class="en-stats">
-        <div class="en-stat"><strong>{{.SubmittedCount}}</strong> {{.T.EndorsementsLive}}</div>
-        <div class="en-stat"><strong>{{.PendingCount}}</strong> {{.T.EndorsementsPending}}</div>
+        <div class="en-stat en-stat-live"><strong>{{.SubmittedCount}}</strong> {{.T.EndorsementsLive}}</div>
+        <div class="en-stat en-stat-pending"><strong>{{.PendingCount}}</strong> {{.T.EndorsementsPending}}</div>
     </div>
 
     {{if .Endorsements}}
     {{range .Endorsements}}
-    <div class="en-card">
+    <div class="en-card {{if eq .Status "submitted"}}en-card-live{{else if eq .Status "pending"}}en-card-pending{{else}}en-card-declined{{end}}">
         <div class="en-card-header">
             <div>
                 <div class="en-card-name">
@@ -42,33 +42,37 @@
             </div>
         </div>
 
-        {{if gt .Rating 0}}
-        <div class="en-card-stars">
-            {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{end}}{{end}}
-        </div>
-        {{end}}
-
-        {{if .Body}}
-        <div class="en-card-body">{{.Body}}</div>
-        {{end}}
-
-        <div class="en-card-meta">
-            {{$.T.EndorsementsRequested}} {{.RequestedAt.Format "Jan 2, 2006"}}
-            {{if .SubmittedAt}} · {{$.T.EndorsementsSubmitted}} {{.SubmittedAt.Format "Jan 2, 2006"}}{{end}}
-        </div>
-
-        <div class="en-card-actions">
-            {{if eq .Status "pending"}}
-            <button type="button" class="en-copy-link"
-                    onclick="navigator.clipboard.writeText('{{$.BaseURL}}/endorse/{{.Token}}'); this.textContent='✓ Copied'">
-                {{$.T.EndorsementsCopyLink}}
-            </button>
+        {{if or (gt .Rating 0) .Body}}
+        <div class="en-card-trust">
+            {{if gt .Rating 0}}
+            <div class="en-card-stars">
+                {{$r := .Rating}}{{range seq 1 5}}{{if le . $r}}⭐{{end}}{{end}}
+            </div>
             {{end}}
-            <form method="POST" action="/endorsements/{{.ID}}/delete"
-                  onsubmit="return confirm('{{$.T.EndorsementsDelete}}?')">
-                {{$.csrfField}}
-                <button type="submit" class="en-btn-delete">{{$.T.EndorsementsDelete}}</button>
-            </form>
+            {{if .Body}}
+            <div class="en-card-body">{{.Body}}</div>
+            {{end}}
+        </div>
+        {{end}}
+
+        <div class="en-card-footer">
+            <div class="en-card-meta">
+                {{$.T.EndorsementsRequested}} {{.RequestedAt.Format "Jan 2, 2006"}}
+                {{if .SubmittedAt}} · {{$.T.EndorsementsSubmitted}} {{.SubmittedAt.Format "Jan 2, 2006"}}{{end}}
+            </div>
+            <div class="en-card-actions">
+                {{if eq .Status "pending"}}
+                <button type="button" class="en-copy-link"
+                        onclick="navigator.clipboard.writeText('{{$.BaseURL}}/endorse/{{.Token}}'); this.textContent='✓ Copied'">
+                    📋 {{$.T.EndorsementsCopyLink}}
+                </button>
+                {{end}}
+                <form method="POST" action="/endorsements/{{.ID}}/delete"
+                      onsubmit="return confirm('{{$.T.EndorsementsDelete}}?')">
+                    {{$.csrfField}}
+                    <button type="submit" class="en-btn-delete">{{$.T.EndorsementsDelete}}</button>
+                </form>
+            </div>
         </div>
     </div>
     {{end}}

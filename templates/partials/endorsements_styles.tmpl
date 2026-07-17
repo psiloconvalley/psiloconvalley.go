@@ -10,10 +10,14 @@
         --en-text-muted: rgba(255,255,255,0.4);
         --en-text-faint: rgba(255,255,255,0.3);
         --en-green: #4ade80;
+        --en-green-surface: rgba(74,222,128,0.08);
+        --en-green-border: rgba(74,222,128,0.2);
         --en-amber: #fbbf24;
+        --en-amber-glow: rgba(251,191,36,0.45);
         --en-red: #f87171;
         --en-radius: 14px;
         --en-radius-sm: 8px;
+        --en-radius-pill: 100px;
         --en-ease: cubic-bezier(0.4, 0, 0.2, 1);
         --en-dur: 0.25s;
     }
@@ -21,11 +25,12 @@
     .page {
         max-width: 720px;
         margin: 48px auto;
-        padding: 0 24px;
+        padding: 0 24px 80px;
     }
 
+    /* ── Header ── */
     .page-header {
-        margin-bottom: 28px;
+        margin-bottom: 32px;
         border-left: 2px solid rgba(255,255,255,0.15);
         padding-left: 20px;
     }
@@ -44,44 +49,97 @@
         line-height: 1.5;
     }
 
+    /* ── Stats pills ── */
     .en-stats {
         display: flex;
-        gap: 20px;
+        gap: 12px;
         margin-bottom: 28px;
     }
 
     .en-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         font-size: 13px;
+        font-weight: 600;
         color: var(--en-text-muted);
+        padding: 7px 14px;
+        background: var(--en-surface);
+        border: 1px solid var(--en-border);
+        border-radius: var(--en-radius-pill);
     }
 
     .en-stat strong {
         color: var(--en-text);
-        font-weight: 700;
+        font-weight: 800;
     }
+
+    .en-stat-live strong { color: var(--en-green); }
+    .en-stat-pending strong { color: var(--en-amber); }
 
     /* ── Endorsement card ── */
     .en-card {
+        display: flex;
+        flex-direction: column;
         background: var(--en-surface);
         border: 1px solid var(--en-border);
+        border-left: 3px solid var(--en-border);
         border-radius: var(--en-radius);
         padding: 22px;
         margin-bottom: 12px;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: en-card-in 0.4s var(--en-ease) forwards;
         transition:
             background var(--en-dur) ease,
-            border-color var(--en-dur) ease;
+            border-color var(--en-dur) ease,
+            box-shadow var(--en-dur) ease,
+            transform var(--en-dur) ease;
+    }
+
+    .en-card:nth-child(1) { animation-delay: 0.05s; }
+    .en-card:nth-child(2) { animation-delay: 0.1s; }
+    .en-card:nth-child(3) { animation-delay: 0.15s; }
+    .en-card:nth-child(4) { animation-delay: 0.2s; }
+    .en-card:nth-child(5) { animation-delay: 0.25s; }
+    .en-card:nth-child(6) { animation-delay: 0.3s; }
+
+    @keyframes en-card-in {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .en-card-live {
+        border-left-color: rgba(74,222,128,0.4);
+    }
+
+    .en-card-pending {
+        border-left-color: rgba(251,191,36,0.35);
+    }
+
+    .en-card-declined {
+        border-left-color: rgba(255,255,255,0.06);
     }
 
     .en-card:hover {
         background: var(--en-surface-hover);
         border-color: var(--en-border-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
+    .en-card:hover.en-card-live {
+        border-left-color: rgba(74,222,128,0.6);
+    }
+
+    .en-card:hover.en-card-pending {
+        border-left-color: rgba(251,191,36,0.55);
+    }
+
+    /* ── Header ── */
     .en-card-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 10px;
         gap: 12px;
     }
 
@@ -94,71 +152,87 @@
     .en-card-location {
         font-size: 12px;
         color: var(--en-text-muted);
+        font-weight: 400;
     }
 
-    /* ── Stars ── */
+    /* ── Trust zone: stars + quote ── */
+    .en-card-trust {
+        padding: 14px 0;
+    }
+
     .en-card-stars {
         display: flex;
         align-items: center;
         gap: 2px;
-        font-size: 14px;
+        font-size: 13px;
         margin-bottom: 10px;
         line-height: 1;
+        filter: drop-shadow(0 0 3px var(--en-amber-glow));
     }
 
-    /* ── Body ── */
     .en-card-body {
         font-size: 14px;
         color: var(--en-text-secondary);
-        line-height: 1.65;
-        margin-bottom: 12px;
+        line-height: 1.7;
     }
 
     .en-card-body::before { content: '\201C'; }
     .en-card-body::after  { content: '\201D'; }
 
-    /* ── Meta ── */
+    /* ── Footer: meta + actions ── */
+    .en-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        flex-wrap: wrap;
+    }
+
     .en-card-meta {
         font-size: 12px;
         color: var(--en-text-faint);
-        margin-bottom: 10px;
     }
 
-    /* ── Actions ── */
     .en-card-actions {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid rgba(255,255,255,0.05);
+        gap: 8px;
     }
 
+    /* ── Copy link ── */
     .en-copy-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
         font-size: 12px;
         font-weight: 600;
-        color: var(--en-text-muted);
+        color: var(--en-green);
         cursor: pointer;
         text-decoration: none;
-        border: 1px solid var(--en-border);
-        padding: 6px 12px;
+        border: 1px solid var(--en-green-border);
+        padding: 6px 14px;
         border-radius: var(--en-radius-sm);
-        background: none;
+        background: var(--en-green-surface);
         font-family: inherit;
         transition:
             color var(--en-dur) ease,
+            background var(--en-dur) ease,
             border-color var(--en-dur) ease;
     }
 
     .en-copy-link:hover {
         color: var(--en-text);
-        border-color: var(--en-border-hover);
+        background: rgba(74,222,128,0.14);
+        border-color: rgba(74,222,128,0.4);
     }
 
+    /* ── Delete ── */
     .en-btn-delete {
-        background: rgba(239,68,68,0.08);
-        border: 1px solid rgba(239,68,68,0.2);
-        color: var(--en-red);
+        background: none;
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--en-text-faint);
         font-size: 12px;
         font-weight: 600;
         padding: 6px 12px;
@@ -167,12 +241,14 @@
         font-family: inherit;
         transition:
             background var(--en-dur) ease,
-            border-color var(--en-dur) ease;
+            border-color var(--en-dur) ease,
+            color var(--en-dur) ease;
     }
 
     .en-btn-delete:hover {
-        background: rgba(239,68,68,0.15);
-        border-color: rgba(239,68,68,0.35);
+        background: rgba(239,68,68,0.1);
+        border-color: rgba(239,68,68,0.25);
+        color: var(--en-red);
     }
 
     .en-btn-delete:focus-visible,
@@ -184,26 +260,29 @@
     /* ── Status badges ── */
     .en-badge {
         display: inline-block;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         padding: 3px 10px;
-        border-radius: 100px;
+        border-radius: var(--en-radius-pill);
         letter-spacing: 0.5px;
         text-transform: uppercase;
     }
 
     .en-badge-pending {
-        background: rgba(251,191,36,0.12);
+        background: rgba(251,191,36,0.1);
+        border: 1px solid rgba(251,191,36,0.2);
         color: var(--en-amber);
     }
 
     .en-badge-submitted {
-        background: rgba(74,222,128,0.12);
+        background: rgba(74,222,128,0.1);
+        border: 1px solid rgba(74,222,128,0.2);
         color: var(--en-green);
     }
 
     .en-badge-declined {
-        background: rgba(255,255,255,0.05);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
         color: var(--en-text-faint);
     }
 
@@ -235,6 +314,13 @@
         max-width: 400px;
         margin: 0 auto;
         line-height: 1.6;
+    }
+
+    @media (max-width: 480px) {
+        .en-card-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 </style>
 {{end}}
