@@ -84,6 +84,18 @@ var en = T{
 	PubProfileDescPlaceholder:    "Describe the work...",
 	PubProfileInvPlaceholder:     "INV-0042",
 
+
+	// Profile — Quick Pay Links section
+	ProfileQuickPay:          "Quick Pay Links",
+	ProfileQuickPaySub:       "Add your payment handles so clients can pay you directly from your public page.",
+	ProfileZelleLabel:        "Zelle (email or phone)",
+	ProfileVenmoLabel:        "Venmo @handle",
+	ProfileCashAppLabel:      "Cash App $tag",
+	ProfileCopyLink:          "Copy Link",
+	ProfileCopied:            "Copied!",
+	ProfilePreview:           "Preview →",
+	ProfilePublicPageHint:    "Share this link with clients. They can request quotes and pay invoices.",
+
 	ProfileServiceAreas:     "Service Areas",
 	ProfileServiceAreasHint: "Comma-separated list of cities or areas you serve. Shown on your public page.",
 	DashboardThDue:      "Due",

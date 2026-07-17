@@ -88,6 +88,18 @@ type T struct {
 	PubProfileDescPlaceholder    string
 	PubProfileInvPlaceholder     string
 
+
+	// Profile — Quick Pay Links section
+	ProfileQuickPay          string
+	ProfileQuickPaySub       string
+	ProfileZelleLabel        string
+	ProfileVenmoLabel        string
+	ProfileCashAppLabel      string
+	ProfileCopyLink          string
+	ProfileCopied            string
+	ProfilePreview           string
+	ProfilePublicPageHint    string
+
 	ProfileServiceAreas     string
 	ProfileServiceAreasHint string
 	DashboardThDue      string

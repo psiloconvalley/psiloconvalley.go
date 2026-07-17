@@ -84,6 +84,18 @@ var es = T{
 	PubProfileDescPlaceholder:    "Describe el trabajo...",
 	PubProfileInvPlaceholder:     "INV-0042",
 
+
+	// Profile — Quick Pay Links section
+	ProfileQuickPay:          "Enlaces de Pago Rápido",
+	ProfileQuickPaySub:       "Agrega tus métodos de pago para que los clientes te paguen directamente desde tu página pública.",
+	ProfileZelleLabel:        "Zelle (correo o teléfono)",
+	ProfileVenmoLabel:        "Venmo @usuario",
+	ProfileCashAppLabel:      "Cash App $etiqueta",
+	ProfileCopyLink:          "Copiar Enlace",
+	ProfileCopied:            "¡Copiado!",
+	ProfilePreview:           "Vista Previa →",
+	ProfilePublicPageHint:    "Comparte este enlace con tus clientes. Pueden solicitar cotizaciones y pagar facturas.",
+
 	ProfileServiceAreas:     "Áreas de servicio",
 	ProfileServiceAreasHint: "Lista de ciudades o áreas donde trabajas, separadas por comas. Se muestra en tu página pública.",
 	DashboardThDue:      "Vence",
@@ -798,4 +810,24 @@ var es = T{
 	HomeDashClientsSub:   "Administra tu directorio de clientes",
 	HomeDashSettings:     "Configuración",
 	HomeDashSettingsSub:  "Perfil de negocio y preferencias",
+
+
+	// Profile — Passkeys
+	ProfilePasskeyTitle:         "Llaves de acceso",
+	ProfilePasskeySubtitle:      "Inicia sesión sin contraseña usando Face ID, Touch ID o el PIN de tu dispositivo.",
+	ProfilePasskeyAdd:           "Agregar llave de acceso",
+	ProfilePasskeyAdded:         "¡Llave agregada!",
+	ProfilePasskeyNoSupport:     "Tu navegador no admite llaves de acceso.",
+	ProfilePasskeySuccess:       "¡Llave de acceso registrada exitosamente!",
+	ProfilePasskeyRegistering:   "Registrando...",
+	ProfilePasskeyErrorGeneric:  "Error del servidor",
+	ProfilePasskeyErrorPrefix:   "Error:",
+	ProfilePasskeyListTitle:     "Llaves registradas",
+	ProfilePasskeyListEmpty:     "No tienes llaves de acceso registradas.",
+	ProfilePasskeyDevice:        "Dispositivo",
+	ProfilePasskeyAddedOn:       "Agregada el",
+	ProfilePasskeyLastUsed:      "Último uso",
+	ProfilePasskeyDelete:        "Eliminar",
+	ProfilePasskeyDeleted:       "Llave de acceso eliminada.",
+	ProfilePasskeyDeleteConfirm: "¿Eliminar esta llave de acceso?",
 }
