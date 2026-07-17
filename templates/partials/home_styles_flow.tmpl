@@ -28,7 +28,9 @@
             padding: 8px 16px;
             border-radius: 20px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition:
+                border-color 0.2s ease,
+                color 0.2s ease;
             font-family: inherit;
         }
         .flow-pill:hover {
@@ -324,7 +326,9 @@
             padding: 14px 28px;
             border-radius: 10px;
             cursor: default;
-            transition: all 0.3s;
+            transition:
+                background 0.3s ease,
+                transform 0.3s ease;
         }
         .flow-card[data-card="3"].active .fc-convert-btn {
             animation: fc-convert-press 0.4s ease 0.9s forwards;
@@ -416,7 +420,9 @@
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
             cursor: pointer;
-            transition: all 0.2s;
+            transition:
+                background 0.2s ease,
+                width 0.2s ease;
             border: none;
         }
         .flow-dot.active {
@@ -433,7 +439,9 @@
             height: 32px;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition:
+                border-color 0.2s ease,
+                color 0.2s ease;
             font-family: inherit;
         }
         .flow-arrow:hover {
