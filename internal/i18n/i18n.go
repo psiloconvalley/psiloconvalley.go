@@ -64,6 +64,30 @@ type T struct {
 	DashboardQuoteViewed      string
 	DashboardQuoteReceived    string
 	// Profile — service areas
+
+	// Public profile page
+	PubProfileRequestQuote   string
+	PubProfileYourName       string
+	PubProfilePhone          string
+	PubProfileWhatDoYouNeed  string
+	PubProfileSendRequest    string
+	PubProfilePayInvoice     string
+	PubProfileInvoiceNumber  string
+	PubProfileYourPhone      string
+	PubProfileFindInvoice    string
+	PubProfileInvNotFound    string
+	PubProfileServing        string
+	PubProfileZelle          string
+	PubProfileVenmo          string
+	PubProfileCashApp        string
+	PubProfileScanQR         string
+	PubProfilePoweredBy      string
+	PubProfileCreatePage     string
+	PubProfileNamePlaceholder    string
+	PubProfilePhonePlaceholder   string
+	PubProfileDescPlaceholder    string
+	PubProfileInvPlaceholder     string
+
 	ProfileServiceAreas     string
 	ProfileServiceAreasHint string
 	DashboardThDue      string

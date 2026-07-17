@@ -3,7 +3,7 @@
     <details class="pp-section"{{if or .QuoteError .QuoteSuccess}} open{{end}}>
         <summary class="pp-section-title">
             <span class="pp-section-icon" aria-hidden="true">💬</span>
-            <span class="pp-section-heading">Request a Quote</span>
+            <span class="pp-section-heading">{{.T.PubProfileRequestQuote}}</span>
             <span class="pp-section-chevron" aria-hidden="true">›</span>
         </summary>
 
@@ -19,21 +19,21 @@
             <form method="POST" action="/biz/{{.Slug}}/quote" autocomplete="on">
                 {{.csrfField}}
                 <div class="pp-field">
-                    <label class="pp-label" for="qr-name">Your Name</label>
+                    <label class="pp-label" for="qr-name">{{.T.PubProfileYourName}}</label>
                     <input type="text" name="client_name" id="qr-name" class="pp-input"
-                           placeholder="John Smith" autocomplete="name" required>
+                           placeholder="{{.T.PubProfileNamePlaceholder}}" autocomplete="name" required>
                 </div>
                 <div class="pp-field">
-                    <label class="pp-label" for="qr-phone">Phone</label>
+                    <label class="pp-label" for="qr-phone">{{.T.PubProfilePhone}}</label>
                     <input type="tel" name="client_phone" id="qr-phone" class="pp-input"
-                           placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel">
+                           placeholder="{{.T.PubProfilePhonePlaceholder}}" autocomplete="tel" inputmode="tel">
                 </div>
                 <div class="pp-field">
-                    <label class="pp-label" for="qr-desc">What do you need?</label>
+                    <label class="pp-label" for="qr-desc">{{.T.PubProfileWhatDoYouNeed}}</label>
                     <textarea name="description" id="qr-desc" class="pp-textarea"
-                              placeholder="Describe the work..."></textarea>
+                              placeholder="{{.T.PubProfileDescPlaceholder}}"></textarea>
                 </div>
-                <button type="submit" class="pp-btn pp-btn-green">Send Request</button>
+                <button type="submit" class="pp-btn pp-btn-green">{{.T.PubProfileSendRequest}}</button>
             </form>
             {{end}}
         </div>

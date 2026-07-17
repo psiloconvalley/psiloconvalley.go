@@ -11,40 +11,7 @@
 
 <div class="pp-wrap">
 
-    <!-- ── Business Card ── -->
-    <div class="pp-card">
-        {{if .Profile.LogoURL}}
-        <img src="{{.Profile.LogoURL}}" alt="{{.Profile.Name}}" class="pp-logo">
-        {{end}}
-        <div class="pp-name">{{.Profile.Name}}</div>
-        {{if and .AvgRating .Endorsements}}
-        <div class="pp-hero-rating">
-            <span class="pp-hero-star">⭐</span>
-            {{printf "%.1f" .AvgRating}} · {{.EndorsementCount}} {{if gt .EndorsementCount 1}}{{.T.EndorseEndorsements}}{{else}}{{.T.EndorseEndorsement}}{{end}}
-        </div>
-        {{end}}
-        {{if .Location}}
-        <div class="pp-location">📍 {{.Location}}</div>
-        {{end}}
-        {{if .Profile.ServiceAreas}}
-        <div class="pp-service-areas">🗺️ Serving: {{.Profile.ServiceAreas}}</div>
-        {{end}}
-        {{if .DisplayPhone}}
-        <div class="pp-contact">📞 <a href="tel:{{.Profile.Phone}}">{{.DisplayPhone}}</a></div>
-        {{end}}
-        {{if .Profile.Email}}
-        <div class="pp-contact">📧 <a href="mailto:{{.Profile.Email}}">{{.Profile.Email}}</a></div>
-        {{end}}
-        {{if .Profile.ZelleID}}
-        <div class="pp-contact">💸 <a href="#" onclick="copyText('{{.Profile.ZelleID}}', this); return false;">Zelle: {{.Profile.ZelleID}}</a></div>
-        {{end}}
-        {{if .Profile.VenmoHandle}}
-        <div class="pp-contact">💜 <a href="https://venmo.com/{{.Profile.VenmoHandle}}" target="_blank" rel="noopener">Venmo: {{.Profile.VenmoHandle}}</a></div>
-        {{end}}
-        {{if .Profile.CashAppHandle}}
-        <div class="pp-contact">💚 <a href="https://cash.app/{{.Profile.CashAppHandle}}" target="_blank" rel="noopener">CashApp: {{.Profile.CashAppHandle}}</a></div>
-        {{end}}
-    </div>
+    {{template "public-profile-hero-section" .}}
 
     {{template "public-profile-endorsements-section" .}}
 
@@ -55,14 +22,14 @@
     <!-- ── QR Code ── -->
     <div class="pp-qr-wrap">
         <img src="/biz/{{.Slug}}/qr.png" alt="QR Code" width="160" height="160" class="pp-qr-img">
-        <div class="pp-qr-label">Scan to visit this page</div>
+        <div class="pp-qr-label">{{.T.PubProfileScanQR}}</div>
     </div>
 
     <!-- ── Branding ── -->
     <div class="pp-branding">
         <div class="pp-branding-divider"></div>
-        <div class="pp-branding-text">Professional invoicing by psiloconvalley</div>
-        <a href="/register" class="pp-branding-link">Create Your Business Page →</a>
+        <div class="pp-branding-text">{{.T.PubProfilePoweredBy}}</div>
+        <a href="/register" class="pp-branding-link">{{.T.PubProfileCreatePage}}</a>
     </div>
 
 </div>

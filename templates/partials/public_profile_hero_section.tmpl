@@ -1,0 +1,37 @@
+{{define "public-profile-hero-section"}}
+    <div class="pp-card">
+        {{if .Profile.LogoURL}}
+        <img src="{{.Profile.LogoURL}}" alt="{{.Profile.Name}}" class="pp-logo">
+        {{end}}
+        <div class="pp-name">{{.Profile.Name}}</div>
+        {{if and .AvgRating .Endorsements}}
+        <div class="pp-hero-rating">
+            <span class="pp-hero-star">⭐</span>
+            {{printf "%.1f" .AvgRating}} · {{.EndorsementCount}} {{if gt .EndorsementCount 1}}{{.T.EndorseEndorsements}}{{else}}{{.T.EndorseEndorsement}}{{end}}
+        </div>
+        {{end}}
+        {{if .Location}}
+        <div class="pp-location">📍 {{.Location}}</div>
+        {{end}}
+        {{if .Profile.ServiceAreas}}
+        <div class="pp-service-areas">🗺️ {{.T.PubProfileServing}} {{.Profile.ServiceAreas}}</div>
+        {{end}}
+        <div class="pp-contact-stack">
+            {{if .DisplayPhone}}
+            <div class="pp-contact">📞 <a href="tel:{{.Profile.Phone}}">{{.DisplayPhone}}</a></div>
+            {{end}}
+            {{if .Profile.Email}}
+            <div class="pp-contact">📧 <a href="mailto:{{.Profile.Email}}">{{.Profile.Email}}</a></div>
+            {{end}}
+            {{if .Profile.ZelleID}}
+            <div class="pp-contact">💸 <a href="#" onclick="copyText('{{.Profile.ZelleID}}', this); return false;">{{.T.PubProfileZelle}} {{.Profile.ZelleID}}</a></div>
+            {{end}}
+            {{if .Profile.VenmoHandle}}
+            <div class="pp-contact">💜 <a href="https://venmo.com/{{.Profile.VenmoHandle}}" target="_blank" rel="noopener">{{.T.PubProfileVenmo}} {{.Profile.VenmoHandle}}</a></div>
+            {{end}}
+            {{if .Profile.CashAppHandle}}
+            <div class="pp-contact">💚 <a href="https://cash.app/{{.Profile.CashAppHandle}}" target="_blank" rel="noopener">{{.T.PubProfileCashApp}} {{.Profile.CashAppHandle}}</a></div>
+            {{end}}
+        </div>
+    </div>
+{{end}}
