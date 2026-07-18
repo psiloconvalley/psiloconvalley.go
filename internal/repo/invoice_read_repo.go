@@ -8,7 +8,7 @@ import (
 
 // GetInvoiceWithItems fetches a single invoice and its line items by ID.
 // It LEFT JOINs business_profiles so the logo and company details are
-// always populated from the canonical source — never stale invoice snapshots.
+// Invoice-level values take priority. Business profile is the fallback.
 func (r *InvoiceRepo) GetInvoiceWithItems(
 	ctx context.Context,
 	id int64,
@@ -27,14 +27,14 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.client_zip,
 			i.client_state,
 			i.client_country,
-			COALESCE(bp.name,    i.company_name,    '') AS company_name,
-			COALESCE(bp.email,   i.company_email,   '') AS company_email,
+			COALESCE(NULLIF(i.company_name, ''),    bp.name,    '') AS company_name,
+			COALESCE(NULLIF(i.company_email, ''),   bp.email,   '') AS company_email,
 			COALESCE(bp.phone,   '')                AS company_phone,
-			COALESCE(bp.address, i.company_address, '') AS company_address,
-			COALESCE(bp.city,    i.company_city,    '') AS company_city,
-			COALESCE(bp.zip,     i.company_zip,     '') AS company_zip,
-			COALESCE(bp.state,   i.company_state,   '') AS company_state,
-			COALESCE(bp.country, i.company_country, '') AS company_country,
+			COALESCE(NULLIF(i.company_address, ''), bp.address, '') AS company_address,
+			COALESCE(NULLIF(i.company_city, ''),    bp.city,    '') AS company_city,
+			COALESCE(NULLIF(i.company_zip, ''),     bp.zip,     '') AS company_zip,
+			COALESCE(NULLIF(i.company_state, ''),   bp.state,   '') AS company_state,
+			COALESCE(NULLIF(i.company_country, ''), bp.country, '') AS company_country,
 			i.invoice_number,
 			i.issue_date,
 			i.due_date,
