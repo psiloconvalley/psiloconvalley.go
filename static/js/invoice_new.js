@@ -198,6 +198,21 @@ function captureCompanyDefaults(form) {
         const field = form.elements.namedItem(name);
         companyDefaults[name] = field ? field.value : '';
     });
+
+    // Add confirmation prompts for company field changes
+    COMPANY_FIELDS.forEach(name => {
+        const field = form.elements.namedItem(name);
+        if (!field) return;
+        field.addEventListener('blur', function() {
+            const original = companyDefaults[name] || '';
+            const current = this.value.trim();
+            if (original && current && current !== original) {
+                if (!confirm('Change "' + original + '" to "' + current + '" for this invoice?')) {
+                    this.value = original;
+                }
+            }
+        });
+    });
 }
 
 function getFormData() {
