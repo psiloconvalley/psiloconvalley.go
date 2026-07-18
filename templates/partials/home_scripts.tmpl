@@ -201,8 +201,8 @@ if (demoEl) demoObserver.observe(demoEl);
             ctx.beginPath();
             ctx.moveTo(this.px, this.py);
             ctx.lineTo(this.x, this.y);
-            ctx.strokeStyle = `rgba(255, 255, 246, ${0.12 / (this.depth + 1)})`;
-            ctx.lineWidth = Math.max(0.5, 2 / (this.depth + 1));
+            ctx.strokeStyle = `rgba(74, 222, 128, ${0.18 / (this.depth + 1)})`;
+            ctx.lineWidth = Math.max(0.6, 2.5 / (this.depth + 1));
             ctx.stroke();
         }
     }
@@ -216,7 +216,7 @@ if (demoEl) demoObserver.observe(demoEl);
         }
     }
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 8; i++) {
         seedNetwork(Math.random() * width, Math.random() * height);
     }
 
@@ -227,13 +227,20 @@ if (demoEl) demoObserver.observe(demoEl);
     });
 
     function animate() {
-        ctx.fillStyle = "rgba(10, 15, 26, 0.04)";
+        ctx.fillStyle = "rgba(10, 15, 26, 0.025)";
         ctx.fillRect(0, 0, width, height);
 
         let newHyphae = [];
         hyphae.forEach((h) => {
             h.update();
             h.draw();
+            // Draw glow node at branch tips
+            if (!h.dead && h.depth === 0 && h.age % 8 === 0) {
+                ctx.beginPath();
+                ctx.arc(h.x, h.y, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(74, 222, 128, 0.15)';
+                ctx.fill();
+            }
             if (!h.dead) {
                 newHyphae.push(h);
                 if (Math.random() < 0.02 && h.depth < 4 && h.age > 15) {
@@ -244,7 +251,7 @@ if (demoEl) demoObserver.observe(demoEl);
         });
         hyphae = newHyphae;
 
-        if (hyphae.length < 15 && Math.random() < 0.05) {
+        if (hyphae.length < 30 && Math.random() < 0.08) {
             seedNetwork(Math.random() * width, Math.random() * height);
         }
         requestAnimationFrame(animate);
