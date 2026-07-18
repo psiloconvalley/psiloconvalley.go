@@ -211,6 +211,9 @@ type T struct {
 	ProfileErrMismatchPW        string
 	ProfileErrFailedPW          string
 	ProfileGoogleSignIn         string
+	ProfilePreviewTabCard    string
+	ProfilePreviewTabInvoice string
+
 	ProfilePreviewLabel         string
 	ProfilePreviewLogo          string
 	ProfilePreviewCompany       string

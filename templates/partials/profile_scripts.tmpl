@@ -1,6 +1,20 @@
 {{define "profile-scripts"}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
+    document.querySelectorAll('.preview-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var target = this.getAttribute('data-tab');
+            var parent = this.closest('.preview-rail') || this.closest('.preview-sheet');
+            if (!parent) return;
+            parent.querySelectorAll('.preview-tab').forEach(function(t) { t.classList.remove('active'); });
+            parent.querySelectorAll('.preview-pane').forEach(function(p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var pane = document.getElementById('preview-pane-' + target);
+            if (pane) pane.classList.add('active');
+        });
+    });
+
     function wire(inputSelector, desktopId, mobileId, opts) {
         var input = document.querySelector(inputSelector);
         if (!input) return;
@@ -74,12 +88,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 var src = ev.target.result;
                 updatePreviewLogo('preview-logo', 'preview-logo-placeholder', src);
                 updatePreviewLogo('preview-logo-mobile', 'preview-logo-placeholder-mobile', src);
+                updatePreviewLogo('inv-preview-logo', 'inv-preview-logo-placeholder', src);
             };
             reader.readAsDataURL(file);
         });
     }
 
-    function updatePreviewLogo(imgId, placeholderId, src) {
+    // Invoice preview live updates
+    wire('input[name="name"]', 'inv-preview-company', null, { fallback: '{{.T.ProfilePreviewCompany}}' });
+
+    function updateInvAddress() {
+        var city = document.querySelector('input[name="city"]');
+        var state = document.querySelector('input[name="state"]');
+        var zip = document.querySelector('input[name="zip"]');
+        var c = city ? city.value.trim() : '';
+        var st = state ? state.value.trim() : '';
+        var z = zip ? zip.value.trim() : '';
+        var parts = [];
+        if (c) parts.push(c);
+        if (st) parts.push(st);
+        var line = parts.join(', ');
+        if (z) line += (line ? ' ' : '') + z;
+        var el = document.getElementById('inv-preview-address');
+        if (el) el.textContent = line;
+    }
+
+    function updateInvContact() {
+        var phone = document.querySelector('input[name="phone"]');
+        var email = document.querySelector('input[name="email"]');
+        var ph = phone ? phone.value.trim() : '';
+        var em = email ? email.value.trim() : '';
+        var parts = [];
+        if (ph) parts.push(ph);
+        if (em) parts.push(em);
+        var el = document.getElementById('inv-preview-contact');
+        if (el) el.textContent = parts.join(' · ');
+    }
+
+    ['city', 'state', 'zip'].forEach(function(n) {
+        var inp = document.querySelector('input[name="' + n + '"]');
+        if (inp) inp.addEventListener('input', updateInvAddress);
+    });
+
+    ['phone', 'email'].forEach(function(n) {
+        var inp = document.querySelector('input[name="' + n + '"]');
+        if (inp) inp.addEventListener('input', updateInvContact);
+    });
+
+        function updatePreviewLogo(imgId, placeholderId, src) {
         var img = document.getElementById(imgId);
         var placeholder = document.getElementById(placeholderId);
         if (img) {

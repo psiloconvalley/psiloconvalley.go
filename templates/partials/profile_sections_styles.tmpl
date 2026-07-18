@@ -443,5 +443,183 @@
     @media (max-width: 860px) {
         .mobile-preview-btn { display: flex; align-items: center; gap: 8px; }
     }
+
+    /* ── Preview tabs ── */
+    .preview-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--pr-radius-sm);
+        padding: 3px;
+    }
+
+    .preview-tab {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.4);
+        background: none;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: inherit;
+        transition:
+            color var(--pr-dur-fast) ease,
+            background var(--pr-dur-fast) ease;
+    }
+
+    .preview-tab:hover {
+        color: rgba(255,255,255,0.7);
+    }
+
+    .preview-tab.active {
+        color: var(--pr-text);
+        background: rgba(255,255,255,0.08);
+    }
+
+    .preview-pane {
+        display: none;
+    }
+
+    .preview-pane.active {
+        display: block;
+    }
+
+    /* ── Invoice preview card ── */
+    .inv-preview {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--pr-radius-md);
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .inv-preview-accent {
+        height: 5px;
+        background: #0d1422;
+    }
+
+    .inv-preview-body {
+        padding: 24px;
+    }
+
+    .inv-preview-logo-area {
+        margin-bottom: 14px;
+        min-height: 24px;
+    }
+
+    .inv-preview-logo-img {
+        max-width: 140px;
+        max-height: 55px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .inv-preview-logo-placeholder {
+        width: 80px;
+        height: 28px;
+        background: #f1f5f9;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #94a3b8;
+    }
+
+    .inv-preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 18px;
+    }
+
+    .inv-preview-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #0d1422;
+        letter-spacing: -0.3px;
+    }
+
+    .inv-preview-company {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        margin-top: 3px;
+    }
+
+    .inv-preview-address {
+        font-size: 10px;
+        color: #94a3b8;
+        margin-top: 2px;
+    }
+
+    .inv-preview-contact-line {
+        font-size: 10px;
+        color: #94a3b8;
+        margin-top: 1px;
+    }
+
+    .inv-preview-right {
+        text-align: right;
+    }
+
+    .inv-preview-inv-label {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: 0.8px;
+    }
+
+    .inv-preview-inv-number {
+        font-size: 11px;
+        font-weight: 600;
+        color: #0d1422;
+    }
+
+    .inv-preview-items {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 12px;
+    }
+
+    .inv-preview-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 7px;
+    }
+
+    .inv-preview-item-name {
+        font-weight: 700;
+        color: #0d1422;
+    }
+
+    .inv-preview-item-amount {
+        font-variant-numeric: tabular-nums;
+    }
+
+    .inv-preview-total {
+        border-top: 1px solid #cbd5e1;
+        margin-top: 14px;
+        padding-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        font-weight: 800;
+        color: #0d1422;
+    }
+
+    .inv-preview-total-amount {
+        font-variant-numeric: tabular-nums;
+    }
 </style>
 {{end}}

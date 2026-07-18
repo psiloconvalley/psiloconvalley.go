@@ -200,6 +200,9 @@ var en = T{
 	ProfileErrMismatchPW:          "Passwords do not match.",
 	ProfileErrFailedPW:            "Could not update password. Please try again.",
 	ProfileGoogleSignIn:           "Your account uses Google sign-in. Setting a password lets you also sign in with email.",
+	ProfilePreviewTabCard:    "Business Card",
+	ProfilePreviewTabInvoice: "Invoice",
+
 	ProfilePreviewLabel:           "Business Card Preview",
 	ProfilePreviewLogo:            "YOUR LOGO",
 	ProfilePreviewCompany:         "Your Company",
