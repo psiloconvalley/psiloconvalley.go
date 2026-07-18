@@ -106,13 +106,13 @@
         }
 
         .co-banner--profile {
-            background: rgba(74,222,128,0.06);
-            border: 1px solid rgba(74,222,128,0.15);
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
         }
 
         .co-banner--override {
-            background: rgba(251,191,36,0.06);
-            border: 1px solid rgba(251,191,36,0.15);
+            background: #fffbeb;
+            border: 1px solid #fde68a;
         }
 
         .co-banner-text {
@@ -126,14 +126,15 @@
         .co-banner-title {
             font-size: 13px;
             font-weight: 700;
-            color: #fff;
+            color: var(--ink);
         }
 
-        .co-banner--override .co-banner-title { color: #fbbf24; }
+        .co-banner--profile .co-banner-title { color: #15803d; }
+        .co-banner--override .co-banner-title { color: #92400e; }
 
         .co-banner-sub {
             font-size: 11px;
-            color: rgba(255,255,255,0.45);
+            color: var(--ink-muted);
             margin-top: 2px;
         }
 
@@ -144,9 +145,9 @@
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06);
-            color: rgba(255,255,255,0.7);
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--ink-muted);
             white-space: nowrap;
             transition:
                 background 0.2s ease,
@@ -155,26 +156,26 @@
         }
 
         .co-action-btn:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.25);
-            color: #fff;
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: var(--ink);
         }
 
         .co-action-btn--reset {
-            border-color: rgba(74,222,128,0.2);
-            color: #4ade80;
-            background: rgba(74,222,128,0.06);
+            border-color: #bbf7d0;
+            color: #15803d;
+            background: #f0fdf4;
         }
 
         .co-action-btn--reset:hover {
-            background: rgba(74,222,128,0.12);
-            border-color: rgba(74,222,128,0.35);
+            background: #dcfce7;
+            border-color: #86efac;
         }
 
         .co-summary {
             padding: 12px 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: #f8fafc;
+            border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 16px;
         }
@@ -182,13 +183,13 @@
         .co-summary-name {
             font-size: 15px;
             font-weight: 700;
-            color: #fff;
+            color: var(--ink);
             margin-bottom: 4px;
         }
 
         .co-summary-detail {
             font-size: 12px;
-            color: rgba(255,255,255,0.45);
+            color: var(--ink-muted);
             margin-top: 2px;
         }
 </style>
