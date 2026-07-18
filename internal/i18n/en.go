@@ -86,6 +86,9 @@ var en = T{
 
 
 	// Profile — Quick Pay Links section
+	ProfilePwMatch:   "Passwords match",
+	ProfilePwNoMatch: "Passwords do not match",
+
 	ProfilePublicPage:     "Your Public Page",
 
 	ProfileQuickPay:          "Quick Pay Links",

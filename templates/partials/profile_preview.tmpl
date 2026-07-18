@@ -1,51 +1,53 @@
 {{define "profile-preview"}}
-        <!-- ═══════════ RIGHT: PREVIEW RAIL ═══════════ -->
+        <!-- ═══════════ RIGHT: BUSINESS CARD PREVIEW ═══════════ -->
         <div class="preview-rail">
             <div class="preview-label">{{.T.ProfilePreviewLabel}}</div>
-            <div class="preview-card">
-                <div class="preview-accent"></div>
-                <div class="preview-body">
-                    <div class="preview-logo-area">
-                        {{if .Profile}}
-                            {{if .Profile.LogoURL}}
-                            <img id="preview-logo" class="preview-logo-img" src="{{.Profile.LogoURL}}" alt="Logo preview">
-                            {{else}}
-                            <div id="preview-logo-placeholder" class="preview-logo-placeholder">{{.T.ProfilePreviewLogo}}</div>
-                            {{end}}
+            <div class="biz-preview">
+                <div class="biz-preview-inner">
+                    <div class="biz-preview-logo-area">
+                        {{if .Profile}}{{if .Profile.LogoURL}}
+                        <img id="preview-logo" class="biz-preview-logo" src="{{.Profile.LogoURL}}" alt="Logo">
                         {{else}}
-                        <div id="preview-logo-placeholder" class="preview-logo-placeholder">{{.T.ProfilePreviewLogo}}</div>
+                        <div id="preview-logo-placeholder" class="biz-preview-logo-placeholder">LOGO</div>
+                        {{end}}{{else}}
+                        <div id="preview-logo-placeholder" class="biz-preview-logo-placeholder">LOGO</div>
                         {{end}}
                     </div>
-                    <div class="preview-header">
-                        <div>
-                            <div class="preview-title">{{.T.ProfilePreviewInvoice}}</div>
-                            <div id="preview-company" class="preview-company-name">
-                                {{if .Profile}}{{if .Profile.Name}}{{.Profile.Name}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}
-                            </div>
+                    <div id="preview-name" class="biz-preview-name">
+                        {{if .Profile}}{{if .Profile.Name}}{{.Profile.Name}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}
+                    </div>
+                    <div id="preview-location" class="biz-preview-location">
+                        {{if .Profile}}{{if .Profile.City}}📍 {{.Profile.City}}{{if .Profile.State}}, {{.Profile.State}}{{end}}{{end}}{{end}}
+                    </div>
+                    <div class="biz-preview-contacts">
+                        <div id="preview-phone" class="biz-preview-contact"
+                             {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.Phone}}style="display:none"{{end}}{{end}}>
+                            📞 <span>{{if .Profile}}{{.Profile.Phone}}{{end}}</span>
                         </div>
-                        <div style="text-align: right;">
-                            <div class="preview-inv-label">{{.T.ProfilePreviewInvoice}}</div>
-                            <div class="preview-inv-number">#INV-001</div>
+                        <div id="preview-email" class="biz-preview-contact"
+                             {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.Email}}style="display:none"{{end}}{{end}}>
+                            📧 <span>{{if .Profile}}{{.Profile.Email}}{{end}}</span>
+                        </div>
+                        <div id="preview-zelle" class="biz-preview-contact"
+                             {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.ZelleID}}style="display:none"{{end}}{{end}}>
+                            💸 <span>{{.T.PubProfileZelle}} {{if .Profile}}{{.Profile.ZelleID}}{{end}}</span>
+                        </div>
+                        <div id="preview-venmo" class="biz-preview-contact"
+                             {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.VenmoHandle}}style="display:none"{{end}}{{end}}>
+                            💜 <span>{{.T.PubProfileVenmo}} {{if .Profile}}{{.Profile.VenmoHandle}}{{end}}</span>
+                        </div>
+                        <div id="preview-cashapp" class="biz-preview-contact"
+                             {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.CashAppHandle}}style="display:none"{{end}}{{end}}>
+                            💚 <span>{{.T.PubProfileCashApp}} {{if .Profile}}{{.Profile.CashAppHandle}}{{end}}</span>
                         </div>
                     </div>
-                    <div class="preview-items">
-                        <div class="preview-item">
-                            <span class="preview-item-name">{{.T.ProfilePreviewItem1}}</span>
-                            <span class="preview-item-amount">$1,200.00</span>
-                        </div>
-                        <div class="preview-item">
-                            <span class="preview-item-name">{{.T.ProfilePreviewItem2}}</span>
-                            <span class="preview-item-amount">$800.00</span>
-                        </div>
-                        <div class="preview-item">
-                            <span class="preview-item-name">{{.T.ProfilePreviewItem3}}</span>
-                            <span class="preview-item-amount">$500.00</span>
-                        </div>
+                    <div id="preview-service-areas" class="biz-preview-service-areas"
+                         {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.ServiceAreas}}style="display:none"{{end}}{{end}}>
+                        🗺️ {{.T.PubProfileServing}} <span>{{if .Profile}}{{.Profile.ServiceAreas}}{{end}}</span>
                     </div>
-                    <div class="preview-total">
-                        <span>{{.T.ProfilePreviewTotal}}</span>
-                        <span class="preview-total-amount">$2,500.00</span>
-                    </div>
+                    {{if .Profile}}{{if .Profile.Slug}}
+                    <div class="biz-preview-url">psiloconvalley.com/biz/{{.Profile.Slug}}</div>
+                    {{end}}{{end}}
                 </div>
             </div>
             <div class="preview-hint">{{.T.ProfilePreviewHint}}</div>
@@ -60,53 +62,38 @@
 <div class="preview-sheet" id="previewSheet">
     <div class="preview-sheet-handle"></div>
     <button class="preview-sheet-close" onclick="closePreviewSheet()">✕</button>
-    <div class="preview-label" style="margin-bottom: 16px;">{{.T.ProfilePreviewLabel}}</div>
-    <div class="preview-card">
-        <div class="preview-accent"></div>
-        <div class="preview-body">
-            <div class="preview-logo-area">
-                {{if .Profile}}
-                    {{if .Profile.LogoURL}}
-                    <img id="preview-logo-mobile" class="preview-logo-img" src="{{.Profile.LogoURL}}" alt="Logo preview">
-                    {{else}}
-                    <div id="preview-logo-placeholder-mobile" class="preview-logo-placeholder">{{.T.ProfilePreviewLogo}}</div>
-                    {{end}}
+    <div class="preview-label" style="margin-bottom:16px;">{{.T.ProfilePreviewLabel}}</div>
+    <div class="biz-preview">
+        <div class="biz-preview-inner">
+            <div class="biz-preview-logo-area">
+                {{if .Profile}}{{if .Profile.LogoURL}}
+                <img id="preview-logo-mobile" class="biz-preview-logo" src="{{.Profile.LogoURL}}" alt="Logo">
                 {{else}}
-                <div id="preview-logo-placeholder-mobile" class="preview-logo-placeholder">{{.T.ProfilePreviewLogo}}</div>
+                <div id="preview-logo-placeholder-mobile" class="biz-preview-logo-placeholder">LOGO</div>
+                {{end}}{{else}}
+                <div id="preview-logo-placeholder-mobile" class="biz-preview-logo-placeholder">LOGO</div>
                 {{end}}
             </div>
-            <div class="preview-header">
-                <div>
-                    <div class="preview-title">{{.T.ProfilePreviewInvoice}}</div>
-                    <div id="preview-company-mobile" class="preview-company-name">
-                        {{if .Profile}}{{if .Profile.Name}}{{.Profile.Name}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}
-                    </div>
+            <div id="preview-name-mobile" class="biz-preview-name">
+                {{if .Profile}}{{if .Profile.Name}}{{.Profile.Name}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}{{else}}{{.T.ProfilePreviewCompany}}{{end}}
+            </div>
+            <div id="preview-location-mobile" class="biz-preview-location">
+                {{if .Profile}}{{if .Profile.City}}📍 {{.Profile.City}}{{if .Profile.State}}, {{.Profile.State}}{{end}}{{end}}{{end}}
+            </div>
+            <div class="biz-preview-contacts">
+                <div id="preview-phone-mobile" class="biz-preview-contact"
+                     {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.Phone}}style="display:none"{{end}}{{end}}>
+                    📞 <span>{{if .Profile}}{{.Profile.Phone}}{{end}}</span>
                 </div>
-                <div style="text-align: right;">
-                    <div class="preview-inv-label">{{.T.ProfilePreviewInvoice}}</div>
-                    <div class="preview-inv-number">#INV-001</div>
+                <div id="preview-email-mobile" class="biz-preview-contact"
+                     {{if not .Profile}}style="display:none"{{else}}{{if not .Profile.Email}}style="display:none"{{end}}{{end}}>
+                    📧 <span>{{if .Profile}}{{.Profile.Email}}{{end}}</span>
                 </div>
             </div>
-            <div class="preview-items">
-                <div class="preview-item">
-                    <span class="preview-item-name">{{.T.ProfilePreviewItem1}}</span>
-                    <span class="preview-item-amount">$1,200.00</span>
-                </div>
-                <div class="preview-item">
-                    <span class="preview-item-name">{{.T.ProfilePreviewItem2}}</span>
-                    <span class="preview-item-amount">$800.00</span>
-                </div>
-                <div class="preview-item">
-                    <span class="preview-item-name">{{.T.ProfilePreviewItem3}}</span>
-                    <span class="preview-item-amount">$500.00</span>
-                </div>
-            </div>
-            <div class="preview-total">
-                <span>{{.T.ProfilePreviewTotal}}</span>
-                <span class="preview-total-amount">$2,500.00</span>
-            </div>
+            {{if .Profile}}{{if .Profile.Slug}}
+            <div class="biz-preview-url">psiloconvalley.com/biz/{{.Profile.Slug}}</div>
+            {{end}}{{end}}
         </div>
     </div>
 </div>
 {{end}}
-

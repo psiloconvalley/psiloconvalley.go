@@ -1,31 +1,78 @@
 {{define "profile-scripts"}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const nameInput = document.getElementById('field-name');
-    const previewCompany = document.getElementById('preview-company');
-    const previewCompanyMobile = document.getElementById('preview-company-mobile');
-
-    if (nameInput) {
-        nameInput.addEventListener('input', function() {
-            const val = this.value || 'Your Company';
-            if (previewCompany) previewCompany.textContent = val;
-            if (previewCompanyMobile) previewCompanyMobile.textContent = val;
+    function wire(inputSelector, desktopId, mobileId, opts) {
+        var input = document.querySelector(inputSelector);
+        if (!input) return;
+        input.addEventListener('input', function() {
+            var val = this.value.trim();
+            var els = [document.getElementById(desktopId)];
+            if (mobileId) els.push(document.getElementById(mobileId));
+            els.forEach(function(el) {
+                if (!el) return;
+                if (opts && opts.prefix) {
+                    var span = el.querySelector('span');
+                    if (span) span.textContent = val;
+                    el.style.display = val ? '' : 'none';
+                } else if (opts && opts.location) {
+                    // handled separately
+                } else {
+                    el.textContent = val || (opts && opts.fallback ? opts.fallback : '');
+                    if (opts && opts.hideEmpty) el.style.display = val ? '' : 'none';
+                }
+            });
         });
     }
 
-    const logoInput = document.querySelector('input[name="logo"]');
+    // Name
+    wire('input[name="name"]', 'preview-name', 'preview-name-mobile', { fallback: '{{.T.ProfilePreviewCompany}}' });
+
+    // Email
+    wire('input[name="email"]', 'preview-email', 'preview-email-mobile', { prefix: true });
+
+    // Phone
+    wire('input[name="phone"]', 'preview-phone', 'preview-phone-mobile', { prefix: true });
+
+    // Zelle
+    wire('input[name="zelle_id"]', 'preview-zelle', null, { prefix: true });
+
+    // Venmo
+    wire('input[name="venmo_handle"]', 'preview-venmo', null, { prefix: true });
+
+    // CashApp
+    wire('input[name="cashapp_handle"]', 'preview-cashapp', null, { prefix: true });
+
+    // Service areas
+    wire('input[name="service_areas"]', 'preview-service-areas', null, { prefix: true });
+
+    // Location — combines city + state
+    var cityInput = document.querySelector('input[name="city"]');
+    var stateInput = document.querySelector('input[name="state"]');
+    function updateLocation() {
+        var city = cityInput ? cityInput.value.trim() : '';
+        var state = stateInput ? stateInput.value.trim() : '';
+        var loc = '';
+        if (city && state) loc = '📍 ' + city + ', ' + state;
+        else if (city) loc = '📍 ' + city;
+        else if (state) loc = '📍 ' + state;
+        ['preview-location', 'preview-location-mobile'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = loc;
+        });
+    }
+    if (cityInput) cityInput.addEventListener('input', updateLocation);
+    if (stateInput) stateInput.addEventListener('input', updateLocation);
+
+    // Logo
+    var logoInput = document.querySelector('input[name="logo"]');
     if (logoInput) {
         logoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
+            var file = e.target.files[0];
             if (!file) return;
-
-            const reader = new FileReader();
+            var reader = new FileReader();
             reader.onload = function(ev) {
-                const src = ev.target.result;
-
-                // Update desktop preview
+                var src = ev.target.result;
                 updatePreviewLogo('preview-logo', 'preview-logo-placeholder', src);
-                // Update mobile preview
                 updatePreviewLogo('preview-logo-mobile', 'preview-logo-placeholder-mobile', src);
             };
             reader.readAsDataURL(file);
@@ -33,17 +80,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updatePreviewLogo(imgId, placeholderId, src) {
-        let img = document.getElementById(imgId);
-        let placeholder = document.getElementById(placeholderId);
-
+        var img = document.getElementById(imgId);
+        var placeholder = document.getElementById(placeholderId);
         if (img) {
             img.src = src;
         } else if (placeholder) {
-            const newImg = document.createElement('img');
+            var newImg = document.createElement('img');
             newImg.id = imgId;
-            newImg.className = 'preview-logo-img';
+            newImg.className = 'biz-preview-logo';
             newImg.src = src;
-            newImg.alt = 'Logo preview';
+            newImg.alt = 'Logo';
             placeholder.replaceWith(newImg);
         }
     }
@@ -51,24 +97,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function openPreviewSheet() {
     document.getElementById('previewOverlay').style.display = 'block';
-    const sheet = document.getElementById('previewSheet');
+    var sheet = document.getElementById('previewSheet');
     sheet.style.display = 'block';
-    requestAnimationFrame(() => sheet.classList.add('open'));
+    requestAnimationFrame(function() { sheet.classList.add('open'); });
 }
 
 function closePreviewSheet() {
     document.getElementById('previewOverlay').style.display = 'none';
-    const sheet = document.getElementById('previewSheet');
+    var sheet = document.getElementById('previewSheet');
     sheet.classList.remove('open');
-    setTimeout(() => sheet.style.display = 'none', 300);
+    setTimeout(function() { sheet.style.display = 'none'; }, 300);
 }
+
 // Password match indicator
 (function() {
-    const np = document.getElementById('new-password');
-    const cp = document.getElementById('confirm-password');
-    const hint = document.getElementById('pw-match-hint');
-    const btn = document.getElementById('pw-submit-btn');
-
+    var np = document.getElementById('new-password');
+    var cp = document.getElementById('confirm-password');
+    var hint = document.getElementById('pw-match-hint');
+    var btn = document.getElementById('pw-submit-btn');
     if (!np || !cp || !hint) return;
 
     function check() {
@@ -79,11 +125,11 @@ function closePreviewSheet() {
             return;
         }
         if (np.value === cp.value) {
-            hint.textContent = '✓ Passwords match';
+            hint.textContent = '✓ {{.T.ProfilePwMatch}}';
             hint.style.color = '#6ee7b7';
             if (btn) btn.disabled = false;
         } else {
-            hint.textContent = '✗ Passwords do not match';
+            hint.textContent = '✗ {{.T.ProfilePwNoMatch}}';
             hint.style.color = '#fca5a5';
             if (btn) btn.disabled = true;
         }
