@@ -173,71 +173,97 @@ function fillClient(select) {
 }
 
 // ── Auto-Save Draft to localStorage ──────────────────────────────
-const DRAFT_KEY = 'pscv_invoice_draft';
+// Draft key v2 — clean break from v1 drafts that stored stale company data.
+const DRAFT_KEY = 'pscv_invoice_draft_v2';
 const DRAFT_MODE = window.INVOICE_MODE || 'create';
 
-// Business identity comes from /profile by default, but users can intentionally
-// override it on a single invoice. We preserve only intentional overrides.
+// Company identity fields are profile-backed by default.
+// Users can explicitly override them for a single invoice.
 const COMPANY_FIELDS = new Set([
-    'company_name',
-    'company_email',
-    'company_address',
-    'company_city',
-    'company_state',
-    'company_zip',
-    'company_country'
-    // If company_phone is ever added to the invoice form, add it here too.
+    'company_name', 'company_email', 'company_address',
+    'company_city', 'company_state', 'company_zip', 'company_country'
 ]);
 
-let companyDefaults = null;
+// ── Company Override System ─────────────────────────────────────
+// The override toggle lives in the template as a hidden input:
+//   <input type="hidden" name="company_override" id="company-override" value="0">
+// When "0": company fields come from profile (server-rendered defaults).
+// When "1": company fields are document-specific (user chose to override).
 
-function captureCompanyDefaults(form) {
-    if (companyDefaults) return;
-    companyDefaults = {};
-    COMPANY_FIELDS.forEach(name => {
-        const field = form.elements.namedItem(name);
-        companyDefaults[name] = field ? field.value : '';
+function isCompanyOverride() {
+    var el = document.getElementById('company-override');
+    return el && el.value === '1';
+}
+
+function setCompanyOverride(on) {
+    var el = document.getElementById('company-override');
+    if (el) el.value = on ? '1' : '0';
+
+    var banner = document.getElementById('company-override-banner');
+    var fields = document.getElementById('company-fields');
+    var summary = document.getElementById('company-summary');
+
+    var titleEl = document.getElementById('co-banner-title');
+    var subEl = document.getElementById('co-banner-sub');
+
+    if (on) {
+        if (banner) banner.className = 'co-banner co-banner--override';
+        if (fields) fields.style.display = '';
+        if (summary) summary.style.display = 'none';
+        if (titleEl) titleEl.textContent = banner?.dataset?.overrideTitle || 'Overriding for this invoice';
+        if (subEl) subEl.textContent = banner?.dataset?.overrideSub || 'These changes affect this invoice only.';
+        document.getElementById('co-override-btn')?.setAttribute('style', 'display:none');
+        document.getElementById('co-reset-btn')?.removeAttribute('style');
+    } else {
+        if (banner) banner.className = 'co-banner co-banner--profile';
+        if (fields) fields.style.display = 'none';
+        if (summary) summary.style.display = '';
+        if (titleEl) titleEl.textContent = banner?.dataset?.profileTitle || 'Using your Business Profile';
+        if (subEl) subEl.textContent = banner?.dataset?.profileSub || 'These details come from your profile.';
+        document.getElementById('co-override-btn')?.removeAttribute('style');
+        document.getElementById('co-reset-btn')?.setAttribute('style', 'display:none');
+        resetCompanyToDefaults();
+    }
+}
+
+function resetCompanyToDefaults() {
+    var form = document.getElementById('invoice-form');
+    if (!form || !window._companyDefaults) return;
+    COMPANY_FIELDS.forEach(function(name) {
+        var field = form.elements.namedItem(name);
+        if (field && window._companyDefaults[name] !== undefined) {
+            field.value = window._companyDefaults[name];
+        }
     });
+}
 
-    // Add confirmation prompts for company field changes
-    COMPANY_FIELDS.forEach(name => {
-        const field = form.elements.namedItem(name);
-        if (!field) return;
-        field.addEventListener('blur', function() {
-            const original = companyDefaults[name] || '';
-            const current = this.value.trim();
-            if (original && current && current !== original) {
-                if (!confirm('Change "' + original + '" to "' + current + '" for this invoice?')) {
-                    this.value = original;
-                }
-            }
-        });
+function captureCompanyDefaults() {
+    if (window._companyDefaults) return;
+    var form = document.getElementById('invoice-form');
+    if (!form) return;
+    window._companyDefaults = {};
+    COMPANY_FIELDS.forEach(function(name) {
+        var field = form.elements.namedItem(name);
+        window._companyDefaults[name] = field ? field.value : '';
     });
 }
 
 function getFormData() {
-    const form = document.getElementById('invoice-form');
+    var form = document.getElementById('invoice-form');
     if (!form) return null;
 
-    captureCompanyDefaults(form);
-
-    const data = {};
-    form.querySelectorAll('input, textarea, select').forEach(el => {
+    var data = {};
+    form.querySelectorAll('input, textarea, select').forEach(function(el) {
         if (el.name && el.type !== 'hidden' && el.name !== 'gorilla.csrf.Token') {
             data[el.name] = el.value;
         }
     });
 
-    // Track whether the user intentionally overrode profile-backed company fields.
-    data._companyOverrides = {};
-    COMPANY_FIELDS.forEach(name => {
-        const field = form.elements.namedItem(name);
-        if (!field) return;
-        data._companyOverrides[name] = field.value !== (companyDefaults[name] || '');
-    });
+    // Store the explicit override flag
+    data._companyOverride = isCompanyOverride();
 
     data._lineItems = [];
-    document.querySelectorAll('#items_body_desktop tr').forEach(row => {
+    document.querySelectorAll('#items_body_desktop tr').forEach(function(row) {
         data._lineItems.push({
             description: row.querySelector('.item-desc')?.value || '',
             details:     row.querySelector('.item-details')?.value || '',
@@ -251,7 +277,7 @@ function getFormData() {
 
 function saveDraft() {
     if (DRAFT_MODE !== 'create') return;
-    const data = getFormData();
+    var data = getFormData();
     if (!data) return;
     data._savedAt = Date.now();
     try {
@@ -264,35 +290,39 @@ function restoreDraft() {
     if (DRAFT_MODE !== 'create') return;
 
     try {
-        const raw = localStorage.getItem(DRAFT_KEY);
+        var raw = localStorage.getItem(DRAFT_KEY);
         if (!raw) return;
 
-        const data = JSON.parse(raw);
+        var data = JSON.parse(raw);
         if (data._savedAt && Date.now() - data._savedAt > 86400000) {
             localStorage.removeItem(DRAFT_KEY);
             return;
         }
 
-        const form = document.getElementById('invoice-form');
+        var form = document.getElementById('invoice-form');
         if (!form) return;
 
-        captureCompanyDefaults(form);
+        captureCompanyDefaults();
 
-        const overrides = data._companyOverrides || {};
+        var overrideOn = data._companyOverride === true;
 
-        form.querySelectorAll('input, textarea, select').forEach(el => {
+        form.querySelectorAll('input, textarea, select').forEach(function(el) {
             if (!el.name || el.type === 'hidden' || el.name === 'gorilla.csrf.Token') return;
 
-            // Company identity fields should only restore if the user intentionally
-            // overrode them on this draft. Otherwise keep fresh server/profile values.
-            if (COMPANY_FIELDS.has(el.name) && overrides[el.name] !== true) return;
+            // Company fields: only restore if override mode was explicitly on.
+            if (COMPANY_FIELDS.has(el.name) && !overrideOn) return;
 
             if (data[el.name] !== undefined) el.value = data[el.name];
         });
 
+        // Restore override UI state
+        if (overrideOn) {
+            setCompanyOverride(true);
+        }
+
         if (data._lineItems && data._lineItems.length > 0) {
-            const tbody = document.getElementById('items_body_desktop');
-            const mobileBody = document.getElementById('items_body_mobile');
+            var tbody = document.getElementById('items_body_desktop');
+            var mobileBody = document.getElementById('items_body_mobile');
             if (!tbody) return;
 
             while (tbody.rows.length > 1) tbody.deleteRow(tbody.rows.length - 1);
@@ -300,31 +330,31 @@ function restoreDraft() {
                 mobileBody.removeChild(mobileBody.lastChild);
             }
 
-            data._lineItems.forEach((item, i) => {
+            data._lineItems.forEach(function(item, i) {
                 if (i > 0) addRow();
 
-                const row = tbody.rows[i];
+                var row = tbody.rows[i];
                 if (row) {
-                    const d = row.querySelector('.item-desc');
-                    const t = row.querySelector('.item-details');
-                    const q = row.querySelector('.qty');
-                    const p = row.querySelector('.price');
+                    var d = row.querySelector('.item-desc');
+                    var t = row.querySelector('.item-details');
+                    var q = row.querySelector('.qty');
+                    var pr = row.querySelector('.price');
                     if (d) d.value = item.description;
                     if (t) t.value = item.details;
                     if (q) q.value = item.qty;
-                    if (p) p.value = item.price;
+                    if (pr) pr.value = item.price;
                 }
 
                 if (mobileBody && mobileBody.children[i]) {
-                    const card = mobileBody.children[i];
-                    const d = card.querySelector('.item-desc');
-                    const t = card.querySelector('.item-details');
-                    const q = card.querySelector('.qty');
-                    const p = card.querySelector('.price');
-                    if (d) d.value = item.description;
-                    if (t) t.value = item.details;
-                    if (q) q.value = item.qty;
-                    if (p) p.value = item.price;
+                    var card = mobileBody.children[i];
+                    var d2 = card.querySelector('.item-desc');
+                    var t2 = card.querySelector('.item-details');
+                    var q2 = card.querySelector('.qty');
+                    var p2 = card.querySelector('.price');
+                    if (d2) d2.value = item.description;
+                    if (t2) t2.value = item.details;
+                    if (q2) q2.value = item.qty;
+                    if (p2) p2.value = item.price;
                 }
             });
         }
@@ -341,11 +371,11 @@ function clearDraft() {
 }
 
 function showDraftIndicator(label) {
-    const el = document.getElementById('draft-indicator');
+    var el = document.getElementById('draft-indicator');
     if (!el) return;
     el.textContent = label ? '📋 ' + label : '💾 Draft saved';
     el.style.opacity = '1';
-    setTimeout(() => { el.style.opacity = '0'; }, 2000);
+    setTimeout(function() { el.style.opacity = '0'; }, 2000);
 }
 // ── Live Validation ──────────────────────────────────────────────
 function initValidation() {
@@ -379,6 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const form = document.getElementById('invoice-form');
     if (form) form.addEventListener('submit', clearDraft);
+
+    // Capture server-rendered company defaults on page load
+    captureCompanyDefaults();
 
         // ── Live toggle preview ───────────────────────────────────────
     const toggleLogo       = document.getElementById('toggle_logo');

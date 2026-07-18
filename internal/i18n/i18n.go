@@ -577,6 +577,14 @@ type T struct {
 	InvoiceNewStep3 string
 
 	// Invoice New — Company section
+
+	// Invoice company override
+	InvoiceNewUsingProfile    string
+	InvoiceNewUsingProfileSub string
+	InvoiceNewOverride        string
+	InvoiceNewOverrideSub     string
+	InvoiceNewResetProfile    string
+
 	InvoiceNewYourDetails string
 	InvoiceNewCompanyName string
 	InvoiceNewEmail       string

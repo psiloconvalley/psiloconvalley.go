@@ -92,5 +92,104 @@
             flex-wrap: wrap;
             gap: 8px;
         }
+
+        /* ── Company override banner ── */
+        .co-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .co-banner--profile {
+            background: rgba(74,222,128,0.06);
+            border: 1px solid rgba(74,222,128,0.15);
+        }
+
+        .co-banner--override {
+            background: rgba(251,191,36,0.06);
+            border: 1px solid rgba(251,191,36,0.15);
+        }
+
+        .co-banner-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .co-banner-icon { font-size: 20px; flex-shrink: 0; }
+
+        .co-banner-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .co-banner--override .co-banner-title { color: #fbbf24; }
+
+        .co-banner-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 2px;
+        }
+
+        .co-action-btn {
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.7);
+            white-space: nowrap;
+            transition:
+                background 0.2s ease,
+                border-color 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .co-action-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
+        .co-action-btn--reset {
+            border-color: rgba(74,222,128,0.2);
+            color: #4ade80;
+            background: rgba(74,222,128,0.06);
+        }
+
+        .co-action-btn--reset:hover {
+            background: rgba(74,222,128,0.12);
+            border-color: rgba(74,222,128,0.35);
+        }
+
+        .co-summary {
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .co-summary-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .co-summary-detail {
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 2px;
+        }
 </style>
 {{end}}

@@ -81,7 +81,29 @@
                         {{.T.InvoiceNewStep1}}
                     </div>
                     <h2>{{.T.InvoiceNewYourDetails}}</h2>
+                    <input type="hidden" name="company_override" id="company-override" value="0">
 
+                    <div id="company-override-banner" class="co-banner co-banner--profile" data-profile-title="{{.T.InvoiceNewUsingProfile}}" data-profile-sub="{{.T.InvoiceNewUsingProfileSub}}" data-override-title="{{.T.InvoiceNewOverride}}" data-override-sub="{{.T.InvoiceNewOverrideSub}}">
+                        <div class="co-banner-text">
+                            <span class="co-banner-icon">🏢</span>
+                            <div>
+                                <div class="co-banner-title" id="co-banner-title">{{.T.InvoiceNewUsingProfile}}</div>
+                                <div class="co-banner-sub" id="co-banner-sub">{{.T.InvoiceNewUsingProfileSub}}</div>
+                            </div>
+                        </div>
+                        <button type="button" id="co-override-btn" class="co-action-btn"
+                                onclick="setCompanyOverride(true)">{{.T.InvoiceNewOverride}}</button>
+                        <button type="button" id="co-reset-btn" class="co-action-btn co-action-btn--reset"
+                                onclick="setCompanyOverride(false)" style="display:none">{{.T.InvoiceNewResetProfile}}</button>
+                    </div>
+
+                    <div id="company-summary" class="co-summary">
+                        <div class="co-summary-name">{{field .Invoice.CompanyName}}</div>
+                        {{if .Invoice.CompanyEmail}}<div class="co-summary-detail">📧 {{field .Invoice.CompanyEmail}}</div>{{end}}
+                        {{if .Invoice.CompanyAddress}}<div class="co-summary-detail">📍 {{field .Invoice.CompanyAddress}}{{if .Invoice.CompanyCity}}, {{field .Invoice.CompanyCity}}{{end}}{{if .Invoice.CompanyState}} {{field .Invoice.CompanyState}}{{end}}{{if .Invoice.CompanyZip}} {{field .Invoice.CompanyZip}}{{end}}</div>{{end}}
+                    </div>
+
+                    <div id="company-fields" style="display:none">
                     <div class="grid-2">
                         <div>
                             <label>{{.T.InvoiceNewCompanyName}} <span style="color:var(--danger)">*</span></label>
@@ -146,6 +168,7 @@
                                 {{end}}
                             </select>
                         </div>
+                    </div>
                     </div>
                 </section>
 

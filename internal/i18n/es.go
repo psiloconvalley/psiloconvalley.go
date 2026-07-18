@@ -557,6 +557,14 @@ var es = T{
 	InvoiceNewStep3: "Paso 3 de 3",
 
 	// Invoice New — Company section
+
+	// Invoice company override
+	InvoiceNewUsingProfile:    "Usando tu Perfil de Negocio",
+	InvoiceNewUsingProfileSub: "Estos datos vienen de tu perfil.",
+	InvoiceNewOverride:        "Cambiar para esta factura",
+	InvoiceNewOverrideSub:     "Estos cambios solo afectan esta factura.",
+	InvoiceNewResetProfile:    "Restablecer a perfil",
+
 	InvoiceNewYourDetails: "Datos de Tu Negocio",
 	InvoiceNewCompanyName: "Nombre de Empresa",
 	InvoiceNewEmail:       "Correo Electrónico",
