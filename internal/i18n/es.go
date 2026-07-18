@@ -200,7 +200,7 @@ var es = T{
 	ProfileErrMismatchPW:          "Las contraseñas no coinciden.",
 	ProfileErrFailedPW:            "No se pudo actualizar la contraseña. Intenta de nuevo.",
 	ProfileGoogleSignIn:           "Tu cuenta usa inicio de sesión con Google. Establecer una contraseña te permite también iniciar sesión con correo.",
-	ProfilePreviewLabel:           "Vista Previa de Factura",
+	ProfilePreviewLabel:           "Vista Previa de Tarjeta",
 	ProfilePreviewLogo:            "TU LOGO",
 	ProfilePreviewCompany:         "Tu Empresa",
 	ProfilePreviewInvoice:         "FACTURA",
