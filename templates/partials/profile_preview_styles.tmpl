@@ -1,0 +1,180 @@
+{{define "profile-preview-styles"}}
+<style>
+    /* ── Business card preview ── */
+    .preview-rail { position: sticky; top: 80px; }
+
+    .preview-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--pr-text-muted);
+        margin-bottom: 12px;
+    }
+
+    .biz-preview {
+        background: #080c14;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: var(--pr-radius);
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .biz-preview-inner {
+        padding: 28px 24px;
+        text-align: center;
+    }
+
+    .biz-preview-logo-area {
+        margin-bottom: 14px;
+        min-height: 40px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .biz-preview-logo {
+        max-width: 120px;
+        max-height: 50px;
+        object-fit: contain;
+        background: rgba(255,255,255,0.05);
+        border-radius: var(--pr-radius-sm);
+        padding: 6px;
+    }
+
+    .biz-preview-logo-placeholder {
+        width: 80px;
+        height: 36px;
+        background: rgba(255,255,255,0.06);
+        border-radius: var(--pr-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: rgba(255,255,255,0.2);
+    }
+
+    .biz-preview-name {
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        color: #ffffff;
+        margin-bottom: 6px;
+        line-height: 1.2;
+    }
+
+    .biz-preview-location {
+        font-size: 13px;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 14px;
+        min-height: 18px;
+    }
+
+    .biz-preview-contacts {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+
+    .biz-preview-contact {
+        font-size: 13px;
+        color: rgba(255,255,255,0.65);
+    }
+
+    .biz-preview-service-areas {
+        font-size: 12px;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 14px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .biz-preview-url {
+        font-size: 11px;
+        font-family: monospace;
+        color: rgba(74,222,128,0.6);
+        padding-top: 12px;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        letter-spacing: 0.3px;
+    }
+
+    .preview-hint {
+        font-size: 10px;
+        color: var(--pr-text-faint);
+        text-align: center;
+        margin-top: 14px;
+        font-style: italic;
+    }
+
+    .mobile-preview-btn {
+        display: none;
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #0d1422;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 14px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        transition: background 0.2s ease;
+    }
+
+    .mobile-preview-btn:hover { background: #1e293b; }
+
+    .preview-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 200;
+    }
+
+    .preview-sheet {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #0a0f1a;
+        border-radius: 20px 20px 0 0;
+        padding: 24px;
+        max-height: 80vh;
+        overflow-y: auto;
+        z-index: 201;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .preview-sheet.open { transform: translateY(0); }
+
+    .preview-sheet-handle {
+        width: 40px;
+        height: 4px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 2px;
+        margin: 0 auto 20px;
+    }
+
+    .preview-sheet-close {
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: rgba(255,255,255,0.4);
+    }
+
+    @media (max-width: 860px) {
+        .mobile-preview-btn { display: flex; align-items: center; gap: 8px; }
+    }
+</style>
+{{end}}
