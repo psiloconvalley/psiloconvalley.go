@@ -220,8 +220,15 @@ function restoreDraft() {
         }
         const form = document.getElementById('invoice-form');
         if (!form) return;
+        // Business identity fields always come from the server (set in /profile).
+        // Never restore these from draft — they would override fresh profile data.
+        const SKIP_FIELDS = new Set([
+            'company_name', 'company_email', 'company_address',
+            'company_city', 'company_state', 'company_zip', 'company_country'
+        ]);
         form.querySelectorAll('input, textarea, select').forEach(el => {
             if (el.name && el.type !== 'hidden' && el.name !== 'gorilla.csrf.Token') {
+                if (SKIP_FIELDS.has(el.name)) return;
                 if (data[el.name] !== undefined) el.value = data[el.name];
             }
         });
