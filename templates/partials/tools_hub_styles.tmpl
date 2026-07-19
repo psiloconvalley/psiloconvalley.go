@@ -110,132 +110,180 @@
     /* ── Request a Feature ── */
     .request-section {
         border-top: 1px solid rgba(255,255,255,0.06);
-        padding-top: 48px;
-        margin-bottom: 32px;
+        padding-top: 56px;
+        margin-bottom: 40px;
     }
 
     .request-card {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 14px;
-        padding: 28px;
-        max-width: 560px;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 16px;
+        padding: 36px 32px;
+        max-width: 620px;
+        transition:
+            border-color 0.3s ease,
+            background 0.3s ease;
     }
 
-    .request-header {
-        display: flex;
-        align-items: flex-start;
-        gap: 14px;
-        margin-bottom: 20px;
+    .request-card:hover {
+        border-color: rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.035);
     }
 
-    .request-icon {
-        font-size: 28px;
-        flex-shrink: 0;
+    .request-badge {
+        font-size: 32px;
+        margin-bottom: 16px;
         line-height: 1;
     }
 
     .request-title {
-        font-size: 16px;
+        font-size: 20px;
         font-weight: 800;
+        letter-spacing: -0.5px;
         color: #ffffff;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
     }
 
     .request-sub {
-        font-size: 13px;
-        color: rgba(255,255,255,0.45);
-        line-height: 1.5;
+        font-size: 14px;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }
+
+    .request-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
     }
 
     .request-textarea {
         width: 100%;
         background: rgba(255,255,255,0.04);
         border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 10px;
-        padding: 14px 16px;
+        border-radius: 12px;
+        padding: 16px 18px;
         color: #fff;
         font-family: inherit;
-        font-size: 14px;
-        min-height: 90px;
+        font-size: 15px;
+        line-height: 1.6;
+        min-height: 100px;
         resize: vertical;
         outline: none;
         transition:
-            border-color 0.2s ease,
-            background 0.2s ease;
+            border-color 0.25s ease,
+            background 0.25s ease,
+            box-shadow 0.25s ease;
     }
 
     .request-textarea:focus {
-        border-color: rgba(74,222,128,0.4);
+        border-color: rgba(74,222,128,0.45);
         background: rgba(255,255,255,0.06);
+        box-shadow: 0 0 20px rgba(74,222,128,0.08);
     }
 
     .request-textarea::placeholder {
         color: rgba(255,255,255,0.2);
     }
 
+    .request-footer {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
     .request-btn {
         background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
         color: #052e16;
         border: none;
-        padding: 12px 24px;
-        border-radius: 8px;
+        padding: 13px 28px;
+        border-radius: 10px;
         font-family: inherit;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 800;
         cursor: pointer;
-        margin-top: 12px;
         letter-spacing: 0.3px;
-        box-shadow: 0 0 20px rgba(74,222,128,0.15);
+        box-shadow: 0 0 24px rgba(74,222,128,0.15), 0 4px 12px rgba(0,0,0,0.2);
         transition:
             transform 0.2s ease,
             box-shadow 0.2s ease;
     }
 
     .request-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 0 28px rgba(74,222,128,0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 0 32px rgba(74,222,128,0.25), 0 6px 16px rgba(0,0,0,0.3);
     }
 
     .request-btn:active {
         transform: translateY(0) scale(0.98);
     }
 
+    .request-btn:focus-visible {
+        outline: 2px solid rgba(74,222,128,0.55);
+        outline-offset: 3px;
+    }
+
     .request-success {
         color: #4ade80;
         font-size: 14px;
-        margin-top: 14px;
         font-weight: 700;
     }
 
     /* ── Need Help ── */
-    .help-link {
+    .help-card {
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 13px;
-        color: rgba(255,255,255,0.35);
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 24px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
         flex-wrap: wrap;
     }
 
-    .help-label {
+    .help-inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .help-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .help-title {
+        font-size: 14px;
         font-weight: 700;
-        color: rgba(255,255,255,0.5);
+        color: rgba(255,255,255,0.6);
     }
 
     .help-sub {
+        font-size: 12px;
         color: rgba(255,255,255,0.3);
+        margin-top: 2px;
     }
 
     .help-email {
         color: rgba(74,222,128,0.7);
         text-decoration: none;
-        font-weight: 600;
-        transition: color 0.2s ease;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 8px 16px;
+        border: 1px solid rgba(74,222,128,0.2);
+        border-radius: 8px;
+        background: rgba(74,222,128,0.06);
+        transition:
+            color 0.2s ease,
+            background 0.2s ease,
+            border-color 0.2s ease;
     }
 
     .help-email:hover {
         color: #4ade80;
+        background: rgba(74,222,128,0.12);
+        border-color: rgba(74,222,128,0.4);
     }
 
     @media (max-width: 600px) {

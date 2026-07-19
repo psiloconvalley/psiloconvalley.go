@@ -76,27 +76,30 @@
     <!-- ── Request a Feature ── -->
     <section class="request-section">
         <div class="request-card">
-            <div class="request-header">
-                <div class="request-icon">💡</div>
-                <div>
-                    <div class="request-title">{{.T.ToolsRequestTitle}}</div>
-                    <div class="request-sub">{{.T.ToolsRequestSub}}</div>
-                </div>
-            </div>
-            <form action="/feedback" method="POST">
+            <div class="request-badge">💡</div>
+            <div class="request-title">{{.T.ToolsRequestTitle}}</div>
+            <div class="request-sub">{{.T.ToolsRequestSub}}</div>
+            <form action="/feedback" method="POST" class="request-form">
                 {{.csrfField}}
                 <textarea name="report" class="request-textarea"
                           placeholder="{{.T.ToolsRequestPlaceholder}}" required></textarea>
-                <button type="submit" class="request-btn">{{.T.ToolsRequestSubmit}}</button>
+                <div class="request-footer">
+                    <button type="submit" class="request-btn">{{.T.ToolsRequestSubmit}}</button>
+                    <div id="status-display"></div>
+                </div>
             </form>
-            <div id="status-display"></div>
         </div>
     </section>
 
     <!-- ── Need Help ── -->
-    <div class="help-link">
-        <span class="help-label">{{.T.ToolsNeedHelp}}</span>
-        <span class="help-sub">{{.T.ToolsNeedHelpSub}}</span>
+    <div class="help-card">
+        <div class="help-inner">
+            <div class="help-icon">✉️</div>
+            <div>
+                <div class="help-title">{{.T.ToolsNeedHelp}}</div>
+                <div class="help-sub">{{.T.ToolsNeedHelpSub}}</div>
+            </div>
+        </div>
         <a href="mailto:support@psiloconvalley.com" class="help-email">support@psiloconvalley.com</a>
     </div>
 </div>
