@@ -49,6 +49,14 @@ func (h *Handlers) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	pass := r.FormValue("password")
 	confirm := r.FormValue("confirm_password")
 
+	// Layer 3: Disposable email domain blocklist
+	// Loaded once from embedded file — O(1) lookup, zero network cost.
+	if auth.IsDisposableEmail(email) {
+		slog.Warn("registration blocked, disposable email domain", "ip", r.RemoteAddr)
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
+	}
+
 	if email == "" || !strings.Contains(email, "@") {
 		h.App.Render(w, r, "register.tmpl", map[string]any{"Error": "Please enter a valid email address", "Email": email})
 		return
