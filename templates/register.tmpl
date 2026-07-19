@@ -21,6 +21,14 @@
 
         <form method="POST" action="/register">
             {{.csrfField}}
+            <!-- Bot protection -->
+            <div style="display:none">
+                <input type="text" name="full_name_honey" tabindex="-1" autocomplete="off">
+                <input type="hidden" name="bt" id="bt" value="">
+            </div>
+            <div style="display:none">
+                <input type="text" name="website_url" autocomplete="off" tabindex="-1">
+            </div>
             <div class="form-group">
                 <label>{{.T.RegisterEmail}}</label>
                 <input type="email" name="email"
@@ -80,5 +88,11 @@
 
 <script src="/static/js/password-toggle.js" defer></script>
 
+<script>
+    // Set timestamp after a small delay to prove JS execution
+    setTimeout(function() {
+        document.getElementById('bt').value = Date.now();
+    }, 500);
+</script>
 </body>
 </html>

@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"strings"
 
+	"strconv"
+	"time"
+
 	"psiloconvalley/internal/audit"
 	"psiloconvalley/internal/auth"
 )
@@ -17,6 +20,31 @@ func (h *Handlers) RegisterGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) RegisterPost(w http.ResponseWriter, r *http.Request) {
+	// ── Bot protection ──────────────────────────────────────────────
+	// Layer 1: Honeypot — bots auto-fill hidden fields, humans don't
+	if r.FormValue("full_name_honey") != "" {
+		slog.Warn("registration blocked by honeypot", "ip", r.RemoteAddr)
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
+	}
+
+	// Layer 2: Timing — bots submit instantly, humans take 3+ seconds
+	if bt := r.FormValue("bt"); bt != "" {
+		if ts, err := strconv.ParseInt(bt, 10, 64); err == nil {
+			elapsed := time.Now().UnixMilli() - ts
+			if elapsed < 2000 {
+				slog.Warn("registration blocked by timing check", "elapsed_ms", elapsed, "ip", r.RemoteAddr)
+				http.Redirect(w, r, "/register", http.StatusSeeOther)
+				return
+			}
+		}
+	} else {
+		// No JS execution — likely a bot
+		slog.Warn("registration blocked, no JS token", "ip", r.RemoteAddr)
+		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
+	}
+
 	email := strings.TrimSpace(strings.ToLower(r.FormValue("email")))
 	pass := r.FormValue("password")
 	confirm := r.FormValue("confirm_password")
