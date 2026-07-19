@@ -107,79 +107,75 @@
 
     .status-live { color: #4ade80; }
 
-    /* ── Request a Feature ── */
-    .request-section {
+    /* ── Bottom actions: request + help side by side ── */
+    .bottom-actions {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 14px;
         border-top: 1px solid rgba(255,255,255,0.06);
-        padding-top: 56px;
-        margin-bottom: 40px;
+        padding-top: 32px;
     }
 
     .request-card {
-        background: rgba(255,255,255,0.025);
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 16px;
-        padding: 36px 32px;
-        max-width: 620px;
-        transition:
-            border-color 0.3s ease,
-            background 0.3s ease;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 22px;
     }
 
-    .request-card:hover {
-        border-color: rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.035);
+    .request-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
     }
 
-    .request-badge {
-        font-size: 32px;
-        margin-bottom: 16px;
+    .request-icon {
+        font-size: 20px;
         line-height: 1;
     }
 
     .request-title {
-        font-size: 20px;
+        font-size: 15px;
         font-weight: 800;
-        letter-spacing: -0.5px;
         color: #ffffff;
-        margin-bottom: 6px;
+        letter-spacing: -0.3px;
     }
 
     .request-sub {
-        font-size: 14px;
-        color: rgba(255,255,255,0.5);
-        line-height: 1.6;
-        margin-bottom: 24px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.4);
+        line-height: 1.5;
+        margin-bottom: 14px;
     }
 
     .request-form {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 10px;
     }
 
     .request-textarea {
         width: 100%;
         background: rgba(255,255,255,0.04);
         border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 12px;
-        padding: 16px 18px;
+        border-radius: 8px;
+        padding: 12px 14px;
         color: #fff;
         font-family: inherit;
-        font-size: 15px;
-        line-height: 1.6;
-        min-height: 100px;
+        font-size: 13px;
+        line-height: 1.5;
+        min-height: 72px;
         resize: vertical;
         outline: none;
         transition:
-            border-color 0.25s ease,
-            background 0.25s ease,
-            box-shadow 0.25s ease;
+            border-color 0.2s ease,
+            background 0.2s ease;
     }
 
     .request-textarea:focus {
-        border-color: rgba(74,222,128,0.45);
+        border-color: rgba(74,222,128,0.4);
         background: rgba(255,255,255,0.06);
-        box-shadow: 0 0 20px rgba(74,222,128,0.08);
     }
 
     .request-textarea::placeholder {
@@ -189,29 +185,29 @@
     .request-footer {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
     }
 
     .request-btn {
         background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
         color: #052e16;
         border: none;
-        padding: 13px 28px;
-        border-radius: 10px;
+        padding: 10px 20px;
+        border-radius: 8px;
         font-family: inherit;
-        font-size: 14px;
-        font-weight: 800;
+        font-size: 13px;
+        font-weight: 700;
         cursor: pointer;
-        letter-spacing: 0.3px;
-        box-shadow: 0 0 24px rgba(74,222,128,0.15), 0 4px 12px rgba(0,0,0,0.2);
+        letter-spacing: 0.2px;
+        box-shadow: 0 0 16px rgba(74,222,128,0.12);
         transition:
             transform 0.2s ease,
             box-shadow 0.2s ease;
     }
 
     .request-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 32px rgba(74,222,128,0.25), 0 6px 16px rgba(0,0,0,0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 0 24px rgba(74,222,128,0.2);
     }
 
     .request-btn:active {
@@ -225,65 +221,50 @@
 
     .request-success {
         color: #4ade80;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
     }
 
-    /* ── Need Help ── */
+    /* ── Need Help card ── */
     .help-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 22px;
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 20px 24px;
-        background: rgba(255,255,255,0.02);
-        border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 12px;
-        flex-wrap: wrap;
-    }
-
-    .help-inner {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        flex-direction: column;
+        gap: 6px;
     }
 
     .help-icon {
-        font-size: 20px;
-        flex-shrink: 0;
+        font-size: 18px;
+        margin-bottom: 4px;
     }
 
     .help-title {
         font-size: 14px;
-        font-weight: 700;
-        color: rgba(255,255,255,0.6);
+        font-weight: 800;
+        color: rgba(255,255,255,0.7);
     }
 
     .help-sub {
         font-size: 12px;
-        color: rgba(255,255,255,0.3);
-        margin-top: 2px;
+        color: rgba(255,255,255,0.35);
+        line-height: 1.5;
     }
 
     .help-email {
+        display: inline-block;
+        margin-top: 8px;
         color: rgba(74,222,128,0.7);
         text-decoration: none;
-        font-size: 13px;
-        font-weight: 700;
-        padding: 8px 16px;
-        border: 1px solid rgba(74,222,128,0.2);
-        border-radius: 8px;
-        background: rgba(74,222,128,0.06);
-        transition:
-            color 0.2s ease,
-            background 0.2s ease,
-            border-color 0.2s ease;
+        font-size: 12px;
+        font-weight: 600;
+        transition: color 0.2s ease;
     }
 
     .help-email:hover {
         color: #4ade80;
-        background: rgba(74,222,128,0.12);
-        border-color: rgba(74,222,128,0.4);
     }
 
     @media (max-width: 600px) {
@@ -292,7 +273,8 @@
         .tool-grid { grid-template-columns: 1fr; }
         .tool-card { min-height: auto; padding: 22px; }
         .request-card { padding: 22px; }
-        .help-link { flex-direction: column; align-items: flex-start; gap: 4px; }
+        .bottom-actions { grid-template-columns: 1fr; }
+        .help-card { order: -1; }
     }
 </style>
 {{end}}

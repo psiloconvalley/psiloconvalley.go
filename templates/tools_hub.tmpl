@@ -73,11 +73,13 @@
         </a>
     </div>
 
-    <!-- ── Request a Feature ── -->
-    <section class="request-section">
+    <!-- ── Request + Help ── -->
+    <div class="bottom-actions">
         <div class="request-card">
-            <div class="request-badge">💡</div>
-            <div class="request-title">{{.T.ToolsRequestTitle}}</div>
+            <div class="request-top">
+                <span class="request-icon">💡</span>
+                <div class="request-title">{{.T.ToolsRequestTitle}}</div>
+            </div>
             <div class="request-sub">{{.T.ToolsRequestSub}}</div>
             <form action="/feedback" method="POST" class="request-form">
                 {{.csrfField}}
@@ -89,18 +91,12 @@
                 </div>
             </form>
         </div>
-    </section>
-
-    <!-- ── Need Help ── -->
-    <div class="help-card">
-        <div class="help-inner">
-            <div class="help-icon">✉️</div>
-            <div>
-                <div class="help-title">{{.T.ToolsNeedHelp}}</div>
-                <div class="help-sub">{{.T.ToolsNeedHelpSub}}</div>
-            </div>
+        <div class="help-card">
+            <span class="help-icon">✉️</span>
+            <div class="help-title">{{.T.ToolsNeedHelp}}</div>
+            <div class="help-sub">{{.T.ToolsNeedHelpSub}}</div>
+            <a href="mailto:support@psiloconvalley.com" class="help-email">support@psiloconvalley.com</a>
         </div>
-        <a href="mailto:support@psiloconvalley.com" class="help-email">support@psiloconvalley.com</a>
     </div>
 </div>
 
