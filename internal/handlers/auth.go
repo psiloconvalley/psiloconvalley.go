@@ -23,7 +23,7 @@ func (h *Handlers) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	// ── Bot protection ──────────────────────────────────────────────
 	// Layer 1: Honeypot — bots auto-fill hidden fields, humans don't
 	if r.FormValue("full_name_honey") != "" {
-		slog.Warn("registration blocked by honeypot", "ip", r.RemoteAddr)
+		slog.Warn("registration blocked by honeypot", "ip", auth.RealIP(r))
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
@@ -33,14 +33,14 @@ func (h *Handlers) RegisterPost(w http.ResponseWriter, r *http.Request) {
 		if ts, err := strconv.ParseInt(bt, 10, 64); err == nil {
 			elapsed := time.Now().UnixMilli() - ts
 			if elapsed < 2000 {
-				slog.Warn("registration blocked by timing check", "elapsed_ms", elapsed, "ip", r.RemoteAddr)
+				slog.Warn("registration blocked by timing check", "elapsed_ms", elapsed, "ip", auth.RealIP(r))
 				http.Redirect(w, r, "/register", http.StatusSeeOther)
 				return
 			}
 		}
 	} else {
 		// No JS execution — likely a bot
-		slog.Warn("registration blocked, no JS token", "ip", r.RemoteAddr)
+		slog.Warn("registration blocked, no JS token", "ip", auth.RealIP(r))
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
@@ -52,7 +52,7 @@ func (h *Handlers) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	// Layer 3: Disposable email domain blocklist
 	// Loaded once from embedded file — O(1) lookup, zero network cost.
 	if auth.IsDisposableEmail(email) {
-		slog.Warn("registration blocked, disposable email domain", "ip", r.RemoteAddr)
+		slog.Warn("registration blocked, disposable email domain", "ip", auth.RealIP(r))
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}

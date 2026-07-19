@@ -81,8 +81,9 @@ func (rl *rateLimiter) cleanup() {
 	}
 }
 
-// realIP extracts the real client IP, respecting Railway's proxy headers.
-func realIP(r *http.Request) string {
+// RealIP extracts the real client IP, respecting Railway's proxy headers.
+// Exported for use by handlers that need consistent IP logging.
+func RealIP(r *http.Request) string {
 	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
 		// X-Forwarded-For can be comma-separated; take the first
 		for i := 0; i < len(ip); i++ {
@@ -119,7 +120,7 @@ var (
 func RateLimit(limiter *rateLimiter) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := realIP(r)
+			ip := RealIP(r)
 			if !limiter.allow(ip) {
 				http.Error(w, "Too many requests. Please wait a moment and try again.", http.StatusTooManyRequests)
 				return
