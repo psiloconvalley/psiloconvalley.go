@@ -7,10 +7,7 @@ import (
 	"time"
 )
 
-// =====================================================================
-// IP-based sliding window rate limiter
-// No external dependencies — pure stdlib
-// =====================================================================
+// ── Sliding window rate limiter — pure stdlib, no external dependencies ──
 
 type rateLimiter struct {
 	mu       sync.Mutex
@@ -103,9 +100,7 @@ func RealIP(r *http.Request) string {
 	return host
 }
 
-// =====================================================================
-// Pre-built limiters for auth routes
-// =====================================================================
+// ── Auth route limiters — tuned for psiloconvalley registration and login flows ──
 
 var (
 	loginLimiter        = newRateLimiter(10, time.Minute)
@@ -122,7 +117,7 @@ func RateLimit(limiter *rateLimiter) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ip := RealIP(r)
 			if !limiter.allow(ip) {
-				http.Error(w, "Too many requests. Please wait a moment and try again.", http.StatusTooManyRequests)
+				http.Error(w, "Too many requests.", http.StatusTooManyRequests)
 				return
 			}
 			next.ServeHTTP(w, r)
