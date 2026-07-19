@@ -109,7 +109,7 @@ func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log to Railway (backup)
-	slog.Info("anomaly report received", "from", fromEmail, "content", report)
+	slog.Info("feature request received", "from", fromEmail, "content", report)
 
 	// Email to yourself via Resend
 	go func() {
@@ -121,13 +121,13 @@ func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 		if key := h.App.Mailer.APIKey(); key != "" {
 			client = resend.NewClient(key)
 		} else {
-			slog.Warn("feedback email skipped, no API key")
+			slog.Warn("feature request email skipped, no API key")
 			return
 		}
 
-		subject := fmt.Sprintf("[PsiloConValley Feedback] from %s", fromEmail)
+		subject := fmt.Sprintf("[psiloconvalley Feature Request] from %s", fromEmail)
 		body := fmt.Sprintf(
-			"<h2>Feedback Report</h2>"+
+			"<h2>Feature Request</h2>"+
 				"<p><strong>From:</strong> %s</p>"+
 				"<p><strong>Time:</strong> %s</p>"+
 				"<hr>"+
@@ -144,9 +144,9 @@ func (h *Handlers) Feedback(w http.ResponseWriter, r *http.Request) {
 			Html:    body,
 		})
 		if err != nil {
-			slog.Error("feedback email failed", "err", err)
+			slog.Error("feature request email failed", "err", err)
 		} else {
-			slog.Info("feedback email sent")
+			slog.Info("feature request email sent")
 		}
 	}()
 

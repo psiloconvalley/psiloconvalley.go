@@ -12,109 +12,103 @@
 
 <div class="hub-container">
     <div class="hub-header">
-        <div class="hub-label">Everything you need</div>
-        <h1>From quote to<br><em>paid.</em></h1>
-        <p>
-            Send a quote. Create an invoice. Accept card payments.
-            All in one place — built for independent businesses.
-        </p>
+        <div class="hub-label">{{.T.ToolsLabel}}</div>
+        <h1>{{.T.ToolsTitle}}</h1>
+        <p>{{.T.ToolsSub}}</p>
     </div>
 
     <div class="tool-grid">
-        <a href="/register" class="tool-card">
+        <a href="{{if .User}}/invoices/new{{else}}/register{{end}}" class="tool-card">
             <div>
-                <div class="tool-tag">Get paid</div>
-                <div class="tool-name">Invoices</div>
-                <div class="tool-desc">
-                    Create a professional invoice in 60 seconds.
-                    Send it by email or share a link.
-                    Your client pays by card.
-                </div>
+                <div class="tool-tag">{{.T.ToolsTagGetPaid}}</div>
+                <div class="tool-name">{{.T.ToolsInvoices}}</div>
+                <div class="tool-desc">{{.T.ToolsInvoicesSub}}</div>
             </div>
-            <div class="tool-status status-live">● Live</div>
+            <div class="tool-status status-live">● {{.T.ToolsStatusLive}}</div>
         </a>
 
-        <a href="/register" class="tool-card">
+        <a href="{{if .User}}/estimates/new{{else}}/register{{end}}" class="tool-card">
             <div>
-                <div class="tool-tag">Get approval</div>
-                <div class="tool-name">Quotes &amp; Estimates</div>
-                <div class="tool-desc">
-                    Send a quote before you start.
-                    Client approves with one tap — no account needed.
-                    Convert to invoice when the work is done.
-                </div>
+                <div class="tool-tag">{{.T.ToolsTagApproval}}</div>
+                <div class="tool-name">{{.T.ToolsEstimates}}</div>
+                <div class="tool-desc">{{.T.ToolsEstimatesSub}}</div>
             </div>
-            <div class="tool-status status-live">● Live</div>
+            <div class="tool-status status-live">● {{.T.ToolsStatusLive}}</div>
         </a>
 
-        <a href="/register" class="tool-card">
+        <a href="{{if .User}}/clients{{else}}/register{{end}}" class="tool-card">
             <div>
-                <div class="tool-tag">Stay organized</div>
-                <div class="tool-name">Client Directory</div>
-                <div class="tool-desc">
-                    Save your clients once.
-                    Their info auto-fills every time you create
-                    an invoice or quote.
-                </div>
+                <div class="tool-tag">{{.T.ToolsTagOrganized}}</div>
+                <div class="tool-name">{{.T.ToolsClients}}</div>
+                <div class="tool-desc">{{.T.ToolsClientsSub}}</div>
             </div>
-            <div class="tool-status status-live">● Live</div>
+            <div class="tool-status status-live">● {{.T.ToolsStatusLive}}</div>
         </a>
 
-        <a href="/register" class="tool-card">
+        <a href="{{if .User}}/recurring{{else}}/register{{end}}" class="tool-card">
             <div>
-                <div class="tool-tag">Set it and forget it</div>
-                <div class="tool-name">Recurring Invoices</div>
-                <div class="tool-desc">
-                    Same client every month?
-                    Set it up once. Invoices send themselves.
-                    Payment reminders included.
-                </div>
+                <div class="tool-tag">{{.T.ToolsTagAutomate}}</div>
+                <div class="tool-name">{{.T.ToolsRecurring}}</div>
+                <div class="tool-desc">{{.T.ToolsRecurringSub}}</div>
             </div>
-            <div class="tool-status status-live">● Live</div>
+            <div class="tool-status status-live">● {{.T.ToolsStatusLive}}</div>
         </a>
 
-        <a href="/register" class="tool-card">
+        <a href="{{if .User}}/invoices{{else}}/register{{end}}" class="tool-card">
             <div>
-                <div class="tool-tag">Track everything</div>
-                <div class="tool-name">Invoice History</div>
-                <div class="tool-desc">
-                    See every invoice you have sent.
-                    Track who paid, who is late, and what is outstanding.
-                </div>
+                <div class="tool-tag">{{.T.ToolsTagTrack}}</div>
+                <div class="tool-name">{{.T.ToolsHistory}}</div>
+                <div class="tool-desc">{{.T.ToolsHistorySub}}</div>
             </div>
-            <div class="tool-status status-live">● Live</div>
+            <div class="tool-status status-live">● {{.T.ToolsStatusLive}}</div>
         </a>
 
-        <a href="/register" class="tool-card">
+        <a href="{{if .User}}/expenses{{else}}/register{{end}}" class="tool-card">
             <div>
-                <div class="tool-tag">Know your numbers</div>
-                <div class="tool-name">Expense Tracking</div>
-                <div class="tool-desc">
-                    Log business expenses.
-                    See what you earned and what you spent — all in one place.
-                </div>
+                <div class="tool-tag">{{.T.ToolsTagNumbers}}</div>
+                <div class="tool-name">{{.T.ToolsExpenses}}</div>
+                <div class="tool-desc">{{.T.ToolsExpensesSub}}</div>
             </div>
-            <div class="tool-status status-live">● Live</div>
+            <div class="tool-status status-live">● {{.T.ToolsStatusLive}}</div>
         </a>
     </div>
 
-    <section class="feedback-section">
-        <div class="feedback-label">Feedback</div>
-        <form action="/feedback" method="POST">
-            {{.csrfField}}
-            <textarea name="report" placeholder="Report a bug or suggest an improvement..." required></textarea>
-            <button type="submit" class="btn-submit">Send Feedback</button>
-        </form>
-        <div id="status-display"></div>
+    <!-- ── Request a Feature ── -->
+    <section class="request-section">
+        <div class="request-card">
+            <div class="request-header">
+                <div class="request-icon">💡</div>
+                <div>
+                    <div class="request-title">{{.T.ToolsRequestTitle}}</div>
+                    <div class="request-sub">{{.T.ToolsRequestSub}}</div>
+                </div>
+            </div>
+            <form action="/feedback" method="POST">
+                {{.csrfField}}
+                <textarea name="report" class="request-textarea"
+                          placeholder="{{.T.ToolsRequestPlaceholder}}" required></textarea>
+                <button type="submit" class="request-btn">{{.T.ToolsRequestSubmit}}</button>
+            </form>
+            <div id="status-display"></div>
+        </div>
     </section>
+
+    <!-- ── Need Help ── -->
+    <div class="help-link">
+        <span class="help-label">{{.T.ToolsNeedHelp}}</span>
+        <span class="help-sub">{{.T.ToolsNeedHelpSub}}</span>
+        <a href="mailto:support@psiloconvalley.com" class="help-email">support@psiloconvalley.com</a>
+    </div>
 </div>
+
 {{template "public-footer" .}}
+
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('transmitted')) {
-        document.getElementById('status-display').innerHTML =
-            '<div class="success-msg">✓ Feedback received. Thank you.</div>';
-    }
+var params = new URLSearchParams(window.location.search);
+if (params.has('transmitted')) {
+    document.getElementById('status-display').innerHTML =
+        '<div class="request-success">✓ {{.T.ToolsRequestSent}}</div>';
+}
 </script>
 
 </body>

@@ -823,6 +823,38 @@ type T struct {
 	// Pricing page — Enterprise callout
 	PricingEntTitle string
 	PricingEntSub   string
+
+	// Tools page
+	ToolsLabel         string
+	ToolsTitle         string
+	ToolsSub           string
+	ToolsTagGetPaid    string
+	ToolsTagApproval   string
+	ToolsTagOrganized  string
+	ToolsTagAutomate   string
+	ToolsTagTrack      string
+	ToolsTagNumbers    string
+	ToolsInvoices      string
+	ToolsInvoicesSub   string
+	ToolsEstimates     string
+	ToolsEstimatesSub  string
+	ToolsClients       string
+	ToolsClientsSub    string
+	ToolsRecurring     string
+	ToolsRecurringSub  string
+	ToolsHistory       string
+	ToolsHistorySub    string
+	ToolsExpenses      string
+	ToolsExpensesSub   string
+	ToolsStatusLive    string
+	ToolsRequestTitle  string
+	ToolsRequestSub    string
+	ToolsRequestPlaceholder string
+	ToolsRequestSubmit string
+	ToolsRequestSent   string
+	ToolsNeedHelp      string
+	ToolsNeedHelpSub   string
+
 	PricingEntCta   string
 	// Home dashboard (logged-in user on homepage)
 	HomeDashWelcome      string

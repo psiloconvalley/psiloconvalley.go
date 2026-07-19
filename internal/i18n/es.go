@@ -804,6 +804,38 @@ var es = T{
 	// Pricing page — Enterprise callout
 	PricingEntTitle: "¿Necesitas controles empresariales?",
 	PricingEntSub:   "Consultorios médicos, despachos legales y agencias — registros de auditoría, tiempo de sesión y soporte dedicado.",
+
+	// Tools page
+	ToolsLabel:         "Todo lo que necesitas",
+	ToolsTitle:         "De cotización a cobro.",
+	ToolsSub:           "Envía una cotización. Crea una factura. Acepta pagos con tarjeta. Todo en un solo lugar — hecho para negocios independientes.",
+	ToolsTagGetPaid:    "Cobra",
+	ToolsTagApproval:   "Obtén aprobación",
+	ToolsTagOrganized:  "Mantente organizado",
+	ToolsTagAutomate:   "Configúralo y olvídalo",
+	ToolsTagTrack:      "Rastrea todo",
+	ToolsTagNumbers:    "Conoce tus números",
+	ToolsInvoices:      "Facturas",
+	ToolsInvoicesSub:   "Crea una factura profesional en 60 segundos. Envíala por correo o comparte un enlace. Tu cliente paga con tarjeta.",
+	ToolsEstimates:     "Cotizaciones y Estimados",
+	ToolsEstimatesSub:  "Envía una cotización antes de empezar. Tu cliente aprueba con un toque — sin necesidad de cuenta. Convierte a factura cuando termines.",
+	ToolsClients:       "Directorio de Clientes",
+	ToolsClientsSub:    "Guarda tus clientes una vez. Su información se llena automáticamente cada vez que creas una factura o cotización.",
+	ToolsRecurring:     "Facturas Recurrentes",
+	ToolsRecurringSub:  "¿Mismo cliente cada mes? Configúralo una vez. Las facturas se envían solas. Recordatorios de pago incluidos.",
+	ToolsHistory:       "Historial de Facturas",
+	ToolsHistorySub:    "Ve cada factura que has enviado. Rastrea quién pagó, quién está atrasado y qué está pendiente.",
+	ToolsExpenses:      "Control de Gastos",
+	ToolsExpensesSub:   "Registra gastos de negocio. Ve lo que ganaste y lo que gastaste — todo en un solo lugar.",
+	ToolsStatusLive:    "Activo",
+	ToolsRequestTitle:  "Solicitar una Función",
+	ToolsRequestSub:    "¿Qué herramienta te ahorraría tiempo en tu trabajo? Construimos para operadores reales.",
+	ToolsRequestPlaceholder: "Necesito una herramienta que...",
+	ToolsRequestSubmit: "Enviar Solicitud",
+	ToolsRequestSent:   "Solicitud recibida. Gracias.",
+	ToolsNeedHelp:      "¿Necesitas ayuda?",
+	ToolsNeedHelpSub:   "Contáctanos cuando quieras.",
+
 	PricingEntCta:   "Explora Enterprise →",
 
 
