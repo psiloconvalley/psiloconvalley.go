@@ -95,6 +95,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/profile", h.ProfileGet)
 		r.Post("/profile", h.ProfilePost)
 		r.Post("/profile/password", h.ChangePasswordPost)
+		r.Post("/profile/logo/delete", h.ProfileLogoDeletePost)
 
 		r.Get("/clients", h.ClientsList)
 		r.Get("/clients/new", h.ClientNewGet)
