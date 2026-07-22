@@ -232,3 +232,26 @@ func (h *Handlers) ChangePasswordPost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/profile?pw_saved=true", http.StatusSeeOther)
 }
+// ProfileLogoDeletePost removes a user's logo from storage and clears
+// the logo_url from their business profile.
+func (h *Handlers) ProfileLogoDeletePost(w http.ResponseWriter, r *http.Request) {
+	user := auth.GetUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if err := h.App.LogoStore.Delete(user.ID); err != nil {
+		slog.Error("logo delete failed", "user_id", user.ID, "err", err)
+	}
+
+	if err := h.App.BizRepo.ClearLogo(r.Context(), user.ID); err != nil {
+		slog.Error("logo url clear failed", "user_id", user.ID, "err", err)
+		http.Redirect(w, r, "/profile?logo_error=true", http.StatusSeeOther)
+		return
+	}
+
+	slog.Info("logo removed", "user_id", user.ID)
+	http.Redirect(w, r, "/profile?logo_removed=true", http.StatusSeeOther)
+}
+
