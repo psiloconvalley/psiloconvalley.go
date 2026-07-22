@@ -24,7 +24,7 @@ func (h *Handlers) ProfileGet(w http.ResponseWriter, r *http.Request) {
 	profile, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		slog.Error("profile fetch failed", "err", err)
-		http.Error(w, "Could not load profile", http.StatusInternalServerError)
+	http.Error(w, "Could not load profile", http.StatusInternalServerError)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *Handlers) ProfilePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Max upload size: 2MB
-	if err := r.ParseMultipartForm(2 << 20); err != nil {
+	if err := r.ParseMultipartForm(logo.MaxInputBytes); err != nil {
 		slog.Error("profile multipart parse failed", "err", err)
 
 		h.App.Render(w, r, "profile.tmpl", map[string]any{

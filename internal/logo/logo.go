@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	MaxFileSize   = 5 << 20 // 5MB input limit
-	MaxLogoHeight = 200     // Output height in pixels
-	MaxLogoWidth  = 800     // Output width cap
+    MaxInputBytes = 2 << 20 // 2MB — matches handler gate in profile.go
+    MaxLogoHeight = 200     // Output height in pixels
+    MaxLogoWidth  = 800     // Output width cap
 )
 
 // Process takes raw uploaded bytes, validates the image,
@@ -24,10 +24,9 @@ func Process(data []byte) ([]byte, error) {
 	if len(data) == 0 {
 		return nil, fmt.Errorf("empty file")
 	}
-	if len(data) > MaxFileSize {
-		return nil, fmt.Errorf("file too large (max 5MB)")
-	}
-
+	if len(data) > MaxInputBytes {
+    return nil, fmt.Errorf("file too large (max 2MB)")
+}	
 	// Detect real content type from bytes, not filename
 	contentType := http.DetectContentType(data)
 
