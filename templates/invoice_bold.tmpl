@@ -690,6 +690,7 @@
                         <div class="more-dropdown-menu">
                             {{if .ShareURL}}
                             <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="more-dropdown-item" style="color:#25D366;">💬 {{.T.InvoicesShareWhatsApp}}</a>
+                            <a href="sms:&body={{.ShareURL}}" class="more-dropdown-item">💬 {{.T.InvoicesShareSMS}}</a>
                             {{end}}
                             <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
                             <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>

@@ -289,6 +289,7 @@ var es = T{
 	InvoicesCopyLink:              "Copiar Enlace",
 	InvoicesCopied:                "¡Copiado!",
 	InvoicesShareWhatsApp:         "Compartir por WhatsApp",
+	InvoicesShareSMS: "Enviar por Mensaje",
 	InvoicesDeleteBtn:             "Eliminar",
 	InvoicesUntitled:              "Sin Título",
 	InvoicesNoClient:              "Sin cliente",

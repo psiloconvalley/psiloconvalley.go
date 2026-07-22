@@ -303,6 +303,7 @@ type T struct {
 	InvoicesCopyLink          string
 	InvoicesCopied            string
 	InvoicesShareWhatsApp     string
+	InvoicesShareSMS string
 	InvoicesDeleteBtn         string
 	InvoicesUntitled          string
 	InvoicesNoClient          string
