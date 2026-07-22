@@ -211,3 +211,12 @@ func slugify(s string) string {
 	s = strings.Trim(s, "-")
 	return s
 }
+// ClearLogo sets logo_url to NULL for the given user.
+// Called when a user removes their logo from the profile page.
+func (r *BusinessRepo) ClearLogo(ctx context.Context, userID int64) error {
+    _, err := r.db.ExecContext(ctx,
+        `UPDATE business_profiles SET logo_url = NULL WHERE user_id = $1`,
+        userID,
+    )
+    return err
+}
