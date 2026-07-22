@@ -113,8 +113,7 @@ func (h *Handlers) EndorsementRequestPost(w http.ResponseWriter, r *http.Request
 			BusinessName: biz.Name,
 			EndorseURL:   endorseURL,
 		}); err != nil {
-			slog.Warn("endorsement request: email failed",
-				"to", inv.ClientEmail, "token", token, "err", err)
+			slog.Warn("endorsement request: email failed", "to", inv.ClientEmail, "invoice_id", id, "err", err)
 		}
 	}()
 
@@ -138,7 +137,7 @@ func (h *Handlers) EndorsementFormGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.Error("endorsement form: get by token failed", "token", token, "err", err)
+		slog.Error("endorsement form: get by token failed", "err", err)
 		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}
@@ -233,7 +232,7 @@ func (h *Handlers) EndorsementSubmitPost(w http.ResponseWriter, r *http.Request)
 	body := strings.TrimSpace(r.FormValue("body"))
 
 	if err := h.App.EndorsementRepo.Submit(r.Context(), token, name, location, body, rating); err != nil {
-		slog.Error("endorsement submit failed", "token", token, "err", err)
+		slog.Error("endorsement submit failed", "err", err)
 		http.Error(w, "Failed to submit endorsement", http.StatusInternalServerError)
 		return
 	}
