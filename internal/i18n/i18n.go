@@ -174,6 +174,9 @@ type T struct {
 	ProfileMagicBody            string
 	ProfileSectionLogo          string
 	ProfileLogoHint             string
+	ProfileLogoRemove           string
+	ProfileLogoRemoved          string
+	ProfileLogoError            string
 	ProfileSectionCompany       string
 	ProfileSectionAddress       string
 	ProfileSectionFinancial     string

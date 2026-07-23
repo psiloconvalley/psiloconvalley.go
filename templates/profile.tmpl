@@ -76,17 +76,19 @@
                 </div>
                 {{end}}
 
-                <div class="section">
-                    <div class="section-title">{{.T.ProfileSectionLogo}}</div>
+	         <div class="section-title">{{.T.ProfileSectionLogo}}</div>
                     <div class="form-group form-group-tight">
                         {{if .Profile}}{{if .Profile.LogoURL}}
                         <img src="{{.Profile.LogoURL}}" alt="Logo" class="pr-logo-preview">
+                        <button type="button" class="pr-btn-remove-logo" onclick="document.getElementById('logo-delete-form').submit()">
+                            {{.T.ProfileLogoRemove}}
+                        </button>
                         {{end}}{{end}}
-                        <input type="file" name="logo" accept=".png,.jpg,.jpeg,.webp,.svg">
+                        <input type="file" name="logo" accept=".png,.jpg,.jpeg">
                         <div class="hint">{{.T.ProfileLogoHint}}</div>
                     </div>
                 </div>
-
+               
                 <div class="section">
                     <div class="section-title">{{.T.ProfileSectionCompany}}</div>
                     <div class="grid-2">
@@ -229,6 +231,12 @@
 
                 <button type="submit" class="btn-primary">{{.T.ProfileSave}}</button>
             </form>
+
+            {{if .Profile}}{{if .Profile.LogoURL}}
+            <form id="logo-delete-form" method="POST" action="/profile/logo/delete" style="display:none;">
+                {{.csrfField}}
+            </form>
+            {{end}}{{end}}
 
             <div class="pr-divider" id="passkey">
                 <h2 class="pr-security-heading">{{.T.ProfileSectionSecurity}}</h2>

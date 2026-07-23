@@ -37,6 +37,8 @@ h.App.Render(w, r, "profile.tmpl", map[string]any{
    "Profile":         profile,
    "Saved":           r.URL.Query().Get("saved") == "true",
    "Welcome":         r.URL.Query().Get("welcome") == "true",
+   "LogoRemoved":     r.URL.Query().Get("logo_removed") == "true",
+   "LogoError":       r.URL.Query().Get("logo_error") == "true",
    "Currencies":      catalog.SupportedCurrencies,
    "StripeConnected": r.URL.Query().Get("stripe_connected") == "1",
    "StripeError":     r.URL.Query().Get("stripe_error") == "1",
