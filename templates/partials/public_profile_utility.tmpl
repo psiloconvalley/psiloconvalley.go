@@ -3,6 +3,8 @@
     .pp-qr-wrap {
         text-align: center;
         margin-top: 32px;
+        padding-bottom: 32px;
+        border-bottom: 1px solid var(--pp-border-divider);
     }
 
     .pp-qr-img {
@@ -15,7 +17,7 @@
     .pp-qr-label {
         font-size: 12px;
         font-weight: 600;
-        color: var(--pp-text-faint);
+        color: var(--pp-text-muted);
         margin-top: 12px;
         letter-spacing: 0.5px;
     }
@@ -52,8 +54,12 @@
         border: 1px solid var(--pp-border-green-mid);
         border-radius: var(--pp-radius-pill);
         background: var(--pp-surface-branding);
-        transition: all var(--pp-dur) ease;
         letter-spacing: 0.2px;
+        transition:
+            background var(--pp-dur) ease,
+            border-color var(--pp-dur) ease,
+            transform var(--pp-dur) ease,
+            box-shadow var(--pp-dur) ease;
     }
 
     .pp-branding-link:hover {
@@ -61,6 +67,11 @@
         border-color: var(--pp-border-green-strong);
         transform: translateY(-1px);
         box-shadow: var(--pp-shadow-branding-hover);
+    }
+
+    .pp-branding-link:focus-visible {
+        outline: 2px solid var(--pp-border-green-mid);
+        outline-offset: 3px;
     }
 </style>
 {{end}}

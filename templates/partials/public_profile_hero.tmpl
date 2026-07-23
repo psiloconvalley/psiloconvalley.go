@@ -17,6 +17,16 @@
         padding: 8px;
         box-shadow: var(--pp-shadow-logo);
         border: 1px solid var(--pp-border-default);
+        transition:
+            box-shadow var(--pp-dur) ease,
+            transform var(--pp-dur) ease;
+    }
+
+    .pp-logo:hover {
+        transform: scale(1.03);
+        box-shadow:
+            0 0 50px var(--pp-green-glow-logo),
+            0 6px 24px rgba(0,0,0,0.5);
     }
 
     .pp-name {
@@ -50,27 +60,32 @@
     .pp-location {
         font-size: 15px;
         color: var(--pp-text-location);
-        margin-bottom: 6px;
+        margin-bottom: 4px;
         font-weight: 500;
     }
 
     .pp-service-areas {
         font-size: 13px;
-        color: var(--pp-text-muted);
-        margin-bottom: 8px;
+        color: var(--pp-text-secondary);
+        margin-bottom: 16px;
+    }
+
+    .pp-contact-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
 
     .pp-contact {
         font-size: 15px;
         color: var(--pp-text-secondary);
-        margin-bottom: 6px;
         font-weight: 500;
     }
 
     .pp-contact a {
         color: var(--pp-text-link);
         text-decoration: none;
-        transition: color var(--pp-dur-fast);
+        transition: color var(--pp-dur-fast) ease;
     }
 
     .pp-contact a:hover {
