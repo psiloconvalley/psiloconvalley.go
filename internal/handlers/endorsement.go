@@ -145,9 +145,11 @@ func (h *Handlers) EndorsementFormGet(w http.ResponseWriter, r *http.Request) {
 
 	// Already submitted or declined — show thank you state
 	if endorsement.Status == "submitted" {
+		biz, _ := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
 		h.App.Render(w, r, "endorse.tmpl", map[string]any{
 			"Submitted": true,
 			"Endorsement": endorsement,
+			"Business":    biz,
 			"Meta": app.AuthMeta("Thank You | PSILOCONVALLEY"),
 		})
 		return
@@ -245,9 +247,11 @@ func (h *Handlers) EndorsementSubmitPost(w http.ResponseWriter, r *http.Request)
 	endorsement.Body = body
 	endorsement.Status = "submitted"
 
+	biz, _ := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
 	h.App.Render(w, r, "endorse.tmpl", map[string]any{
 		"Submitted":   true,
 		"Endorsement": endorsement,
+		"Business":    biz,
 		"Meta":        app.AuthMeta("Thank You | PSILOCONVALLEY"),
 	})
 }

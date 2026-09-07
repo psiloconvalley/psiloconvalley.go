@@ -183,6 +183,13 @@
         </div>
     </div>
     {{end}}
+    
+    {{if .Business}}
+    <a href="/biz/{{.Business.Slug}}" class="btn-primary" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; margin-top: 24px; gap: 8px; width: 100%; box-sizing: border-box; height: 42px; border-radius: 8px; font-weight: 700; font-size: 14.5px;">
+        <span>View {{.Business.Name}}'s Business Page</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+    {{end}}
 
     {{else if .Declined}}
     <!-- ── Declined state ── -->
