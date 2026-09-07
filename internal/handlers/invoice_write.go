@@ -64,13 +64,24 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.DueDate = dueDate
 
 	// ── Update invoice fields ─────────────────────────────────────────
-	inv.CompanyName = strings.TrimSpace(r.FormValue("company_name"))
-	inv.CompanyEmail = strings.TrimSpace(r.FormValue("company_email"))
-	inv.CompanyAddress = strings.TrimSpace(r.FormValue("company_address"))
-	inv.CompanyCity = strings.TrimSpace(r.FormValue("company_city"))
-	inv.CompanyZip = strings.TrimSpace(r.FormValue("company_zip"))
-	inv.CompanyState = strings.TrimSpace(r.FormValue("company_state"))
-	inv.CompanyCountry = strings.TrimSpace(r.FormValue("company_country"))
+	override := r.FormValue("company_override") == "1"
+	if override {
+		inv.CompanyName = strings.TrimSpace(r.FormValue("company_name"))
+		inv.CompanyEmail = strings.TrimSpace(r.FormValue("company_email"))
+		inv.CompanyAddress = strings.TrimSpace(r.FormValue("company_address"))
+		inv.CompanyCity = strings.TrimSpace(r.FormValue("company_city"))
+		inv.CompanyZip = strings.TrimSpace(r.FormValue("company_zip"))
+		inv.CompanyState = strings.TrimSpace(r.FormValue("company_state"))
+		inv.CompanyCountry = strings.TrimSpace(r.FormValue("company_country"))
+	} else {
+		inv.CompanyName = ""
+		inv.CompanyEmail = ""
+		inv.CompanyAddress = ""
+		inv.CompanyCity = ""
+		inv.CompanyZip = ""
+		inv.CompanyState = ""
+		inv.CompanyCountry = ""
+	}
 	inv.ClientName = strings.TrimSpace(r.FormValue("client_name"))
 	inv.ClientEmail = strings.TrimSpace(r.FormValue("client_email"))
 	inv.ClientAddress = strings.TrimSpace(r.FormValue("client_address"))

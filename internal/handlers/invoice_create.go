@@ -217,17 +217,19 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	override := r.FormValue("company_override") == "1"
+	
 	inv := &repo.Invoice{
 		UserID:              userID,
 		BusinessProfileID:   bizProfileID,
 		AnonymousToken:      anonymousToken,
-		CompanyName:         companyName,
-		CompanyEmail:        strings.TrimSpace(r.FormValue("company_email")),
-		CompanyAddress:      strings.TrimSpace(r.FormValue("company_address")),
-		CompanyCity:         strings.TrimSpace(r.FormValue("company_city")),
-		CompanyZip:          strings.TrimSpace(r.FormValue("company_zip")),
-		CompanyState:        strings.TrimSpace(r.FormValue("company_state")),
-		CompanyCountry:      strings.TrimSpace(r.FormValue("company_country")),
+		CompanyName:         func() string { if override { return companyName } else { return "" } }(),
+		CompanyEmail:        func() string { if override { return strings.TrimSpace(r.FormValue("company_email")) } else { return "" } }(),
+		CompanyAddress:      func() string { if override { return strings.TrimSpace(r.FormValue("company_address")) } else { return "" } }(),
+		CompanyCity:         func() string { if override { return strings.TrimSpace(r.FormValue("company_city")) } else { return "" } }(),
+		CompanyZip:          func() string { if override { return strings.TrimSpace(r.FormValue("company_zip")) } else { return "" } }(),
+		CompanyState:        func() string { if override { return strings.TrimSpace(r.FormValue("company_state")) } else { return "" } }(),
+		CompanyCountry:      func() string { if override { return strings.TrimSpace(r.FormValue("company_country")) } else { return "" } }(),
 		ClientName:          clientName,
 		ClientEmail:         strings.TrimSpace(r.FormValue("client_email")),
 		ClientAddress:       strings.TrimSpace(r.FormValue("client_address")),
