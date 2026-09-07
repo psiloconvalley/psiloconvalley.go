@@ -206,9 +206,13 @@
 
             /* ── Actions ── */
 		.invoice-actions-wrapper {
-            margin-top: 24px;
-            padding: 0 0 14px 0;
+            max-width: 720px;
+            margin: 32px auto 48px auto;
+            padding: 0 20px;
             background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow: visible;
             position: relative;
             z-index: 10;
@@ -225,7 +229,8 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 16px;
+            padding: 0 14px;
+            height: 36px;
             border-radius: 6px;
             font-size: 12.5px;
             font-weight: 600;
@@ -236,6 +241,7 @@
             background: #ffffff;
             color: #1e293b;
             transition: all 0.12s ease;
+            box-sizing: border-box;
         }
         .action-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
         .action-btn-primary {
@@ -255,7 +261,7 @@
         .more-dropdown-menu {
             display: none;
             position: absolute;
-            top: calc(100% + 4px);
+            bottom: calc(100% + 8px); top: auto;
             right: 0;
             background: #fff;
             border: 1px solid #e2e8f0;
@@ -391,7 +397,7 @@
                 padding: 16px;
             }
 
-            .invoice-actions-wrapper { padding: 16px 0; }
+            .invoice-actions-wrapper { margin: 24px 16px 40px 16px; padding: 0; }
 
             .primary-actions { gap: 8px; }
             .action-btn { font-size: 11px; padding: 7px 10px; }
@@ -656,8 +662,8 @@
 
                     {{/* ── Actions: hidden in PDF mode ── */}}
         {{if not .Invoice.Hints.PDFMode}}
-        <section class="invoice-actions-wrapper">
-            <div class="primary-actions">
+        <section class="invoice-actions-wrapper" style="display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; width: 100%;">
+            <div class="primary-actions" style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 0; width: 100%;">
                 {{if .IsEstimate}}
                     {{/* ── Estimate Actions ── */}}
                     {{if .User}}
@@ -712,13 +718,31 @@
 
                     <div class="more-dropdown" id="moreDropdown">
                         <button type="button" class="action-btn" onclick="toggleMoreMenu()" style="display:inline-flex; align-items:center; gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg> More</button>
-                        <div class="more-dropdown-menu">
+                        <div class="more-dropdown-menu" style="box-shadow: 0 -4px 24px rgba(15,23,42,0.08); border-radius: 8px;">
                             {{if .ShareURL}}
                             <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="more-dropdown-item" style="color:#25D366;">💬 {{.T.InvoicesShareWhatsApp}}</a>
                             {{end}}
                             <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
                             <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
                             <a href="/invoices/{{.Invoice.ID}}/pdf?mode=inline" class="more-dropdown-item mobile-only">👁 Preview PDF</a>
+                            
+                            {{if .User}}
+                                {{if or (eq .Invoice.Status "sent") (eq .Invoice.Status "overdue")}}
+                                <div class="more-dropdown-divider"></div>
+                                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="width:100%; margin:0;">
+                                    {{.csrfField}}
+                                    <input type="hidden" name="status" value="overdue">
+                                    <button type="submit" class="more-dropdown-item" style="color:#b45309;">⚠️ {{.T.InvoicesMarkOverdue}}</button>
+                                </form>
+                                {{end}}
+                                {{if or (eq .Invoice.Status "draft") (eq .Invoice.Status "sent") (eq .Invoice.Status "overdue")}}
+                                <form method="POST" action="/invoices/{{.Invoice.ID}}/status" style="width:100%; margin:0;">
+                                    {{.csrfField}}
+                                    <input type="hidden" name="status" value="void">
+                                    <button type="submit" class="more-dropdown-item more-dropdown-item-danger">🚫 {{.T.InvoicesVoid}}</button>
+                                </form>
+                                {{end}}
+                            {{end}}
                             {{if .User}}{{if eq .Invoice.Status "draft"}}
                             <div class="more-dropdown-divider"></div>
                             <button type="button" class="more-dropdown-item more-dropdown-item-danger" onclick="closeMoreMenu(); openDeleteModal('{{.Invoice.InvoiceNumber}}', {{.Invoice.ID}})">🗑 Delete Draft</button>
