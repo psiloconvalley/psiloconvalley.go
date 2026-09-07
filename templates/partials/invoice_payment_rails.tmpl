@@ -1,69 +1,215 @@
 {{define "invoice-payment-rails"}}
 {{if and (ne .Invoice.Status "paid") (ne .Invoice.Status "void")}}
 {{if or .PayNowEnabled .Invoice.HasPaymentRails}}
-<div class="payment-rails-box" style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-    <div style="font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+<div class="payment-terminal-card" style="margin-top: 30px; margin-bottom: 20px; padding: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 20px rgba(15,23,42,0.03); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    
+    <div style="font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
         💳 {{.T.InvoicePayHowToPay}}
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 12px;">
+    <!-- Segmented Tab Selector -->
+    <div class="payment-tabs-container" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
         {{if .PayNowEnabled}}
-        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <span style="font-weight: 700; color: #0f172a; font-size: 14px;">💳 {{.T.InvoicePayCard}}</span>
-                <span style="font-size: 12px; color: #64748b; margin-left: 8px;">Visa, Mastercard, Amex, Apple Pay</span>
+        <button type="button" class="pay-tab active" onclick="switchPayTab('card')" id="tab-card" style="padding: 10px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s ease;">
+            💳 {{.T.InvoicePayCard}}
+        </button>
+        {{end}}
+
+        {{if .Invoice.ZelleID}}
+        <button type="button" class="pay-tab {{if not .PayNowEnabled}}active{{end}}" onclick="switchPayTab('zelle')" id="tab-zelle" style="padding: 10px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s ease;">
+            ⚡ Zelle
+        </button>
+        {{end}}
+
+        {{if .Invoice.VenmoHandle}}
+        <button type="button" class="pay-tab {{if and (not .PayNowEnabled) (not .Invoice.ZelleID)}}active{{end}}" onclick="switchPayTab('venmo')" id="tab-venmo" style="padding: 10px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s ease;">
+            📱 Venmo
+        </button>
+        {{end}}
+
+        {{if .Invoice.CashAppHandle}}
+        <button type="button" class="pay-tab {{if and (not .PayNowEnabled) (not .Invoice.ZelleID) (not .Invoice.VenmoHandle)}}active{{end}}" onclick="switchPayTab('cashapp')" id="tab-cashapp" style="padding: 10px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s ease;">
+            💵 Cash App
+        </button>
+        {{end}}
+
+        {{if .Invoice.PaymentDetails}}
+        <button type="button" class="pay-tab {{if and (not .PayNowEnabled) (not .Invoice.ZelleID) (not .Invoice.VenmoHandle) (not .Invoice.CashAppHandle)}}active{{end}}" onclick="switchPayTab('instructions')" id="tab-instructions" style="padding: 10px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s ease;">
+            📋 {{.T.InvoicePayInstructions}}
+        </button>
+        {{end}}
+    </div>
+
+    <!-- Active Tab Panes -->
+    <div class="payment-panes-container">
+        
+        {{if .PayNowEnabled}}
+        <div class="pay-pane" id="pane-card" style="display: block; animation: fadeIn 0.2s ease;">
+            <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a;">{{.T.InvoicePayCard}}</h4>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Pay securely using credit card, debit card, or mobile wallets.</p>
+                </div>
+                <a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" style="display: inline-block; padding: 10px 20px; background: #0f172a; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px; transition: background 0.1s;">💳 {{.T.InvoicesPayNow}}</a>
             </div>
-            <a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" style="display: inline-block; padding: 8px 18px; background: #0f172a; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px;">💳 {{.T.InvoicesPayNow}}</a>
         </div>
         {{end}}
 
         {{if .Invoice.ZelleID}}
-        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <div style="font-weight: 700; color: #7414CA; font-size: 14px;">⚡ {{.T.InvoicePayZelle}}</div>
-                <div style="font-size: 13px; color: #334155; margin-top: 2px;">
-                    {{.T.InvoicePaySendTo}}: <strong style="color: #0f172a;" id="zelle-val">{{.Invoice.ZelleID}}</strong>
+        <div class="pay-pane" id="pane-zelle" style="display: {{if .PayNowEnabled}}none{{else}}block{{end}}; animation: fadeIn 0.2s ease;">
+            <div style="background: #faf5ff; border: 1px solid #ebd5ff; padding: 18px; border-radius: 8px;">
+                <div style="font-weight: 700; color: #7414CA; font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    ⚡ {{.T.InvoicePayZelle}}
                 </div>
-                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{.T.InvoicePayMemo}}: {{.Invoice.InvoiceNumber}}</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ebd5ff; padding-bottom: 8px;">
+                        <div>
+                            <span style="font-size: 12px; color: #6b21a8; font-weight: 600;">{{.T.InvoicePaySendTo}}</span>
+                            <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px;" id="val-zelle">{{.Invoice.ZelleID}}</div>
+                        </div>
+                        <button type="button" onclick="copyValue('{{.Invoice.ZelleID}}', this)" style="padding: 6px 12px; background: #ffffff; border: 1px solid #ebd5ff; color: #7414CA; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 2px;">
+                        <div>
+                            <span style="font-size: 12px; color: #6b21a8; font-weight: 600;">{{.T.InvoicePayMemo}}</span>
+                            <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px;">{{.Invoice.InvoiceNumber}}</div>
+                        </div>
+                        <button type="button" onclick="copyValue('{{.Invoice.InvoiceNumber}}', this)" style="padding: 6px 12px; background: #ffffff; border: 1px solid #ebd5ff; color: #7414CA; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+                    </div>
+                </div>
             </div>
-            <button type="button" onclick="navigator.clipboard.writeText('{{.Invoice.ZelleID}}'); this.innerText='✓ {{.T.InvoicePayCopied}}'; setTimeout(() => this.innerText='📋 {{.T.InvoicePayCopy}}', 2000);" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
         </div>
         {{end}}
 
         {{if .Invoice.VenmoHandle}}
-        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <div style="font-weight: 700; color: #008CFF; font-size: 14px;">📱 {{.T.InvoicePayVenmo}}</div>
-                <div style="font-size: 13px; color: #334155; margin-top: 2px;">
-                    {{.T.InvoicePaySendTo}}: <strong style="color: #0f172a;">{{.Invoice.VenmoHandle}}</strong>
+        <div class="pay-pane" id="pane-venmo" style="display: {{if or .PayNowEnabled .Invoice.ZelleID}}none{{else}}block{{end}}; animation: fadeIn 0.2s ease;">
+            <div style="background: #f0f7ff; border: 1px solid #bae6fd; padding: 18px; border-radius: 8px;">
+                <div style="font-weight: 700; color: #008CFF; font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    📱 {{.T.InvoicePayVenmo}}
                 </div>
-                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{.T.InvoicePayMemo}}: {{.Invoice.InvoiceNumber}}</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #bae6fd; padding-bottom: 8px;">
+                        <div>
+                            <span style="font-size: 12px; color: #0369a1; font-weight: 600;">{{.T.InvoicePaySendTo}}</span>
+                            <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px;">{{.Invoice.VenmoHandle}}</div>
+                        </div>
+                        <button type="button" onclick="copyValue('{{.Invoice.VenmoHandle}}', this)" style="padding: 6px 12px; background: #ffffff; border: 1px solid #bae6fd; color: #008CFF; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 2px;">
+                        <div>
+                            <span style="font-size: 12px; color: #0369a1; font-weight: 600;">{{.T.InvoicePayMemo}}</span>
+                            <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px;">{{.Invoice.InvoiceNumber}}</div>
+                        </div>
+                        <button type="button" onclick="copyValue('{{.Invoice.InvoiceNumber}}', this)" style="padding: 6px 12px; background: #ffffff; border: 1px solid #bae6fd; color: #008CFF; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+                    </div>
+                </div>
             </div>
-            <button type="button" onclick="navigator.clipboard.writeText('{{.Invoice.VenmoHandle}}'); this.innerText='✓ {{.T.InvoicePayCopied}}'; setTimeout(() => this.innerText='📋 {{.T.InvoicePayCopy}}', 2000);" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
         </div>
         {{end}}
 
         {{if .Invoice.CashAppHandle}}
-        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <div style="font-weight: 700; color: #00D632; font-size: 14px;">💵 {{.T.InvoicePayCashApp}}</div>
-                <div style="font-size: 13px; color: #334155; margin-top: 2px;">
-                    {{.T.InvoicePaySendTo}}: <strong style="color: #0f172a;">{{.Invoice.CashAppHandle}}</strong>
+        <div class="pay-pane" id="pane-cashapp" style="display: {{if or .PayNowEnabled .Invoice.ZelleID .Invoice.VenmoHandle}}none{{else}}block{{end}}; animation: fadeIn 0.2s ease;">
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 18px; border-radius: 8px;">
+                <div style="font-weight: 700; color: #00D632; font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    💵 {{.T.InvoicePayCashApp}}
                 </div>
-                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{.T.InvoicePayMemo}}: {{.Invoice.InvoiceNumber}}</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #bbf7d0; padding-bottom: 8px;">
+                        <div>
+                            <span style="font-size: 12px; color: #15803d; font-weight: 600;">{{.T.InvoicePaySendTo}}</span>
+                            <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px;">{{.Invoice.CashAppHandle}}</div>
+                        </div>
+                        <button type="button" onclick="copyValue('{{.Invoice.CashAppHandle}}', this)" style="padding: 6px 12px; background: #ffffff; border: 1px solid #bbf7d0; color: #00D632; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 2px;">
+                        <div>
+                            <span style="font-size: 12px; color: #15803d; font-weight: 600;">{{.T.InvoicePayMemo}}</span>
+                            <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px;">{{.Invoice.InvoiceNumber}}</div>
+                        </div>
+                        <button type="button" onclick="copyValue('{{.Invoice.InvoiceNumber}}', this)" style="padding: 6px 12px; background: #ffffff; border: 1px solid #bbf7d0; color: #00D632; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+                    </div>
+                </div>
             </div>
-            <button type="button" onclick="navigator.clipboard.writeText('{{.Invoice.CashAppHandle}}'); this.innerText='✓ {{.T.InvoicePayCopied}}'; setTimeout(() => this.innerText='📋 {{.T.InvoicePayCopy}}', 2000);" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
         </div>
         {{end}}
 
         {{if .Invoice.PaymentDetails}}
-        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
-            <div style="font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{{.T.InvoicePayInstructions}}</div>
-            <div style="font-size: 13px; color: #1e293b; margin-top: 4px; white-space: pre-wrap;">{{.Invoice.PaymentDetails}}</div>
+        <div class="pay-pane" id="pane-instructions" style="display: {{if or .PayNowEnabled .Invoice.ZelleID .Invoice.VenmoHandle .Invoice.CashAppHandle}}none{{else}}block{{end}}; animation: fadeIn 0.2s ease;">
+            <div style="background: #fafaf9; border: 1px solid #e7e5e4; padding: 18px; border-radius: 8px;">
+                <div style="font-weight: 700; color: #57534e; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">{{.T.InvoicePayInstructions}}</div>
+                <div style="font-size: 13.5px; color: #1c1917; white-space: pre-wrap; line-height: 1.5;">{{.Invoice.PaymentDetails}}</div>
+            </div>
         </div>
         {{end}}
+
     </div>
 </div>
+
+<script>
+function switchPayTab(tabId) {
+    // Deactivate all tabs
+    document.querySelectorAll('.pay-tab').forEach(el => {
+        el.style.background = '#f8fafc';
+        el.style.borderColor = '#e2e8f0';
+        el.style.color = '#334155';
+    });
+    
+    // Hide all panes
+    document.querySelectorAll('.pay-pane').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Activate target tab
+    const tab = document.getElementById('tab-' + tabId);
+    if (tab) {
+        tab.style.background = '#0f172a';
+        tab.style.borderColor = '#0f172a';
+        tab.style.color = '#ffffff';
+    }
+    
+    // Show target pane
+    const pane = document.getElementById('pane-' + tabId);
+    if (pane) {
+        pane.style.display = 'block';
+    }
+}
+
+function copyValue(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✓ ' + '{{.T.InvoicePayCopied}}';
+        btn.style.background = '#dcfce7';
+        btn.style.borderColor = '#bbf7d0';
+        btn.style.color = '#15803d';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '#ffffff';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+        }, 1800);
+    });
+}
+
+// Ensure active tab has correct initial styles
+document.addEventListener('DOMContentLoaded', () => {
+    const activeTab = document.querySelector('.pay-tab.active');
+    if (activeTab) {
+        activeTab.style.background = '#0f172a';
+        activeTab.style.borderColor = '#0f172a';
+        activeTab.style.color = '#ffffff';
+    }
+});
+</script>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@media print {
+    .payment-terminal-card { display: none !important; }
+}
+</style>
 {{end}}
 {{end}}
 {{end}}
