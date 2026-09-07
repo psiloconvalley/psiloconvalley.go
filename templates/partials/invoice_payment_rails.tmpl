@@ -1,0 +1,69 @@
+{{define "invoice-payment-rails"}}
+{{if and (ne .Invoice.Status "paid") (ne .Invoice.Status "void")}}
+{{if or .PayNowEnabled .Invoice.HasPaymentRails}}
+<div class="payment-rails-box" style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+    <div style="font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+        💳 {{.T.InvoicePayHowToPay}}
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        {{if .PayNowEnabled}}
+        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <span style="font-weight: 700; color: #0f172a; font-size: 14px;">💳 {{.T.InvoicePayCard}}</span>
+                <span style="font-size: 12px; color: #64748b; margin-left: 8px;">Visa, Mastercard, Amex, Apple Pay</span>
+            </div>
+            <a href="/invoices/{{.Invoice.ID}}/pay{{if .AccessToken}}?access={{.AccessToken}}{{end}}" style="display: inline-block; padding: 8px 18px; background: #0f172a; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 13px; border-radius: 6px;">💳 {{.T.InvoicesPayNow}}</a>
+        </div>
+        {{end}}
+
+        {{if .Invoice.ZelleID}}
+        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <div style="font-weight: 700; color: #7414CA; font-size: 14px;">⚡ {{.T.InvoicePayZelle}}</div>
+                <div style="font-size: 13px; color: #334155; margin-top: 2px;">
+                    {{.T.InvoicePaySendTo}}: <strong style="color: #0f172a;" id="zelle-val">{{.Invoice.ZelleID}}</strong>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{.T.InvoicePayMemo}}: {{.Invoice.InvoiceNumber}}</div>
+            </div>
+            <button type="button" onclick="navigator.clipboard.writeText('{{.Invoice.ZelleID}}'); this.innerText='✓ {{.T.InvoicePayCopied}}'; setTimeout(() => this.innerText='📋 {{.T.InvoicePayCopy}}', 2000);" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+        </div>
+        {{end}}
+
+        {{if .Invoice.VenmoHandle}}
+        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <div style="font-weight: 700; color: #008CFF; font-size: 14px;">📱 {{.T.InvoicePayVenmo}}</div>
+                <div style="font-size: 13px; color: #334155; margin-top: 2px;">
+                    {{.T.InvoicePaySendTo}}: <strong style="color: #0f172a;">{{.Invoice.VenmoHandle}}</strong>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{.T.InvoicePayMemo}}: {{.Invoice.InvoiceNumber}}</div>
+            </div>
+            <button type="button" onclick="navigator.clipboard.writeText('{{.Invoice.VenmoHandle}}'); this.innerText='✓ {{.T.InvoicePayCopied}}'; setTimeout(() => this.innerText='📋 {{.T.InvoicePayCopy}}', 2000);" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+        </div>
+        {{end}}
+
+        {{if .Invoice.CashAppHandle}}
+        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <div style="font-weight: 700; color: #00D632; font-size: 14px;">💵 {{.T.InvoicePayCashApp}}</div>
+                <div style="font-size: 13px; color: #334155; margin-top: 2px;">
+                    {{.T.InvoicePaySendTo}}: <strong style="color: #0f172a;">{{.Invoice.CashAppHandle}}</strong>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{.T.InvoicePayMemo}}: {{.Invoice.InvoiceNumber}}</div>
+            </div>
+            <button type="button" onclick="navigator.clipboard.writeText('{{.Invoice.CashAppHandle}}'); this.innerText='✓ {{.T.InvoicePayCopied}}'; setTimeout(() => this.innerText='📋 {{.T.InvoicePayCopy}}', 2000);" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer;">📋 {{.T.InvoicePayCopy}}</button>
+        </div>
+        {{end}}
+
+        {{if .Invoice.PaymentDetails}}
+        <div style="padding: 12px 16px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <div style="font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{{.T.InvoicePayInstructions}}</div>
+            <div style="font-size: 13px; color: #1e293b; margin-top: 4px; white-space: pre-wrap;">{{.Invoice.PaymentDetails}}</div>
+        </div>
+        {{end}}
+    </div>
+</div>
+{{end}}
+{{end}}
+{{end}}

@@ -58,7 +58,10 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			i.template_id,
 			i.brand_color,
 			COALESCE(i.logo_position, 'left') AS logo_position,
-			COALESCE(i.public_token, '') AS public_token
+			COALESCE(i.public_token, '') AS public_token,
+			COALESCE(bp.zelle_id, '') AS zelle_id,
+			COALESCE(bp.venmo_handle, '') AS venmo_handle,
+			COALESCE(bp.cashapp_handle, '') AS cashapp_handle
 		FROM invoices i
 		LEFT JOIN business_profiles bp ON bp.id = i.business_profile_id
 		WHERE i.id = $1`
@@ -116,6 +119,9 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.BrandColor,
 		&inv.LogoPosition,
 		&inv.PublicToken,
+		&inv.ZelleID,
+		&inv.VenmoHandle,
+		&inv.CashAppHandle,
 	)
 	if err != nil {
 		return nil, nil, err

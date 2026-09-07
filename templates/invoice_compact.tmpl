@@ -574,7 +574,8 @@
 
         <footer class="invoice-footer-split">
             <div class="notes-block">
-                {{if .Invoice.PaymentDetails}}
+                {{template "invoice-payment-rails" .}}
+                {{if false}}
                 <div>
                     <div class="info-label">Payment Instructions</div>
                     <div class="info-content">{{.Invoice.PaymentDetails}}</div>
@@ -663,7 +664,7 @@
                         {{end}}
                     {{end}}
 
-                    <a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>
+                    {{if .User}}<a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>{{end}}
 
                     <div class="more-dropdown" id="moreDropdown">
                         <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
@@ -695,7 +696,7 @@
                     <a href="/invoices/{{.Invoice.ID}}/edit" class="action-btn">✏️ Edit</a>
                     {{end}}
 
-                    <a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>
+                    {{if .User}}<a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>{{end}}
 
                     <div class="more-dropdown" id="moreDropdown">
                         <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>

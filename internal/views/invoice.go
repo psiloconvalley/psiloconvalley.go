@@ -48,6 +48,10 @@ type InvoicePage struct {
 	CurrencySymbol string
 	Notes          string
 	PaymentDetails string
+	ZelleID        string
+	VenmoHandle    string
+	CashAppHandle  string
+	HasPaymentRails bool
 	Mode           string
 	// LogoURL must be template.URL, not string. The PDF handler injects
 	// base64 data URIs here. If this is typed as string, html/template
@@ -201,6 +205,10 @@ func MapInvoicePage(inv *repo.Invoice, items []repo.InvoiceItem, mode string) In
 		CurrencySymbol: sym,
 		Notes:          inv.Notes,
 		PaymentDetails: inv.PaymentDetails,
+		ZelleID:        inv.ZelleID,
+		VenmoHandle:    inv.VenmoHandle,
+		CashAppHandle:  inv.CashAppHandle,
+		HasPaymentRails: inv.ZelleID != "" || inv.VenmoHandle != "" || inv.CashAppHandle != "" || inv.PaymentDetails != "",
 		Mode:           mode,
 		LogoURL:        template.URL(inv.LogoURL),
 

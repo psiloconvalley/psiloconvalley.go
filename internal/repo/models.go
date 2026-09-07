@@ -214,6 +214,9 @@ type Invoice struct {
 	BrandColor          string
 	LogoPosition        string
 	PublicToken         string
+	ZelleID             string
+	VenmoHandle         string
+	CashAppHandle       string
 }
 
 type InvoiceItem struct {

@@ -5,6 +5,19 @@
 package i18n
 
 type T struct {
+	// Invoice Payment Rails
+	InvoicePayHowToPay          string
+	InvoicePayCard              string
+	InvoicePayZelle             string
+	InvoicePayVenmo             string
+	InvoicePayCashApp           string
+	InvoicePayCashCheck         string
+	InvoicePaySendTo            string
+	InvoicePayMemo              string
+	InvoicePayCopy              string
+	InvoicePayCopied            string
+	InvoicePayInstructions      string
+
 	// Nav
 	NavDashboard string
 	NavBilling   string

@@ -3,6 +3,19 @@
 package i18n
 
 var en = T{
+	// Invoice Payment Rails
+	InvoicePayHowToPay:          "How to Pay",
+	InvoicePayCard:              "Card",
+	InvoicePayZelle:             "Zelle",
+	InvoicePayVenmo:             "Venmo",
+	InvoicePayCashApp:           "Cash App",
+	InvoicePayCashCheck:         "Cash / Check",
+	InvoicePaySendTo:            "Send payment to",
+	InvoicePayMemo:              "Memo / Note",
+	InvoicePayCopy:              "Copy",
+	InvoicePayCopied:            "Copied!",
+	InvoicePayInstructions:      "Payment Instructions",
+
 	NavDashboard: "Dashboard",
 	NavBilling:   "Billing",
 	NavInvoices:  "Invoices",
