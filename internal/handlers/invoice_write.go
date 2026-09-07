@@ -178,7 +178,11 @@ func (h *Handlers) InvoiceStatusPost(w http.ResponseWriter, r *http.Request) {
 		IPAddress:  audit.IPFromRequest(r),
 		Metadata:   map[string]any{"new_status": newStatus},
 	})
-	http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)
+	redirectURL := fmt.Sprintf("/invoices/%d?status_changed=%s", id, newStatus)
+	if newStatus == "paid" && paymentMethod != "" {
+		redirectURL += "&method=" + paymentMethod
+	}
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 
 // InvoiceDuplicateGet creates a copy of an existing invoice as a new draft.

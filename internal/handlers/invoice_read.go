@@ -185,6 +185,8 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		"Sent":          r.URL.Query().Get("sent") == "true",
 		"SentTo":        r.URL.Query().Get("to"),
 		"Paid":          r.URL.Query().Get("paid") == "1",
+		"StatusChanged": r.URL.Query().Get("status_changed"),
+		"PaymentMethod": r.URL.Query().Get("method"),
 		"PayNowEnabled": payNowEnabled,
 		"AccessToken":   r.URL.Query().Get("access"),
 		"ShowBranding":  showBranding,

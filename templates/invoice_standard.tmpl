@@ -447,6 +447,46 @@
 
 <body>
 
+{{if eq .StatusChanged "paid"}}
+<div style="
+    background:#dcfce7;
+    border-bottom:1px solid #bbf7d0;
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:#15803d;
+">
+    <span style="font-size:18px;">✅</span>
+    <div>
+        Invoice <strong>{{.Invoice.InvoiceNumber}}</strong> marked as <strong>PAID</strong> successfully.
+    </div>
+</div>
+{{end}}
+
+{{if eq .StatusChanged "void"}}
+<div style="
+    background:#f3f4f6;
+    border-bottom:1px solid #e5e7eb;
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:#374151;
+">
+    <span style="font-size:18px;">🚫</span>
+    <div>
+        Invoice <strong>{{.Invoice.InvoiceNumber}}</strong> has been voided.
+    </div>
+</div>
+{{end}}
+
 {{if .Sent}}
 <div style="
     background:#dcfce7;
