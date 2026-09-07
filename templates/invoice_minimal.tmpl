@@ -662,7 +662,7 @@
                     {{end}}
                     {{if .User}}<a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>{{end}}
                     <div class="more-dropdown" id="moreDropdown">
-                        <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
+                        <button type="button" class="action-btn" onclick="toggleMoreMenu()" style="display:inline-flex; align-items:center; gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg> More</button>
                         <div class="more-dropdown-menu">
                             <button type="button" class="more-dropdown-item" onclick="window.print()">🖨️ Print</button>
                             <a href="/invoices/{{.Invoice.ID}}/pdf" class="more-dropdown-item desktop-only">📥 Download PDF</a>
@@ -690,7 +690,7 @@
                     {{end}}
                     {{if .User}}<a href="/invoices/{{.Invoice.ID}}/duplicate" class="action-btn">📋 Duplicate</a>{{end}}
                     <div class="more-dropdown" id="moreDropdown">
-                        <button type="button" class="action-btn" onclick="toggleMoreMenu()">⋯ More</button>
+                        <button type="button" class="action-btn" onclick="toggleMoreMenu()" style="display:inline-flex; align-items:center; gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg> More</button>
                         <div class="more-dropdown-menu">
                             {{if .ShareURL}}
                             <a href="https://wa.me/?text={{.ShareURL}}" target="_blank" rel="noopener" class="more-dropdown-item" style="color:#25D366;">💬 {{.T.InvoicesShareWhatsApp}}</a>
