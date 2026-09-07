@@ -2,6 +2,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log/slog"
 	"math"
 	"net/http"
@@ -13,6 +14,8 @@ import (
 	"psiloconvalley/internal/audit"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
+	"psiloconvalley/internal/mailer"
+	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/service"
 )
 
@@ -269,4 +272,77 @@ func (h *Handlers) InvoiceDeletePost(w http.ResponseWriter, r *http.Request) {
 
 	slog.Info("invoice deleted", "invoice_id", id, "user_id", user.ID)
 	http.Redirect(w, r, "/invoices?deleted=true", http.StatusSeeOther)
+}
+
+
+// InvoiceReportPaymentPost handles clients reporting that they sent Zelle or check payment.
+// This notifies the owner and updates the invoice view state cleanly.
+func (h *Handlers) InvoiceReportPaymentPost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	inv, _, err := h.App.InvRepo.GetInvoiceWithItems(r.Context(), id)
+	if err != nil || inv == nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Security validation: match public token
+	accessToken := r.FormValue("access")
+	if accessToken == "" {
+		accessToken = r.URL.Query().Get("access")
+	}
+	if inv.PublicToken != "" && accessToken != inv.PublicToken && auth.GetUser(r) == nil {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
+
+	method := strings.TrimSpace(r.FormValue("payment_method"))
+	note := strings.TrimSpace(r.FormValue("reported_note"))
+	if method == "" {
+		http.Error(w, "Payment method is required", http.StatusBadRequest)
+		return
+	}
+
+	// Update database columns
+	if err := h.App.InvRepo.(*repo.InvoiceRepo).ReportPaymentSent(r.Context(), id, method, note); err != nil {
+		slog.Error("failed to update reported payment info", "invoice_id", id, "err", err)
+		http.Error(w, "Database update failed", http.StatusInternalServerError)
+		return
+	}
+
+	// Send notification email to the owner
+	if inv.UserID != nil {
+		owner, err := h.App.UserRepo.GetByID(*inv.UserID)
+		if err == nil && owner != nil {
+			currencySym := "USD"
+			if inv.Currency != "" {
+				currencySym = inv.Currency
+			}
+
+			verifyURL := fmt.Sprintf("%s/invoices/%d", h.App.BaseURL, inv.ID)
+			
+			// Queue resend mailer
+			_ = h.App.Mailer.SendPaymentReportedNotification(owner.Email, mailer.PaymentReportedEmailData{
+				InvoiceNumber: inv.InvoiceNumber,
+				ClientName:    inv.ClientName,
+				CompanyName:   inv.CompanyName,
+				Amount:        fmt.Sprintf("%.2f", float64(inv.TotalCents)/100.0),
+				Currency:      currencySym,
+				Method:        strings.ToUpper(method),
+				Note:          note,
+				VerifyURL:     verifyURL,
+			})
+		}
+	}
+
+	// Success response back to invoice page
+	redirectURL := fmt.Sprintf("/invoices/%d?reported=1", id)
+	if accessToken != "" {
+		redirectURL += "&access=" + accessToken
+	}
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }

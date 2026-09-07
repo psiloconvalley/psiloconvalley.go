@@ -5,6 +5,12 @@
 package i18n
 
 type T struct {
+	// Invoice Reported Payments
+	InvoicePayReportedSuccess    string
+	InvoicePayReportSubmit       string
+	InvoicePayReportPlaceholder  string
+	InvoicePayReportAlreadySent  string
+
 	// Invoice Payment Rails
 	InvoicePayHowToPay          string
 	InvoicePayCard              string

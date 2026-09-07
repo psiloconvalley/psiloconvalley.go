@@ -214,6 +214,9 @@ type Invoice struct {
 	BrandColor          string
 	LogoPosition        string
 	PublicToken         string
+	PaymentReportedAt   *time.Time
+	PaymentReportedMethod string
+	PaymentReportedNote   string
 	ZelleID             string
 	VenmoHandle         string
 	CashAppHandle       string

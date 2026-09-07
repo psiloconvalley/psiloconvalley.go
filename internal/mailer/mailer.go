@@ -1033,3 +1033,98 @@ func (m *Mailer) SendEndorsementRequest(toEmail string, data EndorsementRequestD
 	slog.Info("endorsement request email sent", "to", toEmail, "business", data.BusinessName)
 	return nil
 }
+
+// =====================================================================
+// SendPaymentReportedNotification
+// Notifies the owner when a client reports an offline payment sent
+// =====================================================================
+
+type PaymentReportedEmailData struct {
+	InvoiceNumber string
+	ClientName    string
+	CompanyName   string
+	Amount        string
+	Currency      string
+	Method        string
+	Note          string
+	VerifyURL     string
+}
+
+func (m *Mailer) SendPaymentReportedNotification(toEmail string, data PaymentReportedEmailData) error {
+	if m.client == nil || os.Getenv("RESEND_API_KEY") == "" {
+		slog.Warn("payment reported notification skipped, no API key")
+		return nil
+	}
+
+	subject := fmt.Sprintf(
+		"🔔 Payment Sent: Invoice %s — %s %s",
+		data.InvoiceNumber,
+		data.Currency,
+		data.Amount,
+	)
+
+	body := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+          <tr>
+            <td style="background:#0f172a;border-radius:12px 12px 0 0;height:6px;"></td>
+          </tr>
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;margin-bottom:8px;">Payment Notification</div>
+              <h1 style="font-size:24px;font-weight:800;color:#0d1422;margin:0 0 24px;letter-spacing:-0.5px;">Client reported payment sent</h1>
+
+              <p style="font-size:15px;color:#334155;line-height:1.6;margin-bottom:24px;">
+                <strong>%s</strong> reported they have sent payment of <strong>%s %s</strong> for invoice <strong>%s</strong>.
+              </p>
+
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+                <div style="font-size:13px;color:#334155;margin-bottom:4px;"><strong>Payment Method:</strong> %s</div>
+                %s
+              </div>
+
+              <div style="margin-top:28px;">
+                <a href="%s" style="display:inline-block;background:#0d1422;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Verify &amp; Mark Paid →</a>
+              </div>
+
+              <p style="margin-top:32px;font-size:12px;color:#94a3b8;">
+                This notification was sent from PsiloConValley for invoice %s
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+		data.ClientName,
+		data.Currency,
+		data.Amount,
+		data.InvoiceNumber,
+		data.Method,
+		func() string {
+			if data.Note != "" {
+				return fmt.Sprintf(`<div style="font-size:13px;color:#334155;margin-top:4px;"><strong>Note:</strong> "%s"</div>`, data.Note)
+			}
+			return ""
+		}(),
+		data.VerifyURL,
+		data.InvoiceNumber,
+	)
+
+	_, err := m.client.Emails.Send(&resend.SendEmailRequest{
+		From:    m.from,
+		To:      []string{toEmail},
+		Subject: subject,
+		Html:    body,
+	})
+	if err != nil {
+		slog.Error("payment reported notification failed", "err", err)
+	}
+	return err
+}

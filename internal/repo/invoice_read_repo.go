@@ -61,7 +61,10 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 			COALESCE(i.public_token, '') AS public_token,
 			COALESCE(bp.zelle_id, '') AS zelle_id,
 			COALESCE(bp.venmo_handle, '') AS venmo_handle,
-			COALESCE(bp.cashapp_handle, '') AS cashapp_handle
+			COALESCE(bp.cashapp_handle, '') AS cashapp_handle,
+			i.payment_reported_at,
+			COALESCE(i.payment_reported_method, '') AS payment_reported_method,
+			COALESCE(i.payment_reported_note, '') AS payment_reported_note
 		FROM invoices i
 		LEFT JOIN business_profiles bp ON bp.id = i.business_profile_id
 		WHERE i.id = $1`
@@ -122,6 +125,9 @@ func (r *InvoiceRepo) GetInvoiceWithItems(
 		&inv.ZelleID,
 		&inv.VenmoHandle,
 		&inv.CashAppHandle,
+		&inv.PaymentReportedAt,
+		&inv.PaymentReportedMethod,
+		&inv.PaymentReportedNote,
 	)
 	if err != nil {
 		return nil, nil, err
@@ -346,4 +352,16 @@ func (r *InvoiceRepo) GetByPublicToken(
 		return nil, nil, nil // not found — caller serves 404
 	}
 	return r.GetInvoiceWithItems(ctx, id)
+}
+
+// ReportPaymentSent records an offline payment submission from a client.
+func (r *InvoiceRepo) ReportPaymentSent(ctx context.Context, id int64, method string, note string) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE invoices 
+		SET payment_reported_at = NOW(),
+		    payment_reported_method = $2,
+		    payment_reported_note = $3
+		WHERE id = $1
+	`, id, method, note)
+	return err
 }

@@ -3,6 +3,12 @@
 package i18n
 
 var en = T{
+	// Invoice Reported Payments
+	InvoicePayReportedSuccess:    "Payment details submitted successfully! Salvador is verifying your payment.",
+	InvoicePayReportSubmit:       "Confirm I've Sent This Payment",
+	InvoicePayReportPlaceholder:  "Optional: Bank name, check number, or transfer memo...",
+	InvoicePayReportAlreadySent:  "You reported sending payment via",
+
 	// Invoice Payment Rails
 	InvoicePayHowToPay:          "How to Pay",
 	InvoicePayCard:              "Card",
