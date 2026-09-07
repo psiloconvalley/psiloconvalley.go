@@ -109,7 +109,7 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 	}
 
 		validTransitions := map[string]map[string]bool{
-		"draft":   {"sent": true, "void": true},
+		"draft":   {"sent": true, "paid": true, "void": true},
 		"sent":    {"paid": true, "overdue": true, "void": true},
 		"overdue": {"paid": true, "void": true},
 		"paid":    {"sent": true},
