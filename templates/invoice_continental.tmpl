@@ -574,7 +574,7 @@
 
         <footer class="invoice-footer-split">
             <div class="notes-block">
-                {{template "invoice-payment-rails" .}}
+                
                 {{if false}}
                 <div>
                     <div class="info-label">Payment Instructions</div>
@@ -641,6 +641,8 @@
                     </span>
                 </div>
                 {{end}}
+
+        {{template "invoice-payment-rails" .}}
 
                     {{/* ── Actions: hidden in PDF mode ── */}}
         {{if not .Invoice.Hints.PDFMode}}
