@@ -134,14 +134,11 @@ func Generate(ctx context.Context, html string) ([]byte, error) {
 			}
 			return page.SetDocumentContent(frameTree.Frame.ID, html).Do(ctx)
 		}),
-		// Wait for DOM ready AND all images fully decoded.
-		// i.complete alone returns true for broken images — a broken image
-		// has naturalWidth === 0. Checking both ensures Chrome has actually
-		// decoded the image bytes before we snapshot to PDF.
+		// Wait for DOM ready and all images to finish loading.
+		// We check i.complete so that we don't hang for 30s if an image/logo is 404 or broken.
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			return chromedp.Poll(
-				`document.readyState === 'complete' && `+
-					`Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)`,
+				`document.readyState === 'complete' && Array.from(document.images).every(i => i.complete)`,
 				nil,
 				chromedp.WithPollingInterval(50*time.Millisecond),
 			).Do(ctx)
@@ -271,7 +268,7 @@ func ScreenshotURL(ctx context.Context, url string, width, height int) ([]byte, 
 		// Wait for the mycelium canvas or hero to be visible
 		chromedp.WaitVisible(`body`, chromedp.ByQuery),
 		// Brief pause for animations to settle
-		chromedp.Sleep(2 * time.Second),
+		chromedp.Sleep(2*time.Second),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			var err error
 			imgBuf, err = page.CaptureScreenshot().
