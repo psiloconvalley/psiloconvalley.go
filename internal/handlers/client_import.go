@@ -93,29 +93,29 @@ func (h *Handlers) ClientImportPost(w http.ResponseWriter, r *http.Request) {
 	// Map header names to column indices (case-insensitive).
 	// Supports common variations so users don't have to match exactly.
 	headerAliases := map[string]string{
-		"client name":  "name",
-		"client":       "name",
-		"nombre":       "name",
-		"correo":       "email",
-		"email address":"email",
-		"telefono":     "phone",
-		"teléfono":     "phone",
-		"telephone":    "phone",
-		"street":       "address",
-		"direccion":    "address",
-		"dirección":    "address",
+		"client name":    "name",
+		"client":         "name",
+		"nombre":         "name",
+		"correo":         "email",
+		"email address":  "email",
+		"telefono":       "phone",
+		"teléfono":       "phone",
+		"telephone":      "phone",
+		"street":         "address",
+		"direccion":      "address",
+		"dirección":      "address",
 		"street address": "address",
-		"ciudad":       "city",
-		"estado":       "state",
-		"province":     "state",
-		"region":       "state",
-		"postal code":  "zip",
-		"zip code":     "zip",
-		"codigo postal":"zip",
-		"código postal":"zip",
-		"pais":         "country",
-		"país":         "country",
-		"notas":        "notes",
+		"ciudad":         "city",
+		"estado":         "state",
+		"province":       "state",
+		"region":         "state",
+		"postal code":    "zip",
+		"zip code":       "zip",
+		"codigo postal":  "zip",
+		"código postal":  "zip",
+		"pais":           "country",
+		"país":           "country",
+		"notas":          "notes",
 	}
 
 	colMap := make(map[string]int)
@@ -164,6 +164,14 @@ func (h *Handlers) ClientImportPost(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		// Enforce plan limits before creating a new client
+		if !h.canAddClient(r) {
+			result.Errors = append(result.Errors, "Row "+itoa(rowNum)+" ("+name+"): skipped - plan client limit reached")
+			result.Skipped++
+			rowNum++
+			continue
+		}
+
 		_, err = h.App.ClientRepo.FindOrCreate(
 			r.Context(),
 			profile.ID,
@@ -181,9 +189,14 @@ func (h *Handlers) ClientImportPost(w http.ResponseWriter, r *http.Request) {
 			result.Skipped++
 		} else {
 			result.Imported++
+			// Track monthly client usage for plan limits
+			if err := h.App.UsageRepo.Increment(r.Context(), user.ID, "clients"); err != nil {
+				slog.Warn("failed to increment client usage during import", "user_id", user.ID, "err", err)
+			}
 		}
 
 		rowNum++
+
 	}
 
 	slog.Info("client import completed",
