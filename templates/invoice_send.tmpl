@@ -3,104 +3,294 @@
 <head>
     {{template "page-head-no-title" .}}
     <title>{{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendTitle}}{{end}} {{.Invoice.InvoiceNumber}} | PSILOCONVALLEY</title>
-
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
-    {{template "invoice-send-styles" .}}
+    <style>
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
 
+        .top {
+            margin-bottom: 32px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
+        }
+        .top h1 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin: 0;
+        }
+        .top-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            font-family: monospace;
+            margin-top: 4px;
+        }
+
+        .form-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px;
+        }
+
+        /* Invoice Summary Card inside the form */
+        .summary-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .summary-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 4px;
+        }
+        .summary-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            font-family: monospace;
+        }
+        .summary-client {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 2px;
+        }
+        .summary-amount {
+            text-align: right;
+        }
+        .summary-total {
+            font-size: 22px;
+            font-weight: 700;
+            color: #4ade80;
+        }
+        .summary-due {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 8px;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.08);
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .hint {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 6px;
+        }
+
+        /* Email Preview Box */
+        .email-preview {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+        }
+        .preview-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 10px;
+        }
+        .preview-line {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+        .preview-line:last-child {
+            margin-bottom: 0;
+        }
+        .preview-line span {
+            color: rgba(255,255,255,0.85);
+        }
+
+        /* Action Buttons */
+        .btn-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        .btn-primary {
+            background: #fff;
+            color: #0a0f1a;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            flex: 1;
+            transition: background 0.15s;
+        }
+        .btn-primary:hover {
+            background: #e5e5e5;
+        }
+        .btn-secondary {
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .btn-secondary:hover {
+            border-color: rgba(255,255,255,0.4);
+            color: #fff;
+        }
+
+        .send-note {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .form-card { padding: 28px 20px; }
+            .summary-box { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .summary-amount { text-align: left; }
+            .btn-row { flex-direction: column; }
+        }
+    </style>
 </head>
 <body>
 
 {{template "nav" .}}
 
-<div class="page">
-
-    <div class="page-header">
-        <p class="page-label">{{.T.InvoiceSendLabel}}</p>
-        <h1 class="page-title">{{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendTitle}}{{end}}</h1>
-        <p class="page-sub">{{.T.InvoiceSendSubtitle}}</p>
+<div class="container">
+    <div class="top">
+        <h1>{{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendTitle}}{{end}}</h1>
+        <p class="top-subtitle">{{.Invoice.InvoiceNumber}} · {{.T.InvoiceSendSubtitle}}</p>
     </div>
 
-    <!-- Invoice Summary Card -->
-    <div class="card">
-        <div class="card-accent"></div>
-        <div class="card-body">
-            <div class="summary-row">
-                <div>
-                    <div class="summary-label">{{.T.InvoiceSendInvoiceLabel}}</div>
-                    <div class="summary-number">{{.Invoice.InvoiceNumber}}</div>
-                    <div class="summary-client">{{.Invoice.ClientName}}</div>
-                </div>
-                <div class="summary-amount">
-                    <div class="summary-label">{{.T.InvoiceSendAmountDue}}</div>
-                    <div class="summary-total">{{.Invoice.Currency}} {{.Invoice.Total}}</div>
-                    {{if .Invoice.DueDate}}
-                    <div class="summary-due">{{.T.InvoiceSendDue}} {{.Invoice.DueDate}}</div>
-                    {{end}}
-                </div>
+    <div class="form-card">
+        <!-- Invoice Summary Box -->
+        <div class="summary-box">
+            <div>
+                <div class="summary-label">{{.T.InvoiceSendInvoiceLabel}}</div>
+                <div class="summary-number">{{.Invoice.InvoiceNumber}}</div>
+                <div class="summary-client">{{.Invoice.ClientName}}</div>
+            </div>
+            <div class="summary-amount">
+                <div class="summary-label">{{.T.InvoiceSendAmountDue}}</div>
+                <div class="summary-total">{{.Invoice.Currency}} {{.Invoice.Total}}</div>
+                {{if .Invoice.DueDate}}
+                <div class="summary-due">{{.T.InvoiceSendDue}} {{.Invoice.DueDate}}</div>
+                {{end}}
             </div>
         </div>
+
+        <form method="POST"
+              action="{{if .IsEstimate}}/estimates/{{.InvoiceID}}/send{{else}}/invoices/{{.InvoiceID}}/send{{end}}"
+              id="send-form">
+            {{.csrfField}}
+
+            <div class="form-group">
+                <label for="to_email">{{.T.InvoiceSendTo}}</label>
+                <input
+                    type="email"
+                    id="to_email"
+                    name="to_email"
+                    value="{{.ClientEmail}}"
+                    placeholder="{{.T.InvoiceSendToPlaceholder}}"
+                    required
+                    autocomplete="email"
+                >
+                <div class="hint">{{.T.InvoiceSendToHint}}</div>
+            </div>
+
+            <div class="form-group">
+                <label for="personal_note">
+                    {{.T.InvoiceSendNote}} <span style="font-weight:400;color:rgba(255,255,255,0.4);">{{.T.InvoiceSendNoteOptional}}</span>
+                </label>
+                <textarea
+                    id="personal_note"
+                    name="personal_note"
+                    placeholder="{{.T.InvoiceSendNotePlaceholder}}"
+                ></textarea>
+                <div class="hint">{{.T.InvoiceSendNoteHint}}</div>
+            </div>
+
+            <div class="email-preview">
+                <div class="preview-title">{{.T.InvoiceSendPreview}}</div>
+                <div class="preview-line">{{.T.InvoiceSendFrom}} <span>noreply@psiloconvalley.com</span></div>
+                <div class="preview-line">Subject: <span>{{if .IsEstimate}}{{.T.InvoiceSendSubjectEst}}{{else}}{{.T.InvoiceSendSubjectInv}}{{end}} {{.Invoice.InvoiceNumber}} from {{.Invoice.CompanyName}} - {{.Invoice.Currency}} {{.Invoice.Total}}</span></div>
+                {{if not .IsEstimate}}
+                <div class="preview-line">{{.T.InvoiceSendAttachment}} <span>invoice-{{.Invoice.InvoiceNumber}}.pdf</span></div>
+                {{end}}
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="btn-primary" id="btn-send">
+                    {{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendBtnInv}}{{end}}
+                </button>
+                <a href="{{if .IsEstimate}}/estimates/{{.InvoiceID}}{{else}}/invoices/{{.InvoiceID}}{{end}}" class="btn-secondary">
+                    {{.T.InvoiceSendCancel}}
+                </a>
+            </div>
+
+            <p class="send-note">
+                {{if eq .Invoice.Status "draft"}}
+                {{.T.InvoiceSendStatusNote}}
+                {{end}}
+                {{.T.InvoiceSendPDFNote}}
+            </p>
+        </form>
     </div>
-
-    <!-- Send Form Card -->
-    <div class="card">
-        <div class="card-body">
-            <form class="send-form" method="POST"
-                  action="{{if .IsEstimate}}/estimates/{{.InvoiceID}}/send{{else}}/invoices/{{.InvoiceID}}/send{{end}}"
-                  id="send-form">
-                {{.csrfField}}
-
-                <div class="field-group">
-                    <label for="to_email">{{.T.InvoiceSendTo}}</label>
-                    <input
-                        type="email"
-                        id="to_email"
-                        name="to_email"
-                        value="{{.ClientEmail}}"
-                        placeholder="{{.T.InvoiceSendToPlaceholder}}"
-                        required
-                        autocomplete="email"
-                    >
-                    <span class="field-hint">{{.T.InvoiceSendToHint}}</span>
-                </div>
-
-                <div class="field-group">
-                    <label for="personal_note">{{.T.InvoiceSendNote}} <span style="font-weight:400;text-transform:none;letter-spacing:0;">{{.T.InvoiceSendNoteOptional}}</span></label>
-                    <textarea
-                        id="personal_note"
-                        name="personal_note"
-                        placeholder="{{.T.InvoiceSendNotePlaceholder}}"
-                    ></textarea>
-                    <span class="field-hint">{{.T.InvoiceSendNoteHint}}</span>
-                </div>
-
-                <div class="email-preview">
-                    <div class="preview-label">{{.T.InvoiceSendPreview}}</div>
-                    <div class="preview-line">{{.T.InvoiceSendFrom}} <span>noreply@psiloconvalley.com</span></div>
-                    <div class="preview-line">Subject: <span>{{if .IsEstimate}}{{.T.InvoiceSendSubjectEst}}{{else}}{{.T.InvoiceSendSubjectInv}}{{end}} {{.Invoice.InvoiceNumber}} from {{.Invoice.CompanyName}} - {{.Invoice.Currency}} {{.Invoice.Total}}</span></div>
-                    {{if not .IsEstimate}}<div class="preview-line">{{.T.InvoiceSendAttachment}} <span>invoice-{{.Invoice.InvoiceNumber}}.pdf</span></div>{{end}}
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-send" id="btn-send">
-                        {{if .IsEstimate}}{{.T.InvoiceSendBtnEst}}{{else}}{{.T.InvoiceSendBtnInv}}{{end}}
-                    </button>
-                    <a href="{{if .IsEstimate}}/estimates/{{.InvoiceID}}{{else}}/invoices/{{.InvoiceID}}{{end}}" class="btn-cancel">
-                        {{.T.InvoiceSendCancel}}
-                    </a>
-                </div>
-
-                <p class="send-note">
-                    {{if eq .Invoice.Status "draft"}}
-                    {{.T.InvoiceSendStatusNote}}
-                    {{end}}
-                    {{.T.InvoiceSendPDFNote}}
-                </p>
-
-            </form>
-        </div>
-    </div>
-
 </div>
 
 <script>
