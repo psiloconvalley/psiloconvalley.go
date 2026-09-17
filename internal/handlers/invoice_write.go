@@ -4,7 +4,6 @@ package handlers
 import (
 	"fmt"
 	"log/slog"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -102,10 +101,20 @@ func (h *Handlers) InvoiceUpdatePost(w http.ResponseWriter, r *http.Request) {
 	inv.TemplateID = r.FormValue("template_id")
 	inv.BrandColor = r.FormValue("brand_color")
 	inv.Currency = catalog.NormalizeCurrency(r.FormValue("currency"))
-	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
-	inv.TaxRateBps = int64(math.Round(taxRatePct * 100))
-	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
-	inv.DiscountAmountCents = int64(math.Round(discountAmt * 100))
+	taxRateBps, err := service.ParseTaxRateBps(r.FormValue("tax_rate"))
+	if err != nil {
+		http.Error(w, "Invalid tax rate", http.StatusBadRequest)
+		return
+	}
+	inv.TaxRateBps = taxRateBps
+
+	discountCents, err := service.ParseCurrencyCents(r.FormValue("discount_amount"))
+	if err != nil {
+		http.Error(w, "Invalid discount amount", http.StatusBadRequest)
+		return
+	}
+	inv.DiscountAmountCents = discountCents
+
 	inv.Notes = strings.TrimSpace(r.FormValue("notes"))
 	inv.PaymentDetails = strings.TrimSpace(r.FormValue("payment_details"))
 
