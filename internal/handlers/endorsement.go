@@ -2,14 +2,16 @@
 // Endorsement flow — token-based client testimonials for business profiles.
 //
 // Public routes (no auth):
-//   GET  /endorse/{token}   — client endorsement form
-//   POST /endorse/{token}   — client submits endorsement
-//   POST /endorse/{token}/decline — client declines
+//
+//	GET  /endorse/{token}   — client endorsement form
+//	POST /endorse/{token}   — client submits endorsement
+//	POST /endorse/{token}/decline — client declines
 //
 // Protected routes (owner only):
-//   POST /invoices/{id}/endorse  — owner requests endorsement
-//   GET  /endorsements           — owner management page
-//   POST /endorsements/{id}/delete — owner deletes endorsement
+//
+//	POST /invoices/{id}/endorse  — owner requests endorsement
+//	GET  /endorsements           — owner management page
+//	POST /endorsements/{id}/delete — owner deletes endorsement
 package handlers
 
 import (
@@ -82,15 +84,13 @@ func (h *Handlers) EndorsementRequestPost(w http.ResponseWriter, r *http.Request
 		if existing.Status == "pending" {
 			// Resend the existing endorsement request email
 			endorseURL := fmt.Sprintf("%s/endorse/%s", h.App.BaseURL, existing.Token)
-			go func() {
-				if err := h.App.Mailer.SendEndorsementRequest(inv.ClientEmail, mailer.EndorsementRequestData{
-					ClientName:   inv.ClientName,
-					BusinessName: biz.Name,
-					EndorseURL:   endorseURL,
-				}); err != nil {
-					slog.Warn("endorsement resend failed", "to", inv.ClientEmail, "err", err)
-				}
-			}()
+			if err := h.App.Mailer.SendEndorsementRequest(inv.ClientEmail, mailer.EndorsementRequestData{
+				ClientName:   inv.ClientName,
+				BusinessName: biz.Name,
+				EndorseURL:   endorseURL,
+			}); err != nil {
+				slog.Error("endorsement resend failed", "to", inv.ClientEmail, "err", err)
+			}
 			http.Redirect(w, r, fmt.Sprintf("/invoices/%d?endorse=resent", id), http.StatusSeeOther)
 			return
 		}
@@ -107,16 +107,17 @@ func (h *Handlers) EndorsementRequestPost(w http.ResponseWriter, r *http.Request
 
 	// Send the email to the client
 	endorseURL := fmt.Sprintf("%s/endorse/%s", h.App.BaseURL, token)
-	go func() {
-		if err := h.App.Mailer.SendEndorsementRequest(inv.ClientEmail, mailer.EndorsementRequestData{
-			ClientName:   inv.ClientName,
-			BusinessName: biz.Name,
-			EndorseURL:   endorseURL,
-		}); err != nil {
-			slog.Warn("endorsement request: email failed",
-				"to", inv.ClientEmail, "token", token, "err", err)
-		}
-	}()
+	if err := h.App.Mailer.SendEndorsementRequest(inv.ClientEmail, mailer.EndorsementRequestData{
+		ClientName:   inv.ClientName,
+		BusinessName: biz.Name,
+		EndorseURL:   endorseURL,
+	}); err != nil {
+		slog.Error("endorsement request email failed",
+			"to", inv.ClientEmail,
+			"token", token,
+			"err", err,
+		)
+	}
 
 	http.Redirect(w, r, fmt.Sprintf("/invoices/%d?endorse=sent", id), http.StatusSeeOther)
 }
@@ -145,12 +146,17 @@ func (h *Handlers) EndorsementFormGet(w http.ResponseWriter, r *http.Request) {
 
 	// Already submitted or declined — show thank you state
 	if endorsement.Status == "submitted" {
-		biz, _ := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+		biz, err := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+		if err != nil {
+			slog.Error("failed to load business profile for submitted endorsement", "err", err)
+			http.Error(w, "Service temporarily unavailable", http.StatusInternalServerError)
+			return
+		}
 		h.App.Render(w, r, "endorse.tmpl", map[string]any{
-			"Submitted": true,
+			"Submitted":   true,
 			"Endorsement": endorsement,
 			"Business":    biz,
-			"Meta": app.AuthMeta("Thank You | PSILOCONVALLEY"),
+			"Meta":        app.AuthMeta("Thank You | PSILOCONVALLEY"),
 		})
 		return
 	}
@@ -207,7 +213,12 @@ func (h *Handlers) EndorsementSubmitPost(w http.ResponseWriter, r *http.Request)
 	ratingStr := r.FormValue("rating")
 	rating, err := strconv.Atoi(ratingStr)
 	if err != nil || rating < 1 || rating > 5 {
-		biz, _ := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+		biz, err := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+		if err != nil {
+			slog.Error("failed to load business profile for validation error render", "err", err)
+			http.Error(w, "Service temporarily unavailable", http.StatusInternalServerError)
+			return
+		}
 		h.App.Render(w, r, "endorse.tmpl", map[string]any{
 			"Token":       token,
 			"Business":    biz,
@@ -220,8 +231,14 @@ func (h *Handlers) EndorsementSubmitPost(w http.ResponseWriter, r *http.Request)
 
 	name := strings.TrimSpace(r.FormValue("endorser_name"))
 	if name == "" {
-		biz, _ := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+		biz, err := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+		if err != nil {
+			slog.Error("failed to load business profile for validation error render", "err", err)
+			http.Error(w, "Service temporarily unavailable", http.StatusInternalServerError)
+			return
+		}
 		h.App.Render(w, r, "endorse.tmpl", map[string]any{
+
 			"Token":       token,
 			"Business":    biz,
 			"Endorsement": endorsement,
@@ -247,8 +264,14 @@ func (h *Handlers) EndorsementSubmitPost(w http.ResponseWriter, r *http.Request)
 	endorsement.Body = body
 	endorsement.Status = "submitted"
 
-	biz, _ := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+	biz, err := h.App.BizRepo.GetByID(r.Context(), endorsement.BusinessProfileID)
+	if err != nil {
+		slog.Error("failed to load business profile for success state render", "err", err)
+		http.Error(w, "Service temporarily unavailable", http.StatusInternalServerError)
+		return
+	}
 	h.App.Render(w, r, "endorse.tmpl", map[string]any{
+
 		"Submitted":   true,
 		"Endorsement": endorsement,
 		"Business":    biz,
