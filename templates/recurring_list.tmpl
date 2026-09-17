@@ -14,30 +14,30 @@
 
 <div class="container">
 
-        <div class="top">
+	       <div class="top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
         <div>
             <h1>Recurring Invoices</h1>
-            <div class="top-subtitle">
+            <div class="top-subtitle" style="margin-top: 4px;">
                 {{len .Schedules}} schedule{{if ne (len .Schedules) 1}}s{{end}}
             </div>
         </div>
-        <a href="/invoices/new" class="btn btn-white">+ New Invoice</a>
+        <a href="/invoices/new" class="btn-success">+ New Invoice</a>
     </div>
-    <div class="info-banner">
+           <div class="info-banner">
         Recurring invoices are automatically generated and optionally sent to your client on your chosen schedule.
         To create one, open any invoice and turn on <strong>Make Recurring</strong> in the sidebar.
     </div>
 
-    {{if not .Schedules}}
+	 {{if not .Schedules}}
     <div class="empty">
         <div class="empty-icon">🔁</div>
         <div class="empty-title">No recurring invoices yet</div>
         <div class="empty-sub">
             Create an invoice and turn on "Make Recurring" in the sidebar to get started.
         </div>
-        <a href="/invoices/new" class="btn btn-white">Create Invoice</a>
+        <a href="/invoices/new" class="btn-success">Create Invoice</a>
     </div>
-    {{else}}
+        {{else}}
 
     {{/* ── DESKTOP TABLE ── */}}
     <div class="table-wrap">
