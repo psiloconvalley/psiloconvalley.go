@@ -12,14 +12,14 @@
 {{template "nav" .}}
 
 <div class="container">
-    <div class="top">
+       <div class="top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
         <div>
             <h1>{{.T.ExpensesListTitle}}</h1>
-            <p class="top-subtitle">{{.T.ExpensesListSubtitle}}</p>
+            <p class="top-subtitle" style="margin-top: 4px;">{{.T.ExpensesListSubtitle}}</p>
         </div>
-        <a href="/expenses/new" class="btn-new">{{.T.ExpensesListNew}}</a>
+        <a href="/expenses/new" class="btn-success">{{.T.ExpensesListNew}}</a>
     </div>
-
+    
     {{if .Saved}}
     <div class="success-banner">{{.T.ExpensesListSaved}}</div>
     {{end}}

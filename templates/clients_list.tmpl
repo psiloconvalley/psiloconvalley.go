@@ -26,16 +26,17 @@
                 {{end}}
             </div>
         </div>
-        <div class="top-right">
-            <a class="cl-btn-secondary" href="/clients/import">📤 {{.T.ClientsImport}}</a>
-            <a class="cl-btn-secondary" href="/clients/export.csv">📥 {{.T.ClientsExport}}</a>
+	   <div class="top-right" style="display: flex; gap: 8px; align-items: center;">
+            <a class="btn-secondary" href="/clients/import">📤 {{.T.ClientsImport}}</a>
+            <a class="btn-secondary" href="/clients/export.csv">📥 {{.T.ClientsExport}}</a>
             {{if .CanAddClient}}
-            <a class="cl-btn" href="/clients/new">{{.T.ClientsNewClient}}</a>
+            <a class="btn-success" href="/clients/new">{{.T.ClientsNewClient}}</a>
             {{else}}
-            <span class="cl-btn-disabled">{{.T.ClientsNewClient}}</span>
+            <span class="btn-secondary" style="opacity: 0.4; cursor: not-allowed;">{{.T.ClientsNewClient}}</span>
             {{end}}
         </div>
-    </div>
+
+          </div>
 
     {{if .AtLimit}}
     <div class="limit-banner">
