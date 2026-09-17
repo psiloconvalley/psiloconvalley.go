@@ -6,25 +6,91 @@
     {{template "nav-styles" .}}
     {{template "app-styles" .}}
     <style>
-        .page { max-width: 640px; margin: 48px auto; padding: 0 24px; }
-        .card {
-            background: rgba(15,15,15,0.95);
-            border: 1px solid rgba(255,255,255,0.1);
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 48px 20px 80px;
+        }
+
+        .top {
+            margin-bottom: 32px;
+            border-left: 2px solid #fff;
+            padding-left: 25px;
+        }
+        .top h1 {
+            font-size: 32px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin: 0;
+        }
+        .top-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            font-family: monospace;
+            margin-top: 4px;
+            line-height: 1.6;
+        }
+
+        .error-banner {
+            background: rgba(220,38,38,0.1);
+            border: 1px solid rgba(220,38,38,0.2);
+            color: #fca5a5;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
+        .result-banner {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .result-success {
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.2);
+            color: #4ade80;
+        }
+        .result-errors {
+            margin-top: 12px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            padding-left: 20px;
+        }
+        .result-errors li { margin-bottom: 4px; }
+
+        .form-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 16px;
             padding: 40px;
         }
-        .page-title {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
+
+        .template-section {
+            text-align: center;
+            margin-bottom: 28px;
         }
-        .page-subtitle {
-            color: rgba(255,255,255,0.5);
-            font-size: 14px;
-            margin-bottom: 32px;
-            line-height: 1.6;
+
+        .btn-template {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.2);
+            border-radius: 8px;
+            color: #4ade80;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.15s ease;
         }
+        .btn-template:hover {
+            background: rgba(74,222,128,0.15);
+        }
+
         .upload-zone {
             border: 2px dashed rgba(255,255,255,0.12);
             border-radius: 12px;
@@ -32,12 +98,16 @@
             text-align: center;
             margin-bottom: 24px;
             transition: border-color 0.2s;
+            cursor: pointer;
         }
-        .upload-zone:hover { border-color: rgba(74,222,128,0.3); }
+        .upload-zone:hover { 
+            border-color: rgba(74,222,128,0.3); 
+        }
         .upload-zone input[type="file"] {
             margin: 16px auto 0;
             font-size: 13px;
             color: rgba(255,255,255,0.6);
+            cursor: pointer;
         }
         .upload-icon {
             font-size: 36px;
@@ -53,23 +123,26 @@
             font-size: 12px;
             color: rgba(255,255,255,0.25);
         }
-        .submit-btn {
-            width: 100%;
-            padding: 12px;
-            background: #0f172a;
-            color: #fff;
+
+        .btn-primary {
+            background: #fff;
+            color: #0a0f1a;
             border: none;
+            padding: 12px 28px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 700;
+            font-family: inherit;
             cursor: pointer;
-            transition: background 0.2s;
+            width: 100%;
+            transition: background 0.15s;
         }
-        .submit-btn:hover { background: #1e293b; }
+        .btn-primary:hover { background: #e5e5e5; }
+
         .format-hint {
-            margin-top: 24px;
+            margin-top: 28px;
             padding: 16px;
-            background: rgba(255,255,255,0.03);
+            background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.06);
             border-radius: 10px;
         }
@@ -88,86 +161,59 @@
             line-height: 1.8;
             overflow-x: auto;
             white-space: pre;
+            font-family: monospace;
         }
-        .result-banner {
-            padding: 16px 20px;
-            border-radius: 10px;
-            margin-bottom: 24px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .result-success {
-            background: rgba(74,222,128,0.08);
-            border: 1px solid rgba(74,222,128,0.2);
-            color: #4ade80;
-        }
-        .result-errors {
-            margin-top: 12px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.4);
-        }
-        .result-errors li { margin-bottom: 4px; }
-        .error-banner {
-            background: rgba(220,38,38,0.1);
-            border: 1px solid rgba(220,38,38,0.2);
-            color: #fca5a5;
-            padding: 14px 18px;
-            border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
+
         .back-link {
-            display: inline-block;
-            margin-top: 20px;
+            display: block;
+            text-align: center;
+            margin-top: 24px;
             font-size: 13px;
             color: rgba(255,255,255,0.4);
             text-decoration: none;
+            transition: color 0.15s;
         }
-        .back-link:hover { color: rgba(255,255,255,0.7); }
+        .back-link:hover { color: #fff; }
+
+        @media (max-width: 600px) {
+            .form-card { padding: 28px 20px; }
+            .upload-zone { padding: 28px 12px; }
+        }
     </style>
 </head>
 <body>
 
 {{template "nav" .}}
 
-<div class="page">
-    <div class="card">
-        <h1 class="page-title">{{.T.ClientsImport}}</h1>
-        <p class="page-subtitle">{{.T.ClientsImportSubtitle}}</p>
+<div class="container">
+    <div class="top">
+        <h1>{{.T.ClientsImport}}</h1>
+        <p class="top-subtitle">{{.T.ClientsImportSubtitle}}</p>
+    </div>
 
-        {{if .Error}}
-        <div class="error-banner">{{.Error}}</div>
+    {{if .Error}}
+    <div class="error-banner">{{.Error}}</div>
+    {{end}}
+
+    {{if .Result}}
+    <div class="result-banner result-success">
+        ✅ {{.Result.Imported}} {{.T.ClientsImportedCount}}
+        {{if gt .Result.Skipped 0}}
+        · {{.Result.Skipped}} {{.T.ClientsImportSkipped}}
         {{end}}
-
-        {{if .Result}}
-        <div class="result-banner result-success">
-            ✅ {{.Result.Imported}} {{.T.ClientsImportedCount}}
-            {{if gt .Result.Skipped 0}}
-            · {{.Result.Skipped}} {{.T.ClientsImportSkipped}}
-            {{end}}
-            {{if .Result.Errors}}
-            <ul class="result-errors">
-                {{range .Result.Errors}}<li>{{.}}</li>{{end}}
-            </ul>
-            {{end}}
-        </div>
+        {{if .Result.Errors}}
+        <ul class="result-errors">
+            {{range .Result.Errors}}<li>{{.}}</li>{{end}}
+        </ul>
         {{end}}
+    </div>
+    {{end}}
 
-        <div style="text-align:center; margin-bottom:24px;">
-            <a href="/clients/import/template.csv" style="
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                padding: 10px 20px;
-                background: rgba(74,222,128,0.08);
-                border: 1px solid rgba(74,222,128,0.2);
-                border-radius: 8px;
-                color: #4ade80;
-                font-size: 13px;
-                font-weight: 600;
-                text-decoration: none;
-                transition: background 0.2s ease;
-            ">📋 {{.T.ClientsImportDownloadTemplate}}</a>
+    <div class="form-card">
+        <div class="template-section">
+            <a href="/clients/import/template.csv" class="btn-template">
+                📋 {{.T.ClientsImportDownloadTemplate}}
+            </a>
         </div>
 
         <form method="POST" action="/clients/import" enctype="multipart/form-data">
@@ -178,17 +224,17 @@
                 <div class="upload-hint">CSV · {{.T.ClientsImportMaxSize}}</div>
                 <input type="file" name="csv_file" accept=".csv" required>
             </div>
-            <button type="submit" class="submit-btn">{{.T.ClientsImportSubmit}}</button>
+            <button type="submit" class="btn-primary">{{.T.ClientsImportSubmit}}</button>
         </form>
 
         <div class="format-hint">
             <div class="format-hint-title">{{.T.ClientsImportFormatTitle}}</div>
             <code>Name,Email,Phone,Address,City,State,Zip,Country,Notes
-John Smith,john@example.com,555-1234,123 Main St,San Jose,CA,95112,US,Pool service</code>
+John Smith,john@example.com,555-123-4567,123 Main St,San Jose,CA,95112,US,Pool service</code>
         </div>
-
-        <a href="/clients" class="back-link">← {{.T.ClientsImportBackToClients}}</a>
     </div>
+
+    <a href="/clients" class="back-link">← {{.T.ClientsImportBackToClients}}</a>
 </div>
 
 </body>
