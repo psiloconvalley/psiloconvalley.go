@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"psiloconvalley/internal/repo"
@@ -98,6 +99,28 @@ func RequireAuth(next http.Handler) http.Handler {
 		user := GetUser(r)
 		if user == nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// RequireAdmin restricts route access to the system owner (User ID 1).
+func RequireAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := GetUser(r)
+		if user == nil || user.ID != 1 {
+			slog.Warn("unauthorized admin route access attempt",
+				"user_id", func() any {
+					if user != nil {
+						return user.ID
+					}
+					return "anonymous"
+				}(),
+				"ip", RealIP(r),
+				"path", r.URL.Path,
+			)
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 		next.ServeHTTP(w, r)

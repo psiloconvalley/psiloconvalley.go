@@ -47,7 +47,7 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	r.With(auth.RateLimitForgotPassword).Post("/forgot-password", h.ForgotPasswordPost)
 	r.Get("/auth/magic", h.MagicLinkGet)
 	r.With(auth.RateLimitMagicLink).Post("/auth/magic", h.MagicLinkPost)
-	
+
 	// ── Passkey authentication (public — user not yet identified) ──
 	r.Post("/passkeys/login/begin", h.PasskeyLoginBegin)
 	r.Post("/passkeys/login/finish", h.PasskeyLoginFinish)
@@ -83,10 +83,10 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 	// ── Protected routes (login required) ──────────────────────────
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
-	// Address autocomplete API
+		// Address autocomplete API
 		r.Get("/api/addresses", h.AddressAutocompleteGet)
 		r.Get("/api/addresses/place", h.AddressPlaceDetailsGet)
-	// Passkey registration (requires login)
+		// Passkey registration (requires login)
 		r.Post("/passkeys/register/begin", h.PasskeyRegistrationBegin)
 		r.Post("/passkeys/register/finish", h.PasskeyRegistrationFinish)
 		r.Post("/checkout", h.CheckoutPost)
@@ -160,9 +160,12 @@ func NewRouter(h *handlers.Handlers) http.Handler {
 		r.Get("/estimates/{id}/send", h.EstimateSendGet)
 		r.Post("/estimates/{id}/send", h.EstimateSendPost)
 
-		// Admin
-		r.Get("/admin/analytics", h.AdminAnalytics)
-		r.Get("/admin/audit", h.AdminAuditLog)
+		// Admin (Owner only)
+		r.Group(func(admin chi.Router) {
+			admin.Use(auth.RequireAdmin)
+			admin.Get("/admin/analytics", h.AdminAnalytics)
+			admin.Get("/admin/audit", h.AdminAuditLog)
+		})
 	})
 	return r
 }
