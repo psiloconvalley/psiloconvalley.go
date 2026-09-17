@@ -4,7 +4,6 @@ package handlers
 import (
 	"fmt"
 	"log/slog"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -55,6 +54,14 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 	var errs []FormError
 
+	taxRateBps, err := service.ParseTaxRateBps(r.FormValue("tax_rate"))
+	if err != nil {
+		errs = append(errs, FormError{Field: "tax_rate", Message: "Tax rate must be between 0 and 100 (e.g., 8.25)"})
+	}
+	discountCents, err := service.ParseCurrencyCents(r.FormValue("discount_amount"))
+	if err != nil {
+		errs = append(errs, FormError{Field: "discount_amount", Message: "Discount must be a valid positive amount"})
+	}
 	if len(clientName) < 2 {
 		errs = append(errs, FormError{Field: "client_name", Message: "Client name is required"})
 	}
@@ -101,10 +108,6 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ── Numeric fields ───────────────────────────────────────────────
-	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
-	taxRateBps := int64(math.Round(taxRatePct * 100))
-	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
-	discountCents := int64(math.Round(discountAmt * 100))
 	logoPosition := r.FormValue("logo_position")
 	if logoPosition == "" {
 		logoPosition = "left"
@@ -294,12 +297,19 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 	if inv.LogoPosition == "" {
 		inv.LogoPosition = "left"
 	}
-	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
-	inv.TaxRateBps = int64(math.Round(taxRatePct * 100))
-	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
-	inv.DiscountAmountCents = int64(math.Round(discountAmt * 100))
-	service.NormalizeTemplateFields(inv, catalog.IsPaid(user.Plan))
+	taxRateBps, err := service.ParseTaxRateBps(r.FormValue("tax_rate"))
+	if err != nil {
+		http.Error(w, "Invalid tax rate", http.StatusBadRequest)
+		return
+	}
+	inv.TaxRateBps = taxRateBps
 
+	discountCents, err := service.ParseCurrencyCents(r.FormValue("discount_amount"))
+	if err != nil {
+		http.Error(w, "Invalid discount amount", http.StatusBadRequest)
+		return
+	}
+	inv.DiscountAmountCents = discountCents
 	if err := h.App.InvRepo.UpdateInvoice(r.Context(), inv, items); err != nil {
 		slog.Error("estimate update failed", "err", err)
 		http.Error(w, "Failed to update estimate", http.StatusInternalServerError)
