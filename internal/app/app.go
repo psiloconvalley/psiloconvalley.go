@@ -4,61 +4,62 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
-	"strings"
-	"path/filepath"
 	"html/template"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/justinas/nosurf"
 	"github.com/stripe/stripe-go/v81"
+	"psiloconvalley/internal/address"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/i18n"
 	"psiloconvalley/internal/logo"
-	"psiloconvalley/internal/receipt"
 	"psiloconvalley/internal/mailer"
+	"psiloconvalley/internal/receipt"
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/scheduler"
 	schedulerhandlers "psiloconvalley/internal/scheduler/handlers"
-	"psiloconvalley/internal/util"
 	"psiloconvalley/internal/service"
-	"psiloconvalley/internal/address"
+	"psiloconvalley/internal/util"
 )
 
 type App struct {
-	db            *sql.DB
-	Templates     *template.Template
-	InvRepo       repo.InvoiceStore
-	InvService     *service.InvoiceService
-	ClientRepo    *repo.ClientRepo
-	BizRepo       *repo.BusinessRepo
-	UserRepo      *repo.UserRepo
-	Mailer        *mailer.Mailer
-	BaseURL       string
-	StripePrice   string
+	db                *sql.DB
+	Templates         *template.Template
+	InvRepo           repo.InvoiceStore
+	InvService        *service.InvoiceService
+	ClientRepo        *repo.ClientRepo
+	BizRepo           *repo.BusinessRepo
+	UserRepo          *repo.UserRepo
+	Mailer            *mailer.Mailer
+	BaseURL           string
+	StripePrice       string
 	StripeProMaxPrice string
-	SchedulerRepo *repo.SchedulerRepo
-	Scheduler     *scheduler.Scheduler
-	LogoStore     logo.Store
-	ReceiptStore  receipt.Store
-	EstRespRepo   *repo.EstimateResponseRepo
-	ExpenseRepo   *repo.ExpenseRepo
-	AuditRepo  *repo.AuditRepo
-	UsageRepo  *repo.UsageRepo
-	PasskeyRepo *repo.PasskeyRepo
-	AddressService *address.Service
+	SchedulerRepo     *repo.SchedulerRepo
+	Scheduler         *scheduler.Scheduler
+	LogoStore         logo.Store
+	ReceiptStore      receipt.Store
+	EstRespRepo       *repo.EstimateResponseRepo
+	ExpenseRepo       *repo.ExpenseRepo
+	AuditRepo         *repo.AuditRepo
+	UsageRepo         *repo.UsageRepo
+	PasskeyRepo       *repo.PasskeyRepo
+	AddressService    *address.Service
 	QuoteRequestRepo  *repo.QuoteRequestRepo
 	EndorsementRepo   *repo.EndorsementRepo
 }
+
 // DB returns the underlying database connection for direct queries.
 func (a *App) DB() *sql.DB { return a.db }
 
 func NewApp(db *sql.DB) *App {
 	auth.InitSessionSecret()
-	
+
 	funcs := template.FuncMap{
 		"money":        util.Money,
 		"formatCents":  util.FormatCentsForInput,
@@ -67,6 +68,20 @@ func NewApp(db *sql.DB) *App {
 		"mul":          func(a, b int) int { return a * b },
 		"hasPrefix":    strings.HasPrefix,
 		"hasSuffix":    strings.HasSuffix,
+		"dict": func(values ...any) (map[string]any, error) {
+			if len(values)%2 != 0 {
+				return nil, fmt.Errorf("invalid dict call: must have an even number of arguments")
+			}
+			dict := make(map[string]any, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, fmt.Errorf("dict keys must be strings, got %T", values[i])
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+		},
 		"seq": func(start, end int) []int {
 			s := make([]int, 0, end-start+1)
 			for i := start; i <= end; i++ {
@@ -119,12 +134,12 @@ func NewApp(db *sql.DB) *App {
 	// ── Register Job Handlers ─────────────────────────────────────────
 	// Add new job types here. The engine never changes.
 	invRepo := repo.NewInvoiceRepo(db)
-	
+
 	invService := service.NewInvoiceService(
-    		invRepo,
-    		repo.NewUserRepo(db),
-    		schedRepo,
-)
+		invRepo,
+		repo.NewUserRepo(db),
+		schedRepo,
+	)
 	sched.Register("send_reminder", schedulerhandlers.NewReminderHandler(
 		invRepo,
 		mailer.New(),
@@ -137,7 +152,6 @@ func NewApp(db *sql.DB) *App {
 		mailer.New(),
 		baseURL,
 	))
-
 
 	return &App{
 		AddressService:    address.New(db),
@@ -158,14 +172,14 @@ func NewApp(db *sql.DB) *App {
 		ReceiptStore:      newReceiptStore(baseURL),
 		EstRespRepo:       repo.NewEstimateResponseRepo(db),
 		ExpenseRepo:       repo.NewExpenseRepo(db),
-		AuditRepo: 	   repo.NewAuditRepo(db),
-		UsageRepo:  	   repo.NewUsageRepo(db),
+		AuditRepo:         repo.NewAuditRepo(db),
+		UsageRepo:         repo.NewUsageRepo(db),
 		QuoteRequestRepo:  repo.NewQuoteRequestRepo(db),
 		EndorsementRepo:   repo.NewEndorsementRepo(db),
 		PasskeyRepo:       repo.NewPasskeyRepo(db),
 	}
 }
-	
+
 // newLogoStore selects the logo backend based on LOGO_STORAGE env var.
 // LOGO_STORAGE=supabase → SupabaseStore (production)
 func newLogoStore(baseURL string) logo.Store {
@@ -238,12 +252,12 @@ func (a *App) Render(w http.ResponseWriter, r *http.Request, name string, data m
 	)
 
 	// ── Inject translations based on user language preference ─────────
-lang := "en"
-if user != nil && user.Language != "" {
-    lang = user.Language
-} else if strings.Contains(r.Header.Get("Accept-Language"), "es") {
-    lang = "es"
-}
+	lang := "en"
+	if user != nil && user.Language != "" {
+		lang = user.Language
+	} else if strings.Contains(r.Header.Get("Accept-Language"), "es") {
+		lang = "es"
+	}
 	data["T"] = i18n.Get(lang)
 	data["Lang"] = lang
 	var buf bytes.Buffer

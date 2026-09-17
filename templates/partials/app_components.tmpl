@@ -35,3 +35,41 @@
   .mono  { font-variant-numeric: tabular-nums; }
 </style>
 {{end}}
+{{/* ── Reusable Mycelium Form Input Component ── */}}
+{{define "form-input"}}
+<div class="form-group">
+    {{if .Label}}<label for="{{.Name}}">{{.Label}}</label>{{end}}
+    <input type="{{if .Type}}{{.Type}}{{else}}text{{end}}" 
+           id="{{.Name}}" 
+           name="{{.Name}}" 
+           value="{{.Value}}"
+           placeholder="{{.Placeholder}}"
+           {{if .Required}}required{{end}}
+           {{if .Autofocus}}autofocus{{end}}
+           {{if .Step}}step="{{.Step}}"{{end}}
+           {{if .Min}}min="{{.Min}}"{{end}}
+           {{if .Autocomplete}}autocomplete="{{.Autocomplete}}"{{end}}
+           {{if .DataAttr}}data-{{.DataAttr}}{{end}}>
+    {{if .Hint}}<div class="hint">{{.Hint}}</div>{{end}}
+</div>
+{{end}}
+
+{{/* ── Reusable Mycelium Form Textarea Component ── */}}
+{{define "form-textarea"}}
+<div class="form-group">
+    {{if .Label}}<label for="{{.Name}}">{{.Label}}</label>{{end}}
+    <textarea id="{{.Name}}" 
+              name="{{.Name}}" 
+              placeholder="{{.Placeholder}}"
+              {{if .Required}}required{{end}}>{{.Value}}</textarea>
+    {{if .Hint}}<div class="hint">{{.Hint}}</div>{{end}}
+</div>
+{{end}}
+
+{{/* ── Reusable Monospace Page Header Component ── */}}
+{{define "form-header"}}
+<div class="top">
+    <h1>{{.Title}}</h1>
+    {{if .Subtitle}}<p class="top-subtitle">{{.Subtitle}}</p>{{end}}
+</div>
+{{end}}
