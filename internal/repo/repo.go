@@ -78,7 +78,12 @@ type InvoiceStore interface {
 		ctx context.Context,
 		id int64,
 	) (*Invoice, []InvoiceItem, error)
-
+	ReportPaymentSent(
+		ctx context.Context,
+		id int64,
+		method string,
+		note string,
+	) error
 	ListInvoices(
 		ctx context.Context,
 		limit, offset int,

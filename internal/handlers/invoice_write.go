@@ -14,7 +14,6 @@ import (
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/mailer"
-	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/service"
 )
 
@@ -327,7 +326,7 @@ func (h *Handlers) InvoiceReportPaymentPost(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Update database columns
-	if err := h.App.InvRepo.(*repo.InvoiceRepo).ReportPaymentSent(r.Context(), id, method, note); err != nil {
+	if err := h.App.InvRepo.ReportPaymentSent(r.Context(), id, method, note); err != nil {
 		slog.Error("failed to update reported payment info", "invoice_id", id, "err", err)
 		http.Error(w, "Database update failed", http.StatusInternalServerError)
 		return

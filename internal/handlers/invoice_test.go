@@ -52,7 +52,9 @@ func (f *fakeInvoiceStore) DeleteDraftInvoice(
 }
 
 // ---- Remaining interface methods — stubs, not used in these tests ----
-
+func (f *fakeInvoiceStore) ReportPaymentSent(ctx context.Context, id int64, method string, note string) error {
+	return nil
+}
 func (f *fakeInvoiceStore) CreateWithToken(ctx context.Context, user *repo.User, anonymousToken, clientName string, amount float64, description string) (int64, error) {
 	return 0, nil
 }
