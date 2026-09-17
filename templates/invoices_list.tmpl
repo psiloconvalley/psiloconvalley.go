@@ -30,18 +30,7 @@
         <a href="/invoices/new" class="btn-success">{{.T.InvoicesNewInvoice}}</a>
     </div>
 
-                   {{if .User}}
-                    {{if .IsPro}}
-                    · <span style="color:#4ade80;">{{.T.InvoicesProUnlimited}}</span>
-                    {{else}}
-                    · {{.MonthlyCount}}/{{.MonthlyLimit}} {{.T.InvoicesThisMonth}}
-                    {{end}}
-                {{end}}
-            </div>
-        </div>
-        <a href="/invoices/new" class="btn-success">{{.T.InvoicesNewInvoice}}</a>
-    </div>
-         
+
     {{if .Deleted}}
     <div id="success-banner" style="
         background: rgba(16,185,129,0.1);
