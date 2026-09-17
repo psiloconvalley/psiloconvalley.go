@@ -188,5 +188,129 @@
         box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
         color: #fff;
     }
+
+    /* ── Global Layout Container ───────────────────────────────────── */
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 48px 20px 80px;
+    }
+
+    /* ── Global Header Layout ───────────────────────────────────────── */
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        border-left: 2px solid #fff;
+        padding-left: 25px;
+    }
+    .top h1 {
+        font-size: 32px;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        margin: 0;
+    }
+    .top-subtitle {
+        color: var(--text-secondary);
+        font-size: 13px;
+        margin-top: 6px;
+        font-family: monospace;
+    }
+
+    /* ── Standardized Table Utilities ──────────────────────────────── */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .data-table th {
+        text-align: left;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-tertiary);
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+        padding: 14px 16px;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        vertical-align: middle;
+        color: var(--text-primary);
+    }
+    .data-table tr:hover td {
+        background: rgba(255, 255, 255, 0.01) !important;
+    }
+
+    /* ── Standardized Stats Grid (Dashboard & Reports) ──────────────── */
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+    .stat-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 20px 24px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+        margin-bottom: 6px;
+    }
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: #fff;
+    }
+
+    /* ── Standardized Empty States ─────────────────────────────────── */
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        margin: 20px 0;
+    }
+    .empty-state-icon {
+        font-size: 40px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    .empty-state-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
+    }
+    .empty-state-sub {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
 </style>
 {{end}}
