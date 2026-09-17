@@ -345,7 +345,7 @@ func (h *Handlers) InvoiceReportPaymentPost(w http.ResponseWriter, r *http.Reque
 			verifyURL := fmt.Sprintf("%s/invoices/%d", h.App.BaseURL, inv.ID)
 
 			// Queue resend mailer
-			_ = h.App.Mailer.SendPaymentReportedNotification(owner.Email, mailer.PaymentReportedEmailData{
+			if err := h.App.Mailer.SendPaymentReportedNotification(owner.Email, mailer.PaymentReportedEmailData{
 				InvoiceNumber: inv.InvoiceNumber,
 				ClientName:    inv.ClientName,
 				CompanyName:   inv.CompanyName,
@@ -354,10 +354,11 @@ func (h *Handlers) InvoiceReportPaymentPost(w http.ResponseWriter, r *http.Reque
 				Method:        strings.ToUpper(method),
 				Note:          note,
 				VerifyURL:     verifyURL,
-			})
+			}); err != nil {
+				slog.Error("failed to send payment reported notification email", "invoice_id", inv.ID, "err", err)
+			}
 		}
 	}
-
 	// Success response back to invoice page
 	redirectURL := fmt.Sprintf("/invoices/%d?reported=1", id)
 	if accessToken != "" {
