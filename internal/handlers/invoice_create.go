@@ -2,6 +2,8 @@
 package handlers
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"html/template"
 	"log/slog"
@@ -17,7 +19,6 @@ import (
 	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/service"
 	"psiloconvalley/internal/views"
-
 )
 
 // InvoiceCreatePost handles invoice creation for both anonymous and
@@ -212,24 +213,72 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	var bizProfileID *int64
 	if user != nil {
 		userID = &user.ID
-		if bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID); err == nil {
+		bp, err := h.App.BizRepo.GetByUserID(r.Context(), user.ID)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			slog.Error("failed to load business profile during invoice creation", "user_id", user.ID, "err", err)
+			http.Error(w, "Could not load business profile", http.StatusInternalServerError)
+			return
+		}
+		if bp != nil {
 			bizProfileID = &bp.ID
 		}
 	}
 
 	override := r.FormValue("company_override") == "1"
-	
+
 	inv := &repo.Invoice{
-		UserID:              userID,
-		BusinessProfileID:   bizProfileID,
-		AnonymousToken:      anonymousToken,
-		CompanyName:         func() string { if override { return companyName } else { return "" } }(),
-		CompanyEmail:        func() string { if override { return strings.TrimSpace(r.FormValue("company_email")) } else { return "" } }(),
-		CompanyAddress:      func() string { if override { return strings.TrimSpace(r.FormValue("company_address")) } else { return "" } }(),
-		CompanyCity:         func() string { if override { return strings.TrimSpace(r.FormValue("company_city")) } else { return "" } }(),
-		CompanyZip:          func() string { if override { return strings.TrimSpace(r.FormValue("company_zip")) } else { return "" } }(),
-		CompanyState:        func() string { if override { return strings.TrimSpace(r.FormValue("company_state")) } else { return "" } }(),
-		CompanyCountry:      func() string { if override { return strings.TrimSpace(r.FormValue("company_country")) } else { return "" } }(),
+		UserID:            userID,
+		BusinessProfileID: bizProfileID,
+		AnonymousToken:    anonymousToken,
+		CompanyName: func() string {
+			if override {
+				return companyName
+			} else {
+				return ""
+			}
+		}(),
+		CompanyEmail: func() string {
+			if override {
+				return strings.TrimSpace(r.FormValue("company_email"))
+			} else {
+				return ""
+			}
+		}(),
+		CompanyAddress: func() string {
+			if override {
+				return strings.TrimSpace(r.FormValue("company_address"))
+			} else {
+				return ""
+			}
+		}(),
+		CompanyCity: func() string {
+			if override {
+				return strings.TrimSpace(r.FormValue("company_city"))
+			} else {
+				return ""
+			}
+		}(),
+		CompanyZip: func() string {
+			if override {
+				return strings.TrimSpace(r.FormValue("company_zip"))
+			} else {
+				return ""
+			}
+		}(),
+		CompanyState: func() string {
+			if override {
+				return strings.TrimSpace(r.FormValue("company_state"))
+			} else {
+				return ""
+			}
+		}(),
+		CompanyCountry: func() string {
+			if override {
+				return strings.TrimSpace(r.FormValue("company_country"))
+			} else {
+				return ""
+			}
+		}(),
 		ClientName:          clientName,
 		ClientEmail:         strings.TrimSpace(r.FormValue("client_email")),
 		ClientAddress:       strings.TrimSpace(r.FormValue("client_address")),
@@ -350,7 +399,7 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 			slog.Error("recurring schedule creation failed", "err", err, "user_id", user.ID, "invoice_id", invoiceID)
 		}
 	}
-		// ── Audit log ─────────────────────────────────────────────────────
+	// ── Audit log ─────────────────────────────────────────────────────
 	var auditUserID *int64
 	if user != nil {
 		auditUserID = audit.UserIDPtr(user.ID)
