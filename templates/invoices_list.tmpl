@@ -13,10 +13,10 @@
 
 <div class="container">
 
-    <div class="top">
+		       <div class="top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
         <div>
             <h1>{{.T.InvoicesTitle}}</h1>
-            <div class="top-subtitle">
+            <div class="top-subtitle" style="margin-top: 4px;">
                 {{len .Invoices}} {{.T.InvoicesListTotal}}
                 {{if .User}}
                     {{if .IsPro}}
@@ -27,9 +27,21 @@
                 {{end}}
             </div>
         </div>
-        <a href="/invoices/new" class="btn-new">{{.T.InvoicesNewInvoice}}</a>
+        <a href="/invoices/new" class="btn-success">{{.T.InvoicesNewInvoice}}</a>
     </div>
 
+                   {{if .User}}
+                    {{if .IsPro}}
+                    · <span style="color:#4ade80;">{{.T.InvoicesProUnlimited}}</span>
+                    {{else}}
+                    · {{.MonthlyCount}}/{{.MonthlyLimit}} {{.T.InvoicesThisMonth}}
+                    {{end}}
+                {{end}}
+            </div>
+        </div>
+        <a href="/invoices/new" class="btn-success">{{.T.InvoicesNewInvoice}}</a>
+    </div>
+         
     {{if .Deleted}}
     <div id="success-banner" style="
         background: rgba(16,185,129,0.1);
