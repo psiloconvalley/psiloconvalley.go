@@ -108,7 +108,7 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 		return fmt.Errorf("invoice not found: %w", err)
 	}
 
-		validTransitions := map[string]map[string]bool{
+	validTransitions := map[string]map[string]bool{
 		"draft":   {"sent": true, "paid": true, "void": true},
 		"sent":    {"paid": true, "overdue": true, "void": true},
 		"overdue": {"paid": true, "void": true},
@@ -133,33 +133,33 @@ func (r *InvoiceRepo) UpdateInvoiceStatus(
 		newStatus, paymentMethod, id, userID,
 	)
 	return err
-	return err
 }
 func (r *InvoiceRepo) DeleteDraftInvoice(
 	ctx context.Context,
 	id int64,
 	userID int64,
 ) error {
-	var status string
-	err := r.db.QueryRowContext(ctx,
-		`SELECT status FROM invoices WHERE id = $1 AND user_id = $2`,
-		id, userID,
-	).Scan(&status)
-	if err != nil {
-		return fmt.Errorf("invoice not found: %w", err)
-	}
-	if status != "draft" {
-		return fmt.Errorf(
-			"only draft invoices can be deleted — use void for %s invoices",
-			status,
-		)
-	}
-
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
+
+	var status string
+	err = tx.QueryRowContext(ctx,
+		`SELECT status FROM invoices WHERE id = $1 AND user_id = $2 FOR UPDATE`,
+		id, userID,
+	).Scan(&status)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("invoice not found")
+		}
+		return fmt.Errorf("fetch status: %w", err)
+	}
+
+	if status != "draft" {
+		return fmt.Errorf("only draft invoices can be deleted — use void for %s invoices", status)
+	}
 
 	if _, err := tx.ExecContext(ctx,
 		`DELETE FROM invoice_items WHERE invoice_id = $1`, id,
@@ -168,7 +168,7 @@ func (r *InvoiceRepo) DeleteDraftInvoice(
 	}
 
 	if _, err := tx.ExecContext(ctx,
-		`DELETE FROM invoices WHERE id = $1 AND user_id = $2 AND status = 'draft'`,
+		`DELETE FROM invoices WHERE id = $1 AND user_id = $2`,
 		id, userID,
 	); err != nil {
 		return fmt.Errorf("delete invoice: %w", err)
