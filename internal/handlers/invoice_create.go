@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"html/template"
 	"log/slog"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -77,6 +76,23 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 		Message string
 	}
 	var errs []FormError
+
+	// Parse numeric inputs first so we can highlight validation errors to the user
+	taxRateBps, err := service.ParseTaxRateBps(r.FormValue("tax_rate"))
+	if err != nil {
+		errs = append(errs, FormError{
+			Field:   "tax_rate",
+			Message: "Tax rate must be a valid percentage between 0 and 100 (e.g., 8.25)",
+		})
+	}
+
+	discountCents, err := service.ParseCurrencyCents(r.FormValue("discount_amount"))
+	if err != nil {
+		errs = append(errs, FormError{
+			Field:   "discount_amount",
+			Message: "Discount must be a valid positive amount (e.g., 10.00)",
+		})
+	}
 
 	if len(clientName) < 2 {
 		errs = append(errs, FormError{
@@ -179,10 +195,6 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ── Numeric fields ───────────────────────────────────────────────
-	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
-	taxRateBps := int64(math.Round(taxRatePct * 100))
-	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
-	discountCents := int64(math.Round(discountAmt * 100))
 	showLogo := r.FormValue("show_logo") == "on"
 	showTitle := r.FormValue("show_title") == "on"
 	autoReminders := r.FormValue("auto_reminders") == "on"
@@ -192,7 +204,6 @@ func (h *Handlers) InvoiceCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 	templateID := r.FormValue("template_id")
 	brandColor := r.FormValue("brand_color")
-
 	// ── Auto-generate invoice number if blank ─────────────────────────
 	if invoiceNumber == "" {
 		if user != nil {
