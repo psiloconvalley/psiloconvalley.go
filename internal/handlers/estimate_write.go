@@ -126,16 +126,28 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 		bizProfileID = &bp.ID
 	}
 
+	override := r.FormValue("company_override") == "1"
+	var compName, compEmail, compAddress, compCity, compZip, compState, compCountry string
+	if override {
+		compName = companyName
+		compEmail = strings.TrimSpace(r.FormValue("company_email"))
+		compAddress = strings.TrimSpace(r.FormValue("company_address"))
+		compCity = strings.TrimSpace(r.FormValue("company_city"))
+		compZip = strings.TrimSpace(r.FormValue("company_zip"))
+		compState = strings.TrimSpace(r.FormValue("company_state"))
+		compCountry = strings.TrimSpace(r.FormValue("company_country"))
+	}
+
 	inv := &repo.Invoice{
 		UserID:              &user.ID,
 		BusinessProfileID:   bizProfileID,
-		CompanyName:         companyName,
-		CompanyEmail:        strings.TrimSpace(r.FormValue("company_email")),
-		CompanyAddress:      strings.TrimSpace(r.FormValue("company_address")),
-		CompanyCity:         strings.TrimSpace(r.FormValue("company_city")),
-		CompanyZip:          strings.TrimSpace(r.FormValue("company_zip")),
-		CompanyState:        strings.TrimSpace(r.FormValue("company_state")),
-		CompanyCountry:      strings.TrimSpace(r.FormValue("company_country")),
+		CompanyName:         compName,
+		CompanyEmail:        compEmail,
+		CompanyAddress:      compAddress,
+		CompanyCity:         compCity,
+		CompanyZip:          compZip,
+		CompanyState:        compState,
+		CompanyCountry:      compCountry,
 		ClientName:          clientName,
 		ClientEmail:         strings.TrimSpace(r.FormValue("client_email")),
 		ClientAddress:       strings.TrimSpace(r.FormValue("client_address")),
@@ -169,7 +181,7 @@ func (h *Handlers) EstimateCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.App.UsageRepo.Increment(r.Context(), user.ID, "estimates"); err != nil {
-    		slog.Warn("estimate usage increment failed", "err", err)
+		slog.Warn("estimate usage increment failed", "err", err)
 	}
 	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     audit.UserIDPtr(user.ID),
@@ -245,13 +257,24 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ── Update fields ─────────────────────────────────────────────────
-	inv.CompanyName = strings.TrimSpace(r.FormValue("company_name"))
-	inv.CompanyEmail = strings.TrimSpace(r.FormValue("company_email"))
-	inv.CompanyAddress = strings.TrimSpace(r.FormValue("company_address"))
-	inv.CompanyCity = strings.TrimSpace(r.FormValue("company_city"))
-	inv.CompanyZip = strings.TrimSpace(r.FormValue("company_zip"))
-	inv.CompanyState = strings.TrimSpace(r.FormValue("company_state"))
-	inv.CompanyCountry = strings.TrimSpace(r.FormValue("company_country"))
+	override := r.FormValue("company_override") == "1"
+	if override {
+		inv.CompanyName = strings.TrimSpace(r.FormValue("company_name"))
+		inv.CompanyEmail = strings.TrimSpace(r.FormValue("company_email"))
+		inv.CompanyAddress = strings.TrimSpace(r.FormValue("company_address"))
+		inv.CompanyCity = strings.TrimSpace(r.FormValue("company_city"))
+		inv.CompanyZip = strings.TrimSpace(r.FormValue("company_zip"))
+		inv.CompanyState = strings.TrimSpace(r.FormValue("company_state"))
+		inv.CompanyCountry = strings.TrimSpace(r.FormValue("company_country"))
+	} else {
+		inv.CompanyName = ""
+		inv.CompanyEmail = ""
+		inv.CompanyAddress = ""
+		inv.CompanyCity = ""
+		inv.CompanyZip = ""
+		inv.CompanyState = ""
+		inv.CompanyCountry = ""
+	}
 	inv.ClientName = strings.TrimSpace(r.FormValue("client_name"))
 	inv.ClientEmail = strings.TrimSpace(r.FormValue("client_email"))
 	inv.ClientAddress = strings.TrimSpace(r.FormValue("client_address"))
@@ -272,7 +295,7 @@ func (h *Handlers) EstimateEditPost(w http.ResponseWriter, r *http.Request) {
 		inv.LogoPosition = "left"
 	}
 	taxRatePct, _ := strconv.ParseFloat(r.FormValue("tax_rate"), 64)
-	inv.TaxRateBps = int64(taxRatePct * 100)
+	inv.TaxRateBps = int64(math.Round(taxRatePct * 100))
 	discountAmt, _ := strconv.ParseFloat(r.FormValue("discount_amount"), 64)
 	inv.DiscountAmountCents = int64(math.Round(discountAmt * 100))
 	service.NormalizeTemplateFields(inv, catalog.IsPaid(user.Plan))
@@ -423,7 +446,7 @@ func (h *Handlers) EstimateConvertPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-		audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
+	audit.Log(r.Context(), h.App.AuditRepo, audit.Entry{
 		UserID:     audit.UserIDPtr(user.ID),
 		Action:     audit.ActionEstimateConverted,
 		EntityType: audit.EntityEstimate,
@@ -433,4 +456,3 @@ func (h *Handlers) EstimateConvertPost(w http.ResponseWriter, r *http.Request) {
 	})
 	http.Redirect(w, r, fmt.Sprintf("/invoices/%d", newID), http.StatusSeeOther)
 }
-

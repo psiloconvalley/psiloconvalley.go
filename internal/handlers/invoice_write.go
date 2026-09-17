@@ -278,7 +278,6 @@ func (h *Handlers) InvoiceDeletePost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/invoices?deleted=true", http.StatusSeeOther)
 }
 
-
 // InvoiceReportPaymentPost handles clients reporting that they sent Zelle or check payment.
 // This notifies the owner and updates the invoice view state cleanly.
 func (h *Handlers) InvoiceReportPaymentPost(w http.ResponseWriter, r *http.Request) {
@@ -294,12 +293,19 @@ func (h *Handlers) InvoiceReportPaymentPost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Security validation: match public token
+	// Security validation: require either a valid public token OR an authenticated user
 	accessToken := r.FormValue("access")
 	if accessToken == "" {
 		accessToken = r.URL.Query().Get("access")
 	}
-	if inv.PublicToken != "" && accessToken != inv.PublicToken && auth.GetUser(r) == nil {
+	authenticated := auth.GetUser(r) != nil
+	tokenValid := inv.PublicToken != "" && accessToken == inv.PublicToken
+
+	if !authenticated && !tokenValid {
+		slog.Warn("unauthorized attempt to report payment",
+			"invoice_id", id,
+			"ip", auth.RealIP(r),
+		)
 		http.Error(w, "Unauthorized", http.StatusForbidden)
 		return
 	}
@@ -328,7 +334,7 @@ func (h *Handlers) InvoiceReportPaymentPost(w http.ResponseWriter, r *http.Reque
 			}
 
 			verifyURL := fmt.Sprintf("%s/invoices/%d", h.App.BaseURL, inv.ID)
-			
+
 			// Queue resend mailer
 			_ = h.App.Mailer.SendPaymentReportedNotification(owner.Email, mailer.PaymentReportedEmailData{
 				InvoiceNumber: inv.InvoiceNumber,
