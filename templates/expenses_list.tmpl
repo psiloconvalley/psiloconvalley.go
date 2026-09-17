@@ -43,16 +43,16 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>{{.T.ExpensesListDate}}</th>
-                    <th>{{.T.ExpensesListVendor}}</th>
-                    <th>{{.T.ExpensesListCategory}}</th>
-                    <th>{{.T.ExpensesListClient}}</th>
-                    <th class="right">{{.T.ExpensesListAmount}}</th>
-                    <th></th>
+                    <th>{{.T.ExpensesListThDate}}</th>
+                    <th>{{.T.ExpensesListThVendor}}</th>
+                    <th>{{.T.ExpensesListThCategory}}</th>
+                    <th>{{.T.ExpensesListThDesc}}</th>
+                    <th class="right">{{.T.ExpensesListThAmount}}</th>
+                    <th>{{.T.ExpensesListThReceipt}}</th>
                     <th></th>
                 </tr>
             </thead>
-            <tbody>
+               <tbody>
                 {{range .Expenses}}
                 <tr>
                     <td class="expense-date">{{.ExpenseDate.Format "Jan 02, 2006"}}</td>
