@@ -50,13 +50,76 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
+     body {
         font-family: var(--font-sans);
         background: var(--bg);
         color: var(--text-primary);
         min-height: 100vh;
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
+    }
+
+    /* ── Global Button Utilities ────────────────────────────────────── */
+    .btn-primary, .btn-secondary, .btn-success, .btn-delete, .btn-danger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 18px;
+        height: 36px; /* Strict 36px matches height */
+        border-radius: var(--radius-md);
+        font-family: var(--font-sans);
+        font-size: var(--text-sm);
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    /* Primary: Solid White (Form Submissions, Core Triggers) */
+    .btn-primary {
+        background: #ffffff;
+        color: #0a0f1a;
+        border: none;
+    }
+    .btn-primary:hover {
+        background: #e5e5e5;
+    }
+
+    /* Secondary: Outlined (Back, Cancel, Secondary Actions) */
+    .btn-secondary {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+        border-color: var(--border-hover);
+        color: var(--text-primary);
+    }
+
+    /* Success: Solid Emerald (Mark Paid, Approve Payment, Confirm) */
+    .btn-success {
+        background: var(--accent);
+        color: #052e16;
+        border: none;
+    }
+    .btn-success:hover {
+        background: var(--accent-dim);
+        color: #052e16;
+    }
+
+    /* Danger / Delete: Red Outlined (Wiping, Deleting, Voiding) */
+    .btn-delete, .btn-danger {
+        background: transparent;
+        color: var(--error-light);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    .btn-delete:hover, .btn-danger:hover {
+        background: rgba(220, 38, 38, 0.1);
+        border-color: var(--error);
+        color: var(--error-light);
     }
 </style>
 {{end}}
