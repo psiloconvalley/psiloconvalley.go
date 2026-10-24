@@ -30,7 +30,11 @@ func main() {
 	defer app.CloseDB()
 
 	// 2b. Run database migrations
-	if err := migrate.Run(app.DB, "/app/migrations"); err != nil {
+	migrationsDir := os.Getenv("MIGRATIONS_DIR")
+if migrationsDir == "" {
+    migrationsDir = "/app/migrations" // Railway container default
+}
+if err := migrate.Run(app.DB, migrationsDir); err != nil {
 		log.Fatal("migration failed: ", err)
 	}
 
