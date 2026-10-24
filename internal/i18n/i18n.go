@@ -278,6 +278,7 @@ type T struct {
 	ClientFormNewTitle         string
 	ClientFormEditTitle        string
 	ClientFormNewSubtitle      string
+	ClientFormDeleteConfirm    string
 	ClientFormEditSubtitle     string
 	ClientFormSectionContact   string
 	ClientFormClientName       string

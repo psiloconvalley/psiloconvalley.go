@@ -264,6 +264,8 @@ var es = T{
 	ClientsAddFirst:               "Agregar Primer Cliente",
 	ClientFormNewTitle:            "Nuevo Cliente",
 	ClientFormEditTitle:           "Editar Cliente",
+	ClientFormDeleteConfirm:       "¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.",
+
 	ClientFormNewSubtitle:         "Los clientes guardados se llenan automáticamente en cada nueva factura.",
 	ClientFormEditSubtitle:        "Actualiza la información del cliente. Los cambios aplican a futuras facturas.",
 	ClientFormSectionContact:      "Información de Contacto",

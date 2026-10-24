@@ -264,6 +264,7 @@ var en = T{
 	ClientsAddFirst:               "Add First Client",
 	ClientFormNewTitle:            "New Client",
 	ClientFormEditTitle:           "Edit Client",
+	ClientFormDeleteConfirm:       "Are you sure you want to delete this client? This action cannot be undone.",
 	ClientFormNewSubtitle:         "Saved clients auto-fill on every new invoice.",
 	ClientFormEditSubtitle:        "Update client information. Changes apply to future invoices.",
 	ClientFormSectionContact:      "Contact Information",
