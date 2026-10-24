@@ -1,0 +1,37 @@
+# ============================================================================
+# Railway deployment configuration — psiloconvalley.go
+# ============================================================================
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "/app/psiloconvalley"
+healthcheckPath = "/healthz"
+healthcheckTimeout = 10
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Only trigger redeploys on changes that actually affect the running app.
+# Editing handoff docs, test files, or README no longer costs a 3-minute deploy.
+[deploy.watchPatterns]
+include = [
+  "cmd/**",
+  "internal/**",
+  "templates/**",
+  "static/**",
+  "migrations/**",
+  "go.mod",
+  "go.sum",
+  "Dockerfile",
+  "railway.toml"
+]
+exclude = [
+  "**/*.md",
+  "**/*_test.go",
+  "**/*.txt",
+  ".github/**",
+  "docs/**",
+  "HANDOFF*"
+]

@@ -1,22 +1,23 @@
 package main
 
 import (
+	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
-	"time"
-	"context"
 	"os/signal"
-	"syscall"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/justinas/nosurf"
 
 	"psiloconvalley/internal/app"
-	"psiloconvalley/internal/migrate"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/handlers"
+	"psiloconvalley/internal/migrate"
 	"psiloconvalley/internal/pdf"
 	"psiloconvalley/internal/router"
 )
@@ -31,10 +32,10 @@ func main() {
 
 	// 2b. Run database migrations
 	migrationsDir := os.Getenv("MIGRATIONS_DIR")
-if migrationsDir == "" {
-    migrationsDir = "/app/migrations" // Railway container default
-}
-if err := migrate.Run(app.DB, migrationsDir); err != nil {
+	if migrationsDir == "" {
+		migrationsDir = "/app/migrations" // Railway container default
+	}
+	if err := migrate.Run(app.DB, migrationsDir); err != nil {
 		log.Fatal("migration failed: ", err)
 	}
 
@@ -63,7 +64,7 @@ if err := migrate.Run(app.DB, migrationsDir); err != nil {
 		return strings.HasPrefix(r.URL.Path, "/og/")
 	})
 	csrfHandler.ExemptFunc(func(r *http.Request) bool {
-	return strings.HasPrefix(r.URL.Path, "/estimates/") &&
+		return strings.HasPrefix(r.URL.Path, "/estimates/") &&
 			strings.HasSuffix(r.URL.Path, "/respond")
 	})
 	csrfHandler.SetBaseCookie(http.Cookie{
@@ -73,7 +74,11 @@ if err := migrate.Run(app.DB, migrationsDir); err != nil {
 		SameSite: http.SameSiteLaxMode,
 	})
 	csrfHandler.SetFailureHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("[SECURITY] CSRF Rejection: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+		slog.Warn("csrf rejection",
+			"method", r.Method,
+			"path", r.URL.Path,
+			"ip", auth.RealIP(r),
+		)
 		http.Error(w, "Forbidden — invalid or missing CSRF token", http.StatusForbidden)
 	}))
 
@@ -91,7 +96,7 @@ if err := migrate.Run(app.DB, migrationsDir); err != nil {
 		IdleTimeout:  120 * time.Second,
 	}
 
-		// ── Scheduler Engine ─────────────────────────────────────────────
+	// ── Scheduler Engine ─────────────────────────────────────────────
 	// Runs in a goroutine alongside the HTTP server.
 	// Cancelled gracefully when the process receives SIGINT or SIGTERM.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -100,7 +105,6 @@ if err := migrate.Run(app.DB, migrationsDir); err != nil {
 	go application.Scheduler.Start(ctx)
 
 	log.Printf("🚀 PsiloConValley Operating on :%s [CSRF ENABLED]", port)
-	log.Fatal(srv.ListenAndServe())	
-
+	log.Fatal(srv.ListenAndServe())
 
 }
