@@ -111,8 +111,6 @@ func (h *Handlers) StripeWebhook(w http.ResponseWriter, r *http.Request) {
 		switch newPlan {
 		case "pro", "promax":
 			// valid — keep as-is
-		case "growth":
-			newPlan = "pro" // legacy compatibility
 		default:
 			newPlan = "pro"
 		}

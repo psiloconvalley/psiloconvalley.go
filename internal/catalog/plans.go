@@ -23,9 +23,6 @@ const (
 	PlanFree   = "free"
 	PlanPro    = "pro"
 	PlanProMax = "promax"
-
-	// Legacy plan — mapped to Pro in all new logic
-	PlanGrowthLegacy = "growth"
 )
 
 // Plan limits
@@ -40,12 +37,17 @@ const (
 	ProSendLimit     = 30
 	ProClientLimit   = 30
 	ProEstimateLimit = 30
-	ProReportLimit   = 0 // unlimited (0 = no limit in usageAllowed)
-)
+	ProReportLimit   = 0 
 
-// IsPro returns true for Pro plan users.
+)
+// grandfatheredUserIDs lists users with unlimited access regardless of plan tier.
+// Early investors / founding customers. Add with care — this bypasses billing limits.
+var grandfatheredUserIDs = map[int64]bool{
+	6: true, // Salvador — first paying customer, grandfathered as early investor
+}
+
 func IsPro(plan string) bool {
-	return plan == PlanPro || plan == PlanGrowthLegacy
+	return plan == PlanPro
 }
 
 // IsProMax returns true for Pro Max plan users.
@@ -66,7 +68,7 @@ func IsUnlimited(userID int64, plan string) bool {
 		return true
 	}
 	// Grandfather clause: early Pro users keep unlimited access
-	if IsPro(plan) && userID <= 10 {
+	if IsPro(plan) && grandfatheredUserIDs[userID] {
 		return true
 	}
 	return false
@@ -85,9 +87,6 @@ func HasAdvancedTemplates(userID int64, plan string) bool {
 // NormalizePlan maps legacy plan names to current ones.
 // "growth" → "pro" for any new logic.
 func NormalizePlan(plan string) string {
-	if plan == PlanGrowthLegacy {
-		return PlanPro
-	}
 	if plan == PlanPro || plan == PlanProMax || plan == PlanFree {
 		return plan
 	}
