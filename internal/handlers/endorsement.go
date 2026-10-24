@@ -300,7 +300,7 @@ func (h *Handlers) EndorsementDeclinePost(w http.ResponseWriter, r *http.Request
 
 // ── Owner: Management Page ────────────────────────────────────────────────
 // GET /endorsements
-// Salvador sees all his endorsements — pending, submitted, declined.
+// The authenticated user sees all their own endorsements — pending, submitted, declined.
 // Can delete any endorsement.
 
 func (h *Handlers) EndorsementsListGet(w http.ResponseWriter, r *http.Request) {

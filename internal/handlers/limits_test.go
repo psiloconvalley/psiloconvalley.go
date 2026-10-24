@@ -1,4 +1,3 @@
-
 package handlers
 
 import (
@@ -52,38 +51,44 @@ func TestUsageAllowedFor_NilUser(t *testing.T) {
 	}
 }
 
-func TestUsageAllowedFor_Salvador_Pro_IsUnlimited(t *testing.T) {
+func TestUsageAllowedFor_GrandfatheredUser_OnPro_IsUnlimited(t *testing.T) {
+	// User ID 6 is in the grandfather allowlist (founding customer).
+	// On Pro, they get unlimited access regardless of count.
 	store := newFakeUsage()
-	store.counts["6:invoices"] = 999 // way over any limit
+	store.counts["6:invoices"] = 999
 	user := &repo.User{ID: 6, Plan: catalog.PlanPro}
 
 	got := usageAllowedFor(context.Background(), store, user, "invoices", 5, 30)
 	if !got {
-		t.Fatal("Salvador on Pro should be grandfathered unlimited, even at 999")
+		t.Fatal("grandfathered user on Pro should be unlimited, even at 999")
 	}
 }
 
-func TestUsageAllowedFor_Salvador_Free_IsNotGrandfathered(t *testing.T) {
+func TestUsageAllowedFor_GrandfatheredUser_OnFree_IsNotExempt(t *testing.T) {
+	// Grandfather status requires an active Pro plan. If a grandfathered
+	// user drops to Free, normal free-tier limits apply.
 	store := newFakeUsage()
-	store.counts["6:invoices"] = 5 // at free limit
+	store.counts["6:invoices"] = 5
 	user := &repo.User{ID: 6, Plan: catalog.PlanFree}
 
 	got := usageAllowedFor(context.Background(), store, user, "invoices", 5, 30)
 	if got {
-		t.Fatal("grandfather requires Pro plan; Salvador on Free at limit should be blocked")
+		t.Fatal("grandfather requires Pro plan; Free user at limit should be blocked")
 	}
 }
 
-func TestUsageAllowedFor_NonSalvador_LowID_IsNotGrandfathered(t *testing.T) {
-	// ID 1 is a test account. The old code (userID <= 10) would have
-	// grandfathered this user. The new allowlist must NOT.
+func TestUsageAllowedFor_NonGrandfatheredLowID_IsNotExempt(t *testing.T) {
+	// Regression trap: the old implementation granted unlimited access to
+	// any userID <= 10 on Pro. The new allowlist must NOT exempt low IDs
+	// that aren't explicitly listed. If this test fails, someone reverted
+	// to range-based grandfathering.
 	store := newFakeUsage()
-	store.counts["1:invoices"] = 30 // at pro limit
+	store.counts["1:invoices"] = 30
 	user := &repo.User{ID: 1, Plan: catalog.PlanPro}
 
 	got := usageAllowedFor(context.Background(), store, user, "invoices", 5, 30)
 	if got {
-		t.Fatal("ID 1 is a test account, not grandfathered — should be blocked at pro limit")
+		t.Fatal("low user IDs are not grandfathered by default — should be blocked at pro limit")
 	}
 }
 

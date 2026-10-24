@@ -43,7 +43,7 @@ const (
 // grandfatheredUserIDs lists users with unlimited access regardless of plan tier.
 // Early investors / founding customers. Add with care — this bypasses billing limits.
 var grandfatheredUserIDs = map[int64]bool{
-	6: true, // Salvador — first paying customer, grandfathered as early investor
+	6: true, 
 }
 
 func IsPro(plan string) bool {
