@@ -5,6 +5,7 @@
 package handlers
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 
@@ -14,10 +15,22 @@ import (
 )
 
 // ── Core metering helper ─────────────────────────────────────────────
-// Failure posture: fail-open on meter read errors.
+
+// usageStore is the subset of repo.UsageRepo this package depends on.
+// Defined here (not in repo/) so handlers own the contract — Go stdlib
+// convention of "accept interfaces, return structs."
+// *repo.UsageRepo satisfies this in production; *fakeUsageStore in tests.
+type usageStore interface {
+	Get(ctx context.Context, userID int64, column string) (int, error)
+	Increment(ctx context.Context, userID int64, column string) error
+}
+
+// usageAllowedFor is the pure business logic — no HTTP, no handler state.
+// All inputs explicit, all outputs returned. This is what tests exercise.
+//
+// Failure posture: fail-OPEN on meter read errors.
 // Quota checks are commercial controls, not security boundaries.
-func (h *Handlers) usageAllowed(r *http.Request, feature string, freeLimit, proLimit int) bool {
-	user := auth.GetUser(r)
+func usageAllowedFor(ctx context.Context, store usageStore, user *repo.User, feature string, freeLimit, proLimit int) bool {
 	if user == nil {
 		return false
 	}
@@ -25,7 +38,7 @@ func (h *Handlers) usageAllowed(r *http.Request, feature string, freeLimit, proL
 		return true
 	}
 
-	count, err := h.App.UsageRepo.Get(r.Context(), user.ID, feature)
+	count, err := store.Get(ctx, user.ID, feature)
 	if err != nil {
 		slog.Warn("usage meter read failed, allowing user",
 			"feature", feature,
@@ -45,6 +58,18 @@ func (h *Handlers) usageAllowed(r *http.Request, feature string, freeLimit, proL
 	return count < limit
 }
 
+// usageAllowed is the thin HTTP wrapper. Pulls user + context out of the
+// request and delegates to usageAllowedFor.
+func (h *Handlers) usageAllowed(r *http.Request, feature string, freeLimit, proLimit int) bool {
+	return usageAllowedFor(
+		r.Context(),
+		h.App.UsageRepo,
+		auth.GetUser(r),
+		feature,
+		freeLimit,
+		proLimit,
+	)
+}
 // ── Client limit ─────────────────────────────────────────────────────
 func (h *Handlers) canAddClient(r *http.Request) bool {
 	user := auth.GetUser(r)
