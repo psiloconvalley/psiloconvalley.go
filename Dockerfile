@@ -18,7 +18,7 @@ WORKDIR /src
 
 # Go module layer — cached unless go.mod/go.sum change
 COPY go.mod go.sum ./
-RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod \
+RUN --mount=type=cache,id=s/${RAILWAY_SERVICE_ID}-go-mod,target=/go/pkg/mod \
     go mod download && go mod verify
 
 # Copy only Go source needed to build the binary
@@ -27,8 +27,8 @@ COPY internal/ ./internal/
 
 # BuildKit cache mounts persist the Go build cache across builds.
 # First deploy: no benefit. Every subsequent deploy: 10-20s faster.
-RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
-    --mount=type=cache,id=go-mod,target=/go/pkg/mod \
+RUN --mount=type=cache,id=s/${RAILWAY_SERVICE_ID}-go-build,target=/root/.cache/go-build \
+    --mount=type=cache,id=s/${RAILWAY_SERVICE_ID}-go-mod,target=/go/pkg/mod \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build \
       -trimpath \
