@@ -4,6 +4,7 @@ package handlers
 import (
 	"fmt"
 	"html/template"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -12,6 +13,7 @@ import (
 	"psiloconvalley/internal/app"
 	"psiloconvalley/internal/auth"
 	"psiloconvalley/internal/catalog"
+	"psiloconvalley/internal/repo"
 	"psiloconvalley/internal/service"
 	"psiloconvalley/internal/views"
 )
@@ -107,17 +109,34 @@ func (h *Handlers) InvoicesList(w http.ResponseWriter, r *http.Request) {
 
 	monthlyCount, _ := h.App.UserRepo.GetMonthlyInvoiceCount(r.Context(), user.ID)
 
+	// Batch-fetch most recent human view per invoice when the feature is on.
+	// One round-trip for the whole page; absent entries mean "no human views".
+	lastViews := map[int64]repo.InvoiceView{}
+	if h.App.ViewLoggingEnabled && len(invoices) > 0 {
+		ids := make([]int64, 0, len(invoices))
+		for _, inv := range invoices {
+			ids = append(ids, inv.ID)
+		}
+		if m, err := h.App.InvoiceViewRepo.LastHumanViewForInvoices(r.Context(), ids); err != nil {
+			slog.Warn("invoices list: last views batch fetch failed", "user_id", user.ID, "err", err)
+		} else {
+			lastViews = m
+		}
+	}
+
 	h.App.Render(w, r, "invoices_list.tmpl", map[string]any{
-		"Invoices":     invoices,
-		"User":         user,
-		"MonthlyCount": monthlyCount,
+		"Invoices":           invoices,
+		"User":               user,
+		"MonthlyCount":       monthlyCount,
 		"MonthlyLimit": func() int {
 			if catalog.IsUnlimited(user.ID, user.Plan) { return 0 }
 			if catalog.IsPro(user.Plan) { return catalog.ProInvoiceLimit }
 			return catalog.FreeInvoiceLimit
 		}(),
-		"IsPro": catalog.IsUnlimited(user.ID, user.Plan),
-		"Deleted":      r.URL.Query().Get("deleted") == "true",
+		"IsPro":              catalog.IsUnlimited(user.ID, user.Plan),
+		"Deleted":            r.URL.Query().Get("deleted") == "true",
+		"ViewLoggingEnabled": h.App.ViewLoggingEnabled,
+		"LastViews":          lastViews,
 	})
 }
 
