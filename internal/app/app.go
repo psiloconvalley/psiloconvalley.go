@@ -52,6 +52,8 @@ type App struct {
 	AddressService    *address.Service
 	QuoteRequestRepo  *repo.QuoteRequestRepo
 	EndorsementRepo   *repo.EndorsementRepo
+	InvoiceViewRepo   *repo.InvoiceViewRepo
+	ViewLoggingEnabled bool
 }
 
 // DB returns the underlying database connection for direct queries.
@@ -127,6 +129,8 @@ func NewApp(db *sql.DB) *App {
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	stripePrice := os.Getenv("STRIPE_PRICE_ID")
 	stripeProMaxPrice := os.Getenv("STRIPE_PROMAX_PRICE_ID")
+	viewLoggingEnabled := os.Getenv("ENABLE_VIEW_LOGGING") == "1"
+
 
 	schedRepo := repo.NewSchedulerRepo(db)
 	sched := scheduler.New(schedRepo, 60*time.Second)
@@ -176,6 +180,8 @@ func NewApp(db *sql.DB) *App {
 		UsageRepo:         repo.NewUsageRepo(db),
 		QuoteRequestRepo:  repo.NewQuoteRequestRepo(db),
 		EndorsementRepo:   repo.NewEndorsementRepo(db),
+		InvoiceViewRepo:   repo.NewInvoiceViewRepo(db),
+		ViewLoggingEnabled: viewLoggingEnabled,
 		PasskeyRepo:       repo.NewPasskeyRepo(db),
 	}
 }
