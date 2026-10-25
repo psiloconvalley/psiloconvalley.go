@@ -141,6 +141,8 @@ func (h *Handlers) InvoiceDetail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized - You can only view your own invoices", http.StatusForbidden)
 		return
 	}
+	
+	h.logInvoiceViewAsync(r, inv, "html")
 
 	invoiceView := views.MapInvoicePage(inv, items, "view")
 
