@@ -5,7 +5,7 @@
 -- for public access.
 
 ALTER TABLE invoices
-  ADD COLUMN public_token VARCHAR(64);
+  ADD COLUMN IF NOT EXISTS public_token VARCHAR(64);
 
 CREATE UNIQUE INDEX idx_invoices_public_token
   ON invoices (public_token)

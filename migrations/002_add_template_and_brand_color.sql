@@ -13,5 +13,5 @@
 --   Default: #0d1422 (current deep slate)
 
 ALTER TABLE invoices
-  ADD COLUMN template_id VARCHAR(20) NOT NULL DEFAULT 'classic',
-  ADD COLUMN brand_color VARCHAR(7)  NOT NULL DEFAULT '#0d1422';
+  ADD COLUMN IF NOT EXISTS template_id VARCHAR(20) NOT NULL DEFAULT 'classic',
+  ADD COLUMN IF NOT EXISTS brand_color VARCHAR(7)  NOT NULL DEFAULT '#0d1422';

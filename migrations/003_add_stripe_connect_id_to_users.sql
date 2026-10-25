@@ -3,4 +3,4 @@
 -- Format: acct_...
 
 ALTER TABLE users
-  ADD COLUMN stripe_connect_id VARCHAR(255);
+  ADD COLUMN IF NOT EXISTS stripe_connect_id VARCHAR(255);
