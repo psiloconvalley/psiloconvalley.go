@@ -345,14 +345,22 @@ type T struct {
 	InvoicesPayOther          string
 	InvoicesPayConfirm        string
 	InvoicesPayCancel         string
-	InvoicesUndoPayment     string
-	InvoicesReopenDraft     string
-	InvoicesPaidVia         string
-	InvoicesStatusPanel     string
-	InvoicesMarkSent        string
-	InvoicesMarkOverdue     string
-	InvoicesVoid            string
-	InvoicesUndoWarningCard string
+	InvoicesUndoPayment       string
+	InvoicesReopenDraft       string
+	InvoicesPaidVia           string
+	InvoicesStatusPanel       string
+	InvoicesMarkSent          string
+	InvoicesMarkOverdue       string
+	InvoicesVoid              string
+	InvoicesUndoWarningCard   string
+	// Invoice view tracking (Phase A)
+	InvoicesSectionDrafts     string
+	InvoicesSectionAwaiting   string
+	InvoicesSectionPaid       string
+	InvoicesThOpened          string
+	InvoicesOpenedNever       string
+	InvoicesOpenedJustNow     string
+	InvoicesOpenedYesterday   string
 
 	// Estimates list page
 	EstimatesListTitle             string
