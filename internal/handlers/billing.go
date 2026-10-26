@@ -274,6 +274,8 @@ func (h *Handlers) InvoicePayGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.logInvoiceViewAsync(r, inv, "pay")
+
 	// Cannot pay invoices that are already paid or voided
 	if inv.Status == "paid" || inv.Status == "void" {
 		http.Redirect(w, r, "/invoices/"+strconv.FormatInt(id, 10), http.StatusSeeOther)

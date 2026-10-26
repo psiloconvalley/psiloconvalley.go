@@ -339,6 +339,13 @@ var en = T{
 	InvoicesMarkOverdue:           "Mark Overdue",
 	InvoicesVoid:                  "Void",
 	InvoicesUndoWarningCard:       "Note: This does not refund the card payment.",
+	InvoicesSectionDrafts:	       "Drafts",
+	InvoicesSectionAwaiting:       "Awaiting Payment",
+	InvoicesSectionPaid:           "Paid",
+	InvoicesThOpened:              "Opened",
+	InvoicesOpenedNever:           "—",
+	InvoicesOpenedJustNow:         "just now",
+	InvoicesOpenedYesterday:       "yesterday",
 
 
 	EstimatesListTitle:             "Estimates",

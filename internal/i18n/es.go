@@ -340,6 +340,13 @@ var es = T{
 	InvoicesMarkOverdue:     "Marcar Vencida",
 	InvoicesVoid:            "Anular",
 	InvoicesUndoWarningCard: "Nota: Esto no reembolsa el pago con tarjeta.",
+	InvoicesSectionDrafts:   	"Borradores",
+	InvoicesSectionAwaiting: 	"Pendiente de Pago",
+	InvoicesSectionPaid:     	"Pagadas",
+	InvoicesThOpened:        	"Abierta",
+	InvoicesOpenedNever:     	"—",
+	InvoicesOpenedJustNow:   	"ahora",
+	InvoicesOpenedYesterday: 	"ayer",
 
 	EstimatesListTitle:             "Presupuestos",
 	EstimatesListTotal:             "en total",
