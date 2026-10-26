@@ -16,6 +16,7 @@
 package handlers
 
 import (
+	"net"
 	"context"
 	"log/slog"
 	"net/http"
@@ -109,20 +110,17 @@ func (h *Handlers) logInvoiceViewAsync(r *http.Request, inv *repo.Invoice, event
 // security decisions.
 func clientIP(r *http.Request) string {
 	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		// XFF can be a comma-separated list; the first entry is the client.
 		if comma := strings.Index(xff, ","); comma >= 0 {
 			return strings.TrimSpace(xff[:comma])
 		}
 		return strings.TrimSpace(xff)
 	}
-	// RemoteAddr is host:port; strip the port.
-	addr := r.RemoteAddr
-	if colon := strings.LastIndex(addr, ":"); colon >= 0 {
-		return addr[:colon]
+	// net.SplitHostPort correctly handles IPv6 bracketed form "[::1]:port".
+	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		return host
 	}
-	return addr
+	return r.RemoteAddr
 }
-
 // nullableString returns nil for empty strings so the DB stores NULL
 // instead of empty string. Keeps column semantics clean.
 func nullableString(s string) *string {
