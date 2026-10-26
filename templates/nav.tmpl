@@ -26,7 +26,7 @@
                     </div>
                 </div>
                 <a href="/clients">{{.T.NavClients}}</a>
-                <a href="/pricing">{{.T.NavPricing}}</a>
+		{{if not (isPaid .User.Plan)}}<a href="/pricing">{{.T.NavPricing}}</a>{{end}}
                 <a href="/profile">{{.T.NavProfile}}</a>
 
                 <form method="POST" action="/logout">
