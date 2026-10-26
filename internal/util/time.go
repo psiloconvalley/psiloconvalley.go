@@ -56,3 +56,36 @@ func RelTime(t time.Time) string {
 	}
 	return t.Format("Jan 2")
 }
+// FmtTime renders a timestamp in operator-friendly absolute form:
+// "Oct 25, 2026 4:49 AM". Used for hover tooltips alongside RelTime.
+// Zero time renders as empty string.
+func FmtTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format("Jan 2, 2006 3:04 PM")
+}
+
+// ViewHeat buckets a view timestamp into one of four heat levels
+// used for CSS color coding in list views:
+//   "hot"  = < 1h   (bright green)
+//   "warm" = < 24h  (green)
+//   "cool" = < 7d   (amber)
+//   "cold" = >= 7d  (gray)
+// Zero time returns "" (caller should branch on never-opened separately).
+func ViewHeat(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	d := time.Since(t)
+	switch {
+	case d < time.Hour:
+		return "hot"
+	case d < 24*time.Hour:
+		return "warm"
+	case d < 7*24*time.Hour:
+		return "cool"
+	default:
+		return "cold"
+	}
+}

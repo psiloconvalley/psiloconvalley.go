@@ -13,6 +13,9 @@ func TestAllTemplatesParse(t *testing.T) {
 		"money":        util.Money,
 		"formatCents":  util.FormatCentsForInput,
 		"bpsToPercent": util.BpsToPercent,
+		"relTime":      util.RelTime,
+		"fmtTime":      util.FmtTime,
+		"viewHeat":     util.ViewHeat,
 		"field":        func(name, value string) string { return "" },
 		"mul":          func(a, b int) int { return a * b },
 		"hasPrefix":    strings.HasPrefix,
@@ -53,6 +56,9 @@ func TestInvoiceTemplatesCoverage(t *testing.T) {
 		"mul":          func(a, b int) int { return a * b },
 		"hasPrefix":    func(s, prefix string) bool { return false },
 		"hasSuffix":    func(s, suffix string) bool { return false },
+		"relTime":      func(t any) string { return "" },
+		"fmtTime":      func(t any) string { return "" },
+		"viewHeat":     func(t any) string { return "" },
 		"seq": func(start, end int) []int {
 			s := make([]int, 0, end-start+1)
 			for i := start; i <= end; i++ {

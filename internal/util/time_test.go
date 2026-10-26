@@ -52,3 +52,44 @@ func TestRelTime_WeekPlus(t *testing.T) {
 		t.Errorf("30 days ago: got %q, want %q", got, expected)
 	}
 }
+func TestFmtTime_Zero(t *testing.T) {
+	if got := FmtTime(time.Time{}); got != "" {
+		t.Fatalf("zero time: want empty, got %q", got)
+	}
+}
+
+func TestFmtTime_Format(t *testing.T) {
+	ts := time.Date(2026, time.October, 25, 16, 49, 0, 0, time.UTC)
+	got := FmtTime(ts)
+	want := "Oct 25, 2026 4:49 PM"
+	if got != want {
+		t.Fatalf("want %q, got %q", want, got)
+	}
+}
+
+func TestViewHeat_Zero(t *testing.T) {
+	if got := ViewHeat(time.Time{}); got != "" {
+		t.Fatalf("zero time: want empty, got %q", got)
+	}
+}
+
+func TestViewHeat_Buckets(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		name string
+		t    time.Time
+		want string
+	}{
+		{"hot_30min", now.Add(-30 * time.Minute), "hot"},
+		{"warm_5h", now.Add(-5 * time.Hour), "warm"},
+		{"cool_3d", now.Add(-3 * 24 * time.Hour), "cool"},
+		{"cold_30d", now.Add(-30 * 24 * time.Hour), "cold"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := ViewHeat(c.t); got != c.want {
+				t.Fatalf("want %q, got %q", c.want, got)
+			}
+		})
+	}
+}

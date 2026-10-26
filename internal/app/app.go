@@ -65,6 +65,9 @@ func NewApp(db *sql.DB) *App {
 	funcs := template.FuncMap{
 		"money":        util.Money,
 		"formatCents":  util.FormatCentsForInput,
+		"relTime":      util.RelTime,
+		"fmtTime":      util.FmtTime,
+		"viewHeat":     util.ViewHeat,
 		"bpsToPercent": util.BpsToPercent,
 		"field":        field,
 		"mul":          func(a, b int) int { return a * b },
