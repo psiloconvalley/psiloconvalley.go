@@ -191,7 +191,7 @@
                 <th>{{.T.InvoicesThClient}}</th>
                 <th>{{.T.InvoicesThIssued}}</th>
                 <th>{{.T.InvoicesThDue}}</th>
-                <th>{{.T.InvoicesThOpened}}</th>
+		<th class="center">{{.T.InvoicesThOpened}}</th>
                 <th class="right">{{.T.InvoicesThTotal}}</th>
                 <th class="right">{{.T.InvoicesThActions}}</th>
             </tr></thead>
@@ -202,7 +202,7 @@
                     <td>{{if .ClientName}}{{.ClientName}}{{else}}—{{end}}</td>
                     <td>{{if .IssueDate}}{{.IssueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
                     <td>{{if .DueDate}}{{.DueDate.Format "Jan 2, 2006"}}{{else}}—{{end}}</td>
-		     <td>{{with index $.LastViews .ID}}<span class="view-dot {{viewHeat .ViewedAt}}"></span><span style="color:rgba(255,255,255,0.85);" title="{{fmtTime .ViewedAt}}">{{relTime .ViewedAt}}</span>{{else}}<span style="color:rgba(255,255,255,0.3);">—</span>{{end}}</td>
+		    <td style="white-space:nowrap;text-align:center;">{{with index $.LastViews .ID}}<span class="view-dot {{viewHeat .ViewedAt}}"></span><span style="color:rgba(255,255,255,0.85);" title="{{fmtTime .ViewedAt}}">{{relTime .ViewedAt}}</span>{{else}}<span style="color:rgba(255,255,255,0.3);">—</span>{{end}}</td>
                     <td class="right mono">{{money .TotalCents}}</td>
                     <td><div class="row-actions">
                         <a href="/invoices/{{.ID}}/send" class="small-btn">{{$.T.InvoicesResend}}</a>
