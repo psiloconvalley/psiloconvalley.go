@@ -17,6 +17,7 @@ import (
 	"github.com/stripe/stripe-go/v81"
 	"psiloconvalley/internal/address"
 	"psiloconvalley/internal/auth"
+	"psiloconvalley/internal/catalog"
 	"psiloconvalley/internal/i18n"
 	"psiloconvalley/internal/logo"
 	"psiloconvalley/internal/mailer"
@@ -68,6 +69,7 @@ func NewApp(db *sql.DB) *App {
 		"relTime":      util.RelTime,
 		"fmtTime":      util.FmtTime,
 		"viewHeat":     util.ViewHeat,
+		"isPaid":       catalog.IsPaid,
 		"bpsToPercent": util.BpsToPercent,
 		"field":        field,
 		"mul":          func(a, b int) int { return a * b },
